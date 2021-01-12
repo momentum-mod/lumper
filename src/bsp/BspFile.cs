@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace MomBspTools
 {
@@ -37,7 +38,7 @@ namespace MomBspTools
 
             BinaryReader reader = new BinaryReader(File.OpenRead(_file));
 
-            _ident = StringUtils.UnmakeByteId(reader.ReadInt32());
+            _ident = Encoding.Default.GetString(reader.ReadBytes(4));
             _version = reader.ReadInt32();
 
             Console.WriteLine("Reading BSP {0} with header ident {1} and version {2}", _file, _ident, _version);
