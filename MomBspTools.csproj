@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="src\util" />
+  </ItemGroup>
+
 </Project>
