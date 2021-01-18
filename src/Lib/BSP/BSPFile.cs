@@ -63,7 +63,7 @@ namespace MomBspTools.Lib.BSP
                 
                 if (ofs == 0 && len == 0)
                 {
-                    Console.WriteLine($"{Enum.GetName(type),-36} {new string('-', 27)} NO DATA {new string('-', 27)}");
+                    Console.WriteLine($"{Enum.GetName(type),-36} {new string('-', 31)} NO DATA {new string('-', 31)}");
                 }
                 else
                 {
