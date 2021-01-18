@@ -1,4 +1,4 @@
-﻿namespace MomBspTools
+﻿namespace MomBspTools.Lib.BSP
 {
     public class Pakfile
     {

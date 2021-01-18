@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace MomBspTools
+namespace MomBspTools.Lib.BSP
 {
     public class BspFile
     {
