@@ -63,6 +63,9 @@
         LUMP_XZIPPAKFILE = 57,
         LUMP_FACES_HDR = 58,
         LUMP_MAP_FLAGS = 59,
-        LUMP_OVERLAY_FADES = 60	
+        LUMP_OVERLAY_FADES = 60,
+        LUMP_OVERLAY_SYSTEM_LEVELS = 61,
+        LUMP_PHYSLEVEL = 62,
+        LUMP_DISP_MULTIBLEND = 63
     }
 }
