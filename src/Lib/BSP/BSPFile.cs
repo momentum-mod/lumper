@@ -60,7 +60,7 @@ namespace MomBspTools.Lib.BSP
                     FourCC = fourcc
                 };
                 lumps.Add(l);
-                Console.WriteLine("Reading {0}, offset {1}, length {2}, version {3}, fourcc {4}", Enum.GetName(type), ofs, len, vers, fourcc);
+                Console.WriteLine("{0,-36} Offset {1,-10} Length {2,-10} Version {3,-10} FourCC {4}", Enum.GetName(type), ofs, len, vers, fourcc);
             }
         }
 
