@@ -11,8 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="src\lib\util" />
-    <Folder Include="src\lib\vtf" />
+    <Folder Include="src\Lib\util" />
+    <Folder Include="src\Lib\vtf" />
   </ItemGroup>
 
 </Project>
