@@ -9,12 +9,27 @@ namespace MomBspTools
     {
         static void Main(string[] args)
         {
-            const string _fileName = "../../../surf_lt_omnific.bsp";
-            
-            if (File.Exists(_fileName))
+            if (args.Length < 1)
             {
-                BspFile map = new BspFile(_fileName);
+                Console.WriteLine("No arguments were given.");
+                return;
+            }
+            
+            foreach (var fileName in args)
+            {
+                LoadMap(fileName);
+            }
+        }
+
+        static void LoadMap(string path)
+        { 
+            try
+            {
+                BspFile map = new BspFile(path);
                 Lump pakFile = map.GetLump(LumpType.LUMP_PAKFILE);
+            }
+            catch (FileNotFoundException e) {
+                
             }
         }
     }
