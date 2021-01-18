@@ -9,23 +9,20 @@ namespace MomBspTools.Lib.VTF
 {
     public class VtfFile
     {
-        public int VersionMajor { get; private set; }
-        public int VersionMinor { get; private set; }
-        public short LargestMipmapWidth { get; private set; }
-        public short LargestMipmapHeight { get; private set; }
-        public short AmountOfFrames { get; private set; }
-        public short FirstFrame { get; private set; }
-        public float BumpmapScale { get; private set; }
-        public int HighResolutionImageFormat { get; private set; }
-        public int AmountOfMipmaps { get; private set; }
-
-        // This var is unsigned to allow comparison against 0xFFFFFFFF to check a thumbnail exists.
-        public uint LowResolutionImageFormat { get; private set; }
-        public short LowResolutionImageWidth { get; private set; }
-        public short LowResolutionImageHeight { get; private set; }
-        public int TextureDepth { get; private set; }
+        public int VersionMajor { get; set; }
+        public int VersionMinor { get; set; }
+        public short LargestMipmapWidth { get; set; }
+        public short LargestMipmapHeight { get; set; }
+        public short AmountOfFrames { get; set; }
+        public short FirstFrame { get; set; }
+        public float BumpmapScale { get; set; }
+        public int HighResolutionImageFormat { get; set; }
+        public int AmountOfMipmaps { get; set; }
+        public uint LowResolutionImageFormat { get; set; } // This var is unsigned to allow comparison against 0xFFFFFFFF to check a thumbnail exists.
+        public short LowResolutionImageWidth { get; set; }
+        public short LowResolutionImageHeight { get; set; }
+        public int TextureDepth { get; set; }
         
-        // These vars are kept internal because there doesn't appear to be any need for these externally.
         private int _headerSize;
         private uint _rawFlags;
         private int _numberOfResources;
@@ -57,7 +54,69 @@ namespace MomBspTools.Lib.VTF
         {
             ParseHeader(path);
         }
-        
+
+        private void ParseHeader(string path)
+        {
+            using var vtfFile = new BinaryReader(File.Open(path,FileMode.Open));
+            
+            Console.WriteLine($"Opening: {path}");
+            
+            const string headerSignature = "VTF\0";
+            var inputSignature = Encoding.Default.GetString(vtfFile.ReadBytes(4));
+            
+            if (inputSignature == headerSignature)
+            {
+                VersionMajor = vtfFile.ReadInt32();
+                VersionMinor = vtfFile.ReadInt32();
+                Console.WriteLine($"VTF Version {VersionMajor}.{VersionMinor}");
+                
+                _headerSize = vtfFile.ReadInt32();
+                Console.WriteLine($"Header Size: {_headerSize} Bytes");
+                
+                LargestMipmapWidth = vtfFile.ReadInt16();
+                LargestMipmapHeight = vtfFile.ReadInt16();
+                Console.WriteLine($"Texture Dimensions: {LargestMipmapWidth} X {LargestMipmapHeight}");
+                
+                ParseFlags(vtfFile);
+                
+                AmountOfFrames = vtfFile.ReadInt16();
+                Console.WriteLine($"Amount of Frames: {AmountOfFrames}");
+                
+                FirstFrame = vtfFile.ReadInt16();
+                Console.WriteLine($"First Frame: {FirstFrame}");
+                
+                // Skip padding of 4 bytes.
+                vtfFile.ReadBytes(4);
+                
+                ParseReflectivity(vtfFile);
+                
+                // Skip padding of 4 bytes.
+                vtfFile.ReadBytes(4);
+                
+                BumpmapScale = vtfFile.ReadSingle();
+                Console.WriteLine($"Bumpmap Scale: {BumpmapScale}");
+                
+                HighResolutionImageFormat = vtfFile.ReadInt32();
+                Console.WriteLine($"Texture Format: {(ImageFormats)HighResolutionImageFormat}");
+                
+                AmountOfMipmaps = vtfFile.ReadByte();
+                Console.WriteLine($"Amount of Mipmaps: {AmountOfMipmaps}");
+                
+                LowResolutionImageFormat = vtfFile.ReadUInt32();
+                Console.WriteLine($"Thumbnail Format: {(ImageFormats)LowResolutionImageFormat}");
+                
+                LowResolutionImageWidth = vtfFile.ReadByte();
+                LowResolutionImageHeight = vtfFile.ReadByte();
+                Console.WriteLine($"Thumbnail Dimensions: {LowResolutionImageWidth} X {LowResolutionImageHeight}");
+                
+                ParseDepthAndResources(vtfFile);
+            }
+            else
+            {
+                throw new ArgumentException("File is not a valid VTF, file signature did not match", path);
+            }
+        }
+
         private void ParseFlags(BinaryReader vtfFile)
         {
             _rawFlags = vtfFile.ReadUInt32();
@@ -72,7 +131,7 @@ namespace MomBspTools.Lib.VTF
                     
                     // Couldn't figure out how to do this in one line.
                     var castFlag = (VtfFlags)currentFlag;
-                    _flags.Add(castFlag.ToString());
+                    _flags.Add(nameof(currentFlag));
                 }
             }
             else
@@ -80,7 +139,7 @@ namespace MomBspTools.Lib.VTF
                 Console.WriteLine("No Flags found.");
             }
         }
-        
+
         private void ParseReflectivity(BinaryReader vtfFile)
         {
             for (var i = 0; i < 3; i++)
@@ -90,7 +149,7 @@ namespace MomBspTools.Lib.VTF
             
             Console.WriteLine($"Reflectivity: {_reflectivity[0]} {_reflectivity[1]} {_reflectivity[2]}");
         }
-        
+
         private void ParseKeyValues(string keyValues)
         {
             // TODO: Can KVs even have quotation marks?
@@ -130,7 +189,7 @@ namespace MomBspTools.Lib.VTF
                 }
             }
         }
-        
+
         private void ParseDepthAndResources(BinaryReader vtfFile)
         {
             if (VersionMinor < 2) return;
@@ -198,70 +257,6 @@ namespace MomBspTools.Lib.VTF
             }
         }
 
-        private void ParseHeader(string path)
-        {
-            using var vtfFile = new BinaryReader(File.Open(path,FileMode.Open));
-            
-            Console.WriteLine($"Opening: {path}");
-            
-            const string headerSignature = "VTF\0";
-            var inputSignature = Encoding.Default.GetString(vtfFile.ReadBytes(4));
-            
-            if (inputSignature == headerSignature)
-            {
-                VersionMajor = vtfFile.ReadInt32();
-                VersionMinor = vtfFile.ReadInt32();
-                Console.WriteLine($"VTF Version {VersionMajor}.{VersionMinor}");
-                
-                _headerSize = vtfFile.ReadInt32();
-                Console.WriteLine($"Header Size: {_headerSize} Bytes");
-                
-                LargestMipmapWidth = vtfFile.ReadInt16();
-                LargestMipmapHeight = vtfFile.ReadInt16();
-                Console.WriteLine($"Texture Dimensions: {LargestMipmapWidth} X {LargestMipmapHeight}");
-                
-                ParseFlags(vtfFile);
-                
-                AmountOfFrames = vtfFile.ReadInt16();
-                Console.WriteLine($"Amount of Frames: {AmountOfFrames}");
-                
-                FirstFrame = vtfFile.ReadInt16();
-                Console.WriteLine($"First Frame: {FirstFrame}");
-                
-                // Skip padding of 4 bytes.
-                vtfFile.ReadBytes(4);
-                
-                ParseReflectivity(vtfFile);
-                
-                // Skip padding of 4 bytes.
-                vtfFile.ReadBytes(4);
-                
-                BumpmapScale = vtfFile.ReadSingle();
-                Console.WriteLine($"Bumpmap Scale: {BumpmapScale}");
-                
-                HighResolutionImageFormat = vtfFile.ReadInt32();
-                Console.WriteLine($"Texture Format: {(ImageFormats)HighResolutionImageFormat}");
-                
-                AmountOfMipmaps = vtfFile.ReadByte();
-                Console.WriteLine($"Amount of Mipmaps: {AmountOfMipmaps}");
-                
-                LowResolutionImageFormat = vtfFile.ReadUInt32();
-                Console.WriteLine($"Thumbnail Format: {(ImageFormats)LowResolutionImageFormat}");
-                
-                LowResolutionImageWidth = vtfFile.ReadByte();
-                LowResolutionImageHeight = vtfFile.ReadByte();
-                Console.WriteLine($"Thumbnail Dimensions: {LowResolutionImageWidth} X {LowResolutionImageHeight}");
-                
-                ParseDepthAndResources(vtfFile);
-                
-                Console.WriteLine("");
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(path, "File is not a valid VTF, File Signature did not match");
-            }
-        }
-        
         /// <summary>
         /// Returns if the VTF is a compressed (DXT) Format.
         /// </summary>

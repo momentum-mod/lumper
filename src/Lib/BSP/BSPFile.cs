@@ -8,9 +8,9 @@ namespace MomBspTools.Lib.BSP
 {
     public class BspFile
     {
-        private const int HEADER_LUMPS = 64;
-        private const int HEADER_SIZE = 1036;
-        private const int MAX_LUMPS = 128;
+        private const int HeaderLumps = 64;
+        private const int HeaderSize = 1036;
+        private const int MaxLumps = 128;
 
         private string _file;
         private string _ident;
@@ -18,7 +18,7 @@ namespace MomBspTools.Lib.BSP
         private int _revision;
         private int _version;
 
-        List<Lump> lumps = new List<Lump>(HEADER_LUMPS);
+        List<Lump> lumps = new(HeaderLumps);
 
         public BspFile()
         {
@@ -42,7 +42,7 @@ namespace MomBspTools.Lib.BSP
 
             Console.WriteLine("Reading BSP {0} with header ident {1} and version {2}", _file, _ident, _version);
 
-            for (int i = 0; i < HEADER_LUMPS; i++)
+            for (int i = 0; i < HeaderLumps; i++)
             {
                 int ofs = reader.ReadInt32();
                 int len = reader.ReadInt32();
