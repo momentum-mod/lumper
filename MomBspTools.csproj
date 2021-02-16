@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Folder Include="src\Lib\Util" />
-    <Folder Include="src\Lib\VTF" />
   </ItemGroup>
 
 </Project>

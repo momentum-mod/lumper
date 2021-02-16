@@ -1,30 +1,21 @@
 ﻿using System;
 using System.IO;
 using MomBspTools.Lib.BSP;
-using MomBspTools.Lib.VTF;
 
 namespace MomBspTools
 {
     static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+            
             if (args.Length < 1)
             {
                 Usage();
                 Console.WriteLine("ERROR: No arguments were given.");
                 return;
             }
-            //
-            // try
-            // {
-            //     VtfFile vtf = new VtfFile(args[0]);
-            // } 
-            // catch (ArgumentException e)
-            // {
-            //     Console.WriteLine(e.Message);
-            // }
-
+            
             foreach (var fileName in args)
             {
                 LoadMap(fileName);
@@ -33,14 +24,26 @@ namespace MomBspTools
 
         static void LoadMap(string path)
         {
+            
             try
             {
-                BspFile map = new BspFile(path);
-                Lump pakFile = map.GetLump(LumpType.LUMP_PAKFILE);
+                var map = new BspFile();
+                map.Load(path);
+                Console.WriteLine(map.GetLump(LumpType.LUMP_TEXDATA));
+                // var pakfile = new Pakfile(map);
+                // ZipArchive archive = pakfile.GetZipArchive();
+                // foreach (var entry in archive.Entries)
+                // {
+                //     Console.WriteLine(entry.Name);
+                // }
             }
-            catch (FileNotFoundException e)
+            catch (FileNotFoundException)
             {
-                Console.WriteLine("File {0} not found!", path);
+                Console.WriteLine("ERROR: File {0} not found.", path);
+            }
+            catch (InvalidDataException)
+            {
+                Console.WriteLine("ERROR: File {0} is not a valid Valve BSP.", path);
             }
         }
 
