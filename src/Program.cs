@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using MomBspTools.Lib.BSP;
 
 namespace MomBspTools
@@ -29,7 +31,10 @@ namespace MomBspTools
             {
                 var map = new BspFile();
                 map.Load(path);
-                //Console.WriteLine(System.Text.Encoding.Default.GetString(map.TexDataStringDataLump.Data));
+                foreach (var tex in map.TexDataLump.Data.Where(data => data.TexNameString != "PROPS/CARPETFLOOR008A"))
+                {
+                    Console.WriteLine("Texname {0}: ref {1} {2} {3}", tex.TexNameString, tex.Reflectivity[0],tex.Reflectivity[1], tex.Reflectivity[2]);
+                }
                 // var pakfile = new Pakfile(map);
                 // ZipArchive archive = pakfile.GetZipArchive();
                 // foreach (var entry in archive.Entries)

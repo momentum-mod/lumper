@@ -18,7 +18,7 @@ namespace MomBspTools.Lib.BSP
         // TODO: kill DX80s/SWs?
         public ZipArchive GetZipArchive()
         {
-            return new ZipArchive(ParentFile.GetLumpStream(Paklump));
+            return new(ParentFile.GetLumpStream(Paklump));
         }
     }
 }
