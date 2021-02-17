@@ -22,7 +22,7 @@ namespace MomBspTools
             }
         }
 
-        static void LoadMap(string path)
+        private static void LoadMap(string path)
         {
             
             try

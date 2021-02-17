@@ -1,9 +1,9 @@
-namespace MomBspTools.Lib.BSP.Structs
+namespace MomBspTools.Lib.BSP.Enum
 {
     public enum SurfaceFlag
     {
         SURF_LIGHT,   
-        SURF_SKY2D,   
+        SURF_SKY_2D,   
         SURF_SKY,     
         SURF_WARP,    
         SURF_TRANS,   

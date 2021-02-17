@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using MomBspTools.Lib.BSP.Structs;
+using MomBspTools.Lib.BSP.Enum;
 
-namespace MomBspTools.Lib.BSP.Lumps
+namespace MomBspTools.Lib.BSP.Lump
 {
-    public class TexInfoLump : Lump
+    public class TexInfoLump : AbstractLump
     {
         public override int DataSize => 72;
 
