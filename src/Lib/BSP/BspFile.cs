@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MomBspTools.Lib.BSP.Enum;
@@ -40,6 +41,35 @@ namespace MomBspTools.Lib.BSP
             TexInfoLump = (TexInfoLump) GetLump(LumpType.LUMP_TEXINFO);
             TexDataStringTableLump = (TexDataStringTableLump) GetLump(LumpType.LUMP_TEXDATA_STRING_TABLE);
             TexDataStringDataLump = (TexDataStringDataLump) GetLump(LumpType.LUMP_TEXDATA_STRING_DATA);
+            
+            ResolveTexNames();
+            ResolveTexData();
+        }
+
+        private void ResolveTexData()
+        {
+            foreach (var texinfo in TexInfoLump.Data)
+            {
+                texinfo.TexData = TexDataLump.Data[texinfo.TexDataPointer];
+            }
+        }
+
+        private void ResolveTexNames()
+        {
+            foreach (var texture in TexDataLump.Data)
+            {
+                var stringtableoffset = TexDataStringTableLump.Data[texture.TexName];
+                var name = "";
+                char nextchar;
+                do
+                {
+                    nextchar = Convert.ToChar(TexDataStringDataLump.Data[stringtableoffset]);
+                    name += nextchar;
+                    stringtableoffset++;
+                } while (nextchar != '\0');
+                
+                texture.TexNameString = name;
+            }
         }
 
         public AbstractLump GetLump(LumpType lumpType)

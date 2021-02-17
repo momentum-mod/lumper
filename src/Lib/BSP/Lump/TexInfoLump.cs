@@ -8,15 +8,6 @@ namespace MomBspTools.Lib.BSP.Lump
     {
         public override int DataSize => 72;
 
-        public struct TexInfo
-        {
-            public float[,] TextureVectors { get; set; }
-            public float[,] LightmapVectors { get; set; }
-            public SurfaceFlag Flags { get; set; }
-            public int TexDataPointer { get; set; }
-            public TexDataLump.TexData TexData { get; set; }
-        }
-
         public List<TexInfo> Data { get; set; } = new();
 
         public override void Read(BinaryReader r)
