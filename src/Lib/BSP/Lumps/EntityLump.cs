@@ -7,9 +7,13 @@ namespace MomBspTools.Lib.BSP.Lumps
     {
         // TODO
         public override int DataSize { get; }
-        public override void Read(BinaryReader reader)
+        public override void Read(BinaryReader r)
         {
             throw new NotImplementedException();
+        }
+
+        public EntityLump(BspFile parent) : base(parent)
+        {
         }
     }
 }
