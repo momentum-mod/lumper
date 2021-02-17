@@ -1,8 +1,8 @@
 using System.IO;
 
-namespace MomBspTools.Lib.BSP.Lumps
+namespace MomBspTools.Lib.BSP.Lump
 {
-    public class TexDataStringDataLump : Lump
+    public class TexDataStringDataLump : AbstractLump
     {
         public byte[] Data;
         

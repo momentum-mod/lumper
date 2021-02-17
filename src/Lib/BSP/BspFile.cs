@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MomBspTools.Lib.BSP.Lumps;
+using MomBspTools.Lib.BSP.Enum;
+using MomBspTools.Lib.BSP.Lump;
 
 namespace MomBspTools.Lib.BSP
 {
@@ -18,7 +19,7 @@ namespace MomBspTools.Lib.BSP
         public TexDataStringTableLump TexDataStringTableLump { get; set; }
         public TexDataStringDataLump TexDataStringDataLump { get; set; }
         
-        public List<Lump> Lumps { get; set; } = new(HeaderLumps);
+        public List<AbstractLump> Lumps { get; set; } = new(HeaderLumps);
 
         public const int HeaderLumps = 64;
         public const int HeaderSize = 1036;
@@ -41,12 +42,12 @@ namespace MomBspTools.Lib.BSP
             TexDataStringDataLump = (TexDataStringDataLump) GetLump(LumpType.LUMP_TEXDATA_STRING_DATA);
         }
 
-        public Lump GetLump(LumpType lumpType)
+        public AbstractLump GetLump(LumpType lumpType)
         {
             return Lumps.First(x => x.Type == lumpType);
         }
 
-        public MemoryStream GetLumpStream(Lump lump)
+        public MemoryStream GetLumpStream(AbstractLump lump)
         {
             var reader = new BspFileReader(this);
             return reader.GetLumpStream(lump);

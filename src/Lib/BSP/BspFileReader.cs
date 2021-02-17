@@ -2,7 +2,8 @@
 using System.IO;
 using System.Linq;
 using System.Text;
-using MomBspTools.Lib.BSP.Lumps;
+using MomBspTools.Lib.BSP.Enum;
+using MomBspTools.Lib.BSP.Lump;
 
 namespace MomBspTools.Lib.BSP
 {
@@ -19,7 +20,7 @@ namespace MomBspTools.Lib.BSP
 
         public void LoadHeader()
         {
-            if (_stream.Position != 0) _stream.Seek(0, 0);
+            if (_stream.Position != 0) Seek(0);
 
             using var reader = GetBinaryReader();
 
@@ -32,7 +33,7 @@ namespace MomBspTools.Lib.BSP
             {
                 var type = (LumpType) i;
 
-                Lump lump = type switch
+                AbstractLump lump = type switch
                 {
                     LumpType.LUMP_TEXINFO => new TexInfoLump(_bspFile),
                     LumpType.LUMP_TEXDATA => new TexDataLump(_bspFile),
@@ -61,7 +62,7 @@ namespace MomBspTools.Lib.BSP
             }
         }
 
-        private void LoadLump(Lump lump)
+        private void LoadLump(AbstractLump lump)
         {
             if (lump.Length == 0) return;
 
@@ -86,7 +87,7 @@ namespace MomBspTools.Lib.BSP
             }
         }
 
-        public MemoryStream GetLumpStream(Lump lump)
+        public MemoryStream GetLumpStream(AbstractLump lump)
         {
             MemoryStream lumpStream = new();
 
@@ -96,7 +97,7 @@ namespace MomBspTools.Lib.BSP
             return lumpStream;
         }
 
-        private BinaryReader GetBinaryReader() => new BinaryReader(_stream, Encoding.Default, true);
+        private BinaryReader GetBinaryReader() => new(_stream, Encoding.Default, true);
 
         private void Seek(int p) => _stream.Seek(p, 0);
 
