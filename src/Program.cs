@@ -29,7 +29,7 @@ namespace MomBspTools
             {
                 var map = new BspFile();
                 map.Load(path);
-                Console.WriteLine(map.GetLump(LumpType.LUMP_TEXDATA));
+                //Console.WriteLine(System.Text.Encoding.Default.GetString(map.TexDataStringDataLump.Data));
                 // var pakfile = new Pakfile(map);
                 // ZipArchive archive = pakfile.GetZipArchive();
                 // foreach (var entry in archive.Entries)

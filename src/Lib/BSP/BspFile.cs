@@ -13,8 +13,10 @@ namespace MomBspTools.Lib.BSP
         public int Version { get; set; }
 
         public EntityLump EntityLump { get; set; }
+        public TexInfoLump TexInfoLump { get; set; }
         public TexDataLump TexDataLump { get; set; }
-        public TexDataLump TexStringDataLump { get; set; }
+        public TexDataStringTableLump TexDataStringTableLump { get; set; }
+        public TexDataStringDataLump TexDataStringDataLump { get; set; }
         
         public List<Lump> Lumps { get; set; } = new(HeaderLumps);
 
@@ -34,6 +36,9 @@ namespace MomBspTools.Lib.BSP
             reader.LoadAllLumps();
 
             TexDataLump = (TexDataLump) GetLump(LumpType.LUMP_TEXDATA);
+            TexInfoLump = (TexInfoLump) GetLump(LumpType.LUMP_TEXINFO);
+            TexDataStringTableLump = (TexDataStringTableLump) GetLump(LumpType.LUMP_TEXDATA_STRING_TABLE);
+            TexDataStringDataLump = (TexDataStringDataLump) GetLump(LumpType.LUMP_TEXDATA_STRING_DATA);
         }
 
         public Lump GetLump(LumpType lumpType)
@@ -43,7 +48,7 @@ namespace MomBspTools.Lib.BSP
 
         public MemoryStream GetLumpStream(Lump lump)
         {
-             var reader = new BspFileReader(this);
+            var reader = new BspFileReader(this);
             return reader.GetLumpStream(lump);
         }
     }

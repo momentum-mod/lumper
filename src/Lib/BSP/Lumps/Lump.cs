@@ -9,8 +9,14 @@ namespace MomBspTools.Lib.BSP.Lumps
         public int Length { get; set; }
         public int Version { get; set; }
         public int FourCc { get; set; }
+        public BspFile Parent { get; set; }
 
+        protected  Lump(BspFile parent)
+        {
+            Parent = parent;
+        }
+        
         public abstract int DataSize { get; }
-        public abstract void Read(BinaryReader reader);
+        public abstract void Read(BinaryReader r);
     }
 }

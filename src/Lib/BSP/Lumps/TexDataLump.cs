@@ -1,16 +1,15 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
 
 namespace MomBspTools.Lib.BSP.Lumps
 {
     public class TexDataLump : Lump
     {
         public override int DataSize => 32;
-        
+
         public struct TexData
         {
-            public Vector3 Reflectivity { get; set; }
+            public float[] Reflectivity { get; set; }
             public int TexName { get; set; }
             public int Width { get; set; }
             public int Height { get; set; }
@@ -19,19 +18,24 @@ namespace MomBspTools.Lib.BSP.Lumps
         }
 
         public List<TexData> Data { get; set; } = new();
-        
-        public override void Read(BinaryReader reader)
+
+        public override void Read(BinaryReader r)
         {
-            var item = new TexData
+            var item = new TexData();
+            item.Reflectivity = new float[3]
             {
-                Reflectivity = new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()),
-                TexName = reader.ReadInt32(),
-                Width = reader.ReadInt32(),
-                Height = reader.ReadInt32(),
-                ViewWidth = reader.ReadInt32(),
-                ViewHeight = reader.ReadInt32()
+                r.ReadSingle(), r.ReadSingle(), r.ReadSingle()
             };
+            item.TexName = r.ReadInt32();
+            item.Width = r.ReadInt32();
+            item.Height = r.ReadInt32();
+            item.ViewWidth = r.ReadInt32();
+            item.ViewHeight = r.ReadInt32();
             Data.Add(item);
+        }
+
+        public TexDataLump(BspFile parent) : base(parent)
+        {
         }
     }
 }

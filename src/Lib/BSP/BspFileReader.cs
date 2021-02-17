@@ -17,8 +17,6 @@ namespace MomBspTools.Lib.BSP
             _stream = File.OpenRead(_bspFile.FilePath);
         }
 
-        public BinaryReader GetBinaryReader() => new BinaryReader(_stream, Encoding.Default, true);
-        
         public void LoadHeader()
         {
             if (_stream.Position != 0) _stream.Seek(0, 0);
@@ -33,11 +31,14 @@ namespace MomBspTools.Lib.BSP
             for (var i = 0; i < BspFile.HeaderLumps; i++)
             {
                 var type = (LumpType) i;
-                
+
                 Lump lump = type switch
                 {
-                    LumpType.LUMP_TEXDATA => new TexDataLump(),
-                    _ => new GenericLump()
+                    LumpType.LUMP_TEXINFO => new TexInfoLump(_bspFile),
+                    LumpType.LUMP_TEXDATA => new TexDataLump(_bspFile),
+                    LumpType.LUMP_TEXDATA_STRING_TABLE => new TexDataStringTableLump(_bspFile),
+                    LumpType.LUMP_TEXDATA_STRING_DATA => new TexDataStringDataLump(_bspFile),
+                    _ => new GenericLump(_bspFile)
                 };
 
                 lump.Type = type;
@@ -68,10 +69,18 @@ namespace MomBspTools.Lib.BSP
 
             using var reader = GetBinaryReader();
 
-            var structSize = lump.DataSize;
-            var structCount = lump.Length / structSize;
+            // If lump has contains non-trivial data structure, its Read() method loads one structure per call.
+            // Otherwise, Read() loads everything in a single call.
+            if (lump.DataSize > 1)
+            {
+                var structCount = lump.Length / lump.DataSize;
 
-            for (var i = 0; i < structCount; i++)
+                for (var i = 0; i < structCount; i++)
+                {
+                    lump.Read(reader);
+                }
+            }
+            else
             {
                 lump.Read(reader);
             }
@@ -80,15 +89,19 @@ namespace MomBspTools.Lib.BSP
         public MemoryStream GetLumpStream(Lump lump)
         {
             MemoryStream lumpStream = new();
-            
+
             _stream.Seek(lump.Offset, 0);
             _stream.CopyTo(lumpStream, lump.Length);
-            
+
             return lumpStream;
         }
 
+        private BinaryReader GetBinaryReader() => new BinaryReader(_stream, Encoding.Default, true);
+
         private void Seek(int p) => _stream.Seek(p, 0);
 
-        public void Dispose() {  }
+        public void Dispose()
+        {
+        }
     }
 }
