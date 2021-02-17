@@ -12,7 +12,7 @@ namespace MomBspTools.Lib.BSP.Lump
         public int FourCc { get; set; }
         public BspFile Parent { get; set; }
 
-        protected  AbstractLump(BspFile parent)
+        protected AbstractLump(BspFile parent)
         {
             Parent = parent;
         }
