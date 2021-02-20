@@ -1,9 +1,9 @@
 ﻿using System.IO;
 using MomBspTools.Lib.BSP.Enum;
 
-namespace MomBspTools.Lib.BSP.Lump
+namespace MomBspTools.Lib.BSP.Lumps
 {
-    public abstract class AbstractLump
+    public abstract class Lump
     {
         public LumpType Type { get; set; }
         public int Offset { get; set; }
@@ -12,12 +12,9 @@ namespace MomBspTools.Lib.BSP.Lump
         public int FourCc { get; set; }
         public BspFile Parent { get; set; }
 
-        protected AbstractLump(BspFile parent)
+        protected Lump(BspFile parent)
         {
             Parent = parent;
         }
-        
-        public abstract int DataSize { get; }
-        public abstract void Read(BinaryReader r);
     }
 }

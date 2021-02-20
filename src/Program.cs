@@ -26,14 +26,13 @@ namespace MomBspTools
 
         private static void LoadMap(string path)
         {
-            
             try
             {
                 var map = new BspFile();
                 map.Load(path);
-                foreach (var tex in map.TexDataLump.Data.Where(data => data.TexNameString != "PROPS/CARPETFLOOR008A"))
+                foreach (var ent in map.EntityLump.Data.FindAll(entity => entity.ClassName.Contains("logic")))
                 {
-                    Console.WriteLine("Texname {0}: ref {1} {2} {3}", tex.TexNameString, tex.Reflectivity[0],tex.Reflectivity[1], tex.Reflectivity[2]);
+                    Console.WriteLine("Ent {0}: index {1}", ent.ClassName, map.EntityLump.Data.FindIndex(entity => entity == ent));
                 }
                 // var pakfile = new Pakfile(map);
                 // ZipArchive archive = pakfile.GetZipArchive();
@@ -52,7 +51,7 @@ namespace MomBspTools
             }
         }
 
-        static void Usage()
+        private static void Usage()
         {
             // TODO
         }
