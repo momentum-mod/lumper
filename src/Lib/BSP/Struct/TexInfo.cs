@@ -1,6 +1,6 @@
 using MomBspTools.Lib.BSP.Enum;
 
-namespace MomBspTools.Lib.BSP.Lump
+namespace MomBspTools.Lib.BSP.Struct
 {
     public class TexInfo
     {

@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 using System.IO;
 using MomBspTools.Lib.BSP.Enum;
+using MomBspTools.Lib.BSP.Struct;
 
-namespace MomBspTools.Lib.BSP.Lump
+namespace MomBspTools.Lib.BSP.Lumps
 {
-    public class TexInfoLump : AbstractLump
+    public class TexInfoLump : FixedLump
     {
-        public override int DataSize => 72;
+        protected override int Size => 72;
 
         public List<TexInfo> Data { get; set; } = new();
 
-        public override void Read(BinaryReader r)
+        protected override void ReadItem(BinaryReader r)
         {
             var item = new TexInfo
             {
@@ -28,6 +29,11 @@ namespace MomBspTools.Lib.BSP.Lump
                 TexDataPointer = r.ReadInt32()
             };
             Data.Add(item);
+        }
+
+        public override void Write(BinaryWriter r)
+        {
+            throw new System.NotImplementedException();
         }
 
         public TexInfoLump(BspFile parent) : base(parent)

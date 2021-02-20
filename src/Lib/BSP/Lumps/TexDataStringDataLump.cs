@@ -1,18 +1,21 @@
 using System.IO;
 
-namespace MomBspTools.Lib.BSP.Lump
+namespace MomBspTools.Lib.BSP.Lumps
 {
-    public class TexDataStringDataLump : AbstractLump
+    public class TexDataStringDataLump : ManagedLump
     {
         public byte[] Data;
-        
-        public override int DataSize => 1;
         
         public override void Read(BinaryReader r)
         {
             Data = r.ReadBytes(Length);
         }
-        
+
+        public override void Write(BinaryWriter r)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public TexDataStringDataLump(BspFile parent) : base(parent)
         {
         }

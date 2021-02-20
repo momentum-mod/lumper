@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MomBspTools.Lib.BSP.Enum;
-using MomBspTools.Lib.BSP.Lump;
+using MomBspTools.Lib.BSP.Lumps;
+using MomBspTools.Lib.BSP.Struct;
 
 namespace MomBspTools.Lib.BSP
 {
@@ -20,7 +21,7 @@ namespace MomBspTools.Lib.BSP
         public TexDataStringTableLump TexDataStringTableLump { get; set; }
         public TexDataStringDataLump TexDataStringDataLump { get; set; }
         
-        public List<AbstractLump> Lumps { get; set; } = new(HeaderLumps);
+        public List<Lump> Lumps { get; set; } = new(HeaderLumps);
 
         public const int HeaderLumps = 64;
         public const int HeaderSize = 1036;
@@ -37,6 +38,7 @@ namespace MomBspTools.Lib.BSP
             reader.LoadHeader();
             reader.LoadAllLumps();
 
+            EntityLump = (EntityLump) GetLump(LumpType.LUMP_ENTITIES);
             TexDataLump = (TexDataLump) GetLump(LumpType.LUMP_TEXDATA);
             TexInfoLump = (TexInfoLump) GetLump(LumpType.LUMP_TEXINFO);
             TexDataStringTableLump = (TexDataStringTableLump) GetLump(LumpType.LUMP_TEXDATA_STRING_TABLE);
@@ -58,6 +60,7 @@ namespace MomBspTools.Lib.BSP
         {
             foreach (var texture in TexDataLump.Data)
             {
+                // TODO: use stringbuilder
                 var stringtableoffset = TexDataStringTableLump.Data[texture.TexName];
                 var name = "";
                 char nextchar;
@@ -72,12 +75,12 @@ namespace MomBspTools.Lib.BSP
             }
         }
 
-        public AbstractLump GetLump(LumpType lumpType)
+        public Lump GetLump(LumpType lumpType)
         {
             return Lumps.First(x => x.Type == lumpType);
         }
 
-        public MemoryStream GetLumpStream(AbstractLump lump)
+        public MemoryStream GetLumpStream(Lump lump)
         {
             var reader = new BspFileReader(this);
             return reader.GetLumpStream(lump);

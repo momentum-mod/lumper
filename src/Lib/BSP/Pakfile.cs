@@ -1,6 +1,6 @@
 ﻿using System.IO.Compression;
 using MomBspTools.Lib.BSP.Enum;
-using MomBspTools.Lib.BSP.Lump;
+using MomBspTools.Lib.BSP.Lumps;
 
 namespace MomBspTools.Lib.BSP
 {
@@ -8,12 +8,12 @@ namespace MomBspTools.Lib.BSP
     {
         public BspFile ParentFile { get; }
         
-        public GenericLump Paklump { get; }
+        public UnmanagedLump Paklump { get; }
 
         public Pakfile(BspFile bspFile)
         {
             ParentFile = bspFile;
-            Paklump = (GenericLump) bspFile.GetLump(LumpType.LUMP_PAKFILE);
+            Paklump = (UnmanagedLump) bspFile.GetLump(LumpType.LUMP_PAKFILE);
         }
         // TODO: kill DX80s/SWs?
         public ZipArchive GetZipArchive()
