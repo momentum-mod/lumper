@@ -4,29 +4,33 @@ using MomBspTools.Lib.BSP.Struct;
 
 namespace MomBspTools.Lib.BSP.Lumps
 {
-    public class TexDataLump : FixedLump
+    public class TexDataLump : FixedLump<TexData>
     {
-        protected override int Size => 32;
-        
-        public List<TexData> Data { get; set; } = new();
+        protected override int StructureSize => 32;
 
-        protected override void ReadItem(BinaryReader r)
+        protected override void ReadItem(BinaryReader reader)
         {
             var item = new TexData
             {
-                Reflectivity = new float[3] {r.ReadSingle(), r.ReadSingle(), r.ReadSingle()},
-                TexName = r.ReadInt32(),
-                Width = r.ReadInt32(),
-                Height = r.ReadInt32(),
-                ViewWidth = r.ReadInt32(),
-                ViewHeight = r.ReadInt32()
+                Reflectivity = new[] {reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()},
+                StringTablePointer = reader.ReadInt32(),
+                Width = reader.ReadInt32(),
+                Height = reader.ReadInt32(),
+                ViewWidth = reader.ReadInt32(),
+                ViewHeight = reader.ReadInt32()
             };
             Data.Add(item);
         }
-
-        public override void Write(BinaryWriter r)
+        protected override void WriteItem(BinaryWriter writer, int index)
         {
-            throw new System.NotImplementedException();
+            writer.Write(Data[index].Reflectivity[0]);
+            writer.Write(Data[index].Reflectivity[1]);
+            writer.Write(Data[index].Reflectivity[2]);
+            writer.Write(Data[index].StringTablePointer);
+            writer.Write(Data[index].Width);
+            writer.Write(Data[index].Height);
+            writer.Write(Data[index].ViewWidth);
+            writer.Write(Data[index].ViewHeight);
         }
 
         public TexDataLump(BspFile parent) : base(parent)

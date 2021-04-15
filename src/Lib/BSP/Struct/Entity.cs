@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MomBspTools.Lib.BSP.Struct
 {
     public class Entity
     {
-        public string ClassName { get; set; }
-
+        public string ClassName
+        {
+            get => Properties.FirstOrDefault(property => property.Key == "classname").Value;
+            set => Properties["classname"] = value;
+        }
+        
         public SortedDictionary<string, string> Properties { get; set; } = new();
         public List<KeyValuePair<string, EntityIO>> IOProperties { get; set; } = new();
-
-        // TODO: IO
 
         public Entity(string className)
         {
@@ -27,16 +30,9 @@ namespace MomBspTools.Lib.BSP.Struct
                 var value = kv.Value;
 
                 if (key == "classname")
-                {
-                    if (ClassName is null)
-                    {
-                        ClassName = value;
-                    }
-                    else
-                    {
+                    if (ClassName is not null)
                         Console.WriteLine("Found duplicate classname key, ignoring {0}", kv);
-                    }
-                }
+                
 
                 if (EntityIO.IsIO(value))
                 {
@@ -47,7 +43,7 @@ namespace MomBspTools.Lib.BSP.Struct
                         var delay = float.Parse(props[3]);
                         var timestofire = int.Parse(props[4]);
 
-                        IOProperties.Add(new KeyValuePair<string, EntityIO>(ClassName,
+                        IOProperties.Add(new KeyValuePair<string, EntityIO>(key,
                             new EntityIO
                             {
                                 TargetEntityName = props[0], Input = props[1], Parameter = props[2], Delay = delay, TimesToFire = timestofire

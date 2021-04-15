@@ -6,14 +6,14 @@ namespace MomBspTools.Lib.BSP.Lumps
     {
         public byte[] Data;
         
-        public override void Read(BinaryReader r)
+        public override void Read(BinaryReader reader)
         {
-            Data = r.ReadBytes(Length);
+            Data = reader.ReadBytes(Length);
         }
 
-        public override void Write(BinaryWriter r)
+        public override void Write(BinaryWriter writer)
         {
-            throw new System.NotImplementedException();
+            writer.Write(Data);
         }
 
         public TexDataStringDataLump(BspFile parent) : base(parent)

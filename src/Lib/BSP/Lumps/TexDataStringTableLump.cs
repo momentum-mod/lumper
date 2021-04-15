@@ -3,20 +3,17 @@ using System.IO;
 
 namespace MomBspTools.Lib.BSP.Lumps
 {
-    public class TexDataStringTableLump : FixedLump
+    public class TexDataStringTableLump : FixedLump<int>
     {
-        public List<int> Data { get; set; } = new();
+        protected override int StructureSize => 4;
 
-        protected override int Size => 4;
-
-        protected override void ReadItem(BinaryReader r)
+        protected override void ReadItem(BinaryReader reader)
         {
-            Data.Add(r.ReadInt32());
+            Data.Add(reader.ReadInt32());
         }
-
-        public override void Write(BinaryWriter r)
+        protected override void WriteItem(BinaryWriter writer, int index)
         {
-            throw new System.NotImplementedException();
+            writer.Write(Data[index]);
         }
 
         public TexDataStringTableLump(BspFile parent) : base(parent)

@@ -9,25 +9,34 @@ namespace MomBspTools.Lib.BSP
 {
     public sealed class BspFileReader : IDisposable
     {
-        private readonly BspFile _bspFile;
+        private readonly BspFile _bsp;
         private readonly FileStream _stream;
         private readonly BinaryReader _reader;
 
         public BspFileReader(BspFile file)
         {
-            _bspFile = file;
-            _stream = File.OpenRead(_bspFile.FilePath);
+            _bsp = file;
+            _stream = File.OpenRead(_bsp.FilePath);
             _reader = new BinaryReader(_stream);
         }
 
-        public void LoadHeader()
+        public void Load()
         {
-            if (_stream.Position != 0) Seek(0);
+            ReadHeader();
+            LoadAll();
+            ResolveTexNames();
+            ResolveTexData();
+        }
+        
+        private void ReadHeader()
+        {
+            if (_stream.Position != 0) _stream.Seek(0, 0);
 
             var ident = _reader.ReadBytes(4);
+            
             if (Encoding.Default.GetString(ident) != "VBSP") throw new InvalidDataException();
 
-            _bspFile.Version = _reader.ReadInt32();
+            _bsp.Version = _reader.ReadInt32();
 
             for (var i = 0; i < BspFile.HeaderLumps; i++)
             {
@@ -35,12 +44,12 @@ namespace MomBspTools.Lib.BSP
 
                 Lump lump = type switch
                 {
-                    LumpType.LUMP_ENTITIES => new EntityLump(_bspFile),
-                    LumpType.LUMP_TEXINFO => new TexInfoLump(_bspFile),
-                    LumpType.LUMP_TEXDATA => new TexDataLump(_bspFile),
-                    LumpType.LUMP_TEXDATA_STRING_TABLE => new TexDataStringTableLump(_bspFile),
-                    LumpType.LUMP_TEXDATA_STRING_DATA => new TexDataStringDataLump(_bspFile),
-                    _ => new UnmanagedLump(_bspFile)
+                    LumpType.LUMP_ENTITIES => new EntityLump(_bsp),
+                    LumpType.LUMP_TEXINFO => new TexInfoLump(_bsp),
+                    LumpType.LUMP_TEXDATA => new TexDataLump(_bsp),
+                    LumpType.LUMP_TEXDATA_STRING_TABLE => new TexDataStringTableLump(_bsp),
+                    LumpType.LUMP_TEXDATA_STRING_DATA => new TexDataStringDataLump(_bsp),
+                    _ => new UnmanagedLump(_bsp)
                 };
 
                 lump.Type = type;
@@ -49,43 +58,79 @@ namespace MomBspTools.Lib.BSP
                 lump.Version = _reader.ReadInt32();
                 lump.FourCc = _reader.ReadInt32();
 
-                _bspFile.Lumps.Add(lump);
+                _bsp.Lumps.Add(lump);
             }
 
-            _bspFile.Revision = _reader.ReadInt32();
+            _bsp.Revision = _reader.ReadInt32();
         }
 
-        public void LoadAllLumps()
+        private void LoadAll()
         {
-            foreach (var l in _bspFile.Lumps.Where(lump => lump is ManagedLump))
+            foreach (var l in _bsp.Lumps.Where(lump => lump is ManagedLump))
             {
                 var lump = (ManagedLump) l;
                 LoadLump(lump);
             }
         }
 
-
         private void LoadLump(ManagedLump lump)
         {
             if (lump.Length == 0) return;
 
-            Seek(lump.Offset);
+            _stream.Seek(lump.Offset, 0);
 
             lump.Read(_reader);
         }
 
-        public MemoryStream GetLumpStream(Lump lump)
+        public void CopyLumpStream(Lump lump, Stream output)
         {
-            MemoryStream lumpStream = new();
-
             _stream.Seek(lump.Offset, 0);
-            _stream.CopyTo(lumpStream, lump.Length);
+            
+            var read = 0;
+            var bytes = lump.Length;
+            var buffer = new byte[64 * 1024];
 
-            return lumpStream;
+            while ((read = _stream.Read(buffer, 0, Math.Min(buffer.Length, bytes))) > 0)
+            {
+                output.Write(buffer, 0, read);
+                bytes -= read;
+            }
+        }
+        
+        // ARGH NO NO NO
+        public FileStream GetLumpStream(Lump lump)
+        { 
+            _stream.Seek(lump.Offset, 0);
+
+            return _stream;
         }
 
-        private void Seek(int p) => _stream.Seek(p, 0);
+        private void ResolveTexNames()
+        {
+            foreach (var texture in _bsp.GetLump<TexDataLump>().Data)
+            {
+                var name = new StringBuilder();
+                char nextchar;
+                var stringtableoffset = _bsp.GetLump<TexDataStringTableLump>().Data[texture.StringTablePointer];
+                do
+                {
+                    nextchar = Convert.ToChar(_bsp.GetLump<TexDataStringDataLump>().Data[stringtableoffset]);
+                    name.Append(nextchar);
+                    stringtableoffset++;
+                } while (nextchar != '\0');
 
-        public void Dispose() => _reader.Dispose();
+                texture.TexName = name.ToString();
+            }
+        }
+
+        private void ResolveTexData()
+        {
+            foreach (var texinfo in _bsp.GetLump<TexInfoLump>().Data)
+            {
+                texinfo.TexData = _bsp.GetLump<TexDataLump>().Data[texinfo.TexDataPointer];
+            }
+        }
+
+        public void Dispose() =>_reader.Dispose();
     }
 }
