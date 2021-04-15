@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+// ReSharper disable InconsistentNaming
 using System.Linq;
 
 namespace MomBspTools.Lib.BSP.Struct

@@ -2,7 +2,7 @@
 using MomBspTools.Lib.BSP.Enum;
 using MomBspTools.Lib.BSP.Lumps;
 
-namespace MomBspTools.Lib.BSP
+namespace MomBspTools.Lib.BSP.Struct
 {
     public class Pakfile
     {

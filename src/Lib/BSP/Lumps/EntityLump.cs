@@ -8,27 +8,26 @@ namespace MomBspTools.Lib.BSP.Lumps
 {
     public class EntityLump : ManagedLump
     {
+        // this could also be set using generics but this class hierarchy is stupid enough already
         public List<Entity> Data { get; set; } = new();
 
-        public override void Read(BinaryReader r)
+        public override void Read(BinaryReader reader)
         {
-            while (ReadItem(r))
-            {
-            }
+            while (ReadEntity(reader)) {}
         }
 
-        private bool ReadItem(BinaryReader r)
+        private bool ReadEntity(BinaryReader reader)
         {
             var stringBuilder = new StringBuilder(512);
             var keyValues = new List<KeyValuePair<string, string>>();
-            
+
             try
             {
                 string key = null;
                 var inSection = false;
                 var inString = false;
                 char x;
-                while ((x = r.ReadChar()) != '\0')
+                while ((x = reader.ReadChar()) != '\0')
                 {
                     switch (x)
                     {
@@ -114,7 +113,7 @@ namespace MomBspTools.Lib.BSP.Lumps
                     e.Message, Data.Count);
 
                 // Read to end of entity (barf)
-                for (var c = ' '; c != '\0' && c != '}'; c = r.ReadChar())
+                for (var c = ' '; c != '\0' && c != '}'; c = reader.ReadChar())
                 {
                 }
             }
@@ -122,11 +121,19 @@ namespace MomBspTools.Lib.BSP.Lumps
             return false;
         }
 
-        public override void Write(BinaryWriter r)
+        public override void Write(BinaryWriter writer)
         {
-            throw new NotImplementedException();
+            foreach (var ent in Data)
+            {
+                writer.Write("{");
+                foreach (var (key, value) in ent.Properties)
+                    writer.Write($"\"{key}\" \"{value}\"");
+                foreach (var (key, value) in ent.IOProperties) 
+                    writer.Write($"\"{key}\" \"{value.TargetEntityName},{value.Input},{value.Parameter},{value.Delay},{value.TimesToFire}\"");
+                writer.Write("}\0");
+            }
         }
-
+        
         public EntityLump(BspFile parent) : base(parent)
         {
         }

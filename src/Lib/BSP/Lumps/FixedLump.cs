@@ -1,26 +1,36 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 
 namespace MomBspTools.Lib.BSP.Lumps
 {
-    /// <summary>
-    /// Lump with underlying structure of a fixed size.
-    /// </summary>
-    public abstract class FixedLump : ManagedLump
+    public abstract class FixedLump<T> : ManagedLump
     {
-        protected abstract int Size { get; }
+        public List<T> Data { get; set; } = new();
 
-        protected abstract void ReadItem(BinaryReader r);
-        
-        public override void Read(BinaryReader r)
+        protected abstract int StructureSize { get; }
+
+        protected abstract void ReadItem(BinaryReader reader);
+        protected abstract void WriteItem(BinaryWriter writer, int index);
+
+        public override void Read(BinaryReader reader)
         {
             // TODO: checks and shit
-            var count = Length / Size;
-            for (var i = 0; i < count; i++)
+            for (var i = 0; i < Length / StructureSize; i++)
             {
-                ReadItem(r);
+                ReadItem(reader);
             }
         }
-        
+
+        public override void Write(BinaryWriter writer)
+        {
+            for (var i = 0; i < Data.Count; i++)
+            {
+                WriteItem(writer, i);
+            }
+        }
+
         protected FixedLump(BspFile parent) : base(parent)
         {
         }
