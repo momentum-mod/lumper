@@ -58,6 +58,8 @@ namespace MomBspTools.Lib.BSP
                 lump.Version = _reader.ReadInt32();
                 lump.FourCc = _reader.ReadInt32();
 
+                Console.WriteLine($"Lump {lump.Type}({(int)lump.Type})\toffset: {lump.Offset}\t length: {lump.Length}");
+
                 _bsp.Lumps.Add(lump);
             }
 
@@ -84,16 +86,19 @@ namespace MomBspTools.Lib.BSP
 
         public void CopyLumpStream(Lump lump, Stream output)
         {
-            _stream.Seek(lump.Offset, 0);
-
-            var read = 0;
-            var bytes = lump.Length;
-            var buffer = new byte[64 * 1024];
-
-            while ((read = _stream.Read(buffer, 0, Math.Min(buffer.Length, bytes))) > 0)
+            if (lump.Length > 0)
             {
-                output.Write(buffer, 0, read);
-                bytes -= read;
+                _stream.Seek(lump.Offset, SeekOrigin.Begin);
+
+                var read = 0;
+                var bytes = lump.Length;
+                var buffer = new byte[64 * 1024];
+
+                while ((read = _stream.Read(buffer, 0, Math.Min(buffer.Length, bytes))) > 0)
+                {
+                    output.Write(buffer, 0, read);
+                    bytes -= read;
+                }
             }
         }
 
@@ -107,14 +112,19 @@ namespace MomBspTools.Lib.BSP
 
         private void ResolveTexNames()
         {
-            foreach (var texture in _bsp.GetLump<TexDataLump>().Data)
+            var texDataLump = _bsp.GetLump<TexDataLump>();
+            foreach (var texture in texDataLump.Data)
             {
                 var name = new StringBuilder();
                 char nextchar;
-                var stringtableoffset = _bsp.GetLump<TexDataStringTableLump>().Data[texture.StringTablePointer];
+                var texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
+                var stringtableoffset = texDataStringTableLump.Data[texture.StringTablePointer];
+                var texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
                 do
                 {
-                    nextchar = Convert.ToChar(_bsp.GetLump<TexDataStringDataLump>().Data[stringtableoffset]);
+                    if (texDataStringDataLump.Data.Length <= stringtableoffset)
+                        break;
+                    nextchar = Convert.ToChar(texDataStringDataLump.Data[stringtableoffset]);
                     name.Append(nextchar);
                     stringtableoffset++;
                 } while (nextchar != '\0');

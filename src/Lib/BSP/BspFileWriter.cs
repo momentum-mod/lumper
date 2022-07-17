@@ -50,7 +50,7 @@ namespace MomBspTools.Lib.BSP
             // Seek past the header
             _stream.Seek(BspFile.HeaderSize, 0);
 
-            foreach (var lump in _bsp.Lumps)
+            foreach (var lump in _bsp.Lumps.OrderBy(x => x.Offset))
             {
                 if (lump is ManagedLump)
                     WriteManagedLump((ManagedLump)lump);
@@ -65,8 +65,17 @@ namespace MomBspTools.Lib.BSP
 
             lump.Write(_writer);
 
+            int oldOffset = lump.Offset;
+            int oldLength = lump.Length;
             lump.Offset = startPosition;
             lump.Length = (int)_stream.Position - startPosition;
+            Console.WriteLine($"Lump {lump.Type}({(int)lump.Type})\n\t{oldOffset}\t->\t{lump.Offset} \n\t{oldLength}\t->\t{lump.Length}");
+            if (oldLength != lump.Length)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("length changed");
+                Console.ResetColor();
+            }
         }
 
         private void WriteUnmanagedLump(Lump lump)
@@ -77,7 +86,9 @@ namespace MomBspTools.Lib.BSP
 
             if (_stream.Position - startPosition != lump.Length) throw new InvalidDataException("Lump data is wrong length!");
 
+            int oldOffset = lump.Offset;
             lump.Offset = startPosition;
+            Console.WriteLine($"Lump {lump.Type}({(int)lump.Type})\n\t{oldOffset}\t->\t{lump.Offset} \n\tlength: {lump.Length}");
         }
 
         private void ConstructTexDataLumps()
@@ -98,7 +109,7 @@ namespace MomBspTools.Lib.BSP
                 // at start of texture string, put its loc in stringtable
                 stringTable.Add(pos);
 
-                tex.StringTablePointer = pos;
+                tex.StringTablePointer = stringTable.Count - 1;
 
                 foreach (var c in tex.TexName)
                 {

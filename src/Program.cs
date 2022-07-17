@@ -24,10 +24,20 @@ namespace MomBspTools
             map1.Load(args[0]);
             //LoadMap(args[0]);
 
-            foreach (var texture in map1.GetLump<TexDataLump>().Data)
+            //foreach (var texture in map1.GetLump<TexDataLump>().Data)
+            //{
+            //   texture.TexName = "R997/Mc/Mc-Jackolantern";
+            //}
+
+            /*foreach(var lump in map1.Lumps)
             {
-                texture.TexName = "R997/Mc/Mc-Jackolantern";
-            }
+                if(lump is ManagedLump ml)
+                    ml.Write()
+                    else
+
+            }*/
+
+
             map1.Save("test.bsp");
 
             var map2 = new BspFile();

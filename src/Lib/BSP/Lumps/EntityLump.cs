@@ -125,13 +125,15 @@ namespace MomBspTools.Lib.BSP.Lumps
         {
             foreach (var ent in Data)
             {
-                writer.Write("{");
+                writer.Write(Encoding.ASCII.GetBytes("{\n"));
                 foreach (var (key, value) in ent.Properties)
-                    writer.Write($"\"{key}\" \"{value}\"");
+                    writer.Write(Encoding.ASCII.GetBytes($"\"{key}\" \"{value}\"\n"));
                 foreach (var (key, value) in ent.IOProperties)
-                    writer.Write($"\"{key}\" \"{value.TargetEntityName},{value.Input},{value.Parameter},{value.Delay},{value.TimesToFire}\"");
-                writer.Write("}\0");
+                    writer.Write(Encoding.ASCII.GetBytes($"\"{key}\" \"{value.TargetEntityName},{value.Input},{value.Parameter},{value.Delay},{value.TimesToFire}\"\n"));
+                writer.Write(Encoding.ASCII.GetBytes("}\n"));
             }
+            //TODO maybe?
+            writer.Write(Encoding.ASCII.GetBytes("\0"));
         }
 
         public EntityLump(BspFile parent) : base(parent)
