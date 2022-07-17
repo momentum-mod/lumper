@@ -18,14 +18,14 @@ namespace MomBspTools.Lib.BSP.Lumps
             };
 
             for (var i = 0; i < 2; i++)
-            for (var j = 0; j < 4; j++)
-                item.TextureVectors[i, j] = reader.ReadSingle();
+                for (var j = 0; j < 4; j++)
+                    item.TextureVectors[i, j] = reader.ReadSingle();
 
             for (var i = 0; i < 2; i++)
-            for (var j = 0; j < 4; j++)
-                item.LightmapVectors[i, j] = reader.ReadSingle();
+                for (var j = 0; j < 4; j++)
+                    item.LightmapVectors[i, j] = reader.ReadSingle();
 
-            item.Flags = (SurfaceFlag) reader.ReadInt32();
+            item.Flags = (SurfaceFlag)reader.ReadInt32();
             item.TexDataPointer = reader.ReadInt32();
 
             Data.Add(item);
@@ -40,10 +40,10 @@ namespace MomBspTools.Lib.BSP.Lumps
             }
 
             for (var i = 0; i < 2; i++)
-            for (var j = 0; j < 4; j++)
-                writer.Write(Data[index].LightmapVectors[i, j]);
+                for (var j = 0; j < 4; j++)
+                    writer.Write(Data[index].LightmapVectors[i, j]);
 
-            writer.Write((int) Data[index].Flags);
+            writer.Write((int)Data[index].Flags);
             writer.Write((Data[index].TexDataPointer));
         }
 

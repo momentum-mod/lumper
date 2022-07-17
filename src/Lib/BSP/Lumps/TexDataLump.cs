@@ -12,7 +12,7 @@ namespace MomBspTools.Lib.BSP.Lumps
         {
             var item = new TexData
             {
-                Reflectivity = new[] {reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()},
+                Reflectivity = new[] { reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle() },
                 StringTablePointer = reader.ReadInt32(),
                 Width = reader.ReadInt32(),
                 Height = reader.ReadInt32(),

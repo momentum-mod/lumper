@@ -49,7 +49,7 @@ namespace MomBspTools.Lib.BSP
         }
 
         // this feels fucking insane but it works
-        public T GetLump<T>() => (T) (object) Lumps.First(x => x.GetType() == typeof(T));
+        public T GetLump<T>() => (T)(object)Lumps.First(x => x.GetType() == typeof(T));
 
         public Lump GetLump(LumpType lumpType) => Lumps.First(x => x.Type == lumpType);
 

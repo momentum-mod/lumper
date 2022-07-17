@@ -12,7 +12,7 @@ namespace MomBspTools
     {
         public static void Main(string[] args)
         {
-            
+
             if (args.Length < 1)
             {
                 Usage();
@@ -23,15 +23,15 @@ namespace MomBspTools
             var map1 = new BspFile();
             map1.Load(args[0]);
             //LoadMap(args[0]);
-            
-             foreach (var texture in map1.GetLump<TexDataLump>().Data)
-             {
-                 texture.TexName = "R997/Mc/Mc-Jackolantern";
-             }
+
+            foreach (var texture in map1.GetLump<TexDataLump>().Data)
+            {
+                texture.TexName = "R997/Mc/Mc-Jackolantern";
+            }
             map1.Save("test.bsp");
 
-             var map2 = new BspFile(); 
-             map2.Load("test.bsp");
+            var map2 = new BspFile();
+            map2.Load("test.bsp");
 
             //
             // foreach (var ent in map.GetLump<EntityLump>().Data.Where(ent => ent.Properties.ContainsKey("skyname")))
@@ -61,7 +61,7 @@ namespace MomBspTools
             try
             {
                 var map = new BspFile();
-                
+
                 map.Load(path);
 
                 return map;

@@ -27,20 +27,20 @@ namespace MomBspTools.Lib.BSP
             ResolveTexNames();
             ResolveTexData();
         }
-        
+
         private void ReadHeader()
         {
             if (_stream.Position != 0) _stream.Seek(0, 0);
 
             var ident = _reader.ReadBytes(4);
-            
+
             if (Encoding.Default.GetString(ident) != "VBSP") throw new InvalidDataException();
 
             _bsp.Version = _reader.ReadInt32();
 
             for (var i = 0; i < BspFile.HeaderLumps; i++)
             {
-                var type = (LumpType) i;
+                var type = (LumpType)i;
 
                 Lump lump = type switch
                 {
@@ -68,7 +68,7 @@ namespace MomBspTools.Lib.BSP
         {
             foreach (var l in _bsp.Lumps.Where(lump => lump is ManagedLump))
             {
-                var lump = (ManagedLump) l;
+                var lump = (ManagedLump)l;
                 LoadLump(lump);
             }
         }
@@ -85,7 +85,7 @@ namespace MomBspTools.Lib.BSP
         public void CopyLumpStream(Lump lump, Stream output)
         {
             _stream.Seek(lump.Offset, 0);
-            
+
             var read = 0;
             var bytes = lump.Length;
             var buffer = new byte[64 * 1024];
@@ -96,10 +96,10 @@ namespace MomBspTools.Lib.BSP
                 bytes -= read;
             }
         }
-        
+
         // ARGH NO NO NO
         public FileStream GetLumpStream(Lump lump)
-        { 
+        {
             _stream.Seek(lump.Offset, 0);
 
             return _stream;
@@ -131,6 +131,6 @@ namespace MomBspTools.Lib.BSP
             }
         }
 
-        public void Dispose() =>_reader.Dispose();
+        public void Dispose() => _reader.Dispose();
     }
 }

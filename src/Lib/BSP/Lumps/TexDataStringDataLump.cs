@@ -5,7 +5,7 @@ namespace MomBspTools.Lib.BSP.Lumps
     public class TexDataStringDataLump : ManagedLump
     {
         public byte[] Data;
-        
+
         public override void Read(BinaryReader reader)
         {
             Data = reader.ReadBytes(Length);
