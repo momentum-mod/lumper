@@ -70,6 +70,7 @@ namespace MomBspTools.Lib.BSP
             lump.Offset = startPosition;
             lump.Length = (int)_stream.Position - startPosition;
             Console.WriteLine($"Lump {lump.Type}({(int)lump.Type})\n\t{oldOffset}\t->\t{lump.Offset} \n\t{oldLength}\t->\t{lump.Length}");
+
             if (oldLength != lump.Length)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -100,10 +101,13 @@ namespace MomBspTools.Lib.BSP
             var texdata = _bsp.GetLump<TexDataLump>().Data;
 
             List<int> stringTable = new();
-            var stringData = new char[256 * 1000];
             var pos = 0;
 
             // loop through every texture name
+            var texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
+            //TODO counts the amount of char and not byts but we convert to ascii and multibyte chars print a questionmark for each byte .. maybe?
+            var sum = texdata.Sum(x => x.TexName.Length + 1);
+            Array.Resize(ref texDataStringDataLump.Data, sum);
             foreach (var tex in texdata)
             {
                 // at start of texture string, put its loc in stringtable
@@ -111,24 +115,14 @@ namespace MomBspTools.Lib.BSP
 
                 tex.StringTablePointer = stringTable.Count - 1;
 
-                foreach (var c in tex.TexName)
-                {
-                    stringData[pos] = c;
-                    pos++;
-                }
-                // string includes a null byte at end, right?
-                // stringData[pos] = '\0';
-                // pos++;
+                //TODO is this ascii?
+                var bytes = Encoding.ASCII.GetBytes(tex.TexName);
+                Array.Copy(bytes, 0, texDataStringDataLump.Data, pos, bytes.Length);
+                pos += bytes.Length;
+                texDataStringDataLump.Data[pos] = 0;
+                pos++;
             }
 
-            var finalArray = new byte[pos];
-
-            for (var i = 0; i < pos; i++)
-            {
-                finalArray[i] = (byte)stringData[i];
-            }
-
-            _bsp.GetLump<TexDataStringDataLump>().Data = finalArray;
             _bsp.GetLump<TexDataStringTableLump>().Data = stringTable;
 
         }

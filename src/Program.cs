@@ -24,10 +24,12 @@ namespace MomBspTools
             map1.Load(args[0]);
             //LoadMap(args[0]);
 
-            //foreach (var texture in map1.GetLump<TexDataLump>().Data)
-            //{
-            //   texture.TexName = "R997/Mc/Mc-Jackolantern";
-            //}
+            foreach (var texture in map1.GetLump<TexDataLump>().Data)
+            {
+                //texture.TexName = "R997/Mc/Mc-Jackolantern";
+                //texture.TexName = "CONCRETE/CONCRETEWALL011";
+                texture.TexName = "CS_ITALY/PWOOD1";
+            }
 
             /*foreach(var lump in map1.Lumps)
             {

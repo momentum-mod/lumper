@@ -116,20 +116,13 @@ namespace MomBspTools.Lib.BSP
             foreach (var texture in texDataLump.Data)
             {
                 var name = new StringBuilder();
-                char nextchar;
                 var texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
                 var stringtableoffset = texDataStringTableLump.Data[texture.StringTablePointer];
                 var texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
-                do
-                {
-                    if (texDataStringDataLump.Data.Length <= stringtableoffset)
-                        break;
-                    nextchar = Convert.ToChar(texDataStringDataLump.Data[stringtableoffset]);
-                    name.Append(nextchar);
-                    stringtableoffset++;
-                } while (nextchar != '\0');
 
-                texture.TexName = name.ToString();
+                //todo checks
+                var end = Array.FindIndex(texDataStringDataLump.Data, stringtableoffset, (x => x == 0));
+                texture.TexName = Encoding.ASCII.GetString(texDataStringDataLump.Data, stringtableoffset, end - stringtableoffset);
             }
         }
 
