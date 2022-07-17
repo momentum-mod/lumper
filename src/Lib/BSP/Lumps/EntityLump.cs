@@ -13,7 +13,7 @@ namespace MomBspTools.Lib.BSP.Lumps
 
         public override void Read(BinaryReader reader)
         {
-            while (ReadEntity(reader)) {}
+            while (ReadEntity(reader)) { }
         }
 
         private bool ReadEntity(BinaryReader reader)
@@ -59,42 +59,42 @@ namespace MomBspTools.Lib.BSP.Lumps
                             break;
 
                         case '"':
-                        {
-                            if (!inSection)
                             {
-                                throw new InvalidDataException("String in unopened section");
-                            }
-
-                            if (inString)
-                            {
-                                if (key == null)
+                                if (!inSection)
                                 {
-                                    key = stringBuilder.ToString();
+                                    throw new InvalidDataException("String in unopened section");
                                 }
-                                else
+
+                                if (inString)
                                 {
-                                    var value = stringBuilder.ToString();
-
-                                    if (key.Length == 0)
+                                    if (key == null)
                                     {
-                                        Console.WriteLine(
-                                            "Entity parser skipped value \"{0}\" for empty key, how u do dis?", value);
+                                        key = stringBuilder.ToString();
                                     }
-
                                     else
                                     {
-                                        keyValues.Add(new KeyValuePair<string, string>(key, value));
+                                        var value = stringBuilder.ToString();
+
+                                        if (key.Length == 0)
+                                        {
+                                            Console.WriteLine(
+                                                "Entity parser skipped value \"{0}\" for empty key, how u do dis?", value);
+                                        }
+
+                                        else
+                                        {
+                                            keyValues.Add(new KeyValuePair<string, string>(key, value));
+                                        }
+
+                                        key = null;
                                     }
 
-                                    key = null;
+                                    stringBuilder.Remove(0, stringBuilder.Length);
                                 }
 
-                                stringBuilder.Remove(0, stringBuilder.Length);
+                                inString = !inString;
+                                continue;
                             }
-
-                            inString = !inString;
-                            continue;
-                        }
 
                         default:
                             if (inSection && inString)
@@ -128,12 +128,12 @@ namespace MomBspTools.Lib.BSP.Lumps
                 writer.Write("{");
                 foreach (var (key, value) in ent.Properties)
                     writer.Write($"\"{key}\" \"{value}\"");
-                foreach (var (key, value) in ent.IOProperties) 
+                foreach (var (key, value) in ent.IOProperties)
                     writer.Write($"\"{key}\" \"{value.TargetEntityName},{value.Input},{value.Parameter},{value.Delay},{value.TimesToFire}\"");
                 writer.Write("}\0");
             }
         }
-        
+
         public EntityLump(BspFile parent) : base(parent)
         {
         }

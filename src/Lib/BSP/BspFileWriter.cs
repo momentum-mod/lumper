@@ -53,25 +53,25 @@ namespace MomBspTools.Lib.BSP
             foreach (var lump in _bsp.Lumps)
             {
                 if (lump is ManagedLump)
-                    WriteManagedLump((ManagedLump) lump);
+                    WriteManagedLump((ManagedLump)lump);
                 else
-                    WriteUnmanagedLump((UnmanagedLump) lump);
+                    WriteUnmanagedLump((UnmanagedLump)lump);
             }
         }
 
         private void WriteManagedLump(ManagedLump lump)
         {
-            var startPosition = (int) _stream.Position;
+            var startPosition = (int)_stream.Position;
 
             lump.Write(_writer);
 
             lump.Offset = startPosition;
-            lump.Length = (int) _stream.Position - startPosition;
+            lump.Length = (int)_stream.Position - startPosition;
         }
 
         private void WriteUnmanagedLump(Lump lump)
         {
-            var startPosition = (int) _stream.Position;
+            var startPosition = (int)_stream.Position;
 
             _bsp.reader.CopyLumpStream(lump, _stream);
 
@@ -114,9 +114,9 @@ namespace MomBspTools.Lib.BSP
 
             for (var i = 0; i < pos; i++)
             {
-                finalArray[i] = (byte) stringData[i];
+                finalArray[i] = (byte)stringData[i];
             }
-            
+
             _bsp.GetLump<TexDataStringDataLump>().Data = finalArray;
             _bsp.GetLump<TexDataStringTableLump>().Data = stringTable;
 
