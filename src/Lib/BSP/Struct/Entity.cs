@@ -9,10 +9,19 @@ namespace MomBspTools.Lib.BSP.Struct
         public string ClassName
         {
             get => Properties.FirstOrDefault(property => property.Key == "classname").Value;
-            set => Properties["classname"] = value;
+            set
+            {
+                KeyValuePair<string, string> pair = Properties.FirstOrDefault(property => property.Key == "classname");
+                if (pair.Key == null)
+                {
+                    Properties.Add(new("classname", value));
+                }
+                else
+                    pair = new("classname", value);
+            }
         }
 
-        public SortedDictionary<string, string> Properties { get; set; } = new();
+        public List<KeyValuePair<string, string>> Properties { get; set; } = new();
         public List<KeyValuePair<string, EntityIO>> IOProperties { get; set; } = new();
 
         public Entity(string className)
@@ -61,7 +70,7 @@ namespace MomBspTools.Lib.BSP.Struct
                 }
                 else
                 {
-                    Properties.Add(key, value);
+                    Properties.Add(new (key, value));
                 }
             }
 
