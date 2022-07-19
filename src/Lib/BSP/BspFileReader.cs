@@ -23,6 +23,9 @@ namespace MomBspTools.Lib.BSP
         public void Load()
         {
             ReadHeader();
+            if (CheckOverlapping())
+                throw new InvalidDataException("overlapping lumps bad .. I think");
+
             LoadAll();
             ResolveTexNames();
             ResolveTexData();
@@ -37,6 +40,7 @@ namespace MomBspTools.Lib.BSP
             if (Encoding.Default.GetString(ident) != "VBSP") throw new InvalidDataException();
 
             _bsp.Version = _reader.ReadInt32();
+            Console.WriteLine($"BSP version: {_bsp.Version}");
 
             for (var i = 0; i < BspFile.HeaderLumps; i++)
             {
@@ -66,6 +70,33 @@ namespace MomBspTools.Lib.BSP
             _bsp.Revision = _reader.ReadInt32();
         }
 
+        //for testing
+        private bool CheckOverlapping()
+        {
+            bool ret = false;
+            Lump prevLump = null;
+            foreach (var lump in _bsp.Lumps.OrderBy(x => x.Offset))
+            {
+                if (prevLump is null)
+                    prevLump = lump;
+                else if (lump.Length > 0)
+                {
+                    int prevEnd = prevLump.Offset + prevLump.Length;
+                    if (lump.Offset < prevEnd)
+                    {
+                        Console.WriteLine($"lumps {prevLump} and {lump} overlapping");
+                        ret = true;
+                    }
+                    else if (lump.Offset > prevEnd)
+                    {
+                        Console.WriteLine($"space between lumps {prevLump.Type} {prevEnd} <-- {lump.Offset - prevEnd} --> {lump.Offset}");
+                    }
+                    if (lump.Offset + lump.Length >= prevEnd)
+                        prevLump = lump;
+                }
+            }
+            return ret;
+        }
         private void LoadAll()
         {
             foreach (var l in _bsp.Lumps.Where(lump => lump is ManagedLump))

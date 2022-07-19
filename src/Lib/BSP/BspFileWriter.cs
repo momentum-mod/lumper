@@ -50,18 +50,26 @@ namespace MomBspTools.Lib.BSP
             // Seek past the header
             _stream.Seek(BspFile.HeaderSize, 0);
 
+            int startPosition = (int)_stream.Position;
             foreach (var lump in _bsp.Lumps.OrderBy(x => x.Offset))
             {
+                if (lump.Length != 0)
+                {
+                    //Lump offsets (and their corresponding data lumps) are always rounded up to the nearest 4-byte boundary, though the lump length may not be. 
+                    for (int i = 0; i < _stream.Position % 4; i++)
+                        _stream.WriteByte(0);
+                    startPosition = (int)_stream.Position;
+                }
+
                 if (lump is ManagedLump)
-                    WriteManagedLump((ManagedLump)lump);
+                    WriteManagedLump((ManagedLump)lump, startPosition);
                 else
-                    WriteUnmanagedLump((UnmanagedLump)lump);
+                    WriteUnmanagedLump((UnmanagedLump)lump, startPosition);
             }
         }
 
-        private void WriteManagedLump(ManagedLump lump)
+        private void WriteManagedLump(ManagedLump lump, int startPosition)
         {
-            var startPosition = (int)_stream.Position;
 
             lump.Write(_writer);
 
@@ -79,17 +87,23 @@ namespace MomBspTools.Lib.BSP
             }
         }
 
-        private void WriteUnmanagedLump(Lump lump)
+        private void WriteUnmanagedLump(Lump lump, int startPosition)
         {
-            var startPosition = (int)_stream.Position;
+            if (lump.Length != 0)
+            {
+                _bsp.reader.CopyLumpStream(lump, _stream);
 
-            _bsp.reader.CopyLumpStream(lump, _stream);
-
-            if (_stream.Position - startPosition != lump.Length) throw new InvalidDataException("Lump data is wrong length!");
+                if (_stream.Position - startPosition != lump.Length) throw new InvalidDataException("Lump data is wrong length!");
+            }
+            else
+            {
+                Console.WriteLine($"Nothing to do for 0 Length UnmanagedLump {lump}");
+            }
 
             int oldOffset = lump.Offset;
             lump.Offset = startPosition;
             Console.WriteLine($"Lump {lump.Type}({(int)lump.Type})\n\t{oldOffset}\t->\t{lump.Offset} \n\tlength: {lump.Length}");
+
         }
 
         private void ConstructTexDataLumps()
