@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using MomBspTools.Lib.BSP;
 using MomBspTools.Lib.BSP.Lumps;
+using MomBspTools.Lib.BSP.Struct;
 
 namespace MomBspTools
 {
@@ -24,12 +26,44 @@ namespace MomBspTools
             map1.Load(args[0]);
             //LoadMap(args[0]);
 
-            foreach (var texture in map1.GetLump<TexDataLump>().Data)
+            var rng = new Random();
+            var texDataLump = map1.GetLump<TexDataLump>();
+            foreach (var texture in texDataLump.Data)
             {
+                Console.WriteLine($"texName: {texture.TexName}");
                 //texture.TexName = "R997/Mc/Mc-Jackolantern";
                 //texture.TexName = "CONCRETE/CONCRETEWALL011";
-                texture.TexName = "CS_ITALY/PWOOD1";
+                //texture.TexName = "CS_ITALY/PWOOD1";
+                if (texture.TexName.EndsWith("CONCRETE/CONCRETEWALL011"))
+                    texture.TexName = "CS_ITALY/PWOOD1";
+                //texture.TexName = texDataLump.Data[rng.Next(texDataLump.Data.Count)].TexName;
             }
+
+            var pakfile = new Pakfile(map1);
+            var pakdir = new DirectoryInfo("./pakfile");
+            if (pakdir.Exists)
+                pakdir.Delete(true);
+            using (ZipArchive zip1 = pakfile.GetZipArchive())
+            {
+                //zip1.ExtractToDirectory(pakdir.FullName);
+                //ZipArchive zip2 = new ZipArchive(zip1);
+                var delEntities = new List<ZipArchiveEntry>();
+                foreach (var entry in zip1.Entries)
+                {
+                    if (entry.Name == "concretewall011.vtf")
+                    //if (entry.Name.StartsWith("concretewall")
+                    //|| entry.Name.StartsWith("computerwall"))
+                    {
+                        delEntities.Add(entry);
+                    }
+                }
+                foreach (var entry in delEntities)
+                {
+                    entry.Delete();
+                }
+            }
+
+
 
             /*foreach(var lump in map1.Lumps)
             {
@@ -40,10 +74,17 @@ namespace MomBspTools
             }*/
 
 
+            //map1.Version = 21;
+
             map1.Save("test.bsp");
 
             var map2 = new BspFile();
             map2.Load("test.bsp");
+            if (pakdir.Exists)
+                pakdir.Delete(true);
+            pakfile = new Pakfile(map2);
+            pakfile.GetZipArchive().ExtractToDirectory(pakdir.FullName);
+
 
             //
             // foreach (var ent in map.GetLump<EntityLump>().Data.Where(ent => ent.Properties.ContainsKey("skyname")))

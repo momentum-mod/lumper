@@ -53,6 +53,7 @@ namespace MomBspTools.Lib.BSP
                     LumpType.LUMP_TEXDATA => new TexDataLump(_bsp),
                     LumpType.LUMP_TEXDATA_STRING_TABLE => new TexDataStringTableLump(_bsp),
                     LumpType.LUMP_TEXDATA_STRING_DATA => new TexDataStringDataLump(_bsp),
+                    LumpType.LUMP_PAKFILE => new PakFileLump(_bsp),
                     _ => new UnmanagedLump(_bsp)
                 };
 
