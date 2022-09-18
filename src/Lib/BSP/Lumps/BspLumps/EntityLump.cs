@@ -1,22 +1,22 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using MomBspTools.Lib.BSP.Struct;
+using System.Linq;
+using System.Collections.Generic;
+using Lumper.Lib.BSP.Struct;
 
-namespace MomBspTools.Lib.BSP.Lumps
+namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
-    public class EntityLump : ManagedLump
+    public class EntityLump : ManagedLump<BspLumpType>
     {
-        // this could also be set using generics but this class hierarchy is stupid enough already
         public List<Entity> Data { get; set; } = new();
 
-        public override void Read(BinaryReader reader)
+        public override void Read(BinaryReader reader, long length)
         {
-            while (ReadEntity(reader)) { }
+            while (ReadEntity(reader, reader.BaseStream.Position + length)) { }
         }
 
-        private bool ReadEntity(BinaryReader reader)
+        private bool ReadEntity(BinaryReader reader, long endPos)
         {
             var stringBuilder = new StringBuilder(512);
             var keyValues = new List<KeyValuePair<string, string>>();
@@ -112,26 +112,40 @@ namespace MomBspTools.Lib.BSP.Lumps
                     "WARNING: Failed to parse entity: {0}, {1} in list.\n Saving this BSP could cause data loss!",
                     e.Message, Data.Count);
 
-                // Read to end of entity (barf)
-                for (var c = ' '; c != '\0' && c != '}'; c = reader.ReadChar())
+                // Read to end of entity
+                bool foundEnd = false;
+                while (reader.BaseStream.Position < endPos)
                 {
+                    var c = reader.ReadChar();
+                    if (c == '\0' || c == '}')
+                    {
+                        foundEnd = true;
+                        break;
+                    }
                 }
+                if (!foundEnd)
+                    Console.WriteLine("WARNING: End of entity not found!");
             }
 
             return false;
         }
 
-        public override void Write(BinaryWriter writer)
+        public override void Write(Stream stream)
         {
             foreach (var ent in Data)
             {
-                writer.Write("{");
-                foreach (var (key, value) in ent.Properties)
-                    writer.Write($"\"{key}\" \"{value}\"");
-                foreach (var (key, value) in ent.IOProperties)
-                    writer.Write($"\"{key}\" \"{value.TargetEntityName},{value.Input},{value.Parameter},{value.Delay},{value.TimesToFire}\"");
-                writer.Write("}\0");
+                stream.Write(Encoding.ASCII.GetBytes("{\n"));
+                foreach (var prop in ent.Properties)
+                {
+                    stream.Write(Encoding.ASCII.GetBytes($"{prop}\n"));
+                }
+                stream.Write(Encoding.ASCII.GetBytes("}\n"));
             }
+            stream.Write(Encoding.ASCII.GetBytes("\0"));
+        }
+        public override bool Empty()
+        {
+            return !Data.Any();
         }
 
         public EntityLump(BspFile parent) : base(parent)

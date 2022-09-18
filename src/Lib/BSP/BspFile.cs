@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MomBspTools.Lib.BSP.Enum;
-using MomBspTools.Lib.BSP.Lumps;
+using Lumper.Lib.BSP.Lumps;
+using Lumper.Lib.BSP.Lumps.BspLumps;
+using Lumper.Lib.BSP.IO;
 
-namespace MomBspTools.Lib.BSP
+namespace Lumper.Lib.BSP
 {
     public class BspFile
     {
@@ -18,12 +18,17 @@ namespace MomBspTools.Lib.BSP
         public int Revision { get; set; }
         public int Version { get; set; }
 
-        // TODO: constructor w/ str that calls load()
-
-        // Keep a main reader open for now, maybe change down the line idk
         public BspFileReader reader;
 
-        public List<Lump> Lumps { get; set; } = new(HeaderLumps);
+        public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = new();
+
+        public BspFile()
+        { }
+
+        public BspFile(string path)
+        {
+            Load(path);
+        }
 
         public void Load(string path)
         {
@@ -31,9 +36,10 @@ namespace MomBspTools.Lib.BSP
             Name = Path.GetFileNameWithoutExtension(path);
             FilePath = Path.GetFullPath(path);
 
-            if (!File.Exists(FilePath)) throw new FileNotFoundException();
-
-            reader = new BspFileReader(this);
+            if (!File.Exists(FilePath))
+                throw new FileNotFoundException();
+            var stream = File.OpenRead(FilePath);
+            reader = new BspFileReader(this, stream);
             reader.Load();
         }
 
@@ -43,16 +49,36 @@ namespace MomBspTools.Lib.BSP
             // else
             // {
             File.WriteAllText(path, null);
-            using var writer = new BspFileWriter(this, path);
+            using var writer = new BspFileWriter(this, File.OpenWrite(path));
             writer.Save();
             // }
         }
 
-        // this feels fucking insane but it works
-        public T GetLump<T>() => (T)(object)Lumps.First(x => x.GetType() == typeof(T));
+        public T GetLump<T>() where T : Lump<BspLumpType>
+        {
+            // if you add something here, also add it to the BspReader
+            Dictionary<System.Type, BspLumpType> typeMap = new()
+            {
+                { typeof(EntityLump), BspLumpType.Entities },
+                { typeof(TexInfoLump), BspLumpType.Texinfo },
+                { typeof(TexDataLump), BspLumpType.Texdata },
+                { typeof(TexDataStringTableLump), BspLumpType.Texdata_string_table },
+                { typeof(TexDataStringDataLump), BspLumpType.Texdata_string_data },
+                { typeof(PakFileLump), BspLumpType.Pakfile },
+                { typeof(GameLump), BspLumpType.Game_lump }
+            };
 
-        public Lump GetLump(LumpType lumpType) => Lumps.First(x => x.Type == lumpType);
+            if (typeMap.ContainsKey(typeof(T)))
+            {
+                return (T)Lumps[typeMap[typeof(T)]];
+            }
+            var tLumps = Lumps.Where(x => x.Value.GetType() == typeof(T));
+            return (T)tLumps.Select(x => x.Value).First();
+        }
 
-        public FileStream GetLumpStream(Lump lump) => new BspFileReader(this).GetLumpStream(lump);
+        public Lump<BspLumpType> GetLump(BspLumpType lumpType)
+        {
+            return Lumps[lumpType];
+        }
     }
 }

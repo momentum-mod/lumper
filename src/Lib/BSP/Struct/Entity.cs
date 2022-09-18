@@ -2,25 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MomBspTools.Lib.BSP.Struct
+namespace Lumper.Lib.BSP.Struct
 {
     public class Entity
     {
+        public abstract class Property
+        {
+            public string Key { get; protected set; }
+        }
+        public class Property<T> : Property
+        {
+            public Property(string Key, T Value)
+            {
+                this.Key = Key;
+                this.Value = Value;
+            }
+            public T Value { get; set; }
+            public override string ToString() => $"\"{Key}\" \"{Value}\"";
+        }
+        private readonly Property<string> _ClassName;
         public string ClassName
         {
-            get => Properties.FirstOrDefault(property => property.Key == "classname").Value;
-            set => Properties["classname"] = value;
+            get { return _ClassName.Value; }
+            set { _ClassName.Value = value; }
         }
-
-        public SortedDictionary<string, string> Properties { get; set; } = new();
-        public List<KeyValuePair<string, EntityIO>> IOProperties { get; set; } = new();
-
-        public Entity(string className)
-        {
-            _ = className ?? throw new ArgumentNullException(nameof(className));
-
-            ClassName = className.Length == 0 ? className : throw new ArgumentException(className);
-        }
+        public List<Property> Properties { get; set; } = new();
 
         public Entity(IEnumerable<KeyValuePair<string, string>> keyValues)
         {
@@ -30,8 +36,16 @@ namespace MomBspTools.Lib.BSP.Struct
                 var value = kv.Value;
 
                 if (key == "classname")
-                    if (ClassName is not null)
+                {
+                    if (_ClassName is null)
+                    {
+                        _ClassName = new Property<string>(key, value);
+                        Properties.Add(_ClassName);
+                        continue;
+                    }
+                    else
                         Console.WriteLine("Found duplicate classname key, ignoring {0}", kv);
+                }
 
 
                 if (EntityIO.IsIO(value))
@@ -43,7 +57,7 @@ namespace MomBspTools.Lib.BSP.Struct
                         var delay = float.Parse(props[3]);
                         var timestofire = int.Parse(props[4]);
 
-                        IOProperties.Add(new KeyValuePair<string, EntityIO>(key,
+                        Properties.Add(new Property<EntityIO>(key,
                             new EntityIO
                             {
                                 TargetEntityName = props[0],
@@ -61,11 +75,12 @@ namespace MomBspTools.Lib.BSP.Struct
                 }
                 else
                 {
-                    Properties.Add(key, value);
+                    Properties.Add(new Property<string>(key, value));
                 }
             }
 
-            if (ClassName is null) Console.WriteLine("Warning: Found entity with missing classname! Fuck you!");
+            if (ClassName is null)
+                Console.WriteLine("Warning: Found entity with missing classname!");
         }
     }
 }

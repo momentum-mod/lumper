@@ -1,4 +1,4 @@
-namespace MomBspTools.Lib.BSP.Struct
+namespace Lumper.Lib.BSP.Struct
 {
     public class TexData
     {

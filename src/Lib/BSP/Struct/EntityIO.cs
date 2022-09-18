@@ -1,7 +1,7 @@
 // ReSharper disable InconsistentNaming
 using System.Linq;
 
-namespace MomBspTools.Lib.BSP.Struct
+namespace Lumper.Lib.BSP.Struct
 {
     public class EntityIO
     {
@@ -12,5 +12,6 @@ namespace MomBspTools.Lib.BSP.Struct
         public int TimesToFire { get; set; }
 
         public static bool IsIO(string value) => value.Count(s => s == ',') == 4;
+        public override string ToString() => $"{TargetEntityName},{Input},{Parameter},{Delay},{TimesToFire}";
     }
 }

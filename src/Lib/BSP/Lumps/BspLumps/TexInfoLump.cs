@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
-using MomBspTools.Lib.BSP.Enum;
-using MomBspTools.Lib.BSP.Struct;
+using Lumper.Lib.BSP.Struct;
+using Lumper.Lib.BSP.Enum;
 
-namespace MomBspTools.Lib.BSP.Lumps
+namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
-    public class TexInfoLump : FixedLump<TexInfo>
+    public class TexInfoLump : FixedLump<BspLumpType, TexInfo>
     {
-        protected override int StructureSize => 72;
+        public override int StructureSize => 72;
 
         protected override void ReadItem(BinaryReader reader)
         {
@@ -33,18 +33,17 @@ namespace MomBspTools.Lib.BSP.Lumps
 
         protected override void WriteItem(BinaryWriter writer, int index)
         {
+            var texInfo = Data[index];
             for (var i = 0; i < 2; i++)
-            {
                 for (var j = 0; j < 4; j++)
-                    writer.Write(Data[index].TextureVectors[i, j]);
-            }
+                    writer.Write(texInfo.TextureVectors[i, j]);
 
             for (var i = 0; i < 2; i++)
                 for (var j = 0; j < 4; j++)
-                    writer.Write(Data[index].LightmapVectors[i, j]);
+                    writer.Write(texInfo.LightmapVectors[i, j]);
 
-            writer.Write((int)Data[index].Flags);
-            writer.Write((Data[index].TexDataPointer));
+            writer.Write((int)texInfo.Flags);
+            writer.Write((texInfo.TexDataPointer));
         }
 
         public TexInfoLump(BspFile parent) : base(parent)

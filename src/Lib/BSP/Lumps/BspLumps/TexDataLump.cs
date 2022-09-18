@@ -1,18 +1,21 @@
-using System.Collections.Generic;
 using System.IO;
-using MomBspTools.Lib.BSP.Struct;
+using Lumper.Lib.BSP.Struct;
 
-namespace MomBspTools.Lib.BSP.Lumps
+namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
-    public class TexDataLump : FixedLump<TexData>
+    public class TexDataLump : FixedLump<BspLumpType, TexData>
     {
-        protected override int StructureSize => 32;
-
+        public override int StructureSize => 32;
         protected override void ReadItem(BinaryReader reader)
         {
             var item = new TexData
             {
-                Reflectivity = new[] { reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle() },
+                Reflectivity = new[]
+                    {
+                        reader.ReadSingle(),
+                        reader.ReadSingle(),
+                        reader.ReadSingle()
+                    },
                 StringTablePointer = reader.ReadInt32(),
                 Width = reader.ReadInt32(),
                 Height = reader.ReadInt32(),

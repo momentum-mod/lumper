@@ -1,136 +1,213 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
-using MomBspTools.Lib.BSP.Enum;
-using MomBspTools.Lib.BSP.Lumps;
+using System.Collections.Generic;
+using Lumper.Lib.BSP.Lumps;
+using Lumper.Lib.BSP.Lumps.BspLumps;
 
-namespace MomBspTools.Lib.BSP
+namespace Lumper.Lib.BSP.IO
 {
-    public sealed class BspFileReader : IDisposable
+    public class BspFileReader : LumpReader
     {
         private readonly BspFile _bsp;
-        private readonly FileStream _stream;
-        private readonly BinaryReader _reader;
 
-        public BspFileReader(BspFile file)
+        public BspFileReader(BspFile file, Stream input) : base(input)
         {
             _bsp = file;
-            _stream = File.OpenRead(_bsp.FilePath);
-            _reader = new BinaryReader(_stream);
         }
 
         public void Load()
         {
+            Lumps.Clear();
+            _bsp.Lumps.Clear();
             ReadHeader();
             LoadAll();
             ResolveTexNames();
             ResolveTexData();
         }
 
-        private void ReadHeader()
+        protected override void ReadHeader()
         {
-            if (_stream.Position != 0) _stream.Seek(0, 0);
+            if (BaseStream.Position != 0)
+                BaseStream.Seek(0, SeekOrigin.Begin);
 
-            var ident = _reader.ReadBytes(4);
+            var ident = ReadBytes(4);
 
-            if (Encoding.Default.GetString(ident) != "VBSP") throw new InvalidDataException();
+            if (Encoding.Default.GetString(ident) != "VBSP")
+                throw new InvalidDataException("File doesn't look like a VBSP");
 
-            _bsp.Version = _reader.ReadInt32();
+            _bsp.Version = ReadInt32();
+            Console.WriteLine($"BSP version: {_bsp.Version}");
 
             for (var i = 0; i < BspFile.HeaderLumps; i++)
             {
-                var type = (LumpType)i;
+                var type = (BspLumpType)i;
 
-                Lump lump = type switch
+                Lump<BspLumpType> lump = type switch
                 {
-                    LumpType.LUMP_ENTITIES => new EntityLump(_bsp),
-                    LumpType.LUMP_TEXINFO => new TexInfoLump(_bsp),
-                    LumpType.LUMP_TEXDATA => new TexDataLump(_bsp),
-                    LumpType.LUMP_TEXDATA_STRING_TABLE => new TexDataStringTableLump(_bsp),
-                    LumpType.LUMP_TEXDATA_STRING_DATA => new TexDataStringDataLump(_bsp),
-                    _ => new UnmanagedLump(_bsp)
+                    BspLumpType.Entities => new EntityLump(_bsp),
+                    BspLumpType.Texinfo => new TexInfoLump(_bsp),
+                    BspLumpType.Texdata => new TexDataLump(_bsp),
+                    BspLumpType.Texdata_string_table => new TexDataStringTableLump(_bsp),
+                    BspLumpType.Texdata_string_data => new TexDataStringDataLump(_bsp),
+                    BspLumpType.Pakfile => new PakFileLump(_bsp),
+                    BspLumpType.Game_lump => new GameLump(_bsp),
+                    _ => new UnmanagedLump<BspLumpType>(_bsp)
                 };
+                LumpHeader lumpHeader = new();
 
                 lump.Type = type;
-                lump.Offset = _reader.ReadInt32();
-                lump.Length = _reader.ReadInt32();
-                lump.Version = _reader.ReadInt32();
-                lump.FourCc = _reader.ReadInt32();
+                lumpHeader.Offset = ReadInt32();
+                int length = ReadInt32();
+                lump.Version = ReadInt32();
+                int fourCc = ReadInt32();
+                if (fourCc == 0)
+                {
+                    lumpHeader.CompressedLength = -1;
+                    lumpHeader.UncompressedLength = length;
+                }
+                else
+                {
+                    lumpHeader.CompressedLength = length;
+                    lumpHeader.UncompressedLength = fourCc;
+                }
 
-                _bsp.Lumps.Add(lump);
+                Console.WriteLine($"Lump {type}({(int)type})"
+                                  + $"\toffset: {lumpHeader.Offset}"
+                                  + $"\t length: {length}"
+                                  + $"\t Version: {lump.Version}"
+                                  + $"\t FourCc: {fourCc}");
+
+                _bsp.Lumps.Add(type, lump);
+                Lumps.Add(new Tuple<Lump, LumpHeader>(lump, lumpHeader));
             }
 
-            _bsp.Revision = _reader.ReadInt32();
+            _bsp.Revision = ReadInt32();
+
+            UpdateGameLumpLength();
+
+            SortLumps();
+
+            if (CheckOverlapping())
+                throw new InvalidDataException("Some lumps are overlapping. Check logging for details.");
         }
 
-        private void LoadAll()
+        //finding the real gamelump length by looking at the next lump
+        private void UpdateGameLumpLength()
         {
-            foreach (var l in _bsp.Lumps.Where(lump => lump is ManagedLump))
+            Lump gameLump = null;
+            LumpHeader gameLumpHeader = null;
+            foreach (var l in Lumps.OrderBy(x => x.Item2.Offset))
             {
-                var lump = (ManagedLump)l;
-                LoadLump(lump);
+                Lump lump = l.Item1;
+                LumpHeader header = l.Item2;
+                if (lump is GameLump)
+                {
+                    gameLump = lump;
+                    gameLumpHeader = header;
+                }
+                else if (gameLump is not null && header.Offset != 0 && header.Offset != gameLumpHeader.Offset)
+                {
+                    gameLumpHeader.UncompressedLength = header.Offset - gameLumpHeader.Offset;
+                    Console.WriteLine($"Changed gamelump length to {gameLumpHeader.Length}");
+                    break;
+                }
             }
         }
 
-        private void LoadLump(ManagedLump lump)
+        //sort by offset so the output file looks more like the input
+        private void SortLumps()
         {
-            if (lump.Length == 0) return;
-
-            _stream.Seek(lump.Offset, 0);
-
-            lump.Read(_reader);
-        }
-
-        public void CopyLumpStream(Lump lump, Stream output)
-        {
-            _stream.Seek(lump.Offset, 0);
-
-            var read = 0;
-            var bytes = lump.Length;
-            var buffer = new byte[64 * 1024];
-
-            while ((read = _stream.Read(buffer, 0, Math.Min(buffer.Length, bytes))) > 0)
+            Dictionary<BspLumpType, Lump<BspLumpType>> newLumps = new();
+            foreach (var l in Lumps.OrderBy(x => x.Item2.Offset))
             {
-                output.Write(buffer, 0, read);
-                bytes -= read;
+                var temp = _bsp.Lumps.First(x => x.Value == l.Item1);
+                newLumps.Add(temp.Key, temp.Value);
+                _bsp.Lumps.Remove(temp.Key);
             }
+
+            if (_bsp.Lumps.Any())
+                throw new InvalidDataException("SortLumps error: BSP lumps and reader headers didn't match!");
+            _bsp.Lumps = newLumps;
         }
 
-        // ARGH NO NO NO
-        public FileStream GetLumpStream(Lump lump)
+        //for testing
+        private bool CheckOverlapping()
         {
-            _stream.Seek(lump.Offset, 0);
+            var ret = false;
+            Lump<BspLumpType> prevLump = null;
+            LumpHeader prevHeader = null;
+            bool first = true;
+            foreach (var l in Lumps.OrderBy(x => x.Item2.Offset))
+            {
+                var lump = (Lump<BspLumpType>)l.Item1;
+                LumpHeader header = l.Item2;
+                if (first)
+                {
+                    first = false;
+                    prevLump = lump;
+                    prevHeader = header;
+                }
+                else if (header.Length > 0)
+                {
+                    long prevEnd = prevHeader.Offset + prevHeader.Length;
+                    if (header.Offset < prevEnd)
+                    {
+                        Console.WriteLine($"Lumps {prevLump.Type} and {lump.Type} overlapping");
+                        if (prevLump.Type == BspLumpType.Game_lump)
+                            Console.WriteLine("but the previous lump was GAME_LUMP and the length is a lie");
+                        else
+                            ret = true;
+                    }
+                    else if (header.Offset > prevEnd)
+                    {
+                        Console.WriteLine($"Space between lumps {prevLump.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
+                    }
 
-            return _stream;
+                    if (header.Offset + header.Length >= prevEnd)
+                    {
+                        prevLump = lump;
+                        prevHeader = header;
+                    }
+                }
+            }
+            return ret;
         }
 
         private void ResolveTexNames()
         {
-            foreach (var texture in _bsp.GetLump<TexDataLump>().Data)
+            var texDataLump = _bsp.GetLump<TexDataLump>();
+            foreach (var texture in texDataLump.Data)
             {
                 var name = new StringBuilder();
-                char nextchar;
-                var stringtableoffset = _bsp.GetLump<TexDataStringTableLump>().Data[texture.StringTablePointer];
-                do
-                {
-                    nextchar = Convert.ToChar(_bsp.GetLump<TexDataStringDataLump>().Data[stringtableoffset]);
-                    name.Append(nextchar);
-                    stringtableoffset++;
-                } while (nextchar != '\0');
+                var texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
+                var stringTableOffset = texDataStringTableLump.Data[texture.StringTablePointer];
+                var texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
 
-                texture.TexName = name.ToString();
+                var end = Array.FindIndex(texDataStringDataLump.Data, stringTableOffset, x => x == 0);
+                if (end < 0)
+                {
+                    end = texDataStringDataLump.Data.Length;
+                    Console.WriteLine("WARING: didn't find null at the end of texture string");
+                }
+                texture.TexName = end > 0
+                    ? TexDataStringDataLump.TextureNameEncoding.GetString(
+                        texDataStringDataLump.Data,
+                        stringTableOffset,
+                        end - stringTableOffset)
+                    : "";
             }
         }
 
         private void ResolveTexData()
         {
-            foreach (var texinfo in _bsp.GetLump<TexInfoLump>().Data)
+            var texInfoLump = _bsp.GetLump<TexInfoLump>();
+            foreach (var texInfo in texInfoLump.Data)
             {
-                texinfo.TexData = _bsp.GetLump<TexDataLump>().Data[texinfo.TexDataPointer];
+                var texDataLump = _bsp.GetLump<TexDataLump>();
+                texInfo.TexData = texDataLump.Data[texInfo.TexDataPointer];
             }
         }
-
-        public void Dispose() => _reader.Dispose();
     }
 }
