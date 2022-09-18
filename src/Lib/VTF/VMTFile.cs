@@ -1,7 +1,7 @@
-namespace MomBspTools.Lib.VTF
+namespace Lumper.Lib.VTF
 {
     public class VMTFile
     {
-        
+
     }
 }
