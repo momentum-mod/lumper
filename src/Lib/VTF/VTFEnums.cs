@@ -1,4 +1,4 @@
-﻿namespace Lumper.Lib.VTF
+namespace Lumper.Lib.VTF
 {
     public enum ImageFormats
     {
