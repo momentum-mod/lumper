@@ -1,4 +1,4 @@
-﻿namespace Lumper.Lib.BSP.Lumps.BspLumps
+namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
     public enum BspLumpType
     {
