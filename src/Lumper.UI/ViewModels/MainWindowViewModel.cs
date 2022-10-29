@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -7,6 +9,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using DynamicData;
 using Lumper.Lib.BSP;
 using Lumper.UI.ViewModels.Bsp;
 using Lumper.UI.ViewModels.Matchers;
@@ -17,10 +20,15 @@ namespace Lumper.UI.ViewModels;
 public class MainWindowViewModel : ViewModelBase
 {
     private BspViewModel? _bspModel;
+    private Dictionary<BspNodeBase, UserControl> _bspTabCache = new();
     private BspFile? _file;
+    private readonly SourceList<BspNodeBase> _openTabs = new();
+    private readonly ReadOnlyObservableCollection<BspNodeBase> _openTabsReadOnly;
+    private readonly HashSet<BspNodeBase> _openTabsSet = new();
     private string _searchPattern = "";
-
     private MatcherBase _selectedMatcher = new GlobMatcherViewModel();
+    private BspNodeBase? _selectedNode;
+    private BspNodeBase? _selectedTab;
 
     public MainWindowViewModel()
     {
@@ -35,15 +43,43 @@ public class MainWindowViewModel : ViewModelBase
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(Search);
 
+        this.WhenAnyValue(x => x.BspModel)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(x => this.RaisePropertyChanged(nameof(LoadedPath)));
+
+        this.WhenAnyValue(x => x.SelectedNode)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(x => Open(x));
+
+        _openTabs.Connect()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Bind(out _openTabsReadOnly)
+            .DisposeMany()
+            .Subscribe(_ => { }, RxApp.DefaultExceptionHandler.OnNext);
+
         RxApp.MainThreadScheduler.Schedule(OnLoad);
     }
 
     public IClassicDesktopStyleApplicationLifetime Desktop { get; }
 
+    public string LoadedPath => BspModel?.FilePath ?? "";
+
     public BspViewModel? BspModel
     {
         get => _bspModel;
         set => this.RaiseAndSetIfChanged(ref _bspModel, value);
+    }
+
+    public BspNodeBase? SelectedNode
+    {
+        get => _selectedNode;
+        set => this.RaiseAndSetIfChanged(ref _selectedNode, value);
+    }
+
+    public BspNodeBase? SelectedTab
+    {
+        get => _selectedTab;
+        set => this.RaiseAndSetIfChanged(ref _selectedTab, value);
     }
 
     public string SearchPattern
@@ -58,11 +94,30 @@ public class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedMatcher, value);
     }
 
+    public ReadOnlyObservableCollection<BspNodeBase> OpenTabs => _openTabsReadOnly;
+
     private async void OnLoad()
     {
         if (Desktop.Args is not { Length: 1 })
             return;
         await LoadBsp(Desktop.Args[0]);
+    }
+
+    public void Open(BspNodeBase? bspNode)
+    {
+        if (bspNode is null || !bspNode.CanView)
+            return;
+        if (_openTabsSet.Add(bspNode))
+            _openTabs.Add(bspNode);
+        SelectedTab = bspNode;
+    }
+
+    public void Close(BspNodeBase? bspNode)
+    {
+        if (bspNode is null)
+            return;
+        if (_openTabsSet.Remove(bspNode))
+            _openTabs.Remove(bspNode);
     }
 
     private async void Search((string?, MatcherBase?, BspViewModel?) args)
@@ -75,7 +130,7 @@ public class MainWindowViewModel : ViewModelBase
         await model.Filter(matcher);
     }
 
-    public async Task OpenCommand()
+    public async ValueTask OpenCommand()
     {
         var dialog = ConstructOpenBspDialog();
         var result = await dialog.ShowAsync(Desktop.MainWindow);
@@ -91,7 +146,7 @@ public class MainWindowViewModel : ViewModelBase
         var bspFilter = new FileDialogFilter { Name = "Bsp file" };
         bspFilter.Extensions.Add("bsp");
         var anyFilter = new FileDialogFilter { Name = "All files" };
-        bspFilter.Extensions.Add("*");
+        anyFilter.Extensions.Add("*");
         dialog.Filters!.Add(bspFilter);
         dialog.Filters!.Add(anyFilter);
         dialog.AllowMultiple = false;
@@ -99,13 +154,13 @@ public class MainWindowViewModel : ViewModelBase
         return dialog;
     }
 
-    private async Task LoadBsp(string path)
+    private async ValueTask LoadBsp(string path)
     {
         if (!File.Exists(path))
             return;
         var file = new BspFile();
         file.Load(path);
         _file = file;
-        BspModel = new BspViewModel(file);
+        BspModel = new BspViewModel(this, file);
     }
 }

@@ -15,7 +15,7 @@
                                        DataContext="{Binding}" />
         <TreeView Grid.Row="1"
                   Items="{Binding BspModel.FilteredNodes}"
-                  SelectedItem="{Binding BspModel.SelectedNode}"
+                  SelectedItem="{Binding SelectedNode}"
                   Background="LightGray">
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="bspmodels:BspNodeBase"

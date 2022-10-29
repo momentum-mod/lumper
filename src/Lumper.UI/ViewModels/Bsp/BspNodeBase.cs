@@ -12,21 +12,23 @@ namespace Lumper.UI.ViewModels.Bsp;
 
 public abstract class BspNodeBase : ViewModelBase
 {
-    private bool _canView;
     private ReadOnlyObservableCollection<BspNodeBase>? _filteredNodes;
     private bool _isVisible;
     private ReadOnlyObservableCollection<BspNodeBase>? _nodes;
     private BspNodeBase? _selectedNode;
 
-    public BspNodeBase()
+    public BspNodeBase(MainWindowViewModel mainModel)
     {
+        Parent = null;
         _isVisible = true;
+        Main = mainModel;
     }
 
     public BspNodeBase(BspNodeBase parent)
     {
         Parent = parent;
         _isVisible = parent._isVisible;
+        Main = parent.Main;
     }
 
     public bool IsVisible
@@ -35,14 +37,13 @@ public abstract class BspNodeBase : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _isVisible, value);
     }
 
-    public bool CanView
-    {
-        get => _canView;
-        set => this.RaiseAndSetIfChanged(ref _canView, value);
-    }
+    public virtual bool CanView => false;
 
     public bool IsLeaf => _nodes is not { Count: > 0 };
+
     public BspNodeBase? Parent { get; }
+
+    public MainWindowViewModel Main { get; }
 
     public ReadOnlyObservableCollection<BspNodeBase>? Nodes => _nodes;
     public ReadOnlyObservableCollection<BspNodeBase>? FilteredNodes => _filteredNodes;
@@ -54,14 +55,19 @@ public abstract class BspNodeBase : ViewModelBase
     }
 
     public abstract string NodeName { get; }
-    public abstract string NodeIcon { get; }
+    public virtual string NodeIcon => "/Assets/momentum-logo.png";
 
-    protected virtual async Task<bool> Match(Matcher matcher, CancellationToken? cancellationToken)
+    protected virtual async ValueTask<bool> Match(Matcher matcher, CancellationToken? cancellationToken)
     {
         return await matcher.Match(NodeName);
     }
 
-    public async Task Reset()
+    public void Close()
+    {
+        Main.Close(this);
+    }
+
+    public async ValueTask Reset()
     {
         IsVisible = true;
         if (_nodes is not null)
@@ -69,7 +75,7 @@ public abstract class BspNodeBase : ViewModelBase
                 await node.Reset();
     }
 
-    public async Task<bool> Filter(Matcher matcher, CancellationToken? cancellationToken = null)
+    public async ValueTask<bool> Filter(Matcher matcher, CancellationToken? cancellationToken = null)
     {
         var anyChildVisible = false;
         if (_nodes is not null)
@@ -86,11 +92,6 @@ public abstract class BspNodeBase : ViewModelBase
         var visible = anyChildVisible || await Match(matcher, cancellationToken);
         IsVisible = visible;
         return visible;
-    }
-
-    private Func<BspNodeBase, bool> MakeFilter(bool x)
-    {
-        return demoClass => demoClass.IsVisible;
     }
 
     protected void InitializeNodeChildrenObserver<T>(ISourceList<T> list) where T : BspNodeBase
