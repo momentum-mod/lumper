@@ -10,6 +10,6 @@ public class GlobMatcherStrictViewModel : MatcherBase
 
     public override Matcher ConstructMatcher(string pattern)
     {
-        return new GlobMatcher($"*{pattern}*");
+        return new GlobMatcher($"{pattern}");
     }
 }

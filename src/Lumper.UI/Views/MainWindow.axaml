@@ -4,14 +4,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:bspviews="clr-namespace:Lumper.UI.Views.Bsp"
+        xmlns:converters="clr-namespace:Lumper.UI.Converters"
+        xmlns:entviews="clr-namespace:Lumper.UI.Views.Bsp.Lumps.Entity"
+        xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.Entity"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Lumper.UI.Views.MainWindow"
         Icon="/Assets/momentum-logo.png"
-        Title="Lumper">
+        Title="{Binding LoadedPath, StringFormat='{}Lumper {0}'}">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
+    <Window.Resources>
+    </Window.Resources>
 
     <Grid ColumnDefinitions="*,1,4*" RowDefinitions="Auto, *">
         <DockPanel Grid.Column="0" Grid.ColumnSpan="3">
@@ -25,6 +30,37 @@
         </DockPanel>
         <bspviews:BspBrowserView Grid.Column="0" Grid.Row="1" DataContext="{Binding }" Margin="0,0,2,0" />
         <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />
-        <TabControl Grid.Column="2" Grid.Row="1" />
+        <TabControl Grid.Column="2" Grid.Row="1"
+                    Items="{Binding OpenTabs}"
+                    SelectedItem="{Binding SelectedTab}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding NodeName}" Margin="0,0,5,0" />
+                        <Button Grid.Column="1" Content="X"
+                                Command="{Binding Close}" />
+                    </Grid>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <!--TODO: Figure out how to wrap ScrollViewer over all possible data templates-->
+            <TabControl.DataTemplates>
+                <DataTemplate DataType="entmodels:EntityViewModel">
+                    <ScrollViewer>
+                        <entviews:EntityTabView DataContext="{Binding }" />
+                    </ScrollViewer>
+                </DataTemplate>
+                <DataTemplate DataType="entmodels:EntityPropertyStringViewModel">
+                    <ScrollViewer>
+                        <entviews:EntityPropertyStringTabView DataContext="{Binding }" />
+                    </ScrollViewer>
+                </DataTemplate>
+                <DataTemplate DataType="entmodels:EntityPropertyIOViewModel">
+                    <ScrollViewer>
+                        <entviews:EntityPropertyIOTabView DataContext="{Binding }" />
+                    </ScrollViewer>
+                </DataTemplate>
+            </TabControl.DataTemplates>
+        </TabControl>
     </Grid>
 </Window>
