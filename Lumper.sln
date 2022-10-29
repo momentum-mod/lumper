@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper", "src\Lumper\Lumper.csproj", "{DA3367C2-8012-47C7-84B2-98760867C956}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper.UI", "src\Lumper.UI\Lumper.UI.csproj", "{494EA280-15F5-445F-A2E6-AECA9387B8EA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{DA3367C2-8012-47C7-84B2-98760867C956}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA3367C2-8012-47C7-84B2-98760867C956}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA3367C2-8012-47C7-84B2-98760867C956}.Release|Any CPU.Build.0 = Release|Any CPU
+		{494EA280-15F5-445F-A2E6-AECA9387B8EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{494EA280-15F5-445F-A2E6-AECA9387B8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{494EA280-15F5-445F-A2E6-AECA9387B8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{494EA280-15F5-445F-A2E6-AECA9387B8EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

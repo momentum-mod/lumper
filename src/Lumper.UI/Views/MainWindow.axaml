@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Lumper.UI.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:bspviews="clr-namespace:Lumper.UI.Views.Bsp"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Lumper.UI.Views.MainWindow"
+        Icon="/Assets/momentum-logo.png"
+        Title="Lumper">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Grid ColumnDefinitions="*,1,4*" RowDefinitions="Auto, *">
+        <DockPanel Grid.Column="0" Grid.ColumnSpan="3">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_Open..." Command="{Binding OpenCommand}" />
+                    <Separator />
+                    <MenuItem Header="_Exit" />
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <bspviews:BspBrowserView Grid.Column="0" Grid.Row="1" DataContext="{Binding }" Margin="0,0,2,0" />
+        <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />
+        <TabControl Grid.Column="2" Grid.Row="1" />
+    </Grid>
+</Window>
