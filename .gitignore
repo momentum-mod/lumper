@@ -396,6 +396,6 @@ FodyWeavers.xsd
 
 ## Lumper/Source-specific
 
-*.bsp
-*.vtf
-*.vmf
+/*.bsp
+/*.vtf
+/*.vmf
