@@ -33,6 +33,7 @@ namespace Lumper.Lib.BSP.IO
             long startPos = BaseStream.Position;
             var count = ReadInt32();
             LumpHeader prevHeader = null;
+            bool prevCompressed = false;
             for (var i = 0; i < count; i++)
             {
                 var type = (GameLumpType)ReadInt32();
@@ -58,10 +59,10 @@ namespace Lumper.Lib.BSP.IO
                     if (actualLength < 0)
                         actualLength = _length - (prevHeader.Offset + prevHeader.Length - startPos);
 
-                    if (actualLength == prevHeader.UncompressedLength)
-                        prevHeader.CompressedLength = -1;
-                    else
+                    if (prevCompressed)
                         prevHeader.CompressedLength = actualLength;
+                    else
+                        prevHeader.CompressedLength = -1;
                 }
 
                 Lumps.Add(new Tuple<Lump, LumpHeader>(lump, header));
@@ -78,6 +79,8 @@ namespace Lumper.Lib.BSP.IO
                 Console.WriteLine($"\tFilelen: {header.UncompressedLength}");
 
                 prevHeader = header;
+                //lump is compressed if the last bit is 1 
+                prevCompressed = (lump.Flags & 1) == 1;
             }
             // won't set compressedLength on the last entry 
             // but it should be 0 and if its not we don't know the length 
