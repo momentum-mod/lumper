@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lumper.Lib.BSP.Lumps;
@@ -34,24 +34,33 @@ namespace Lumper.Lib.BSP
         {
             // TODO: loads of error handling
             Name = Path.GetFileNameWithoutExtension(path);
-            FilePath = Path.GetFullPath(path);
-
-            if (!File.Exists(FilePath))
-                throw new FileNotFoundException();
-            var stream = File.OpenRead(FilePath);
+            var filePath = Path.GetFullPath(path);
+            var stream = File.OpenRead(filePath);
+            Load(stream);
+            //set this at the end because Load(stream) resets it
+            FilePath = filePath;
+        }
+        public void Load(Stream stream)
+        {
+            FilePath = null;
+            if (reader is not null)
+                reader.Dispose();
             reader = new BspFileReader(this, stream);
             reader.Load();
         }
 
         public void Save(string path)
         {
-            // if (File.Exists(path)) Console.WriteLine("File already exists!");
-            // else
-            // {
-            File.WriteAllText(path, null);
-            using var writer = new BspFileWriter(this, File.OpenWrite(path));
+            if (path == FilePath)
+                throw new IOException("Can't write BSP to the same file");
+            using var stream = File.Open(path, FileMode.Create);
+            Save(stream);
+        }
+
+        public void Save(Stream stream)
+        {
+            using var writer = new BspFileWriter(this, stream);
             writer.Save();
-            // }
         }
 
         public T GetLump<T>() where T : Lump<BspLumpType>
