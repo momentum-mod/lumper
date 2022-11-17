@@ -1,8 +1,16 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Text.RegularExpressions;
 using SharpCompress.Archives.Zip;
 using System.Linq;
+//using System.Text.Json;
+//using System.Text.Json.Serialization;
+//using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
+using JsonSubTypes;
+using Lumper.Tasks;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
@@ -10,17 +18,18 @@ using Lumper.Lib.BSP.Lumps.GameLumps;
 using Lumper.Lib.BSP.Enum;
 using Lumper.Lib.BSP.Struct;
 
-namespace MomBspTools
+namespace Lumper
 {
     static class Program
     {
+        //enum Bla { A, B, C };
         public static void Main(string[] args)
         {
 
-            const bool compress = true;
-            const bool change = true;
-            const bool changePak = true;
-            const bool compressPak = true;
+            const bool compress = false;
+            const bool change = false;
+            const bool changePak = false;
+            const bool compressPak = false;
 
             int pakFileIdx = 0;
             //DirectoryInfo di = new("./lumps/");
@@ -34,54 +43,117 @@ namespace MomBspTools
                 return;
             }
 
+
             var map1 = new BspFile();
             map1.Load(args[0]);
+
+
+            var texturesUtopia = new ChangeTextureTask()
+            {
+                Replace =
+                {
+                    {"TOOLS/TOOLSTRIGGER", "decals/graffiti_chicken"}
+                },
+                ReplaceRegex =
+                {
+                    { new KeyValuePair<Regex,string>(
+                        new Regex(".*CONCRETEWALL011"),
+                        "CS_ITALY/PWOOD1") },
+                    { new KeyValuePair<Regex,string>(
+                        new Regex("/COMPUTERWALL.*"),
+                        "/COMPUTERWALL005") },
+                    { new KeyValuePair<Regex,string>(
+                        new Regex(".*CONCRETEWALL00.*"),
+                        "GLASS/COMBINEGLASS001A") }
+                }
+            };
+            string steamDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)
+                                        + "/.steam/steam/steamapps/common/";
+            string momDir = steamDir + "Momentum Mod Playtest";
+            string bspfixPath = momDir + "/bin/linux64/bspfix";
+            string cssMountDir = steamDir + "Counter-Strike Source/cstrike";
+            var tasks = new List<LumperTask>()
+            {
+                texturesUtopia,
+                new StripperTask("./stripper/test.cfg"),
+                //new StripperTask("./stripper/surf.cfg"),
+                new StripperTask("./stripper/lumpertest.cfg"),
+                //new StripperTask("./stripper/surf_rebel_scaz.cfg"),
+                new RunExternalToolTask("cat",  "cat.bsp", "cat.bsp", true),
+                new RunExternalToolTask("cat",  "cat.bsp", "cat.bsp", true),
+                new RunExternalToolTask(bspfixPath,
+                                        "bspfix_tmp.bsp -game \""+cssMountDir+"\"",
+                                        "bspfix_tmp.bsp",
+                                        "bspfix_tmp_fixed.bsp"),
+                /*new RunExternalToolTask(bspfixPath,
+                                        "bspfix_tmp.bsp -game \""+cssMountDir+"\"",
+                                        "bspfix_tmp.bsp",
+                                        "bspfix_tmp_fixed.bsp"),*/
+                new CompressionTask(true, true)
+            };
+            using var fileStream = File.Open("bla.json", FileMode.Create, FileAccess.Write, FileShare.None);
+            {
+                var serializer = new JsonSerializer();
+                serializer.Formatting = Formatting.Indented;
+                //                serializer.Converters.Add(JsonSubtypesConverterBuilder
+                //                    .Of(typeof(BspFileTask), "Type2") // type property is only defined here
+                //                    .RegisterSubtype(typeof(ChangeTextureTask), Bla.A)
+                //                    .RegisterSubtype(typeof(RunExternalToolTask), Bla.B)
+                //                    .RegisterSubtype(typeof(StripperTask), Bla.C)
+                //                    .SerializeDiscriminatorProperty() // ask to serialize the type property
+                //                    .Build());
+                using (StreamWriter sw = new StreamWriter(fileStream))
+                using (JsonWriter writer = new JsonTextWriter(sw))
+                {
+                    serializer.Serialize(writer, tasks);
+                }
+            }
+            tasks.Clear();
+
+            //List<BspFileTask> tasks;
+            using var fileStream2 = File.Open("bla.json", FileMode.Open, FileAccess.Read, FileShare.Read);
+            {
+                var serializer = new JsonSerializer();
+                serializer.Formatting = Formatting.Indented;
+                /*                serializer.Converters.Add(JsonSubtypesConverterBuilder
+                                    .Of(typeof(BspFileTask), "Type2") // type property is only defined here
+                                    .RegisterSubtype(typeof(ChangeTextureTask), Bla.A)
+                                    .RegisterSubtype(typeof(RunExternalToolTask), Bla.B)
+                                    .RegisterSubtype(typeof(StripperTask), Bla.C)
+                                    .SerializeDiscriminatorProperty() // ask to serialize the type property
+                                    .Build());*/
+                using (var sr = new StreamReader(fileStream2))
+                using (var reader = new JsonTextReader(sr))
+                {
+                    tasks = (List<LumperTask>)serializer.Deserialize<List<LumperTask>>(reader);
+                }
+            }
+
+            /*Node node = node1;
+            while (node != null)
+            {
+                node = node.Run();
+            }*/
+
+            foreach (var task in tasks)
+            {
+                task.Progress.OnPercentChanged += (sender, percent) => PrintProgress(percent);
+                task.Run(map1);
+                Console.Error.WriteLine();
+            }
+
+
+
+
+
             //LoadMap(args[0]);
 
             var cubemapsLump = map1.GetLump(BspLumpType.Cubemaps);
             //cubemapsLump.Length = 0;
 
-            var pakDirKitsuneGrid = new DirectoryInfo("./pakfile_kitsune/materials/grids");
             if (change)
             {
                 var rng = new Random(42);
-                var texDataLump = map1.GetLump<TexDataLump>();
-                foreach (var texture in texDataLump.Data)
-                {
-                    Console.WriteLine($"TexName: {texture.TexName}");
-                    //texture.TexName = "R997/Mc/Mc-Jackolantern";
-                    //texture.TexName = "CONCRETE/CONCRETEWALL011";
-                    //texture.TexName = "CS_ITALY/PWOOD1";
-                    //if (texture.TexName.StartsWith("CONCRETE/CONCRETE"))
-                    if (texture.TexName.EndsWith("CONCRETEWALL011")
-                    //|| texture.TexName.Contains("glass"))
-                    //|| texture.TexName.Contains("testchmb_a_00")
-                    //|| texture.TexName.Contains("CEIL")
-                    || texture.TexName.Contains("FLOOR")
-                    )
-                    {
-                        texture.TexName = "CS_ITALY/PWOOD1";
-                        //texture.TexName = "NEON/NEON_GREEN";
-                    }
-                    else if (
-                    //     texture.TexName.Contains("glass")
-                    //|| 
-                    texture.TexName.Contains("testchmb_a_00"))
-                    {
-                        texture.TexName = "CS_ITALY/PWOOD1";
-                    }
-                    else if (map1.Name == "de_overpass")
-                    {
-                        //texture.TexName = "decals/graffiti_chicken";
-                    }
-                    else if (map1.Name != "de_inferno" && map1.Name != "surf_summit")
-                    {
-                        do
-                        {
-                            texture.TexName = texDataLump.Data[rng.Next(texDataLump.Data.Count)].TexName;
-                        } while (texture.TexName.StartsWith("TOOL"));
-                    }
-                }
 
                 var pakFileLump = map1.GetLump<PakFileLump>();
                 {
@@ -299,6 +371,7 @@ namespace MomBspTools
                             rng.Next(0, 255)
                         );
                     }
+                    map1.Version = 21;
                 }
             }
 
@@ -333,7 +406,6 @@ namespace MomBspTools
                 }
             }
 
-            map1.Version = 21;
 
             map1.Save("test.bsp");
 
@@ -382,6 +454,23 @@ namespace MomBspTools
         private static void Usage()
         {
             // TODO
+        }
+        static object printProgressLock = new();
+        private static void PrintProgress(double percent)
+        {
+            if (Monitor.TryEnter(printProgressLock))
+            {
+                //Thread.Sleep(10);
+                const int size = 10;
+                int done = (int)(percent / size);
+                int remaining = size - done;
+                string progressBar = ""
+                    .PadRight(done, '#')
+                    .PadRight(size, '-');
+                //console.error for now .. keeps it separate 
+                Console.Error.Write($"\r{((int)percent).ToString().PadLeft(3)}% [{progressBar}]\b");
+                Monitor.Enter(printProgressLock);
+            }
         }
     }
 }
