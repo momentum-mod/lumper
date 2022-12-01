@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Pastel" Version="4.0.2" />
     <PackageReference Include="SharpCompress" Version="0.32.2" />
   </ItemGroup>
 

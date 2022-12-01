@@ -9,6 +9,8 @@ using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps.GameLumps;
 using Lumper.Lib.BSP.Enum;
 using Lumper.Lib.BSP.Struct;
+using Pastel;
+using System.Drawing;
 
 namespace MomBspTools
 {
@@ -30,16 +32,38 @@ namespace MomBspTools
             if (args.Length < 1)
             {
                 Usage();
-                Console.WriteLine("ERROR: No arguments were given.");
+                Console.WriteLine($"{ "ERROR:".Pastel(Color.Red) } No arguments were given!");
+                return;
+            }
+            if (args.Length == 1)
+            {
+                Usage();
+                Console.WriteLine($"{ "ERROR:".Pastel(Color.Red) } Need an output file!");
+                return;
+            }
+            if (args.Length > 2)
+            {
+                Usage();
+                Console.WriteLine($"{ "ERROR:".Pastel(Color.Red) } Too many arguments!");
                 return;
             }
 
-            var map1 = new BspFile();
-            map1.Load(args[0]);
-            //LoadMap(args[0]);
 
-            var cubemapsLump = map1.GetLump(BspLumpType.Cubemaps);
-            //cubemapsLump.Length = 0;
+            var map1 = new BspFile();
+            // map1.Load(args[0]);
+            map1 = LoadMap(args[0]);
+            if (map1 == null)
+            {
+                return;
+            }
+
+            // Lump cubemapsLump = map1.GetLump(BspLumpType.Cubemaps);
+            // bool yeetcubemaps = true;
+            // if (yeetcubemaps)
+            // {
+            //     var str = cubemapsLump.ToString();
+            // }
+            // cubemapsLump.Length = 0;
 
             var pakDirKitsuneGrid = new DirectoryInfo("./pakfile_kitsune/materials/grids");
             if (change)
@@ -127,7 +151,6 @@ namespace MomBspTools
                         {
                             if (entry.Key.EndsWith("concretewall011.vtf"))
                             //if (entry.Name.StartsWith("concretewall")
-                            //|| entry.Name.StartsWith("computerwall"))
                             //|| entry.Name.StartsWith("computerwall"))
                             {
                                 delEntities.Add(entry);
@@ -238,8 +261,12 @@ namespace MomBspTools
                                 sprop.Value = model;
                             }
                         }
-                        else if (entity.ClassName.StartsWith("weapon_")
-                        || (entity.ClassName.StartsWith("prop") && prop.Key == "model"))
+                        else if
+                        (
+                            entity.ClassName.StartsWith("weapon_")
+                            ||
+                            (entity.ClassName.StartsWith("prop") && prop.Key == "model")
+                        )
                         {
                             var weapons = new string[] {
                                 "weapon_momentum_pistol",
@@ -275,7 +302,7 @@ namespace MomBspTools
                     for (int i = 0; i < sprp.StaticProps.Data.Count; i++)
                     {
                         sprp.StaticProps.Data[i].Skin = 1;
-                        var test = sprp.StaticProps.Data[i].UniformScale;
+                        // var test = sprp.StaticProps.Data[i].UniformScale;
                         if (model.Contains("train"))
                         {
                             sprp.StaticProps.Data[i].UniformScale = 0.5f;
@@ -287,9 +314,9 @@ namespace MomBspTools
                         //sprp.StaticProps.Data[i].FadeMinDist = 100;
                         sprp.StaticProps.Data[i].Angle = new Angle()
                         {
-                            Pitch = (float)rng.Next(0, 360),
-                            Yaw = (float)rng.Next(0, 360),
-                            Roll = (float)rng.Next(0, 360),
+                            Pitch   = (float)rng.Next(0, 360),
+                            Yaw     = (float)rng.Next(0, 360),
+                            Roll    = (float)rng.Next(0, 360),
                         };
                         sprp.StaticProps.Data[i].DiffuseModulation = System.Drawing.Color.FromArgb
                         (
@@ -313,7 +340,6 @@ namespace MomBspTools
 
                     //if (i2 >= 15)
                     //if (i2 >= 23)
-                    //if (i2 >= 23)
                     //    break;
 
                     i2++;
@@ -332,13 +358,13 @@ namespace MomBspTools
 
                 }
             }
-
-            map1.Version = 21;
-
-            map1.Save("test.bsp");
-
+            // https://developer.valvesoftware.com/wiki/Source_BSP_File_Format#Versions
+            int momvers  = 21;
+            map1.Version = momvers;
+            map1.Save(args[1]);
+            
             var map2 = new BspFile();
-            map2.Load("test.bsp");
+            map2.Load(args[1]);
             var entityLump2 = map2.GetLump<EntityLump>();
             foreach (var entity in entityLump2.Data)
             {
@@ -369,11 +395,11 @@ namespace MomBspTools
             }
             catch (FileNotFoundException)
             {
-                Console.WriteLine("ERROR: File {0} not found.", path);
+                Console.WriteLine($"{ "ERROR:".Pastel(Color.Red) } File {path} not found.");
             }
             catch (InvalidDataException)
             {
-                Console.WriteLine("ERROR: File {0} is not a valid Valve BSP.", path);
+                Console.WriteLine($"{ "ERROR:".Pastel(Color.Red) } File {path} is not a valid Valve BSP.");
             }
 
             return null;
@@ -381,7 +407,7 @@ namespace MomBspTools
 
         private static void Usage()
         {
-            // TODO
+            Console.WriteLine($"Usage: { "Lumper.exe".Pastel(Color.CadetBlue) } <input bsp file> <output bsp file>");
         }
     }
 }
