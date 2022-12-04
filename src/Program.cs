@@ -26,10 +26,10 @@ namespace Lumper
         public static void Main(string[] args)
         {
 
-            const bool compress = false;
-            const bool change = false;
-            const bool changePak = false;
-            const bool compressPak = false;
+            const bool compress = true;
+            const bool change = true;
+            const bool changePak = true;
+            const bool compressPak = true;
 
             int pakFileIdx = 0;
             //DirectoryInfo di = new("./lumps/");
@@ -336,7 +336,8 @@ namespace Lumper
                 var gameLumpSprp = gameLump.GetLump<Sprp>();
                 if (gameLumpSprp is Sprp sprp)
                 {
-                    sprp.StaticProps.ActualVersion = StaticPropVersion.V11;
+                    if (sprp.StaticProps.ActualVersion != StaticPropVersion.V12)
+                        sprp.StaticProps.ActualVersion = StaticPropVersion.V11;
                     Console.WriteLine("StaticProps:");
                     for (int i = 0; i < sprp.StaticPropsDict.Data.Count; i++)
                     {
@@ -360,15 +361,15 @@ namespace Lumper
                         sprp.StaticProps.Data[i].Angle = new Angle()
                         {
                             Pitch = (float)rng.Next(0, 360),
-                            Yaw = (float)rng.Next(0, 360),
-                            Roll = (float)rng.Next(0, 360),
+                            Yaw = (float)90,
+                            Roll = (float)45,
                         };
                         sprp.StaticProps.Data[i].DiffuseModulation = System.Drawing.Color.FromArgb
                         (
                             255,
+                            0,
                             rng.Next(0, 255),
-                            rng.Next(0, 255),
-                            rng.Next(0, 255)
+                            0
                         );
                     }
                     map1.Version = 21;
