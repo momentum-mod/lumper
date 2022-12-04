@@ -17,6 +17,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
         V9 = 90,
         V10 = 100,
         V11 = 110,
+        V12 = 120,
     }
     public class StaticPropLump : FixedLump<GameLumpType, StaticProp>
     {
@@ -32,6 +33,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
             StaticPropVersion.V9 => 72,
             StaticPropVersion.V10 => 76,
             StaticPropVersion.V11 => 80,
+            StaticPropVersion.V12 => 80,
             _ => 1
         };
 
@@ -47,6 +49,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
                 9 => StaticPropVersion.V9,
                 10 => StaticPropVersion.V10,
                 11 => StaticPropVersion.V11,
+                12 => StaticPropVersion.V12,
                 _ => StaticPropVersion.Unknown
             };
         }
@@ -64,6 +67,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
                 StaticPropVersion.V9 => 9,
                 StaticPropVersion.V10 => 10,
                 StaticPropVersion.V11 => 11,
+                StaticPropVersion.V12 => 12,
                 _ => 0
             };
         }

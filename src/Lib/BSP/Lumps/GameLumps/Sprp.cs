@@ -20,6 +20,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
 
             int leafEntries = reader.ReadInt32();
             StaticPropsLeaf = new(Parent);
+            StaticPropsLeaf.Version = Version;
             StaticPropsLeaf.Read(reader, leafEntries * StaticPropsLeaf.StructureSize);
 
             int entries = reader.ReadInt32();
@@ -46,7 +47,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
                 StaticProps.Read(reader, tmpLength);
             }
             else
-                throw new NotImplementedException("Unknown staticprop version");
+                throw new NotImplementedException($"Unknown staticprop version (Version: {StaticProps.Version})");
         }
 
         public override void Write(Stream stream)
