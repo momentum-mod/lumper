@@ -106,6 +106,11 @@ namespace Lumper.Lib.BSP.IO
                 {
                     gameLump = lump;
                     gameLumpHeader = header;
+                    if (gameLumpHeader.Length == 0 && gameLumpHeader.Offset == 0)
+                    {
+                        Console.WriteLine("GameLump length and offset 0 .. won't set new length");
+                        break;
+                    }
                 }
                 else if (gameLump is not null && header.Offset != 0 && header.Offset != gameLumpHeader.Offset)
                 {

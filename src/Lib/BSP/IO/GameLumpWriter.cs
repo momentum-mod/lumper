@@ -44,7 +44,7 @@ namespace Lumper.Lib.BSP.IO
                 Write(header.FileOfs);
                 Write(header.FileLen);
             }
-            if (BaseStream.Position != LumpdataStart)
+            if (LumpHeaders.Any() && BaseStream.Position != LumpdataStart)
                 throw new NotImplementedException("Failed to write GameLump header: bad length");
             BaseStream.Seek(LumpdataEnd, SeekOrigin.Begin);
         }
@@ -67,7 +67,7 @@ namespace Lumper.Lib.BSP.IO
 
                 LumpHeaders.Add(new GameLumpHeader(newHeader, (ushort)lump.Version, (int)entry.Key));
             }
-            if (LumpHeaders.Last().Id != 0)
+            if (LumpHeaders.Any() && LumpHeaders.Last().Id != 0)
                 LumpHeaders.Add(new GameLumpHeader());
 
             LumpdataEnd = (int)BaseStream.Position;
