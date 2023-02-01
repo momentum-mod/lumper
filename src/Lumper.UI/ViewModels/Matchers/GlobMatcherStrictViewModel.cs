@@ -4,6 +4,9 @@ using Lumper.UI.ViewModels.Bsp;
 
 namespace Lumper.UI.ViewModels.Matchers;
 
+/// <summary>
+///     ViewModel for <see cref="GlobMatcher" />.
+/// </summary>
 public class GlobMatcherStrictViewModel : MatcherBase
 {
     public override string Name => "Glob (Strict)";

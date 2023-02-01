@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Bsp.Lumps.Entity.EntityPropertyIOTabView">
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="Auto,5,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
+          ColumnDefinitions="Auto,5,*">
         <TextBlock Text="Target Entity Name:"
                    VerticalAlignment="Center"
                    Grid.Row="0" Grid.Column="0" />

@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using Avalonia;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -14,44 +15,67 @@ namespace Lumper.UI.Converters;
 ///     </para>
 ///     <para>
 ///         The asset must be in the same assembly as the program. If it isn't,
-///         specify "avares://<assemblynamehere>/" in front of the path to the asset.
+///         specify "avares://Lumper.UI/" in front of the path to the asset.
 ///     </para>
 /// </summary>
 public class BitmapAssetValueConverter : IValueConverter
 {
-    public static BitmapAssetValueConverter Instance = new();
-
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public static BitmapAssetValueConverter Instance
     {
-        if (value == null)
-            return null;
+        get;
+    } = new();
 
-        if (value is string rawUri && targetType.IsAssignableFrom(typeof(Bitmap)))
+    public object Convert(object? value, Type targetType, object? parameter,
+        CultureInfo culture)
+    {
+        switch (value)
         {
-            Uri uri;
-
-            // Allow for assembly overrides
-            if (rawUri.StartsWith("avares://"))
+            case null:
+                return new BindingNotification(
+                    new ArgumentNullException(nameof(value)),
+                    BindingErrorType.DataValidationError);
+            case string rawUri when targetType.IsAssignableFrom(typeof(Bitmap)):
             {
-                uri = new Uri(rawUri);
-            }
-            else
-            {
-                var assemblyName = Assembly.GetEntryAssembly().GetName().Name;
-                uri = new Uri($"avares://{assemblyName}{rawUri}");
-            }
+                Uri uri;
 
-            var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-            var asset = assets.Open(uri);
+                // Allow for assembly overrides
+                if (rawUri.StartsWith("avares://"))
+                {
+                    uri = new Uri(rawUri);
+                }
+                else
+                {
+                    string? assemblyName =
+                        Assembly.GetEntryAssembly()?.GetName().Name;
+                    if (assemblyName is null)
+                        return new BindingNotification(
+                            new ArgumentNullException(nameof(assemblyName)),
+                            BindingErrorType.DataValidationError);
 
-            return new Bitmap(asset);
+                    uri = new Uri($"avares://{assemblyName}{rawUri}");
+                }
+
+                var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                if (assets is null)
+                    return new BindingNotification(
+                        new ArgumentNullException(nameof(assets)),
+                        BindingErrorType.DataValidationError);
+
+                var asset = assets.Open(uri);
+                return new Bitmap(asset);
+            }
+            default:
+                return new BindingNotification(
+                    new ArgumentOutOfRangeException(nameof(value)),
+                    BindingErrorType.DataValidationError);
         }
-
-        throw new NotSupportedException();
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter,
+        CultureInfo culture)
     {
-        throw new NotSupportedException();
+        return new BindingNotification(
+            new ArgumentOutOfRangeException(nameof(value)),
+            BindingErrorType.DataValidationError);
     }
 }
