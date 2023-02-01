@@ -4,6 +4,9 @@ using Lumper.UI.ViewModels.Bsp;
 
 namespace Lumper.UI.ViewModels.Matchers;
 
+/// <summary>
+///     ViewModel for <see cref="SimpleMatcher" />.
+/// </summary>
 public class SimpleMatcherViewModel : MatcherBase
 {
     public override string Name => "Simple";

@@ -20,11 +20,17 @@
             <TreeView.DataTemplates>
                 <TreeDataTemplate DataType="bspmodels:BspNodeBase"
                                   ItemsSource="{Binding FilteredNodes}">
-                    <StackPanel Orientation="Horizontal" IsVisible="{Binding IsVisible}">
-                        <Image Source="{Binding NodeIcon, Converter={StaticResource variableImage}}"
-                               Width="24" Height="24"
-                               Margin="0,0,5,0" />
-                        <TextBlock Text="{Binding NodeName}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal"
+                                IsVisible="{Binding IsVisible}">
+                        <Image
+                            Source="{Binding NodeIcon, Converter={StaticResource variableImage}}"
+                            Width="24" Height="24"
+                            Margin="0,0,5,0" />
+                        <TextBlock Text="*"
+                                   IsVisible="{Binding IsModified}"
+                                   Margin="0,0,5,0" />
+                        <TextBlock Text="{Binding NodeName}"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                 </TreeDataTemplate>
             </TreeView.DataTemplates>

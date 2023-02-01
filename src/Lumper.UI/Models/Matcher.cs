@@ -2,13 +2,19 @@ using System.Threading.Tasks;
 
 namespace Lumper.UI.Models;
 
+/// <summary>
+///     Base class for pattern matching
+/// </summary>
 public abstract class Matcher
 {
-    protected readonly string _pattern;
-
-    public Matcher(string pattern)
+    protected Matcher(string pattern)
     {
-        _pattern = pattern;
+        Pattern = pattern;
+    }
+
+    protected string Pattern
+    {
+        get;
     }
 
     public abstract ValueTask<bool> Match(string value);
