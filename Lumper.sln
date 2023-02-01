@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper", "Lumper.csproj", "{8044F782-1690-496C-BF80-7D7EFBFDFFD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper", "src\Lumper\Lumper.csproj", "{DA3367C2-8012-47C7-84B2-98760867C956}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8044F782-1690-496C-BF80-7D7EFBFDFFD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8044F782-1690-496C-BF80-7D7EFBFDFFD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8044F782-1690-496C-BF80-7D7EFBFDFFD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8044F782-1690-496C-BF80-7D7EFBFDFFD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA3367C2-8012-47C7-84B2-98760867C956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA3367C2-8012-47C7-84B2-98760867C956}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA3367C2-8012-47C7-84B2-98760867C956}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA3367C2-8012-47C7-84B2-98760867C956}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,12 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>Lumper</AssemblyName>
-    <RootNamespace>Lumper</RootNamespace>
-    <LangVersion>10</LangVersion>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="JsonSubTypes" Version="2.0.1" />
