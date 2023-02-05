@@ -78,7 +78,7 @@ public abstract class BspNodeBase : ViewModelBase
         get;
     }
 
-    public virtual string NodeIcon => "/Assets/momentum-logo.png";
+    public virtual string NodeIcon => "/Assets/Lumper.png";
 
     public virtual void Update()
     {
