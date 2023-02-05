@@ -6,7 +6,15 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
+    <Application.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="BackgroundExtraDark" Color="#0e0e0e" />
+            <SolidColorBrush x:Key="BackgroundDark" Color="#151515" />
+            <SolidColorBrush x:Key="BackgroundMediumDark" Color="#242424" />
+        </ResourceDictionary>
+    </Application.Resources>
+
     <Application.Styles>
-        <FluentTheme Mode="Light" />
+        <FluentTheme Mode="Dark" />
     </Application.Styles>
 </Application>

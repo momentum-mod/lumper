@@ -10,30 +10,30 @@
     <UserControl.Resources>
         <converters:BitmapAssetValueConverter x:Key="variableImage" />
     </UserControl.Resources>
-    <Grid RowDefinitions="Auto, *">
-        <bspviews:BspBrowserSearchView Grid.Row="0"
-                                       DataContext="{Binding}" />
-        <TreeView Grid.Row="1"
-                  Items="{Binding BspModel.FilteredNodes}"
-                  SelectedItem="{Binding SelectedNode}"
-                  Background="LightGray">
-            <TreeView.DataTemplates>
-                <TreeDataTemplate DataType="bspmodels:BspNodeBase"
-                                  ItemsSource="{Binding FilteredNodes}">
-                    <StackPanel Orientation="Horizontal"
-                                IsVisible="{Binding IsVisible}">
-                        <Image
-                            Source="{Binding NodeIcon, Converter={StaticResource variableImage}}"
-                            Width="24" Height="24"
-                            Margin="0,0,5,0" />
-                        <TextBlock Text="*"
-                                   IsVisible="{Binding IsModified}"
+    <Border BorderBrush="{DynamicResource BackgroundExtraDark}"
+            BorderThickness="1"
+            Margin="8">
+        <Grid RowDefinitions="Auto, *" Background="{DynamicResource BackgroundDark}">
+            <bspviews:BspBrowserSearchView Grid.Row="0" Margin="6" DataContext="{Binding}" />
+            <TreeView Grid.Row="1"
+                      Items="{Binding BspModel.FilteredNodes}"
+                      SelectedItem="{Binding SelectedNode}"
+                      Margin="0, 0, 0,8">
+                <TreeView.DataTemplates>
+                    <TreeDataTemplate DataType="bspmodels:BspNodeBase"
+                                      ItemsSource="{Binding FilteredNodes}">
+                        <StackPanel Orientation="Horizontal" IsVisible="{Binding IsVisible}">
+                            <Image Source="{Binding NodeIcon, Converter={StaticResource variableImage}}"
+                                   Width="24" Height="24"
                                    Margin="0,0,5,0" />
-                        <TextBlock Text="{Binding NodeName}"
-                                   VerticalAlignment="Center" />
-                    </StackPanel>
-                </TreeDataTemplate>
-            </TreeView.DataTemplates>
-        </TreeView>
-    </Grid>
+                            <TextBlock Text="*"
+                                       IsVisible="{Binding IsModified}"
+                                       Margin="0,0,5,0" />
+                            <TextBlock Text="{Binding NodeName}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </TreeDataTemplate>
+                </TreeView.DataTemplates>
+            </TreeView>
+        </Grid>
+    </Border>
 </UserControl>
