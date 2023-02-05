@@ -8,59 +8,73 @@
         xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.Entity"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Lumper.UI.Views.MainWindow"
-        Icon="/Assets/momentum-logo.png"
+        Icon="/Assets/Lumper.png"
         Closing="Window_OnClosing"
-        Title="{Binding BspModel.FilePath, StringFormat='{}Lumper {0}'}">
+        Title="{Binding BspModel.FilePath, StringFormat='{}Lumper {0}'}"
+        TransparencyLevelHint="AcrylicBlur"
+        ExtendClientAreaToDecorationsHint="True"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent">
 
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <Grid ColumnDefinitions="*,1,4*" RowDefinitions="Auto, *">
-        <DockPanel Grid.Column="0" Grid.ColumnSpan="3">
-            <Menu DockPanel.Dock="Top">
-                <MenuItem Header="_File">
-                    <MenuItem Header="_Open..." Command="{Binding OpenCommand}" />
-                    <Separator />
-                    <MenuItem Header="_Save" Command="{Binding SaveCommand}" />
-                    <MenuItem Header="_Save As..."
-                              Command="{Binding SaveAsCommand}" />
-                    <Separator />
-                    <MenuItem Header="_Close" Command="{Binding CloseCommand}" />
-                    <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
-                </MenuItem>
-            </Menu>
-        </DockPanel>
-        <bspviews:BspBrowserView Grid.Column="0" Grid.Row="1"
-                                 DataContext="{Binding }" Margin="0,0,2,0" />
-        <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />
-        <TabControl Grid.Column="2" Grid.Row="1"
-                    Items="{Binding OpenTabs}"
-                    SelectedItem="{Binding SelectedTab}">
-            <TabControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid ColumnDefinitions="Auto, *,Auto">
-                        <TextBlock Grid.Column="0"
-                                   Text="*"
-                                   Margin="0,0,5,0"
-                                   IsVisible="{Binding IsModified}" />
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding NodeName}"
-                                   Margin="0,0,5,0" />
-                        <Button Grid.Column="2"
-                                Width="15" Height="15"
-                                Command="{Binding Close}" />
-                    </Grid>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <!--TODO: Figure out how to wrap ScrollViewer over all possible data templates-->
-            <TabControl.DataTemplates>
-                <DataTemplate DataType="entmodels:EntityViewModel">
-                    <ScrollViewer>
-                        <entviews:EntityTabView DataContext="{Binding }" />
-                    </ScrollViewer>
-                </DataTemplate>
-            </TabControl.DataTemplates>
-        </TabControl>
-    </Grid>
+    <Panel>
+        <ExperimentalAcrylicBorder IsHitTestVisible="False" CornerRadius="8">
+            <ExperimentalAcrylicBorder.Material>
+                <ExperimentalAcrylicMaterial
+                    BackgroundSource="Digger"
+                    TintColor="Black"
+                    TintOpacity="1"
+                    MaterialOpacity="0.7" />
+            </ExperimentalAcrylicBorder.Material>
+        </ExperimentalAcrylicBorder>
+        <TitleBar></TitleBar>
+        <Grid ColumnDefinitions="*,1,4*" RowDefinitions="Auto, *" ClipToBounds="True" Margin="0,0">
+            <DockPanel Grid.Column="0" Grid.ColumnSpan="3" Width="100" HorizontalAlignment="Left" ClipToBounds="True">
+                <Menu DockPanel.Dock="Top">
+                    <MenuItem Header="_File">
+                        <MenuItem Header="_Open..." Command="{Binding OpenCommand}" />
+                        <Separator />
+                        <MenuItem Header="_Save" Command="{Binding SaveCommand}" />
+                        <MenuItem Header="_Save As..." Command="{Binding SaveAsCommand}" />
+                        <Separator />
+                        <MenuItem Header="_Close" Command="{Binding CloseCommand}" />
+                        <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
+                    </MenuItem>
+                </Menu>
+            </DockPanel>
+            <bspviews:BspBrowserView Grid.Column="0" Grid.Row="1" DataContext="{Binding }" Margin="0,0,2,0" />
+            <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />
+            <TabControl Grid.Column="2" Grid.Row="1"
+                        Items="{Binding OpenTabs}"
+                        SelectedItem="{Binding SelectedTab}">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="Auto, *,Auto">
+                            <TextBlock Grid.Column="0"
+                                       Text="*"
+                                       Margin="0,0,5,0"
+                                       IsVisible="{Binding IsModified}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding NodeName}"
+                                       Margin="0,0,5,0" />
+                            <Button Grid.Column="2"
+                                    Width="15" Height="15"
+                                    Command="{Binding Close}" />
+                        </Grid>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <!--TODO: Figure out how to wrap ScrollViewer over all possible data templates-->
+                <TabControl.DataTemplates>
+                    <DataTemplate DataType="entmodels:EntityViewModel">
+                        <ScrollViewer>
+                            <entviews:EntityTabView DataContext="{Binding }" />
+                        </ScrollViewer>
+                    </DataTemplate>
+                </TabControl.DataTemplates>
+            </TabControl>
+        </Grid>
+    </Panel>
 </Window>
