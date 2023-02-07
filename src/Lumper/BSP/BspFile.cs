@@ -4,6 +4,7 @@ using System.Linq;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.IO;
+using System;
 
 namespace Lumper.Lib.BSP
 {
@@ -34,7 +35,7 @@ namespace Lumper.Lib.BSP
         {
             // TODO: loads of error handling
             Name = Path.GetFileNameWithoutExtension(path);
-            var filePath = Path.GetFullPath(path);
+            var filePath = Uri.UnescapeDataString(Path.GetFullPath(path));
             var stream = File.OpenRead(filePath);
             Load(stream);
             //set this at the end because Load(stream) resets it
