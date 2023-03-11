@@ -50,5 +50,12 @@ namespace Lumper.Lib.Tasks
             if (OnPercentChanged is not null)
                 OnPercentChanged(this, Percent);
         }
+
+        public void Reset()
+        {
+            Count = 0;
+            UpdatePercent();
+        }
+
     }
 }

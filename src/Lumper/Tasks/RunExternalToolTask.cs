@@ -19,7 +19,7 @@ namespace Lumper.Lib.Tasks
         public bool UseStdOut { get; set; }
 
 
-        private RunExternalToolTask() { }
+        public RunExternalToolTask() { }
         public RunExternalToolTask(string path, string args)
         {
             Path = path;
