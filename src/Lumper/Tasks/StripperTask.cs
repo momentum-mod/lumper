@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
-namespace Lumper.Tasks
+namespace Lumper.Lib.Tasks
 {
     //change entities wth stripper config
     public partial class StripperTask : LumperTask

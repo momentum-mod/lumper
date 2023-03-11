@@ -1,5 +1,5 @@
 
-namespace Lumper.Tasks
+namespace Lumper.Lib.Tasks
 {
     public class TaskProgress
     {
