@@ -6,7 +6,7 @@
              xmlns:bspmodels="clr-namespace:Lumper.UI.ViewModels.Bsp"
              xmlns:converters="clr-namespace:Lumper.UI.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Lumper.UI.Views.Bsp.BspBrowserView">
+             x:Class="Lumper.UI.Views.Bsp.BspTreeView">
     <UserControl.Resources>
         <converters:BitmapAssetValueConverter x:Key="variableImage" />
     </UserControl.Resources>
@@ -14,9 +14,8 @@
             BorderThickness="1"
             Margin="8">
         <Grid RowDefinitions="Auto, *" Background="{DynamicResource BackgroundDark}">
-            <bspviews:BspBrowserSearchView Grid.Row="0" Margin="6" DataContext="{Binding}" />
             <TreeView Grid.Row="1"
-                      Items="{Binding BspModel.FilteredNodes}"
+                      Items="{Binding BspNode.FilteredNodes}"
                       SelectedItem="{Binding SelectedNode}"
                       Margin="0, 0, 0,8">
                 <TreeView.DataTemplates>

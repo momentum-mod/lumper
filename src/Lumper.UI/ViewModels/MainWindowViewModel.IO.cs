@@ -151,7 +151,8 @@ public partial class MainWindowViewModel
     private void LoadBsp(string path)
     {
         var bspFile = new BspFile(path);
-        BspModel = new BspViewModel(this, bspFile);
+        BspModel = new BspViewModel(bspFile);
+        Content = BspModel;
     }
 
     private async Task LoadBsp(IStorageFile file)
@@ -160,17 +161,17 @@ public partial class MainWindowViewModel
             return;
         Console.WriteLine(file.Name);
         var folder = await file.GetParentAsync();
-        if(!file.TryGetUri(out var path))
+        if (!file.TryGetUri(out var path))
         {
-           throw new Exception("Failed to get file path");
-            
+            throw new Exception("Failed to get file path");
+
         }
         LoadBsp(path.AbsolutePath);
     }
 
     public async Task CloseCommand()
     {
-        if (_bspModel is null || !_bspModel.IsModifiedRecursive)
+        if (_bspModel is null || !_bspModel.BspNode.IsModifiedRecursive)
             return;
 
         var messageBox = MessageBoxManager
@@ -190,7 +191,7 @@ public partial class MainWindowViewModel
     public async Task OnClose(CancelEventArgs e)
     {
         e.Cancel = true;
-        if (_bspModel is not null && _bspModel.IsModifiedRecursive)
+        if (_bspModel is not null && _bspModel.BspNode.IsModifiedRecursive)
         {
             var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
                 "You have unsaved changes", "Do you want to close application without saving?",
@@ -199,8 +200,6 @@ public partial class MainWindowViewModel
             if (result != ButtonResult.Ok)
                 return;
         }
-
-        _bspModel?.Dispose();
 
         //Since we have to cancel closing event on start due to not being able to await on Event
         //and message box cannot work in synchronous mode due to main window thread being frozen,

@@ -3,9 +3,9 @@ using Avalonia.Markup.Xaml;
 
 namespace Lumper.UI.Views.Bsp;
 
-public partial class BspBrowserSearchView : UserControl
+public partial class BspTreeView : UserControl
 {
-    public BspBrowserSearchView()
+    public BspTreeView()
     {
         InitializeComponent();
     }

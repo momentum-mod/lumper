@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using DynamicData;
-using Lumper.UI.ViewModels.Bsp;
 using ReactiveUI;
 
-namespace Lumper.UI.ViewModels;
+namespace Lumper.UI.ViewModels.Bsp;
 
-// MainWindowViewModel support for Tabs
-public partial class MainWindowViewModel
+// BspViewModel support for Tabs
+public partial class BspViewModel
 {
     private readonly SourceList<BspNodeBase> _openTabs = new();
     private readonly HashSet<BspNodeBase> _openTabsSet = new();
@@ -30,15 +29,6 @@ public partial class MainWindowViewModel
 
     private void TabsInit()
     {
-        this.WhenAnyValue(x => x.BspModel)
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(_ =>
-            {
-                _openTabs.Clear();
-                _openTabsSet.Clear();
-                _selectedTab = null;
-            });
-
         this.WhenAnyValue(x => x.SelectedNode)
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(x => Open(x));
@@ -48,13 +38,6 @@ public partial class MainWindowViewModel
             .Bind(out _openTabsReadOnly)
             .DisposeMany()
             .Subscribe(_ => { }, RxApp.DefaultExceptionHandler.OnNext);
-    }
-
-    private void OnLoad()
-    {
-        if (Desktop.Args is not { Length: 1 })
-            return;
-        LoadBsp(Desktop.Args[0]);
     }
 
     public void Open(BspNodeBase? bspNode)
