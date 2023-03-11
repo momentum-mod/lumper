@@ -20,20 +20,19 @@ public abstract class BspNodeBase : ViewModelBase
     private ReadOnlyObservableCollection<BspNodeBase>? _filteredNodes;
     private bool _isVisible;
     private ReadOnlyObservableCollection<BspNodeBase>? _nodes;
-    private BspNodeBase? _selectedNode;
 
-    public BspNodeBase(MainWindowViewModel mainModel)
+    public BspNodeBase(BspViewModel bspView)
     {
         Parent = null;
         _isVisible = true;
-        Main = mainModel;
+        BspView = bspView;
     }
 
     public BspNodeBase(BspNodeBase parent)
     {
         Parent = parent;
         _isVisible = parent._isVisible;
-        Main = parent.Main;
+        BspView = parent.BspView;
     }
 
     public bool IsModifiedRecursive => IsModified
@@ -57,7 +56,7 @@ public abstract class BspNodeBase : ViewModelBase
         get;
     }
 
-    public MainWindowViewModel Main
+    public BspViewModel BspView
     {
         get;
     }
@@ -67,11 +66,6 @@ public abstract class BspNodeBase : ViewModelBase
     public ReadOnlyObservableCollection<BspNodeBase>? FilteredNodes =>
         _filteredNodes;
 
-    public BspNodeBase? SelectedNode
-    {
-        get => _selectedNode;
-        set => this.RaiseAndSetIfChanged(ref _selectedNode, value);
-    }
 
     public abstract string NodeName
     {
@@ -98,7 +92,7 @@ public abstract class BspNodeBase : ViewModelBase
 
     public void Close()
     {
-        Main.Close(this);
+        BspView.Close(this);
     }
 
     public async ValueTask Reset()

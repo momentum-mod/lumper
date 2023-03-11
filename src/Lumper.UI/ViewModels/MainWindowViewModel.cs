@@ -11,8 +11,9 @@ namespace Lumper.UI.ViewModels;
 /// </summary>
 public partial class MainWindowViewModel : ViewModelBase
 {
-    private BspViewModel? _bspModel;
+    private ViewModelBase? content;
     private BspNodeBase? _selectedNode;
+    private BspViewModel? _bspModel;
 
     public MainWindowViewModel()
     {
@@ -24,9 +25,21 @@ public partial class MainWindowViewModel : ViewModelBase
 
         Desktop = desktop;
 
-        SearchInit();
-        TabsInit();
         IOInit();
+        Content = BspModel;
+    }
+
+    private void OnLoad()
+    {
+        if (Desktop.Args is not { Length: 1 })
+            return;
+        LoadBsp(Desktop.Args[0]);
+    }
+
+    public ViewModelBase? Content
+    {
+        get => content;
+        private set => this.RaiseAndSetIfChanged(ref content, value);
     }
 
     public IClassicDesktopStyleApplicationLifetime Desktop

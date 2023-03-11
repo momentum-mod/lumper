@@ -4,8 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:bspviews="clr-namespace:Lumper.UI.Views.Bsp"
-        xmlns:entviews="clr-namespace:Lumper.UI.Views.Bsp.Lumps.Entity"
-        xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.Entity"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Lumper.UI.Views.MainWindow"
         Icon="/Assets/Lumper.png"
@@ -31,7 +29,7 @@
             </ExperimentalAcrylicBorder.Material>
         </ExperimentalAcrylicBorder>
         <TitleBar></TitleBar>
-        <Grid ColumnDefinitions="*,1,4*" RowDefinitions="Auto, *" ClipToBounds="True" Margin="0,0">
+        <Grid ColumnDefinitions="*" RowDefinitions="Auto, *" ClipToBounds="True" Margin="0,0">
             <DockPanel Grid.Column="0" Grid.ColumnSpan="3" Width="100" HorizontalAlignment="Left" ClipToBounds="True">
                 <Menu DockPanel.Dock="Top">
                     <MenuItem Header="_File">
@@ -45,36 +43,7 @@
                     </MenuItem>
                 </Menu>
             </DockPanel>
-            <bspviews:BspBrowserView Grid.Column="0" Grid.Row="1" DataContext="{Binding }" Margin="0,0,2,0" />
-            <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />
-            <TabControl Grid.Column="2" Grid.Row="1"
-                        Items="{Binding OpenTabs}"
-                        SelectedItem="{Binding SelectedTab}">
-                <TabControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid ColumnDefinitions="Auto, *,Auto">
-                            <TextBlock Grid.Column="0"
-                                       Text="*"
-                                       Margin="0,0,5,0"
-                                       IsVisible="{Binding IsModified}" />
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding NodeName}"
-                                       Margin="0,0,5,0" />
-                            <Button Grid.Column="2"
-                                    Width="15" Height="15"
-                                    Command="{Binding Close}" />
-                        </Grid>
-                    </DataTemplate>
-                </TabControl.ItemTemplate>
-                <!--TODO: Figure out how to wrap ScrollViewer over all possible data templates-->
-                <TabControl.DataTemplates>
-                    <DataTemplate DataType="entmodels:EntityViewModel">
-                        <ScrollViewer>
-                            <entviews:EntityTabView DataContext="{Binding }" />
-                        </ScrollViewer>
-                    </DataTemplate>
-                </TabControl.DataTemplates>
-            </TabControl>
+            <ContentControl Grid.Column="0" Grid.Row="1" Margin="0,0,2,0" Content="{Binding Content}" />
         </Grid>
     </Panel>
 </Window>
