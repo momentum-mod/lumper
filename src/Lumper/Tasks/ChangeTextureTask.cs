@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
-namespace Lumper.Tasks
+namespace Lumper.Lib.Tasks
 {
     public class ChangeTextureTask : LumperTask
     {

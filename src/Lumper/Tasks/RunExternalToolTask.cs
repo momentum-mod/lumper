@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Lumper.Lib.BSP;
 
-namespace Lumper.Tasks
+namespace Lumper.Lib.Tasks
 {
     public class RunExternalToolTask : LumperTask
     {

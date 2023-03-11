@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using JsonSubTypes;
 using Lumper.Lib.BSP;
 
-namespace Lumper.Tasks
+namespace Lumper.Lib.Tasks
 {
     public enum TaskResult { Unknwon, Success, Failed }
 
