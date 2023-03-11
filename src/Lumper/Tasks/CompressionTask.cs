@@ -9,11 +9,16 @@ namespace Lumper.Lib.Tasks
         public override string Type { get; } = "CompressionTask";
         public bool CompressLumps { get; set; }
         public bool CompressPakFile { get; set; }
+
+        public CompressionTask()
+        { }
+
         public CompressionTask(bool compressLumps, bool compressPakFile)
         {
             CompressLumps = compressLumps;
             CompressPakFile = compressPakFile;
         }
+
         public override TaskResult Run(BspFile map)
         {
             if (!CompressLumps && !CompressPakFile)

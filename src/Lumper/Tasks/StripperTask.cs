@@ -15,7 +15,15 @@ namespace Lumper.Lib.Tasks
         [JsonIgnore()]
         protected List<Block> blocks = new();
         public string ConfigPath { get; set; }
+        public StripperTask()
+        { }
+
         public StripperTask(string configPath)
+        {
+            ConfigPath = configPath;
+        }
+
+        public void Load(string configPath)
         {
             ConfigPath = configPath;
             Parse(File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.Read));
@@ -80,6 +88,10 @@ namespace Lumper.Lib.Tasks
 
         public override TaskResult Run(BspFile map)
         {
+            if (!Path.Exists(ConfigPath))
+                return TaskResult.Failed;
+
+            Load(ConfigPath);
             Progress.Max = blocks.Count;
             var entityLump = map.GetLump<EntityLump>();
             foreach (var block in blocks)
