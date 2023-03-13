@@ -14,6 +14,7 @@
         TransparencyLevelHint="AcrylicBlur"
         ExtendClientAreaToDecorationsHint="True"
         WindowStartupLocation="CenterScreen"
+        DragDrop.AllowDrop="True"
         Background="Transparent">
 
     <Design.DataContext>

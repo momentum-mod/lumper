@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Lumper.UI.ViewModels;
 using Lumper.UI.Views;
@@ -17,10 +18,12 @@ public class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime
             desktop)
+        {
             desktop.MainWindow = new MainWindow
             {
                 DataContext = new MainWindowViewModel()
             };
+        }
 
         base.OnFrameworkInitializationCompleted();
     }
