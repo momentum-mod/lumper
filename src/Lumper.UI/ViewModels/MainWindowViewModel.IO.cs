@@ -163,7 +163,7 @@ public partial class MainWindowViewModel
         if(!file.TryGetUri(out var path))
         {
            throw new Exception("Failed to get file path");
-            
+
         }
         LoadBsp(path.AbsolutePath);
     }
