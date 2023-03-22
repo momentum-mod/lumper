@@ -47,7 +47,8 @@ namespace Lumper.Lib.Tasks
             Percent = (Count >= 0 && Max > 0)
                        ? (double)Count / Max * 100
                        : 0;
-            OnPercentChanged(this, Percent);
+            if (OnPercentChanged is not null)
+                OnPercentChanged(this, Percent);
         }
     }
 }
