@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
+             xmlns:vm="using:Lumper.UI.ViewModels"
+             x:Class="Lumper.UI.Views.Tasks.ChangeTextureTaskView">
+
+    <Grid RowDefinitions="Auto,*,Auto,*" ColumnDefinitions="*">
+        <Button Grid.Row="0" Command="{Binding AddReplaceItem}">Add replace item</Button>
+        <ListBox Grid.Row="1" Grid.Column="0" 
+                 Items="{Binding ReplaceItems}" 
+                 SelectedItem="{Binding SelectedReplaceItem}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding Source}"/>
+                        <TextBox Grid.Column="1" Text="{Binding Target}" />
+                        <Button Grid.Column="2" Command="{Binding Parent.RemoveItem}" CommandParameter="{Binding}">X</Button>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Grid.Row="2" Command="{Binding AddRegexItem}">Add regex item</Button>
+        <ListBox Grid.Row="3" Grid.Column="0" 
+                 Items="{Binding RegexItems}" 
+                 SelectedItem="{Binding SelectedRegexItem}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" Text="{Binding Source}"/>
+                        <TextBox Grid.Column="1" Text="{Binding Target}" />
+                        <Button Grid.Column="2" Command="{Binding Parent.RemoveItem}" CommandParameter="{Binding}">X</Button>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+    </Grid>
+</UserControl>
