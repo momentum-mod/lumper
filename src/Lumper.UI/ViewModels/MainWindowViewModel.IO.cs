@@ -152,6 +152,7 @@ public partial class MainWindowViewModel
     {
         var bspFile = new BspFile(path);
         BspModel = new BspViewModel(bspFile);
+        TasksModel = new Tasks.TasksViewModel(bspFile);
         Content = BspModel;
     }
 

@@ -1,0 +1,12 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
+             x:Class="Lumper.UI.Views.Tasks.CompressionTaskView">
+
+    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto">
+        <CheckBox Grid.Row="0" IsChecked="{Binding Task.CompressLumps}">CompressLumps</CheckBox>
+        <CheckBox Grid.Row="1" IsChecked="{Binding Task.CompressPakFile}">CompressPakFile</CheckBox>
+    </Grid>
+</UserControl>

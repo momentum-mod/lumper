@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Lumper.UI.ViewModels.Bsp;
+using Lumper.UI.ViewModels.Tasks;
 using ReactiveUI;
 
 namespace Lumper.UI.ViewModels;
@@ -14,6 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private ViewModelBase? content;
     private BspNodeBase? _selectedNode;
     private BspViewModel? _bspModel;
+    private TasksViewModel? _tasksModel;
 
     public MainWindowViewModel()
     {
@@ -57,5 +59,21 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         get => _selectedNode;
         set => this.RaiseAndSetIfChanged(ref _selectedNode, value);
+    }
+
+    public TasksViewModel? TasksModel
+    {
+        get => _tasksModel;
+        set => this.RaiseAndSetIfChanged(ref _tasksModel, value);
+    }
+
+    public void ViewBsp()
+    {
+        Content = BspModel;
+    }
+
+    public void ViewTasks()
+    {
+        Content = TasksModel;
     }
 }
