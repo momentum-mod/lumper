@@ -18,6 +18,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
             while ((read = stream.Read(buffer, 0, (int)Math.Min(buffer.Length, remaining))) > 0)
             {
                 DataStream.Write(buffer, 0, read);
+                remaining -= read;
             }
         }
 
