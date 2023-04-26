@@ -1,4 +1,6 @@
 using System.IO;
+using Newtonsoft.Json;
+using JsonSubTypes;
 
 namespace Lumper.Lib.BSP.Lumps
 {
@@ -13,9 +15,13 @@ namespace Lumper.Lib.BSP.Lumps
 
     // implements how a lump will be read from a stream (same for write)
     // doesn't store offset or length because header information is separate
+
+    [JsonConverter(typeof(JsonSubtypes), "Class")]
     public abstract class Lump
     {
+        public string Class { get => this.GetType().Name; }
         public bool Compress { get; set; }
+        [JsonIgnore]
         public BspFile Parent { get; set; }
         public int Version { get; set; }
         public int Flags { get; set; }

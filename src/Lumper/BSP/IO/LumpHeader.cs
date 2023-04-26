@@ -1,6 +1,10 @@
+using Newtonsoft.Json;
+using JsonSubTypes;
+
 namespace Lumper.Lib.BSP.IO
 {
     // helper class for saving lump offset an length data
+    [JsonConverter(typeof(JsonSubtypes), "Type")]
     public class LumpHeader
     {
         public LumpHeader()

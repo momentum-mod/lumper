@@ -1,7 +1,8 @@
 using System.IO;
 using System.Drawing;
 using Lumper.Lib.BSP.Struct;
-using Lumper.Lib.BSP.Lumps;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace Lumper.Lib.BSP.Lumps.GameLumps
 {
@@ -21,6 +22,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
     }
     public class StaticPropLump : FixedLump<GameLumpType, StaticProp>
     {
+        [JsonConverter(typeof(StringEnumConverter))]
         public StaticPropVersion ActualVersion { get; set; }
         public override int StructureSize => ActualVersion switch
         {

@@ -1,12 +1,34 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 using SharpCompress.Archives.Zip;
+using SharpCompress.Readers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Security.Cryptography;
 
 namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
+    //[JsonConverter(typeof(PakFileJsonConverter))]
     public class PakFileLump : ManagedLump<BspLumpType>
     {
+        [JsonIgnore]
         public MemoryStream DataStream { get; set; }
+
+        [JsonConverter(typeof(ZipJsonConverter))]
+        public ZipArchive Zip
+        {
+            get => GetZipArchive();
+        }
+        public byte[] HashMD5
+        {
+            get
+            {
+                DataStream.Seek(0, SeekOrigin.Begin);
+                return MD5.Create().ComputeHash(DataStream);
+            }
+        }
         public override void Read(BinaryReader reader, long lenght)
         {
             Stream stream = reader.BaseStream;
@@ -41,6 +63,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
         }
         public ZipArchive GetZipArchive()
         {
+            DataStream.Seek(0, SeekOrigin.Begin);
             return ZipArchive.Open(DataStream);
         }
 
@@ -54,4 +77,45 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
             DataStream = temp;
         }
     }
+
+    public class ZipJsonConverter : JsonConverter<ZipArchive>
+    {
+        public override void WriteJson(JsonWriter writer,
+                                       ZipArchive? value,
+                                       JsonSerializer serializer)
+        {
+            if (value is null)
+                return;
+            var zip = value;
+            writer.WriteStartArray();
+            foreach (var entry in zip.Entries)
+            {
+                var md5 = MD5.Create().ComputeHash(entry.OpenEntryStream());
+                JObject o = JObject.FromObject(new
+                {
+                    entry.Key,
+                    MD5 = md5
+                });
+                o.WriteTo(writer);
+            }
+            writer.WriteEndArray();
+        }
+
+        public override ZipArchive? ReadJson(JsonReader reader,
+                                             Type objectType,
+                                             ZipArchive? existingValue,
+                                             bool hasExistingValue,
+                                             JsonSerializer serializer)
+        {
+            throw new NotImplementedException(
+                "Unnecessary because CanRead is false. " +
+                "The type will skip the converter.");
+        }
+
+        public override bool CanRead
+        {
+            get { return false; }
+        }
+    }
+
 }

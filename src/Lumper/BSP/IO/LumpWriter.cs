@@ -1,12 +1,13 @@
-
 using System;
 using System.IO;
 using SharpCompress.Compressors.LZMA;
 using Lumper.Lib.BSP.Lumps;
+using Newtonsoft.Json;
 
 namespace Lumper.Lib.BSP.IO
 {
     // handles compression and writes lumpdata to a stream
+    [JsonObject(MemberSerialization.OptIn)]
     public abstract class LumpWriter : BinaryWriter
     {
         public static readonly int LzmaId = (('A' << 24) | ('M' << 16) | ('Z' << 8) | ('L'));
