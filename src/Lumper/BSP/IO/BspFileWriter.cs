@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
 namespace Lumper.Lib.BSP.IO
 {
     public class BspFileWriter : LumpWriter
     {
+        [JsonIgnore]
         private readonly BspFile _bsp;
+
+        [JsonProperty]
         public Dictionary<BspLumpType, BspLumpHeader> LumpHeaders { get; set; } = new();
         public BspFileWriter(BspFile file, Stream output) : base(output)
         {

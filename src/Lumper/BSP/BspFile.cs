@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.IO;
-using System;
+using Newtonsoft.Json;
 
 namespace Lumper.Lib.BSP
 {
@@ -14,12 +15,14 @@ namespace Lumper.Lib.BSP
         public const int HeaderSize = 1036;
         public const int MaxLumps = 128;
 
+
+        [JsonIgnore]
         public string FilePath { get; private set; }
         public string Name { get; private set; }
         public int Revision { get; set; }
         public int Version { get; set; }
 
-        public BspFileReader reader;
+        public BspFileReader Reader { get; private set; }
 
         public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = new();
 
@@ -44,10 +47,10 @@ namespace Lumper.Lib.BSP
         public void Load(Stream stream)
         {
             FilePath = null;
-            if (reader is not null)
-                reader.Dispose();
-            reader = new BspFileReader(this, stream);
-            reader.Load();
+            if (Reader is not null)
+                Reader.Dispose();
+            Reader = new BspFileReader(this, stream);
+            Reader.Load();
         }
 
         public void Save(string path)
@@ -89,6 +92,56 @@ namespace Lumper.Lib.BSP
         public Lump<BspLumpType> GetLump(BspLumpType lumpType)
         {
             return Lumps[lumpType];
+        }
+
+        public void ToJson(bool sortLumps,
+                          bool sortProperties,
+                          bool ignoreOffset)
+        {
+            string dir = Path.GetDirectoryName(FilePath) ?? ".";
+            string name = Path.GetFileNameWithoutExtension(FilePath);
+            string path = $"{dir}/{name}.json";
+            using var fileStream = new FileStream(
+                path,
+                FileMode.Create,
+                FileAccess.Write);
+
+            ToJson(fileStream, sortLumps, sortProperties, ignoreOffset);
+            Console.WriteLine("JSON file: " + path);
+        }
+
+        public void ToJson(Stream stream,
+            bool sortLumps,
+            bool sortProperties,
+            bool ignoreOffset)
+        {
+            if (sortLumps)
+            {
+                Lumps = Lumps
+                    .OrderBy(x => x.Key)
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            using var bspStream = new MemoryStream();
+            using var bspWriter = new BspFileWriter(this, bspStream);
+            bspWriter.Save();
+
+            var jsonSerializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver =
+                    new JsonContractResolver(sortProperties, ignoreOffset),
+                Formatting = Formatting.Indented
+            };
+
+            var serializer = JsonSerializer.Create(jsonSerializerSettings);
+            using var sw = new StreamWriter(stream);
+            using var writer = new JsonTextWriter(sw);
+            serializer.Serialize(writer,
+                new
+                {
+                    Bsp = this,
+                    Writer = bspWriter,
+                });
         }
     }
 }

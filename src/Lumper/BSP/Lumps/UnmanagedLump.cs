@@ -1,6 +1,7 @@
 using System;
 using System.IO;
-using Lumper.Lib.BSP.Enum;
+using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace Lumper.Lib.BSP.Lumps
 {
@@ -9,6 +10,7 @@ namespace Lumper.Lib.BSP.Lumps
     {
         public bool Compressed { get; set; }
         public long UncompressedLength { get; set; }
+        public long DataStreamOffset { get; set; }
 
     }
     // only points to the data in the inputstream and knows if it's compressed or not
@@ -17,7 +19,10 @@ namespace Lumper.Lib.BSP.Lumps
     {
         public bool Compressed { get; set; }
         public long UncompressedLength { get; set; }
+        [JsonIgnore]
         public Stream DataStream { get; set; }
+
+        public byte[] HashMD5 { get; private set; }
         public long DataStreamOffset { get; set; }
         public long DataStreamLength { get; set; }
         public static readonly int LzmaId = (('A' << 24) | ('M' << 16) | ('Z' << 8) | ('L'));
@@ -27,6 +32,11 @@ namespace Lumper.Lib.BSP.Lumps
             DataStream = reader.BaseStream;
             DataStreamOffset = reader.BaseStream.Position;
             DataStreamLength = length;
+
+            DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
+            var buffer = new byte[DataStreamLength];
+            DataStream.Read(buffer, 0, buffer.Length);
+            HashMD5 = MD5.Create().ComputeHash(buffer);
         }
         public override void Write(Stream stream)
         {

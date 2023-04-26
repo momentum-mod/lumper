@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps.GameLumps;
@@ -8,8 +11,19 @@ namespace Lumper.Lib.BSP.IO
 {
     public sealed class GameLumpReader : LumpReader
     {
+        [JsonIgnore]
         private readonly GameLump _gameLump;
         private readonly long _length;
+
+        public override IReadOnlyDictionary<System.Enum, LumpHeader> Headers
+        {
+            get => Lumps.ToDictionary(
+                x => (System.Enum)(x.Item1 is Lump<GameLumpType> lump
+                                ? lump.Type
+                                : GameLumpType.Unknown),
+                x => x.Item2);
+        }
+
         public GameLumpReader(GameLump gamelump, BinaryReader reader, long length)
             : this(gamelump, reader.BaseStream, length)
         { }

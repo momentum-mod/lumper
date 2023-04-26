@@ -5,12 +5,23 @@ using System.Text;
 using System.Collections.Generic;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
+using Newtonsoft.Json;
 
 namespace Lumper.Lib.BSP.IO
 {
     public class BspFileReader : LumpReader
     {
+        [JsonIgnore]
         private readonly BspFile _bsp;
+
+        public override IReadOnlyDictionary<System.Enum, LumpHeader> Headers
+        {
+            get => Lumps.ToDictionary(
+                x => (System.Enum)(x.Item1 is Lump<BspLumpType> lump
+                                ? lump.Type
+                                : BspLumpType.Unknown),
+                x => x.Item2);
+        }
 
         public BspFileReader(BspFile file, Stream input) : base(input)
         {

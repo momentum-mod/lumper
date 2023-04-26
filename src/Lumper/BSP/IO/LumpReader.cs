@@ -2,16 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 using SharpCompress.Compressors.LZMA;
+using Newtonsoft.Json;
 using Lumper.Lib.BSP.Lumps;
 
 namespace Lumper.Lib.BSP.IO
 {
     // handles decompressing and fills lumps with data
+
+    [JsonObject(MemberSerialization.OptIn)]
     public abstract class LumpReader : BinaryReader
     {
         // lumpheader information is only needed in the reader
         protected List<Tuple<Lump, LumpHeader>> Lumps = new();
+
+        [JsonProperty]
+        public abstract IReadOnlyDictionary<System.Enum, LumpHeader> Headers { get; }
+
         public LumpReader(Stream input) : base(input)
         { }
         protected abstract void ReadHeader();
@@ -83,5 +91,29 @@ namespace Lumper.Lib.BSP.IO
             lump.Read(lumpReader, lumpStreamLength);
             lumpReader.BaseStream.Seek(startPos, SeekOrigin.Begin);
         }
+
+        public void ToJson(Stream stream)
+        {
+            try
+            {
+                var serializer = new JsonSerializer()
+                {
+                    Formatting = Formatting.Indented
+                };
+                using var sw = new StreamWriter(stream);
+                using var writer = new JsonTextWriter(sw);
+                serializer.Serialize(writer,
+                    Lumps.Select(x => new
+                    {
+                        Header = x.Item2,
+                        Lump = x.Item1
+                    }));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
     }
 }

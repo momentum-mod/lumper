@@ -170,6 +170,13 @@ public partial class MainWindowViewModel
         LoadBsp(path.AbsolutePath);
     }
 
+    public void BspToJsonCommand()
+    {
+        if (BspModel is null)
+            return;
+        BspModel.BspFile.ToJson(false, false, false);
+    }
+
     public async Task CloseCommand()
     {
         if (_bspModel is null || !_bspModel.BspNode.IsModifiedRecursive)

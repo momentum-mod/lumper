@@ -8,6 +8,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
     public class GameLump : ManagedLump<BspLumpType>
     {
+        public GameLumpReader Reader { get; private set; }
         public Dictionary<GameLumpType, Lump> Lumps { get; set; } = new();
         public T GetLump<T>() where T : Lump<GameLumpType>
         {
@@ -25,8 +26,8 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
         }
         public override void Read(BinaryReader reader, long length)
         {
-            var gameLumpReader = new GameLumpReader(this, reader, length);
-            gameLumpReader.Load();
+            Reader = new GameLumpReader(this, reader, length);
+            Reader.Load();
         }
 
         public override void Write(Stream stream)

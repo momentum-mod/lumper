@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps.GameLumps;
@@ -10,6 +11,7 @@ namespace Lumper.Lib.BSP.IO
 {
     public sealed class GameLumpWriter : LumpWriter
     {
+        [JsonIgnore]
         private readonly GameLump _gameLump;
 
         private readonly long _startPos;
