@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper", "src\Lumper\Lumper
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper.UI", "src\Lumper.UI\Lumper.UI.csproj", "{494EA280-15F5-445F-A2E6-AECA9387B8EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper.CLI", "src\Lumper.CLI\Lumper.CLI.csproj", "{2F2B0AC4-2E4A-450C-91B0-3EF4DD611B44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{494EA280-15F5-445F-A2E6-AECA9387B8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{494EA280-15F5-445F-A2E6-AECA9387B8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{494EA280-15F5-445F-A2E6-AECA9387B8EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F2B0AC4-2E4A-450C-91B0-3EF4DD611B44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F2B0AC4-2E4A-450C-91B0-3EF4DD611B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F2B0AC4-2E4A-450C-91B0-3EF4DD611B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F2B0AC4-2E4A-450C-91B0-3EF4DD611B44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
