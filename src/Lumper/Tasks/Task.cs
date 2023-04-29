@@ -11,7 +11,7 @@ namespace Lumper.Lib.Tasks
     {
         public abstract string Type { get; }
 
-        [JsonIgnore()]
+        [JsonIgnore]
         public TaskProgress Progress { get; protected set; } = new();
 
         public abstract TaskResult Run(BspFile map);

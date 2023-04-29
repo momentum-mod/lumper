@@ -12,7 +12,7 @@ namespace Lumper.Lib.Tasks
     {
         public override string Type { get; } = "StripperTask";
 
-        [JsonIgnore()]
+        [JsonIgnore]
         protected List<Block> blocks = new();
         public string ConfigPath { get; set; }
         public StripperTask()
