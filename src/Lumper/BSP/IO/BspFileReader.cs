@@ -14,10 +14,11 @@ namespace Lumper.Lib.BSP.IO
         [JsonIgnore]
         private readonly BspFile _bsp;
 
-        public override IReadOnlyDictionary<System.Enum, LumpHeader> Headers
+        [JsonProperty]
+        public IReadOnlyDictionary<BspLumpType, LumpHeader> Headers
         {
             get => Lumps.ToDictionary(
-                x => (System.Enum)(x.Item1 is Lump<BspLumpType> lump
+                x => (x.Item1 is Lump<BspLumpType> lump
                                 ? lump.Type
                                 : BspLumpType.Unknown),
                 x => x.Item2);
