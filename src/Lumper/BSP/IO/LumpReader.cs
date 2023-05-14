@@ -17,9 +17,6 @@ namespace Lumper.Lib.BSP.IO
         // lumpheader information is only needed in the reader
         protected List<Tuple<Lump, LumpHeader>> Lumps = new();
 
-        [JsonProperty]
-        public abstract IReadOnlyDictionary<System.Enum, LumpHeader> Headers { get; }
-
         public LumpReader(Stream input) : base(input)
         { }
         protected abstract void ReadHeader();

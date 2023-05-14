@@ -15,10 +15,11 @@ namespace Lumper.Lib.BSP.IO
         private readonly GameLump _gameLump;
         private readonly long _length;
 
-        public override IReadOnlyDictionary<System.Enum, LumpHeader> Headers
+        [JsonProperty]
+        public IReadOnlyDictionary<GameLumpType, LumpHeader> Headers
         {
             get => Lumps.ToDictionary(
-                x => (System.Enum)(x.Item1 is Lump<GameLumpType> lump
+                x => (x.Item1 is Lump<GameLumpType> lump
                                 ? lump.Type
                                 : GameLumpType.Unknown),
                 x => x.Item2);
