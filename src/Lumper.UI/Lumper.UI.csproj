@@ -32,5 +32,6 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Lumper\Lumper.csproj"/>
+        <ProjectReference Include="..\VTFLib.NET\VTFLib.NET/VTFLib.NET.csproj"/>
     </ItemGroup>
 </Project>

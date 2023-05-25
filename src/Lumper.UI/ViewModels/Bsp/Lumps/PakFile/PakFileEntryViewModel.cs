@@ -1,10 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Drawing;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using DynamicData;
 using SharpCompress.Archives.Zip;
 using ReactiveUI;
+using VTFLib;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 
@@ -105,9 +108,64 @@ public class PakFileEntryViewModel : BspNodeBase
     public void Open()
     {
         Stream = _entry.OpenEntryStream();
-        var sr = new StreamReader(Stream);
-        //todo async
-        Content = sr.ReadToEnd();
+        if (_name.ToLower().EndsWith(".vtf"))
+        {
+            VTFAPI.Initialize();
+            string fileName = "tmp.vtf";
+            using var file = File.Open(fileName, FileMode.Create);
+            Stream.CopyTo(file);
+
+            uint image = 0;
+            VTFFile.CreateImage(ref image);
+            VTFFile.BindImage(image);
+            VTFFile.ImageLoad(fileName, false);
+
+            Content = VTFFile.ImageGetHeight().ToString();
+            uint w = VTFFile.ImageGetThumbnailWidth();
+            uint h = VTFFile.ImageGetThumbnailHeight();
+            var f = VTFFile.ImageGetThumbnailFormat();
+
+
+            if (VTFFile.ImageGetHasThumbnail())
+            {
+                var ucharPtr = VTFFile.ImageGetThumbnailData();
+
+                int size = (int)(w * h * sizeof(byte) * 4);
+                var thumbnail = new byte[size];
+
+                GCHandle pinnedArray = GCHandle.Alloc(thumbnail, GCHandleType.Pinned);
+                IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+
+                VTFFile.ImageConvertToRGBA8888(ucharPtr, pointer, w, h, f);
+                Marshal.Copy(ucharPtr, thumbnail, 0, size);
+
+                pinnedArray.Free();
+
+                Bitmap bmp;
+                using (var ms = new MemoryStream(thumbnail))
+                {
+                    bmp = new Bitmap(ms);
+                    bmp.Save("tmp.bmp");
+                }
+                //fileName = "tmp.bmp";
+                //using var file2 = File.Open(fileName, FileMode.Create);
+                //file2.Write(thumbnail);
+
+            }
+            /*
+            uint hasImage = VTFFile.ImageGetHasImage();
+            if (hasImage != 0)
+            {
+                var asdf = VTFFile.ImageGetData(0, 0, 0, 0);
+            }
+            */
+        }
+        else
+        {
+            var sr = new StreamReader(Stream);
+            //todo async
+            Content = sr.ReadToEnd();
+        }
     }
 
     public void Close()
