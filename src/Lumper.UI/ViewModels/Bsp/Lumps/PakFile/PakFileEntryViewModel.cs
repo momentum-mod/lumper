@@ -1,13 +1,15 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Drawing;
+//using System.Drawing;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DynamicData;
 using SharpCompress.Archives.Zip;
 using ReactiveUI;
 using VTFLib;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 
@@ -101,6 +103,12 @@ public class PakFileEntryViewModel : BspNodeBase
         set => this.RaiseAndSetIfChanged(ref _content, value);
     }
 
+    public Image? _image = null;
+    public Image? Image
+    {
+        get => _image;
+        set => this.RaiseAndSetIfChanged(ref _image, value);
+    }
     public override bool IsModified =>
         Nodes is { Count: > 0 } && Nodes.Any(n => n.IsModified);
 
@@ -120,45 +128,33 @@ public class PakFileEntryViewModel : BspNodeBase
             VTFFile.BindImage(image);
             VTFFile.ImageLoad(fileName, false);
 
-            Content = VTFFile.ImageGetHeight().ToString();
-            uint w = VTFFile.ImageGetThumbnailWidth();
-            uint h = VTFFile.ImageGetThumbnailHeight();
-            var f = VTFFile.ImageGetThumbnailFormat();
-
+            Content = $"MajorVersion: {VTFFile.ImageGetMajorVersion()}\n" +
+                      $"MinorVersion: {VTFFile.ImageGetMinorVersion()}\n" +
+                      $"Size: {VTFFile.ImageGetSize()}\n" +
+                      $"Width: {VTFFile.ImageGetWidth()}\n" +
+                      $"Height: {VTFFile.ImageGetHeight()}\n" +
+                      $"Format: {Enum.GetName(VTFFile.ImageGetFormat())}\n";
 
             if (VTFFile.ImageGetHasThumbnail())
             {
+                uint w = VTFFile.ImageGetThumbnailWidth();
+                uint h = VTFFile.ImageGetThumbnailHeight();
+                var f = VTFFile.ImageGetThumbnailFormat();
                 var ucharPtr = VTFFile.ImageGetThumbnailData();
-
-                int size = (int)(w * h * sizeof(byte) * 4);
-                var thumbnail = new byte[size];
-
-                GCHandle pinnedArray = GCHandle.Alloc(thumbnail, GCHandleType.Pinned);
-                IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-
-                VTFFile.ImageConvertToRGBA8888(ucharPtr, pointer, w, h, f);
-                Marshal.Copy(ucharPtr, thumbnail, 0, size);
-
-                pinnedArray.Free();
-
-                Bitmap bmp;
-                using (var ms = new MemoryStream(thumbnail))
-                {
-                    bmp = new Bitmap(ms);
-                    bmp.Save("tmp.bmp");
-                }
-                //fileName = "tmp.bmp";
-                //using var file2 = File.Open(fileName, FileMode.Create);
-                //file2.Write(thumbnail);
-
+                var img = GetImage(ucharPtr, w, h, f);
+                img.SaveAsBmp("thumbnail.bmp");
             }
-            /*
             uint hasImage = VTFFile.ImageGetHasImage();
             if (hasImage != 0)
             {
-                var asdf = VTFFile.ImageGetData(0, 0, 0, 0);
+                uint w = VTFFile.ImageGetWidth();
+                uint h = VTFFile.ImageGetHeight();
+                var f = VTFFile.ImageGetFormat();
+                var ucharPtr = VTFFile.ImageGetData(0, 0, 0, 0);
+                var img = GetImage(ucharPtr, w, h, f);
+                img.SaveAsBmp("tmp.bmp");
+                Image = img;
             }
-            */
         }
         else
         {
@@ -166,6 +162,38 @@ public class PakFileEntryViewModel : BspNodeBase
             //todo async
             Content = sr.ReadToEnd();
         }
+    }
+
+    private Image GetImage(IntPtr ptr, uint width, uint height, VTFImageFormat format)
+    {
+        int size = (int)width * (int)height * sizeof(byte) * 4;
+        var data = new byte[size];
+
+        GCHandle pinnedArray = GCHandle.Alloc(data, GCHandleType.Pinned);
+        IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+
+        VTFFile.ImageConvertToRGBA8888(ptr, pointer, width, height, format);
+        Marshal.Copy(pointer, data, 0, size);
+
+        var img = GetImageFromRgba8888(data, (int)width, (int)height);
+
+        pinnedArray.Free();
+        return img;
+    }
+    private Image GetImageFromRgba8888(byte[] img, int width, int height)
+    {
+        var asdf = new Rgba32[width * height];
+        int j = 0;
+        for (int i = 0; i < img.Length; i += 4)
+        {
+            asdf[j++] = new Rgba32(
+                img[i],
+                img[i + 1],
+                img[i + 2],
+                img[i + 3]);
+        }
+
+        return Image.LoadPixelData<Rgba32>(asdf.AsSpan(), width, height);
     }
 
     public void Close()

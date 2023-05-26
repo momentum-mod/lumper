@@ -4,11 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:entviews="clr-namespace:Lumper.UI.Views.Bsp.Lumps.PakFile"
              xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.PakFile"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileEntryView">
 
-    <Grid RowDefinitions="Auto,*">
+    <UserControl.Resources>
+        <converters:BitmapAssetValueConverter x:Key="variableImage" />
+    </UserControl.Resources>
+    <Grid RowDefinitions="Auto,*,*">
         <Button Grid.Row="0" Command="{Binding Open}">_Open</Button>
         <TextBox Grid.Row="1" Text="{Binding Content}"></TextBox>
+        <Image Grid.Row="2" Source="{Binding Image, Converter={StaticResource variableImage}}"/>
     </Grid>
 </UserControl>
