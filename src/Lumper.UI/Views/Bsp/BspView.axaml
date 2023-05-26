@@ -34,7 +34,10 @@
                                        Margin="0,0,5,0" />
                             <Button Grid.Column="2"
                                     Width="15" Height="15"
-                                    Command="{Binding Close}" />
+                                    Command="{Binding Close}"/>
+                            <Button IsVisible="false"
+                                    Command="{Binding CloseSelected}" 
+                                    HotKey="Ctrl+W"/>
                         </Grid>
                     </DataTemplate>
                 </TabControl.ItemTemplate>
