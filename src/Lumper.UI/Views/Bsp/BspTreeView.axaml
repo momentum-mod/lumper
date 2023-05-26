@@ -17,7 +17,9 @@
             <TreeView Grid.Row="1"
                       Items="{Binding BspNode.FilteredNodes}"
                       SelectedItem="{Binding SelectedNode}"
-                      Margin="0, 0, 0,8">
+                      Margin="0, 0, 0,8"
+                      KeyDown="OnKeyDown"
+                      Tapped="OnClick">
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="bspmodels:BspNodeBase"
                                       ItemsSource="{Binding FilteredNodes}">

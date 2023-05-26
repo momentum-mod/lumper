@@ -29,10 +29,6 @@ public partial class BspViewModel
 
     private void TabsInit()
     {
-        this.WhenAnyValue(x => x.SelectedNode)
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(x => Open(x));
-
         _openTabs.Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _openTabsReadOnly)
