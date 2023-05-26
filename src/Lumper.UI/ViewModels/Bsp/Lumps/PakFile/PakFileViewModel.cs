@@ -16,11 +16,11 @@ namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileLumpViewModel : LumpBase
 {
     //private readonly SourceList<PakFileEntryViewModel> _entries = new();
-    private readonly PakFileEntryViewModel _entryRoot;
+    private readonly PakFileEntryBranchViewModel _entryRoot;
     public PakFileLumpViewModel(BspViewModel parent, PakFileLump pakFileLump)
         : base(parent)
     {
-        _entryRoot = new PakFileEntryViewModel(this, pakFileLump.Zip);
+        _entryRoot = new(this, pakFileLump.Zip);
 
         InitializeNodeChildrenObserver(_entryRoot._entries);
     }

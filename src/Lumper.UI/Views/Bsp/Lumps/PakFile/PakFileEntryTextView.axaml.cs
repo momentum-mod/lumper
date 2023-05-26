@@ -3,9 +3,9 @@ using Avalonia.Markup.Xaml;
 
 namespace Lumper.UI.Views.Bsp.Lumps.PakFile;
 
-public partial class PakFileEntryView : UserControl
+public partial class PakFileEntryTextView : UserControl
 {
-    public PakFileEntryView()
+    public PakFileEntryTextView()
     {
         InitializeComponent();
     }
