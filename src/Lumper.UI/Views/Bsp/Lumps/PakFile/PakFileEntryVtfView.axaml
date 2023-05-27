@@ -11,8 +11,9 @@
     <UserControl.Resources>
         <converters:BitmapAssetValueConverter x:Key="variableImage" />
     </UserControl.Resources>
-    <Grid RowDefinitions="Auto,*">
-        <TextBlock Grid.Row="0" Text="{Binding Info}"/>
-        <Image Grid.Row="1" Source="{Binding Image, Converter={StaticResource variableImage}}"/>
+    <Grid RowDefinitions="Auto, Auto,*">
+        <Button Grid.Row="0" Click="OnSetImageClick">Set Image</Button>
+        <TextBlock Grid.Row="1" Text="{Binding Info}"/>
+        <Image Grid.Row="2" Source="{Binding Image, Converter={StaticResource variableImage}}"/>
     </Grid>
 </UserControl>

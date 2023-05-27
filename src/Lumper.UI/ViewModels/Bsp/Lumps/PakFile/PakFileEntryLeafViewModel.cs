@@ -6,7 +6,7 @@ using SharpCompress.Archives.Zip;
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
 {
-    private readonly ZipArchiveEntry? _entry;
+    protected readonly ZipArchiveEntry? _entry;
 
     public PakFileEntryLeafViewModel(PakFileEntryBranchViewModel parent,
         ZipArchiveEntry entry, string name)
@@ -34,10 +34,24 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
         }
     }
 
-    public void Save()
+    //todo this is probably not stay like this
+    public override void Save(ZipArchive zip)
     {
-        throw new NotImplementedException("todo save");
-        Close();
+        try
+        {
+            //hack leak .. if I dispose it, setziparchive failes
+            var mem = new MemoryStream();
+            Stream.CopyTo(mem);
+            long test = mem.Length;
+            mem.Seek(0, SeekOrigin.Begin);
+            zip.AddEntry(_entry.Key, mem);
+            base.Save(zip);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
     }
 
 }

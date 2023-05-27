@@ -94,5 +94,20 @@ public class PakFileLumpViewModel : LumpBase
         }
     }
 
-
+    public async void Save()
+    {
+        //todo make a new one for now .. ugly and slow?
+        var zip = ZipArchive.Create();
+        try
+        {
+            _entryRoot.Save(zip);
+            //todo
+            bool compress = false;
+            _lump.SetZipArchive(zip, compress);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
 }

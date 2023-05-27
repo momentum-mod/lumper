@@ -1,5 +1,6 @@
 using System.Linq;
 using DynamicData;
+using SharpCompress.Archives.Zip;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public abstract class PakFileEntryBaseViewModel : BspNodeBase
@@ -28,5 +29,15 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
             entry.InitializeNodeChildrenObserver();
         }
     }
+
+    public virtual void Save(ZipArchive zip)
+    {
+        foreach (var entry in _entries.Items)
+        {
+            entry.Save(zip);
+        }
+
+    }
+
 
 }

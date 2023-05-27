@@ -12,6 +12,7 @@
         <DockPanel Grid.Row="1">
             <Button DockPanel.Dock="Left" Click="OnImportClick">Import</Button>
             <Button DockPanel.Dock="Left" Click="OnExportClick">Export</Button>
+            <Button DockPanel.Dock="Left" Command="{Binding Save}">Save</Button>
         </DockPanel>
     </Grid>
 </UserControl>
