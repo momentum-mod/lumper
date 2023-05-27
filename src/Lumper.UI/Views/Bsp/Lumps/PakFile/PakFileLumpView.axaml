@@ -5,7 +5,13 @@
              xmlns:entviews="clr-namespace:Lumper.UI.Views.Bsp.Lumps.PakFile"
              xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.PakFile"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileView">
+             x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileLumpView">
 
-<TextBlock >bla</TextBlock>
+    <Grid RowDefinitions="Auto,*">
+        <TextBlock Grid.Row="0">PakFile</TextBlock>
+        <DockPanel Grid.Row="1">
+            <Button DockPanel.Dock="Left" Click="OnImportClick">Import</Button>
+            <Button DockPanel.Dock="Left" Click="OnExportClick">Export</Button>
+        </DockPanel>
+    </Grid>
 </UserControl>

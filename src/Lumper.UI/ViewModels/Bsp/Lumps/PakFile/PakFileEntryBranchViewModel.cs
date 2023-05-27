@@ -19,6 +19,8 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         : base(parent, name)
     { }
 
+    public override BspNodeBase? ViewNode => null;
+
     private void CreateNodes(ZipArchiveEntry entry, int index = 0)
     {
         var path = entry.Key.Split('/');
