@@ -41,15 +41,13 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     {
         base.Open();
         VTFAPI.Initialize();
-        //todo don't save to file first
-        string fileName = "tmp.vtf";
-        using var file = File.Open(fileName, FileMode.Create);
-        Stream.CopyTo(file);
+        var reader = new BinaryReader(Stream);
+        byte[] vtfBuffer = reader.ReadBytes((int)Stream.Length);
 
         uint image = 0;
         VTFFile.CreateImage(ref image);
         VTFFile.BindImage(image);
-        VTFFile.ImageLoad(fileName, false);
+        VTFFile.ImageLoadLump(vtfBuffer, (uint)vtfBuffer.Length, false);
 
         Info = $"MajorVersion: {VTFFile.ImageGetMajorVersion()}\n" +
                   $"MinorVersion: {VTFFile.ImageGetMinorVersion()}\n" +
@@ -101,27 +99,14 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     //todo meh
     public static Image<Rgba32> ImageFromFileStream(Stream fileSteam)
     {
-        /*
-        var img = SixLabors.ImageSharp.Image.Load(fileSteam);
-        if (img is SixLabors.ImageSharp.Image<Rgba32> i)
-            return i;
-        else
-        {
-            var bla = (SixLabors.ImageSharp.Image<Rgba32>)img;
-            bla.SaveAsBmp("bla.bmp");
-            return bla;
-        }*/
-
-        var img = SixLabors.ImageSharp.Image.Load<Rgba32>(fileSteam);
-        img.SaveAsBmp("bla.bmp");
-        return img;
+        return SixLabors.ImageSharp.Image.Load<Rgba32>(fileSteam);
     }
     public void SetImage(Image<Rgba32> image)
     {
         Image = image;
         _isModified = true;
     }
-    public void SaveImage(string file)
+    public void SaveImage()
     {
         if (_image != null)
         {
@@ -145,36 +130,24 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
 
             var createOptions = new SVTFCreateOptions();
 
-            var buffer2 = buffer;
-            /*
-            var f = VTFImageFormat.IMAGE_FORMAT_DXT5;
-            //var f = VTFFile.ImageGetFormat();
-            var buffer2 = new byte[size];
-            VTFFile.ImageConvertFromRGBA8888(
-                buffer,
-                buffer2,
-                (uint)_image.Width,
-                (uint)_image.Height,
-                f
-                );
-                */
-
-
             VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
-            //createOptions.imageFormat = f;
             createOptions.imageFormat = VTFImageFormat.IMAGE_FORMAT_DXT5;
-            //createOptions.imageFormat = VTFImageFormat.IMAGE_FORMAT_RGB888;
             if (!VTFFile.ImageCreateSingle(
                 (uint)_image.Width,
                 (uint)_image.Height,
-                buffer2,
+                buffer,
                 ref createOptions))
             {
                 string err = VTFAPI.GetLastError();
                 Console.WriteLine(err);
             }
 
-            VTFFile.ImageSave(file);
+            //todo where do I dispose this
+            var vtfBuffer = new byte[VTFFile.ImageGetSize()];
+            Stream = new MemoryStream(vtfBuffer);
+
+            uint uiSize = 0;
+            VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize);
         }
     }
     /*private void SetImage(byte[] data)
@@ -201,12 +174,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     {
         if (IsModified)
         {
-            //todo tmp file bad
-            const string file = "tmp.vtf";
-            SaveImage(file);
-            Stream = new MemoryStream();
-            using Stream fs = File.Open(file, FileMode.Open);
-            fs.CopyTo(Stream);
+            SaveImage();
             Stream.Seek(0, SeekOrigin.Begin);
             _isModified = false;
         }
