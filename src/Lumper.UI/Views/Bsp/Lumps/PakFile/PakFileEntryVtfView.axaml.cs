@@ -36,6 +36,14 @@ public partial class PakFileEntryVtfView : UserControl
 
     public async void OnSetImageClick(object sender, RoutedEventArgs e)
     {
+        SetImage(false);
+    }
+    public async void OnNewImageClick(object sender, RoutedEventArgs e)
+    {
+        SetImage(true);
+    }
+    private async void SetImage(bool createNew)
+    {
         if (Desktop.MainWindow is null)
             return;
 
@@ -48,19 +56,24 @@ public partial class PakFileEntryVtfView : UserControl
             return;
         if (DataContext is PakFileEntryVtfViewModel vm)
         {
-            vm.SetImage(
-             PakFileEntryVtfViewModel.ImageFromFileStream(
-                await result[0].OpenReadAsync()));
+            var img = PakFileEntryVtfViewModel.ImageFromFileStream(
+                await result[0].OpenReadAsync());
+            if (createNew)
+                vm.SetNewImage(img);
+            else
+                vm.SetImageData(img);
+            //open so we can check everything worked
+            vm.Open();
         }
     }
     private static IReadOnlyList<FilePickerFileType> GenerateImageFileFilter()
     {
-        var jsonFilter = new FilePickerFileType("JSON files");
+        var imageFilter = new FilePickerFileType("Image files");
         //todo test and and all the supported formats
-        jsonFilter.Patterns = new[] { "*.bmp", "*.jpeg", "*.jpg", "*.png" };
+        imageFilter.Patterns = new[] { "*.bmp", "*.jpeg", "*.jpg", "*.png" };
         var anyFilter = new FilePickerFileType("All files");
         anyFilter.Patterns = new[] { "*" };
 
-        return new[] { jsonFilter, jsonFilter };
+        return new[] { imageFilter, anyFilter };
     }
 }

@@ -92,7 +92,8 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     public uint MipmapCount { get; private set; }
     public VTFImageFlag Flags { get; private set; }
 
-    uint image = 0;
+    uint imageIndex = 0;
+    protected bool Opened { get; private set; }
     public void Open()
     {
         VTFAPI.Initialize();
@@ -102,8 +103,11 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         Stream.CopyTo(mem);
         byte[] vtfBuffer = mem.ToArray();
 
-        VTFFile.CreateImage(ref image);
-        VTFFile.BindImage(image);
+        if (!Opened)
+            VTFFile.CreateImage(ref imageIndex);
+        else
+            Opened = true;
+        VTFFile.BindImage(imageIndex);
         VTFFile.ImageLoadLump(vtfBuffer, (uint)vtfBuffer.Length, false);
 
         Depth = VTFFile.ImageGetDepth();
@@ -139,7 +143,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
 
     private void OpenImage()
     {
-        VTFFile.BindImage(image);
+        VTFFile.BindImage(imageIndex);
         uint hasImage = VTFFile.ImageGetHasImage();
         if (hasImage != 0)
         {
@@ -176,60 +180,68 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     {
         return SixLabors.ImageSharp.Image.Load<Rgba32>(fileSteam);
     }
-    public void SetImage(Image<Rgba32> image)
+    public void SetImageData(Image<Rgba32> image)
     {
-        Image = image;
         _isModified = true;
+        VTFFile.BindImage(imageIndex);
+        byte[] buffer = GetRgba888FromImage(image);
+
+        var f = VTFFile.ImageGetFormat();
+        //todo buffer2 length doesn't have to be buffer.length
+        var buffer2 = new byte[buffer.Length];
+        VTFFile.ImageConvertFromRGBA8888(
+            buffer,
+            buffer2,
+            (uint)image.Width,
+            (uint)image.Height,
+            f
+            );
+        VTFFile.ImageSetData(Frame, Face, Slice, MipmapLevel, buffer2);
+        SaveVTF();
     }
-    public void SaveImage()
+    public void SetNewImage(Image<Rgba32> image)
     {
-        if (_image != null)
+        _isModified = true;
+        byte[] buffer = GetRgba888FromImage(image);
+        var createOptions = new SVTFCreateOptions();
+        VTFFile.BindImage(imageIndex);
+        //todo do I have to delete this?
+        //if (Opened)
+        //VTFFile.DeleteImage(image);
+        VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
+        createOptions.imageFormat = VTFImageFormat.IMAGE_FORMAT_DXT5;
+        if (!VTFFile.ImageCreateSingle(
+            (uint)image.Width,
+            (uint)image.Height,
+            buffer,
+            ref createOptions))
         {
-            int size = _image.Width * _image.Height * 4;
-            using var mem = new MemoryStream();
-            var buffer = new byte[size];
-            int i = 0;
-            for (int y = 0; y < _image.Height; y++)
-            {
-                for (int x = 0; x < _image.Width; x++)
-                {
-                    Rgba32 pixel = _image[x, y];
-                    buffer[i++] = pixel.R;
-                    buffer[i++] = pixel.G;
-                    buffer[i++] = pixel.B;
-                    buffer[i++] = pixel.A;
-                }
-            }
-
-
-
-            var createOptions = new SVTFCreateOptions();
-
-            VTFFile.BindImage(image);
-            VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
-            createOptions.imageFormat = VTFImageFormat.IMAGE_FORMAT_DXT5;
-            if (!VTFFile.ImageCreateSingle(
-                (uint)_image.Width,
-                (uint)_image.Height,
-                buffer,
-                ref createOptions))
-            {
-                string err = VTFAPI.GetLastError();
-                Console.WriteLine(err);
-            }
-
-            var vtfBuffer = new byte[VTFFile.ImageGetSize()];
-            Stream = new MemoryStream(vtfBuffer);
-
-            uint uiSize = 0;
-            VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize);
+            string err = VTFAPI.GetLastError();
+            Console.WriteLine(err);
         }
+
+        SaveVTF();
+    }
+
+    public void SaveVTF()
+    {
+        var vtfBuffer = new byte[VTFFile.ImageGetSize()];
+        Stream = new MemoryStream(vtfBuffer);
+
+        uint uiSize = 0;
+        if (!VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize))
+        {
+            string err = VTFAPI.GetLastError();
+            Console.WriteLine(err);
+        }
+        Stream.Seek(0, SeekOrigin.Begin);
+        //_isModified = false;
     }
     /*private void SetImage(byte[] data)
     {
         VTFFile.ImageSetData(0, 0, 0, 0, data);
     }*/
-    private Image<Rgba32> GetImageFromRgba8888(byte[] img, int width, int height)
+    private static Image<Rgba32> GetImageFromRgba8888(byte[] img, int width, int height)
     {
         var asdf = new Rgba32[width * height];
         int j = 0;
@@ -245,11 +257,31 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         return SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(asdf.AsSpan(), width, height);
     }
 
+    private static byte[] GetRgba888FromImage(Image<Rgba32> image)
+    {
+        int size = image.Width * image.Height * 4;
+        using var mem = new MemoryStream();
+        var buffer = new byte[size];
+        int i = 0;
+        for (int y = 0; y < image.Height; y++)
+        {
+            for (int x = 0; x < image.Width; x++)
+            {
+                Rgba32 pixel = image[x, y];
+                buffer[i++] = pixel.R;
+                buffer[i++] = pixel.G;
+                buffer[i++] = pixel.B;
+                buffer[i++] = pixel.A;
+            }
+        }
+        return buffer;
+    }
+
     public override void Save(ZipArchive zip, ref List<Stream> streams)
     {
         if (IsModified)
         {
-            SaveImage();
+            //SaveImage();
             Stream.Seek(0, SeekOrigin.Begin);
             _isModified = false;
         }

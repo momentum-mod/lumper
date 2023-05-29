@@ -57,8 +57,7 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
             var stream = Stream;
             if (stream.CanSeek)
                 stream.Seek(0, SeekOrigin.Begin);
-            //todo should I check this? what if its not LZMA?
-            else if (stream is SharpCompress.Compressors.LZMA.LzmaStream)
+            else if (!IsModified)
             {
                 var mem = new MemoryStream();
                 OpenEntryStream();
@@ -68,7 +67,7 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
             }
             else if (stream.Position >= stream.Length)
                 throw new EndOfStreamException(
-                    "Stream is not seekable, is not a LzmaStream " +
+                    "Stream is not seekable, was modified  " +
                     "and there is nothing to read .. what did you do?");
             //hack leak .. if I dispose it, setziparchive failes
             //var mem = new MemoryStream();

@@ -18,7 +18,10 @@
                           Auto,
                           *"
           ColumnDefinitions="Auto,*">
-        <Button Grid.Row="0" Click="OnSetImageClick">Set Image</Button>
+        <DockPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2">
+            <Button DockPanel.Dock="Left" Click="OnNewImageClick">New Image</Button>
+            <Button DockPanel.Dock="Left" Click="OnSetImageClick">Set Image</Button>
+        </DockPanel>
         <TextBlock Grid.Row="1" Grid.Column="0" Text="Frame"/>
         <TextBlock Grid.Row="2" Grid.Column="0" Text="Face"/>
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Slice"/>
