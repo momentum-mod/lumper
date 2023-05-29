@@ -100,10 +100,18 @@ public class PakFileLumpViewModel : LumpBase
         var zip = ZipArchive.Create();
         try
         {
-            _entryRoot.Save(zip);
+            var streams = new List<Stream>();
+            _entryRoot.Save(zip, ref streams);
             //todo
             bool compress = false;
             _lump.SetZipArchive(zip, compress);
+
+            //close all new streams we had to make
+            foreach (var stream in streams)
+            {
+                stream.Close();
+                stream.Dispose();
+            }
         }
         catch (Exception ex)
         {

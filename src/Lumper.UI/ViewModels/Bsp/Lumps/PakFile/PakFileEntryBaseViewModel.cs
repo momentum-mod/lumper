@@ -1,4 +1,6 @@
+using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 using DynamicData;
 using SharpCompress.Archives.Zip;
 
@@ -30,13 +32,12 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
         }
     }
 
-    public virtual void Save(ZipArchive zip)
+    public virtual void Save(ZipArchive zip, ref List<Stream> streams)
     {
         foreach (var entry in _entries.Items)
         {
-            entry.Save(zip);
+            entry.Save(zip, ref streams);
         }
-
     }
 
 
