@@ -11,9 +11,24 @@
     <UserControl.Resources>
         <converters:BitmapAssetValueConverter x:Key="variableImage" />
     </UserControl.Resources>
-    <Grid RowDefinitions="Auto, Auto,*">
+    <Grid RowDefinitions="Auto, 
+                          Auto,
+                          Auto,
+                          Auto,
+                          Auto,
+                          *"
+          ColumnDefinitions="Auto,*">
         <Button Grid.Row="0" Click="OnSetImageClick">Set Image</Button>
-        <TextBlock Grid.Row="1" Text="{Binding Info}"/>
-        <Image Grid.Row="2" Source="{Binding Image, Converter={StaticResource variableImage}}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Frame"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Face"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Slice"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="MipmapLevel"/>
+        <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Frame}" Increment="1" Minimum="0" Maximum="{Binding FrameCount}"/>
+        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Face}" Increment="1" Minimum="0" Maximum="{Binding FaceCount}"/>
+        <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Slice}" Increment="1" Minimum="0" />
+        <NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding MipmapLevel}" Increment="1" Minimum="0" Maximum="{Binding MipmapCount}"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding Info}"/>
+        <Image Grid.Row="5" Grid.Column="1" Source="{Binding Image, Converter={StaticResource variableImage}}"/>
+
     </Grid>
 </UserControl>

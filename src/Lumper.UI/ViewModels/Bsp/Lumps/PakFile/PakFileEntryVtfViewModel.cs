@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpCompress.Archives.Zip;
@@ -41,6 +42,57 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         private set => this.RaiseAndSetIfChanged(ref _image, value);
     }
 
+    private uint _frame;
+    public uint Frame
+    {
+        get => _frame;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _frame, value);
+            OpenImage();
+        }
+    }
+
+    public uint _face;
+    public uint Face
+    {
+        get => _face;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _face, value);
+            OpenImage();
+        }
+    }
+
+    public uint _slice;
+    public uint Slice
+    {
+        get => _slice;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _slice, value);
+            OpenImage();
+        }
+    }
+
+    public uint _mipmapLevel;
+    public uint MipmapLevel
+    {
+        get => _mipmapLevel;
+        private set
+        {
+            this.RaiseAndSetIfChanged(ref _mipmapLevel, value);
+            OpenImage();
+        }
+    }
+
+    public uint Depth { get; private set; }
+    public uint FrameCount { get; private set; }
+    public uint FaceCount { get; private set; }
+    public uint MipmapCount { get; private set; }
+    public VTFImageFlag Flags { get; private set; }
+
+    uint image = 0;
     public void Open()
     {
         VTFAPI.Initialize();
@@ -50,17 +102,28 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         Stream.CopyTo(mem);
         byte[] vtfBuffer = mem.ToArray();
 
-        uint image = 0;
         VTFFile.CreateImage(ref image);
         VTFFile.BindImage(image);
         VTFFile.ImageLoadLump(vtfBuffer, (uint)vtfBuffer.Length, false);
+
+        Depth = VTFFile.ImageGetDepth();
+
+        FrameCount = VTFFile.ImageGetFrameCount();
+        FaceCount = VTFFile.ImageGetFaceCount();
+        MipmapCount = VTFFile.ImageGetMipmapCount();
+        Flags = (VTFImageFlag)VTFFile.ImageGetFlags();
 
         Info = $"MajorVersion: {VTFFile.ImageGetMajorVersion()}\n" +
                   $"MinorVersion: {VTFFile.ImageGetMinorVersion()}\n" +
                   $"Size: {VTFFile.ImageGetSize()}\n" +
                   $"Width: {VTFFile.ImageGetWidth()}\n" +
                   $"Height: {VTFFile.ImageGetHeight()}\n" +
-                  $"Format: {Enum.GetName(VTFFile.ImageGetFormat())}\n";
+                  $"Format: {Enum.GetName(VTFFile.ImageGetFormat())}\n" +
+                  $"Depth: {Depth}\n" +
+                  $"FrameCount: {FrameCount}\n" +
+                  $"FaceCount: {FaceCount}\n" +
+                  $"MipmapCount: {MipmapCount}\n" +
+                  $"Flags: {Flags.ToString().Replace(",", "\n")}\n";
 
         /*if (VTFFile.ImageGetHasThumbnail())
         {
@@ -71,6 +134,12 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
             var img = GetImage(ucharPtr, w, h, f);
             //img.SaveAsBmp("thumbnail.bmp");
         }*/
+        OpenImage();
+    }
+
+    private void OpenImage()
+    {
+        VTFFile.BindImage(image);
         uint hasImage = VTFFile.ImageGetHasImage();
         if (hasImage != 0)
         {
@@ -78,7 +147,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
             uint h = VTFFile.ImageGetHeight();
             var f = VTFFile.ImageGetFormat();
             //var ucharPtr = VTFFile.ImageGetData(0, 0, 0, 0);
-            var ucharPtr = VTFFile.ImageGetData(1, 1, 1, 1);
+            var ucharPtr = VTFFile.ImageGetData(Frame, Face, Slice, MipmapLevel);
             var img = GetImage(ucharPtr, w, h, f);
             //img.SaveAsBmp("tmp.bmp");
             Image = img;
@@ -136,6 +205,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
 
             var createOptions = new SVTFCreateOptions();
 
+            VTFFile.BindImage(image);
             VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
             createOptions.imageFormat = VTFImageFormat.IMAGE_FORMAT_DXT5;
             if (!VTFFile.ImageCreateSingle(
