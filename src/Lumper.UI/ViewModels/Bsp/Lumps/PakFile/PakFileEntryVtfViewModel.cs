@@ -163,15 +163,17 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         int size = (int)width * (int)height * sizeof(byte) * 4;
         var data = new byte[size];
 
-        GCHandle pinnedArray = GCHandle.Alloc(data, GCHandleType.Pinned);
-        IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+        //GCHandle pinnedArray = GCHandle.Alloc(data, GCHandleType.Pinned);
+        //IntPtr pointer = pinnedArray.AddrOfPinnedObject();
 
-        VTFFile.ImageConvertToRGBA8888(ptr, pointer, width, height, format);
-        Marshal.Copy(pointer, data, 0, size);
+        //Marshal.Copy(ptr, data, 0, size);
+
+        VTFFile.ImageConvertToRGBA8888(ptr, data, width, height, format);
+        //Marshal.Copy(pointer, data, 0, size);
 
         var img = GetImageFromRgba8888(data, (int)width, (int)height);
 
-        pinnedArray.Free();
+        //pinnedArray.Free();
         return img;
     }
 
