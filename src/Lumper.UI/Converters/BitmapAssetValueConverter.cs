@@ -8,6 +8,7 @@ using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Bmp;
 
 namespace Lumper.UI.Converters;
 
@@ -69,7 +70,13 @@ public class BitmapAssetValueConverter : IValueConverter
             case Image img when targetType.IsAssignableFrom(typeof(Bitmap)):
                 {
                     using var mem = new MemoryStream();
-                    img.SaveAsBmp(mem);
+                    var encoder = new BmpEncoder()
+                    {
+                        SupportTransparency = true,
+                        BitsPerPixel = BmpBitsPerPixel.Pixel32,
+                        SkipMetadata = false,
+                    };
+                    img.SaveAsBmp(mem, encoder);
                     mem.Seek(0, SeekOrigin.Begin);
                     return new Bitmap(mem);
 

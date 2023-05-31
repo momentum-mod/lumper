@@ -186,7 +186,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     {
         _isModified = true;
         VTFFile.BindImage(imageIndex);
-        byte[] buffer = GetRgba888FromImage(image);
+        byte[] buffer = GetRgba888FromImage(image, out _);
 
         var f = VTFFile.ImageGetFormat();
         //todo buffer2 length doesn't have to be buffer.length
@@ -204,14 +204,17 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     public void SetNewImage(Image<Rgba32> image)
     {
         _isModified = true;
-        byte[] buffer = GetRgba888FromImage(image);
+        bool hasAlpha = false;
+        byte[] buffer = GetRgba888FromImage(image, out hasAlpha);
         var createOptions = new SVTFCreateOptions();
         VTFFile.BindImage(imageIndex);
         //todo do I have to delete this?
         //if (Opened)
         //VTFFile.DeleteImage(image);
         VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
-        createOptions.imageFormat = VTFImageFormat.IMAGE_FORMAT_DXT5;
+        createOptions.imageFormat = hasAlpha ?
+                                    VTFImageFormat.IMAGE_FORMAT_DXT5 :
+                                    VTFImageFormat.IMAGE_FORMAT_DXT1;
         if (!VTFFile.ImageCreateSingle(
             (uint)image.Width,
             (uint)image.Height,
@@ -259,12 +262,13 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         return SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(asdf.AsSpan(), width, height);
     }
 
-    private static byte[] GetRgba888FromImage(Image<Rgba32> image)
+    private static byte[] GetRgba888FromImage(Image<Rgba32> image, out bool hasAlpha)
     {
         int size = image.Width * image.Height * 4;
         using var mem = new MemoryStream();
         var buffer = new byte[size];
         int i = 0;
+        hasAlpha = false;
         for (int y = 0; y < image.Height; y++)
         {
             for (int x = 0; x < image.Width; x++)
@@ -274,6 +278,8 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
                 buffer[i++] = pixel.G;
                 buffer[i++] = pixel.B;
                 buffer[i++] = pixel.A;
+                if (!hasAlpha && pixel.A != 255)
+                    hasAlpha = true;
             }
         }
         return buffer;

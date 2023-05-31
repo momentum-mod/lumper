@@ -31,7 +31,6 @@
         <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Slice}" Increment="1" Minimum="0" />
         <NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding MipmapLevel}" Increment="1" Minimum="0" Maximum="{Binding MipmapCount}"/>
         <TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding Info}"/>
-        <Image Grid.Row="5" Grid.Column="1" Source="{Binding Image, Converter={StaticResource variableImage}}"/>
-
+        <Image Grid.Row="5" Grid.Column="1" Source="{Binding Image, Converter={StaticResource variableImage}}" />
     </Grid>
 </UserControl>
