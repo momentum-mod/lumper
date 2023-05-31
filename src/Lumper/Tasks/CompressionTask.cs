@@ -13,15 +13,14 @@ namespace Lumper.Lib.Tasks
         public CompressionTask()
         { }
 
-        public CompressionTask(bool compressLumps, bool compressPakFile)
+        public CompressionTask(bool compressLumps)
         {
             CompressLumps = compressLumps;
-            CompressPakFile = compressPakFile;
         }
 
         public override TaskResult Run(BspFile map)
         {
-            if (!CompressLumps && !CompressPakFile)
+            if (!CompressLumps)
             {
                 //todo error message?
                 return TaskResult.Failed;
@@ -44,11 +43,6 @@ namespace Lumper.Lib.Tasks
                     {
                         lump2.Value.Compress = CompressLumps;
                     }
-                }
-                else if (CompressPakFile && lump.Value is PakFileLump pakFileLump)
-                {
-                    var zip = pakFileLump.GetZipArchive();
-                    pakFileLump.SetZipArchive(zip, true);
                 }
 
                 Progress.Count++;

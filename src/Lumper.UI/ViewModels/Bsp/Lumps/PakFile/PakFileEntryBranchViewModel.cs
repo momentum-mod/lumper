@@ -1,14 +1,16 @@
 using System.Linq;
 using DynamicData;
 using SharpCompress.Archives.Zip;
+using Lumper.Lib.BSP.Lumps.BspLumps;
+using Lumper.Lib.BSP.Struct;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 {
-    public PakFileEntryBranchViewModel(PakFileLumpViewModel parent, ZipArchive zip)
+    public PakFileEntryBranchViewModel(PakFileLumpViewModel parent, PakFileLump pakFile)
     : base(parent, "root")
     {
-        foreach (var entry in zip.Entries)
+        foreach (var entry in pakFile.Entries)
         {
             CreateNodes(entry);
         }
@@ -21,7 +23,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 
     public override BspNodeBase? ViewNode => null;
 
-    private void CreateNodes(ZipArchiveEntry entry, int index = 0)
+    private void CreateNodes(PakFileEntry entry, int index = 0)
     {
         var path = entry.Key.Split('/');
         bool isDir;

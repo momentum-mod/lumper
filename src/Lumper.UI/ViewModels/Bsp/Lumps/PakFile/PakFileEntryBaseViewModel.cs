@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using DynamicData;
 using SharpCompress.Archives.Zip;
+using Lumper.Lib.BSP.Struct;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public abstract class PakFileEntryBaseViewModel : BspNodeBase

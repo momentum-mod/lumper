@@ -23,8 +23,8 @@ public class PakFileLumpViewModel : LumpBase
     public PakFileLumpViewModel(BspViewModel parent, PakFileLump pakFileLump)
         : base(parent)
     {
-        _entryRoot = new(this, pakFileLump.Zip);
         _lump = pakFileLump;
+        _entryRoot = new(this, pakFileLump);
 
         InitializeNodeChildrenObserver(_entryRoot._entries);
     }
@@ -44,7 +44,7 @@ public class PakFileLumpViewModel : LumpBase
         List<FileStream> fileStreams = new();
         AddFilesRecusive(fileStreams, importDir, importDir, zip);
 
-        _lump.SetZipArchive(zip, compress);
+        _lump.Zip = zip;
 
         foreach (var fs in fileStreams)
         {
@@ -94,28 +94,29 @@ public class PakFileLumpViewModel : LumpBase
         }
     }
 
-    public async void Save()
-    {
-        //todo make a new one for now .. ugly and slow?
-        var zip = ZipArchive.Create();
-        try
+    /*
+        public async void Save()
         {
-            var streams = new List<Stream>();
-            _entryRoot.Save(zip, ref streams);
-            //todo
-            bool compress = false;
-            _lump.SetZipArchive(zip, compress);
-
-            //close all new streams we had to make
-            foreach (var stream in streams)
+            //todo make a new one for now .. ugly and slow?
+            var zip = ZipArchive.Create();
+            try
             {
-                stream.Close();
-                stream.Dispose();
+                var streams = new List<Stream>();
+                _entryRoot.Save(zip, ref streams);
+                _lump.Zip = zip;
+
+                //todo check if the closeStream flang in zip.addEntry does this
+                //close all new streams we had to make
+                foreach (var stream in streams)
+                {
+                    stream.Close();
+                    stream.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-    }
+        */
 }

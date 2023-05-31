@@ -8,13 +8,14 @@ using ReactiveUI;
 using VTFLib;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using Lumper.Lib.BSP.Struct;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 
 public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
 {
     public PakFileEntryVtfViewModel(PakFileEntryBranchViewModel parent,
-        ZipArchiveEntry entry, string name)
+        PakFileEntry entry, string name)
         : base(parent, entry, name)
     {
         //todo don't call this here
@@ -100,7 +101,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         //can't get length for byte array from LzmaStream 
         //so we need to read to a different stream first
         using var mem = new MemoryStream();
-        Stream.CopyTo(mem);
+        _entry.DataStream.CopyTo(mem);
         byte[] vtfBuffer = mem.ToArray();
 
         if (!Opened)
@@ -231,7 +232,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     public void SaveVTF()
     {
         var vtfBuffer = new byte[VTFFile.ImageGetSize()];
-        Stream = new MemoryStream(vtfBuffer);
+        _entry.DataStream = new MemoryStream(vtfBuffer);
 
         uint uiSize = 0;
         if (!VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize))
@@ -239,7 +240,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
             string err = VTFAPI.GetLastError();
             Console.WriteLine(err);
         }
-        Stream.Seek(0, SeekOrigin.Begin);
+        _entry.DataStream.Seek(0, SeekOrigin.Begin);
         //_isModified = false;
     }
     /*private void SetImage(byte[] data)
@@ -285,16 +286,10 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         return buffer;
     }
 
-    public override void Save(ZipArchive zip, ref List<Stream> streams)
+    public override void Update()
     {
-        if (IsModified)
-        {
-            //SaveImage();
-            Stream.Seek(0, SeekOrigin.Begin);
-            _isModified = false;
-        }
-        //else
-        //    Stream = _entry.OpenEntryStream();
-        base.Save(zip, ref streams);
+        //_entry.DataStream.Seek(0, SeekOrigin.Begin);
+        _isModified = false;
+        base.Update();
     }
 }
