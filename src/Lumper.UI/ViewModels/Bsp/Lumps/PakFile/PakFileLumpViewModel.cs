@@ -18,7 +18,7 @@ namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileLumpViewModel : LumpBase
 {
     //private readonly SourceList<PakFileEntryViewModel> _entries = new();
-    private readonly PakFileEntryBranchViewModel _entryRoot;
+    private PakFileEntryBranchViewModel _entryRoot;
     private readonly PakFileLump _lump;
     public PakFileLumpViewModel(BspViewModel parent, PakFileLump pakFileLump)
         : base(parent)
@@ -94,29 +94,8 @@ public class PakFileLumpViewModel : LumpBase
         }
     }
 
-    /*
-        public async void Save()
-        {
-            //todo make a new one for now .. ugly and slow?
-            var zip = ZipArchive.Create();
-            try
-            {
-                var streams = new List<Stream>();
-                _entryRoot.Save(zip, ref streams);
-                _lump.Zip = zip;
-
-                //todo check if the closeStream flang in zip.addEntry does this
-                //close all new streams we had to make
-                foreach (var stream in streams)
-                {
-                    stream.Close();
-                    stream.Dispose();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-        }
-        */
+    public void AddFile(string key, Stream stream)
+    {
+        _entryRoot.AddFile(key, stream);
+    }
 }

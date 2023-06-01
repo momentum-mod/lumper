@@ -69,4 +69,14 @@ public partial class PakFileLumpView : UserControl
             vm.Export(uri.AbsolutePath);
         }
     }
+
+    private static IReadOnlyList<FilePickerFileType> GenerateJsonFileFilter()
+    {
+        var jsonFilter = new FilePickerFileType("JSON files");
+        jsonFilter.Patterns = new[] { "*.json" };
+        var anyFilter = new FilePickerFileType("All files");
+        anyFilter.Patterns = new[] { "*" };
+
+        return new[] { jsonFilter, jsonFilter };
+    }
 }

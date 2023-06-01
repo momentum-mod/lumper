@@ -5,14 +5,11 @@
              xmlns:entviews="clr-namespace:Lumper.UI.Views.Bsp.Lumps.PakFile"
              xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.PakFile"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileLumpView">
+             x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileEntryBranchView">
 
-    <Grid RowDefinitions="Auto,*">
-        <TextBlock Grid.Row="0">PakFile</TextBlock>
-        <DockPanel Grid.Row="1">
-            <Button DockPanel.Dock="Left" Click="OnImportClick">Import</Button>
-            <Button DockPanel.Dock="Left" Click="OnExportClick">Export</Button>
-            <!--add the root entry ui here?-->
+    <Grid RowDefinitions="Auto">
+        <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Left" Click="OnAddFileClick">Add file</Button>
         </DockPanel>
     </Grid>
 </UserControl>

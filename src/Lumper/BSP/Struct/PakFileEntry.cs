@@ -15,6 +15,13 @@ namespace Lumper.Lib.BSP.Struct
             _entry = entry;
             Key = entry.Key;
         }
+
+        public PakFileEntry(string key, Stream stream)
+        {
+            Key = key;
+            _dataStream = stream;
+        }
+
         [JsonIgnore]
         private readonly ZipArchiveEntry _entry;
         public string Key { get; set; }
