@@ -10,6 +10,7 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
 //, IDisposable
 {
     protected readonly PakFileEntry? _entry;
+    public PakFileEntry? Entry { get => _entry; }
 
     public PakFileEntryLeafViewModel(PakFileEntryBranchViewModel parent,
         PakFileEntry entry, string name)

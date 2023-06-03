@@ -17,17 +17,21 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         InitializeNodeChildrenObserver();
     }
 
-    public PakFileEntryBranchViewModel(PakFileEntryBranchViewModel parent, string name)
+    public PakFileEntryBranchViewModel(PakFileEntryBranchViewModel parent,
+                                       string name,
+                                       string path)
         : base(parent, name)
-    { }
+    {
+        Path = path;
+    }
 
+    public string Path { get; }
     private readonly PakFileLump _pakFile;
 
     public override BspNodeBase? ViewNode => this;
 
     private void CreateNodes(IEnumerable<PakFileEntry> entries)
     {
-        _entries.Clear();
         foreach (var entry in entries)
         {
             CreateNodes(entry);
@@ -51,18 +55,50 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
                                   && branch._name == name, null);
             if (dir is null)
             {
-                dir = new PakFileEntryBranchViewModel(this, name);
+                dir = new PakFileEntryBranchViewModel(
+                    this,
+                    name,
+                    string.Join("/", path.Take(index + 1)) + "/");
                 _entries.Add(dir);
             }
             ((PakFileEntryBranchViewModel)dir).CreateNodes(entry, index + 1);
         }
         else
         {
-            if (name.ToLower().EndsWith(".vtf"))
-                _entries.Add(new PakFileEntryVtfViewModel(this, entry, name));
-            else
-                _entries.Add(new PakFileEntryTextViewModel(this, entry, name));
+            if (!_entries.Items.Any(
+                    x => x is PakFileEntryLeafViewModel leaf
+                         && leaf.Entry == entry))
+            {
+                if (name.ToLower().EndsWith(".vtf"))
+                    _entries.Add(new PakFileEntryVtfViewModel(this, entry, name));
+                else
+                    _entries.Add(new PakFileEntryTextViewModel(this, entry, name));
+            }
         }
+    }
+
+    private bool DeleteEmptyNodes()
+    {
+        bool hasLeafs = false;
+        List<PakFileEntryBranchViewModel> deleteList = new();
+        foreach (var entry in _entries.Items)
+        {
+            if (entry is PakFileEntryBranchViewModel branch)
+            {
+                bool entryHasLeafs = branch.DeleteEmptyNodes();
+                if (entryHasLeafs)
+                    hasLeafs = entryHasLeafs;
+                else
+                    deleteList.Add(branch);
+            }
+            else if (entry is PakFileEntryLeafViewModel)
+                hasLeafs = true;
+            else
+                throw new InvalidDataException($"what is this doing here {entry.GetType().Name}");
+        }
+        foreach (var branch in deleteList)
+            _entries.Remove(branch);
+        return hasLeafs;
     }
     public void AddFile(string key, Stream stream)
     {
@@ -74,8 +110,8 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         {
             _pakFile.Entries.Add(new PakFileEntry(key, stream));
 
-            //todo this breaks the ui
-            //CreateNodes(_pakFile.Entries);
+            CreateNodes(_pakFile.Entries);
+            DeleteEmptyNodes();
         }
     }
 }
