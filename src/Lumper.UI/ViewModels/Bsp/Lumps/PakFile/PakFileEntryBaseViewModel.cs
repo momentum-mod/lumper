@@ -1,9 +1,11 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using DynamicData;
 using SharpCompress.Archives.Zip;
-using Lumper.Lib.BSP.Struct;
+using ReactiveUI;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public abstract class PakFileEntryBaseViewModel : BspNodeBase
@@ -12,9 +14,20 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
         : base(parent)
     {
         _name = name;
+        this.WhenAnyValue(x => x.Name)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Where(m => m is not null)
+            .Subscribe(_ =>
+                this.RaisePropertyChanged(nameof(NodeName)));
     }
     public readonly SourceList<PakFileEntryBaseViewModel> _entries = new();
-    protected readonly string _name;
+
+    private string _name;
+    public string Name
+    {
+        get => _name;
+        set => this.RaiseAndSetIfChanged(ref _name, value);
+    }
 
     public override BspNodeBase? ViewNode => this;
 

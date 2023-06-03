@@ -1,10 +1,13 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using DynamicData;
 using SharpCompress.Archives.Zip;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Struct;
+using ReactiveUI;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
@@ -18,14 +21,36 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     }
 
     public PakFileEntryBranchViewModel(PakFileEntryBranchViewModel parent,
-                                       string name,
-                                       string path)
+                                       string name)
         : base(parent, name)
     {
-        Path = path;
+        Path = GetPath();
+        parent.WhenAnyValue(x => x.Name)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Where(m => m is not null)
+            .Subscribe(_ =>
+                Path = GetPath());
     }
 
-    public string Path { get; }
+    private string GetPath()
+    {
+        List<string> path = new();
+        GetPath(ref path, true);
+        path.Reverse();
+        return string.Join("/", path) + "/";
+    }
+
+    private void GetPath(ref List<string> path, bool skip = false)
+    {
+        if (Parent is PakFileEntryBranchViewModel branch)
+        {
+            if (!skip)
+                path.Add(Name);
+            branch.GetPath(ref path);
+        }
+    }
+
+    public string Path { get; private set; }
     private readonly PakFileLump _pakFile;
 
     public override BspNodeBase? ViewNode => this;
@@ -38,6 +63,21 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         }
     }
 
+    private PakFileEntryBranchViewModel AddBranch(string name)
+    {
+        var dir =
+            _entries.AsObservableList().Items
+            .FirstOrDefault(x => x is PakFileEntryBranchViewModel branch
+                                && branch.Name == name, null);
+        if (dir is null)
+        {
+            dir = new PakFileEntryBranchViewModel(this, name);
+            _entries.Add(dir);
+        }
+        return (PakFileEntryBranchViewModel)dir;
+    }
+
+
     private void CreateNodes(PakFileEntry entry, int index = 0)
     {
         var path = entry.Key.Split('/');
@@ -49,19 +89,8 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         string name = path[index];
         if (isDir)
         {
-            var dir =
-                _entries.AsObservableList().Items
-                .FirstOrDefault(x => x is PakFileEntryBranchViewModel branch
-                                  && branch._name == name, null);
-            if (dir is null)
-            {
-                dir = new PakFileEntryBranchViewModel(
-                    this,
-                    name,
-                    string.Join("/", path.Take(index + 1)) + "/");
-                _entries.Add(dir);
-            }
-            ((PakFileEntryBranchViewModel)dir).CreateNodes(entry, index + 1);
+            var dir = AddBranch(name);
+            dir.CreateNodes(entry, index + 1);
         }
         else
         {
@@ -100,11 +129,13 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
             _entries.Remove(branch);
         return hasLeafs;
     }
+
+    //todo do I still need this recursive thiing
     public void AddFile(string key, Stream stream)
     {
         if (Parent is PakFileEntryBranchViewModel branch)
         {
-            branch.AddFile(_name + "/" + key, stream);
+            branch.AddFile(Name + "/" + key, stream);
         }
         else if (Parent is PakFileLumpViewModel)
         {
@@ -113,5 +144,15 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
             CreateNodes(_pakFile.Entries);
             DeleteEmptyNodes();
         }
+    }
+
+    public void AddDir(string key)
+    {
+        if (key.Contains("/"))
+            throw new NotSupportedException(
+                "no path here for now .. only the directory name");
+        var dir = AddBranch(key);
+        //todo move this to the constructor again
+        dir.InitializeNodeChildrenObserver(dir._entries);
     }
 }

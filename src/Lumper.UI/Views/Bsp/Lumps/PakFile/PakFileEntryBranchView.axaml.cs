@@ -50,6 +50,12 @@ public partial class PakFileEntryBranchView : UserControl
             foreach (var r in result)
                 vm.AddFile(r.Name, await r.OpenReadAsync());
         }
-
+    }
+    public async void OnAddDirClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is PakFileEntryBranchViewModel vm)
+        {
+            vm.AddDir("new_dir");
+        }
     }
 }

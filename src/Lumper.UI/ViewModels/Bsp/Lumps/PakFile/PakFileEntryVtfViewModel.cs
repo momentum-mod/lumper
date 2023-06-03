@@ -25,7 +25,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     public override BspNodeBase? ViewNode => this;
 
     public override string NodeName =>
-        $"PakFileEntry{(string.IsNullOrWhiteSpace(_name) ? "" : $" ({_name})")}";
+        $"PakFileEntry{(string.IsNullOrWhiteSpace(Name) ? "" : $" ({Name})")}";
 
     private string _info = "";
     //todo remove this later and add seperate properties instead

@@ -7,10 +7,13 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileEntryBranchView">
 
-    <Grid RowDefinitions="Auto,Auto">
-        <TextBlock Grid.Row="0" Text="{Binding Path}"/>
-        <DockPanel Grid.Row="1">
+    <Grid RowDefinitions="Auto,Auto" 
+          ColumnDefinitions="Auto,Auto">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Path}" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}"/>
+        <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
             <Button DockPanel.Dock="Left" Click="OnAddFileClick">Add file</Button>
+            <Button DockPanel.Dock="Left" Click="OnAddDirClick">Add directory</Button>
         </DockPanel>
     </Grid>
 </UserControl>
