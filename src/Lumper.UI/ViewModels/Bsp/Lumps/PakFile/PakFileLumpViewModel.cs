@@ -83,6 +83,14 @@ public class PakFileLumpViewModel : LumpBase
         var exportDir = new DirectoryInfo(path);
         if (!exportDir.Exists)
             throw new DirectoryNotFoundException(path);
+        if (exportDir.GetFiles().Any()
+            || exportDir.GetDirectories().Any())
+        {
+            Console.WriteLine("Refusing to export to a directory containing stuff");
+            //todo messagebox .. but not here because of dependencies?
+            //option to delete files?
+            return;
+        }
 
         var reader = _lump.Zip.ExtractAllEntries();
         while (reader.MoveToNextEntry())
