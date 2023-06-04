@@ -24,6 +24,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
                                        string name)
         : base(parent, name)
     {
+        _pakFile = parent._pakFile;
     }
 
     private readonly PakFileLump _pakFile;
@@ -129,5 +130,25 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         var dir = AddBranch(key);
         //todo move this to the constructor again
         dir.InitializeNodeChildrenObserver(dir._entries);
+    }
+
+    //todo close the open tab on delete
+    public void Delete()
+    {
+        foreach (var entry in _entries.Items)
+        {
+            if (entry is PakFileEntryBranchViewModel branch)
+                branch.Delete();
+            else if (entry is PakFileEntryLeafViewModel leaf)
+                _pakFile.Entries.Remove(leaf.Entry);
+        }
+        _entries.Clear();
+        if (Parent is PakFileEntryBranchViewModel parentBranch)
+            parentBranch._entries.Remove(this);
+    }
+    public void Delete(PakFileEntryLeafViewModel leaf)
+    {
+        _pakFile.Entries.Remove(leaf.Entry);
+        _entries.Remove(leaf);
     }
 }

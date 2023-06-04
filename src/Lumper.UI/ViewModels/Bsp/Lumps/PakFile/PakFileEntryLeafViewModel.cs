@@ -34,4 +34,10 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
                 Entry.Key = Path + Name);
     }
 
+    public void Delete()
+    {
+        if (Parent is PakFileEntryBranchViewModel branch)
+            branch.Delete(this);
+    }
+
 }
