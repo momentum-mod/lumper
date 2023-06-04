@@ -90,6 +90,9 @@ public abstract class BspNodeBase : ViewModelBase
         return await matcher.Match(NodeName);
     }
 
+    public virtual void Open()
+    { }
+
     public void Close()
     {
         BspView.Close(this);

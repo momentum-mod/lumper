@@ -18,8 +18,6 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         PakFileEntry entry, string name)
         : base(parent, entry, name)
     {
-        //todo don't call this here
-        Open();
     }
 
     public override BspNodeBase? ViewNode => this;
@@ -87,15 +85,40 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         }
     }
 
-    public uint Depth { get; private set; }
-    public uint FrameCount { get; private set; }
-    public uint FaceCount { get; private set; }
-    public uint MipmapCount { get; private set; }
-    public VTFImageFlag Flags { get; private set; }
+    private uint _depth;
+    public uint Depth
+    {
+        get => _depth;
+        private set => this.RaiseAndSetIfChanged(ref _depth, value);
+    }
+    private uint _frameCount;
+    public uint FrameCount
+    {
+        get => _frameCount;
+        private set => this.RaiseAndSetIfChanged(ref _frameCount, value);
+    }
+    private uint _faceCount;
+    public uint FaceCount
+    {
+        get => _faceCount;
+        private set => this.RaiseAndSetIfChanged(ref _faceCount, value);
+    }
+    private uint _mipmapCount;
+    public uint MipmapCount
+    {
+        get => _mipmapCount;
+        private set => this.RaiseAndSetIfChanged(ref _mipmapCount, value);
+    }
+    public VTFImageFlag _flags;
+    public VTFImageFlag Flags
+    {
+        get => _flags;
+        private set => this.RaiseAndSetIfChanged(ref _flags, value);
+    }
 
     uint imageIndex = 0;
     protected bool Opened { get; private set; }
-    public void Open()
+    public override void Open()
     {
         VTFAPI.Initialize();
         //can't get length for byte array from LzmaStream 

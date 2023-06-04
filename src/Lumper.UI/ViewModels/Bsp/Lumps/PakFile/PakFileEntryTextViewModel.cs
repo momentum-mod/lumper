@@ -12,8 +12,6 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
         PakFileEntry entry, string name)
         : base(parent, entry, name)
     {
-        //todo don't call this here
-        Open();
     }
 
     private string _content = "";
@@ -33,7 +31,7 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
     private readonly System.Text.Encoding _encoding
         = System.Text.Encoding.Latin1;
 
-    public void Open()
+    public override void Open()
     {
         using var mem = new MemoryStream();
         _entry.DataStream.CopyTo(mem);
