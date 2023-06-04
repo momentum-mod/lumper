@@ -151,30 +151,25 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
             uint w = VTFFile.ImageGetWidth();
             uint h = VTFFile.ImageGetHeight();
             var f = VTFFile.ImageGetFormat();
-            //var ucharPtr = VTFFile.ImageGetData(0, 0, 0, 0);
             var ucharPtr = VTFFile.ImageGetData(Frame, Face, Slice, MipmapLevel);
-            var img = GetImage(ucharPtr, w, h, f);
+            var size = (int)VTFFile.ImageComputeImageSize(w, h, 1, 1, f);
+            var img = GetImage(ucharPtr, size, w, h, f);
             //img.SaveAsBmp("tmp.bmp");
             Image = img;
         }
     }
-
-    private Image<Rgba32> GetImage(IntPtr ptr, uint width, uint height, VTFImageFormat format)
+    private Image<Rgba32> GetImage(IntPtr ptr, int size, uint width, uint height, VTFImageFormat format)
+    {
+        var data = new byte[size];
+        Marshal.Copy(ptr, data, 0, size);
+        return GetImage(data, width, height, format);
+    }
+    private Image<Rgba32> GetImage(byte[] source, uint width, uint height, VTFImageFormat format)
     {
         int size = (int)width * (int)height * sizeof(byte) * 4;
-        var data = new byte[size];
-
-        //GCHandle pinnedArray = GCHandle.Alloc(data, GCHandleType.Pinned);
-        //IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-
-        //Marshal.Copy(ptr, data, 0, size);
-
-        VTFFile.ImageConvertToRGBA8888(ptr, data, width, height, format);
-        //Marshal.Copy(pointer, data, 0, size);
-
-        var img = GetImageFromRgba8888(data, (int)width, (int)height);
-
-        //pinnedArray.Free();
+        var dest = new byte[size];
+        VTFFile.ImageConvertToRGBA8888(source, dest, width, height, format);
+        var img = GetImageFromRgba8888(dest, (int)width, (int)height);
         return img;
     }
 
