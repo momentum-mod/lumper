@@ -2,20 +2,36 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using SharpCompress.Archives.Zip;
+using ReactiveUI;
 using Lumper.Lib.BSP.Struct;
+
+
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
 //, IDisposable
 {
-    protected readonly PakFileEntry? _entry;
-    public PakFileEntry? Entry { get => _entry; }
+    protected readonly PakFileEntry _entry;
+    public PakFileEntry Entry { get => _entry; }
 
     public PakFileEntryLeafViewModel(PakFileEntryBranchViewModel parent,
         PakFileEntry entry, string name)
         : base(parent, name)
     {
         _entry = entry;
+        Path = GetPath();
+        this.WhenAnyValue(x => x.Name)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Where(m => m is not null)
+            .Subscribe(_ =>
+                Entry.Key = Path + Name);
+        this.WhenAnyValue(x => x.Path)
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Where(m => m is not null)
+            .Subscribe(_ =>
+                Entry.Key = Path + Name);
     }
+
 }

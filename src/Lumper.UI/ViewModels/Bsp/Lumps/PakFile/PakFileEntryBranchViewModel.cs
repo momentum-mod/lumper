@@ -24,33 +24,8 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
                                        string name)
         : base(parent, name)
     {
-        Path = GetPath();
-        parent.WhenAnyValue(x => x.Name)
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Where(m => m is not null)
-            .Subscribe(_ =>
-                Path = GetPath());
     }
 
-    private string GetPath()
-    {
-        List<string> path = new();
-        GetPath(ref path, true);
-        path.Reverse();
-        return string.Join("/", path) + "/";
-    }
-
-    private void GetPath(ref List<string> path, bool skip = false)
-    {
-        if (Parent is PakFileEntryBranchViewModel branch)
-        {
-            if (!skip)
-                path.Add(Name);
-            branch.GetPath(ref path);
-        }
-    }
-
-    public string Path { get; private set; }
     private readonly PakFileLump _pakFile;
 
     public override BspNodeBase? ViewNode => this;

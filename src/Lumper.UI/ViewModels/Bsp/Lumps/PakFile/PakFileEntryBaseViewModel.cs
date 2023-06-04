@@ -19,6 +19,15 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
             .Where(m => m is not null)
             .Subscribe(_ =>
                 this.RaisePropertyChanged(nameof(NodeName)));
+
+        if (parent is PakFileEntryBranchViewModel branch)
+        {
+            branch.WhenAnyValue(x => x.Name)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Where(m => m is not null)
+                .Subscribe(_ =>
+                   Path = GetPath());
+        }
     }
     public readonly SourceList<PakFileEntryBaseViewModel> _entries = new();
 
@@ -29,6 +38,14 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
         set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
+    private string _path;
+    public string Path
+    {
+        get => _path;
+        protected set => this.RaiseAndSetIfChanged(ref _path, value);
+    }
+
+
     public override BspNodeBase? ViewNode => this;
 
     public override string NodeName =>
@@ -36,6 +53,25 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
 
     public override bool IsModified =>
         Nodes is { Count: > 0 } && Nodes.Any(n => n.IsModified);
+
+    protected string GetPath()
+    {
+        List<string> path = new();
+        GetPath(ref path, true);
+        path.Reverse();
+        return string.Join("/", path) + "/";
+    }
+
+    protected void GetPath(ref List<string> path, bool skip = false)
+    {
+        if (Parent is PakFileEntryBranchViewModel branch)
+        {
+            if (!skip)
+                path.Add(Name);
+            branch.GetPath(ref path);
+        }
+    }
+
 
     protected void InitializeNodeChildrenObserver()
     {

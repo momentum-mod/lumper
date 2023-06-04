@@ -4,11 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:entviews="clr-namespace:Lumper.UI.Views.Bsp.Lumps.PakFile"
              xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.PakFile"
-             xmlns:converters="clr-namespace:Lumper.UI.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileEntryTextView">
-    <Grid RowDefinitions="Auto, *">
-        <entviews:PakFileEntryView Grid.Row="0"/>
-        <TextBox Grid.Row="1" Text="{Binding Content}"></TextBox>
+             x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileEntryView">
+
+    <Grid RowDefinitions="Auto" 
+          ColumnDefinitions="Auto,Auto">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Path}" VerticalAlignment="Center"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}"/>
     </Grid>
 </UserControl>

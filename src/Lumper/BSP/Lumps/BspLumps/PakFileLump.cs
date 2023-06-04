@@ -59,7 +59,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
             {
                 var existing =
                     Zip.Entries.Where(x => x.Key == entry.Key);
-                if (!entry.IsModified)
+                if (existing.Any() && !entry.IsModified)
                     continue;
                 if (existing.Count() == 1)
                 {
@@ -74,12 +74,12 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
                 var stream = entry.DataStream;
                 if (stream.CanSeek)
                     stream.Seek(0, SeekOrigin.Begin);
-                /*else if (!entry.IsModified)
+                else if (!entry.IsModified)
                 {
                     var mem = new MemoryStream();
                     stream.CopyTo(mem);
                     stream = mem;
-                }*/
+                }
                 else if (entry.IsModified && stream.Position >= stream.Length)
                     throw new EndOfStreamException(
                         "Stream is not seekable, was modified  " +
