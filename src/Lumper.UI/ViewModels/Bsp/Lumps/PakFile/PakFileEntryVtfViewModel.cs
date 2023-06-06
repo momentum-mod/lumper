@@ -88,24 +88,55 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         get => _depth;
         private set => this.RaiseAndSetIfChanged(ref _depth, value);
     }
+
     private uint _frameCount;
     public uint FrameCount
     {
         get => _frameCount;
-        private set => this.RaiseAndSetIfChanged(ref _frameCount, value);
+        private set
+        {
+            if (_frameCount != value)
+            {
+                _frameCount = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(FrameMax));
+            }
+        }
     }
+    public uint FrameMax { get { return FrameCount - 1; } }
+
     private uint _faceCount;
     public uint FaceCount
     {
         get => _faceCount;
-        private set => this.RaiseAndSetIfChanged(ref _faceCount, value);
+        private set
+        {
+            if (_faceCount != value)
+            {
+                _faceCount = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(FaceMax));
+            }
+        }
     }
+    public uint FaceMax { get { return FaceCount - 1; } }
+
     private uint _mipmapCount;
     public uint MipmapCount
     {
         get => _mipmapCount;
-        private set => this.RaiseAndSetIfChanged(ref _mipmapCount, value);
+        private set
+        {
+            if (_mipmapCount != value)
+            {
+                _mipmapCount = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(MipmapMax));
+            }
+        }
     }
+    public uint MipmapMax { get { return MipmapCount - 1; } }
+
     public VTFImageFlag _flags;
     public VTFImageFlag Flags
     {

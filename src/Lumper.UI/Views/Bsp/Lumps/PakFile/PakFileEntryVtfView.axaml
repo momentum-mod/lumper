@@ -28,10 +28,10 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Text="Face"/>
         <TextBlock Grid.Row="4" Grid.Column="0" Text="Slice"/>
         <TextBlock Grid.Row="5" Grid.Column="0" Text="MipmapLevel"/>
-        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Frame}" Increment="1" Minimum="0" Maximum="{Binding FrameCount}"/>
-        <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Face}" Increment="1" Minimum="0" Maximum="{Binding FaceCount}"/>
+        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Frame}" Increment="1" Minimum="0" Maximum="{Binding FrameMax}"/>
+        <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Face}" Increment="1" Minimum="0" Maximum="{Binding FaceMax}"/>
         <NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding Slice}" Increment="1" Minimum="0" />
-        <NumericUpDown Grid.Row="5" Grid.Column="1" Value="{Binding MipmapLevel}" Increment="1" Minimum="0" Maximum="{Binding MipmapCount}"/>
+        <NumericUpDown Grid.Row="5" Grid.Column="1" Value="{Binding MipmapLevel}" Increment="1" Minimum="0" Maximum="{Binding MipmapMax}"/>
         <TextBlock Grid.Row="6" Grid.Column="0" Text="{Binding Info}"/>
         <Image Grid.Row="6" Grid.Column="1" Source="{Binding Image, Converter={StaticResource variableImage}}" />
     </Grid>
