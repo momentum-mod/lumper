@@ -28,6 +28,7 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
                 .Subscribe(_ =>
                    Path = GetPath());
         }
+        InitializeNodeChildrenObserver(_entries);
     }
     public readonly SourceList<PakFileEntryBaseViewModel> _entries = new();
 
@@ -69,16 +70,6 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
             if (!skip)
                 path.Add(Name);
             branch.GetPath(ref path);
-        }
-    }
-
-
-    protected void InitializeNodeChildrenObserver()
-    {
-        InitializeNodeChildrenObserver(_entries);
-        foreach (var entry in _entries.AsObservableList().Items)
-        {
-            entry.InitializeNodeChildrenObserver();
         }
     }
 

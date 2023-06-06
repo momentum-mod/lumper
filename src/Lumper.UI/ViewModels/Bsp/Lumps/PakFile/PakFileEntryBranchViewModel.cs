@@ -17,7 +17,6 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     {
         _pakFile = pakFile;
         CreateNodes(pakFile.Entries);
-        InitializeNodeChildrenObserver();
     }
 
     public PakFileEntryBranchViewModel(PakFileEntryBranchViewModel parent,
@@ -128,8 +127,6 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
             throw new NotSupportedException(
                 "no path here for now .. only the directory name");
         var dir = AddBranch(key);
-        //todo move this to the constructor again
-        dir.InitializeNodeChildrenObserver(dir._entries);
     }
 
     //todo close the open tab on delete
