@@ -27,9 +27,8 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
     private bool _isModified = false;
     public override bool IsModified { get => _isModified; }
 
-    //todo meh
     private readonly System.Text.Encoding _encoding
-        = System.Text.Encoding.Latin1;
+        = System.Text.Encoding.ASCII;
 
     public override void Open()
     {

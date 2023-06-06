@@ -1,9 +1,6 @@
 using System;
 using System.IO;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using SharpCompress.Archives.Zip;
 using ReactiveUI;
 using VTFLib;
 using SixLabors.ImageSharp;
@@ -153,15 +150,6 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
                   $"MipmapCount: {MipmapCount}\n" +
                   $"Flags: {Flags.ToString().Replace(",", "\n")}\n";
 
-        /*if (VTFFile.ImageGetHasThumbnail())
-        {
-            uint w = VTFFile.ImageGetThumbnailWidth();
-            uint h = VTFFile.ImageGetThumbnailHeight();
-            var f = VTFFile.ImageGetThumbnailFormat();
-            var ucharPtr = VTFFile.ImageGetThumbnailData();
-            var img = GetImage(ucharPtr, w, h, f);
-            //img.SaveAsBmp("thumbnail.bmp");
-        }*/
         OpenImage();
     }
 
@@ -174,7 +162,7 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
             uint w = VTFFile.ImageGetWidth();
             uint h = VTFFile.ImageGetHeight();
             var f = VTFFile.ImageGetFormat();
-            var ucharPtr = VTFFile.ImageGetData(Frame, Face, Slice, MipmapLevel);
+            IntPtr ucharPtr = VTFFile.ImageGetData(Frame, Face, Slice, MipmapLevel);
             var size = (int)VTFFile.ImageComputeImageSize(w, h, 1, 1, f);
             var img = GetImage(ucharPtr, size, w, h, f);
             //img.SaveAsBmp("tmp.bmp");
@@ -189,7 +177,9 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
     }
     private Image<Rgba32> GetImage(byte[] source, uint width, uint height, VTFImageFormat format)
     {
-        int size = (int)width * (int)height * sizeof(byte) * 4;
+        int size = (int)width * (int)height * 4;
+        if (size <= 0)
+            throw new ArgumentException("image data array size is 0");
         var dest = new byte[size];
         VTFFile.ImageConvertToRGBA8888(source, dest, width, height, format);
         var img = GetImageFromRgba8888(dest, (int)width, (int)height);

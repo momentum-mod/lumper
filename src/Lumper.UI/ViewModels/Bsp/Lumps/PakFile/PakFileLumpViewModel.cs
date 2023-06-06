@@ -1,14 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Collections.Generic;
-using DynamicData;
-using Lumper.Lib.BSP.Lumps.BspLumps;
-using Lumper.Lib.BSP.Lumps;
-using Lumper.UI.Models;
 using SharpCompress.Archives.Zip;
+using Lumper.Lib.BSP.Lumps.BspLumps;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 
