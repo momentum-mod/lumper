@@ -8,7 +8,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileEntryTextView">
     <Grid RowDefinitions="Auto, *">
-        <entviews:PakFileEntryView Grid.Row="0"/>
+        <entviews:PakFileEntryView Grid.Row="0" Grid.ColumnSpan="2"/>
         <TextBox Grid.Row="1" Text="{Binding Content}"></TextBox>
     </Grid>
 </UserControl>

@@ -19,7 +19,7 @@
                           Auto,
                           *"
           ColumnDefinitions="Auto,*">
-        <entviews:PakFileEntryView Grid.Row="0"/>
+        <entviews:PakFileEntryView Grid.Row="0" Grid.ColumnSpan="2"/>
         <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
             <Button DockPanel.Dock="Left" Click="OnNewImageClick">New Image</Button>
             <Button DockPanel.Dock="Left" Click="OnSetImageClick">Set Image</Button>

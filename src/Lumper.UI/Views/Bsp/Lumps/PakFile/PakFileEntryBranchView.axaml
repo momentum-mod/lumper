@@ -9,7 +9,7 @@
 
     <Grid RowDefinitions="Auto,Auto" 
           ColumnDefinitions="Auto,Auto">
-        <entviews:PakFileEntryView Grid.Row="0"/>
+        <entviews:PakFileEntryView Grid.Row="0" Grid.ColumnSpan="2"/>
         <DockPanel Grid.Row="1" Grid.ColumnSpan="2">
             <Button DockPanel.Dock="Left" Click="OnAddFileClick">Add file</Button>
             <Button DockPanel.Dock="Left" Click="OnAddDirClick">Add directory</Button>
