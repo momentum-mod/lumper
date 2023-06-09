@@ -98,6 +98,16 @@ public abstract class BspNodeBase : ViewModelBase
         BspView.Close(this);
     }
 
+    //hack used for the hotkey on invisible button
+    //hotkey always calls the first tab
+    //adding and removing the hotkey in code behind didn't work
+    //hotkey in mainwindow menu didn't work either
+    //so this is my ugly workaround
+    public void CloseSelected()
+    {
+        BspView.Close(BspView.SelectedTab);
+    }
+
     public async ValueTask Reset()
     {
         IsVisible = true;

@@ -35,6 +35,9 @@
                             <Button Grid.Column="2"
                                     Width="15" Height="15"
                                     Command="{Binding Close}"/>
+                            <Button IsVisible="false"
+                                    Command="{Binding CloseSelected}" 
+                                    HotKey="Ctrl+F4"/>
                         </Grid>
                     </DataTemplate>
                 </TabControl.ItemTemplate>
