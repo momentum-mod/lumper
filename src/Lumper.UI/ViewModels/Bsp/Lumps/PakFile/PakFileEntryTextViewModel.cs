@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using SharpCompress.Archives.Zip;
 using ReactiveUI;
@@ -27,15 +28,38 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
     private bool _isModified = false;
     public override bool IsModified { get => _isModified; }
 
+
+    private bool _isContentVisible = false;
+    public bool IsContentVisible
+    {
+        get => _isContentVisible;
+        set => this.RaiseAndSetIfChanged(ref _isContentVisible, value);
+    }
+
+    private readonly string[] KnownFileTypes =
+    {
+        ".txt",
+        ".vbsp",
+        ".vmt"
+    };
     private readonly System.Text.Encoding _encoding
         = System.Text.Encoding.ASCII;
 
-    public override void Open()
+
+    public void ShowContent()
     {
         var sr = new StreamReader(_entry.DataStream, _encoding);
         Content = sr.ReadToEnd();
         //hack setting Content sets IsModified 
         _isModified = false;
+        IsContentVisible = true;
+    }
+
+    public override void Open()
+    {
+        var fi = new FileInfo(Name);
+        if (KnownFileTypes.Contains(fi.Extension.ToLower()))
+            ShowContent();
     }
 
     public override void Update()
