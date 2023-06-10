@@ -32,13 +32,8 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
 
     public override void Open()
     {
-        using var mem = new MemoryStream();
-        _entry.DataStream.CopyTo(mem);
-        mem.Seek(0, SeekOrigin.Begin);
-        var sr = new BinaryReader(mem);
-        //todo async
-        byte[] b = sr.ReadBytes((int)mem.Length);
-        Content = _encoding.GetString(b);
+        var sr = new StreamReader(_entry.DataStream, _encoding);
+        Content = sr.ReadToEnd();
         //hack setting Content sets IsModified 
         _isModified = false;
     }
@@ -48,8 +43,8 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
         if (IsModified)
         {
             var stream = new MemoryStream();
-            var writer = new BinaryWriter(stream);
-            writer.Write(_encoding.GetBytes(Content));
+            var writer = new StreamWriter(stream, _encoding);
+            writer.Write(Content);
             stream.Seek(0, SeekOrigin.Begin);
             _entry.DataStream = stream;
             _isModified = false;
