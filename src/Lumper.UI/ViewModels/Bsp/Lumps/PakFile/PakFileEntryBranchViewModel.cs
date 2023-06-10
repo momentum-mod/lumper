@@ -53,6 +53,18 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     }
 
 
+    private void AddLeaf(string name, PakFileEntry entry)
+    {
+        if (!_entries.Items.Any(
+                x => x is PakFileEntryLeafViewModel leaf
+                     && leaf.Entry == entry))
+        {
+            if (name.ToLower().EndsWith(".vtf"))
+                _entries.Add(new PakFileEntryVtfViewModel(this, entry, name));
+            else
+                _entries.Add(new PakFileEntryTextViewModel(this, entry, name));
+        }
+    }
     private void CreateNodes(PakFileEntry entry, int index = 0)
     {
         var path = entry.Key.Split('/');
@@ -69,15 +81,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         }
         else
         {
-            if (!_entries.Items.Any(
-                    x => x is PakFileEntryLeafViewModel leaf
-                         && leaf.Entry == entry))
-            {
-                if (name.ToLower().EndsWith(".vtf"))
-                    _entries.Add(new PakFileEntryVtfViewModel(this, entry, name));
-                else
-                    _entries.Add(new PakFileEntryTextViewModel(this, entry, name));
-            }
+            AddLeaf(name, entry);
         }
     }
 
@@ -105,20 +109,16 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         return hasLeafs;
     }
 
-    //todo do I still need this recursive thiing
     public void AddFile(string key, Stream stream)
     {
-        if (Parent is PakFileEntryBranchViewModel branch)
-        {
-            branch.AddFile(Name + "/" + key, stream);
-        }
-        else if (Parent is PakFileLumpViewModel)
-        {
-            _pakFile.Entries.Add(new PakFileEntry(key, stream));
-
-            CreateNodes(_pakFile.Entries);
-            DeleteEmptyNodes();
-        }
+        if (key.Contains("/"))
+            throw new NotSupportedException(
+                "no path here for now .. only the directory name");
+        var entry = new PakFileEntry(key, stream);
+        _pakFile.Entries.Add(entry);
+        AddLeaf(key, entry);
+        //CreateNodes(_pakFile.Entries);
+        //DeleteEmptyNodes();
     }
 
     public void AddDir(string key)
