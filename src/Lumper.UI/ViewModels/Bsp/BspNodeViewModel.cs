@@ -7,6 +7,7 @@ using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.UI.Models;
 using Lumper.UI.ViewModels.Bsp.Lumps.Entity;
+using Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps;
 
@@ -40,6 +41,7 @@ public class BspNodeViewModel : BspNodeBase, IDisposable
         LumpBase lumpModel = lump switch
         {
             EntityLump el => new EntityLumpViewModel(BspView, el),
+            PakFileLump el => new PakFileLumpViewModel(BspView, el),
             _ => new UnmanagedLumpViewModel(BspView, type)
         };
         _lumps.Add(lumpModel);

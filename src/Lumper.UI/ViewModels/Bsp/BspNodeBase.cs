@@ -19,12 +19,14 @@ public abstract class BspNodeBase : ViewModelBase
 {
     private ReadOnlyObservableCollection<BspNodeBase>? _filteredNodes;
     private bool _isVisible;
+    private bool _isExpanded;
     private ReadOnlyObservableCollection<BspNodeBase>? _nodes;
 
     public BspNodeBase(BspViewModel bspView)
     {
         Parent = null;
         _isVisible = true;
+        _isExpanded = false;
         BspView = bspView;
     }
 
@@ -32,6 +34,7 @@ public abstract class BspNodeBase : ViewModelBase
     {
         Parent = parent;
         _isVisible = parent._isVisible;
+        _isExpanded = parent._isExpanded;
         BspView = parent.BspView;
     }
 
@@ -45,6 +48,12 @@ public abstract class BspNodeBase : ViewModelBase
     {
         get => _isVisible;
         set => this.RaiseAndSetIfChanged(ref _isVisible, value);
+    }
+
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set => this.RaiseAndSetIfChanged(ref _isExpanded, value);
     }
 
     public virtual BspNodeBase? ViewNode => null;
@@ -90,6 +99,9 @@ public abstract class BspNodeBase : ViewModelBase
         return await matcher.Match(NodeName);
     }
 
+    public virtual void Open()
+    { }
+
     public void Close()
     {
         BspView.Close(this);
@@ -130,6 +142,7 @@ public abstract class BspNodeBase : ViewModelBase
             return _isVisible;
         bool visible =
             anyChildVisible || await Match(matcher, cancellationToken);
+        IsExpanded = !matcher.IsEmpty && anyChildVisible;
         IsVisible = visible;
         return visible;
     }
@@ -178,5 +191,21 @@ public abstract class BspNodeBase : ViewModelBase
             ViewNode.RaisePropertyChanged(nameof(IsModified));
 
         return result;
+    }
+
+    public void ExpandTree()
+    {
+        ExpandTree(_ => true);
+    }
+    public void ExpandTree(Func<BspNodeBase, bool> fun)
+    {
+        IsExpanded = fun(this);
+        if (Nodes is not null)
+        {
+            foreach (var node in Nodes)
+            {
+                node.ExpandTree(fun);
+            }
+        }
     }
 }

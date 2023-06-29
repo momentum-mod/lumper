@@ -7,12 +7,21 @@ namespace Lumper.UI.Models;
 /// </summary>
 public abstract class Matcher
 {
-    protected Matcher(string pattern)
+    //todo meh
+    //IsEmpty needs to be seperate because the pattern 
+    //could have been changed by the matcher
+    protected Matcher(string pattern, bool isEmpty)
     {
         Pattern = pattern;
+        IsEmpty = isEmpty;
     }
 
     protected string Pattern
+    {
+        get;
+    }
+
+    public bool IsEmpty
     {
         get;
     }

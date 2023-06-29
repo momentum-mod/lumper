@@ -15,7 +15,7 @@
     <Border BorderBrush="{DynamicResource BackgroundExtraDark}"
             BorderThickness="1"
             Margin="8">
-        <Grid ColumnDefinitions="*,1,4*" RowDefinitions="Auto, *" Background="{DynamicResource BackgroundDark}">
+        <Grid ColumnDefinitions="Auto,1,4*" RowDefinitions="Auto,*" Background="{DynamicResource BackgroundDark}">
             <bspviews:BspSearchView Grid.Row="0" Margin="6" DataContext="{Binding}" />
             <bspviews:BspTreeView Grid.Row="1" Margin="0, 0, 0,8" DataContext="{Binding}" />
             <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />

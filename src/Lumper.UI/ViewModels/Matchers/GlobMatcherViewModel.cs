@@ -13,6 +13,6 @@ public class GlobMatcherViewModel : MatcherBase
 
     public override Matcher ConstructMatcher(string pattern)
     {
-        return new GlobMatcher($"*{pattern}*", true);
+        return new GlobMatcher($"*{pattern}*", string.IsNullOrEmpty(pattern), true);
     }
 }

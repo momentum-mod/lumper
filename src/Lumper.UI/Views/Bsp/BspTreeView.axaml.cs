@@ -19,7 +19,7 @@ public partial class BspTreeView : UserControl
         AvaloniaXamlLoader.Load(this);
     }
 
-    public async void OnKeyDown(object sender, KeyEventArgs e)
+    public void OnKeyDown(object sender, KeyEventArgs e)
     {
         switch (e.Key)
         {
