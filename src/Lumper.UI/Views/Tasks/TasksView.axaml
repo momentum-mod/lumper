@@ -39,7 +39,7 @@
                             <ColumnDefinition Width="35" />
                             <ColumnDefinition Width="15" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock HorizontalAlignment="Left" Grid.Column="0" Text="{Binding Task.Type}"/>
+                       <TextBlock HorizontalAlignment="Left" Grid.Column="0" Text="{Binding Task.Type}"/>
                         <!--FIXME ProgressBar didn't scale properly .. needs to get smaller before the other fields-->
                         <!--<ProgressBar Grid.Column="1" Value="{Binding ProgressPercent}"/>-->
                         <TextBlock Grid.Column="2" Text="{Binding ProgressPercent, Converter={StaticResource percent}}"/>

@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:entviews="clr-namespace:Lumper.UI.Views.Bsp.Lumps.PakFile"
+             xmlns:entmodels="clr-namespace:Lumper.UI.ViewModels.Bsp.Lumps.PakFile"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Bsp.Lumps.PakFile.PakFileEntryVtfView">
+
+    <UserControl.Resources>
+        <converters:BitmapAssetValueConverter x:Key="variableImage" />
+    </UserControl.Resources>
+    <Grid RowDefinitions="Auto, 
+                          Auto,
+                          Auto,
+                          Auto,
+                          Auto,
+                          Auto,
+                          *"
+          ColumnDefinitions="Auto,*">
+        <entviews:PakFileEntryView Grid.Row="0" Grid.ColumnSpan="2"/>
+        <DockPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+            <Button DockPanel.Dock="Left" Click="OnNewImageClick">New Image</Button>
+            <Button DockPanel.Dock="Left" Click="OnSetImageClick">Set Image</Button>
+        </DockPanel>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Frame"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Face"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Slice"/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="MipmapLevel"/>
+        <NumericUpDown Grid.Row="2" Grid.Column="1" Value="{Binding Frame}" Increment="1" Minimum="0" Maximum="{Binding FrameMax}"/>
+        <NumericUpDown Grid.Row="3" Grid.Column="1" Value="{Binding Face}" Increment="1" Minimum="0" Maximum="{Binding FaceMax}"/>
+        <NumericUpDown Grid.Row="4" Grid.Column="1" Value="{Binding Slice}" Increment="1" Minimum="0" />
+        <NumericUpDown Grid.Row="5" Grid.Column="1" Value="{Binding MipmapLevel}" Increment="1" Minimum="0" Maximum="{Binding MipmapMax}"/>
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="{Binding Info}"/>
+        <Image Grid.Row="6" Grid.Column="1" Source="{Binding Image, Converter={StaticResource variableImage}}" />
+    </Grid>
+</UserControl>

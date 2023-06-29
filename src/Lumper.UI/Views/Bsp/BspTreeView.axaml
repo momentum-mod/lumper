@@ -20,17 +20,18 @@
                       Margin="0, 0, 0,8"
                       KeyDown="OnKeyDown"
                       Tapped="OnClick">
+                <TreeView.Styles>
+                    <Style Selector="TreeViewItem">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    </Style>
+                </TreeView.Styles>
                 <TreeView.DataTemplates>
                     <TreeDataTemplate DataType="bspmodels:BspNodeBase"
                                       ItemsSource="{Binding FilteredNodes}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding IsVisible}">
                             <StackPanel.ContextMenu>
-                                <ContextMenu Items="{Binding ContextMenuItems}">
-                                    <ContextMenu.ItemTemplate>
-                                        <DataTemplate>
-                                            <Button Content="{Binding Key}" Command="{Binding Value}" />
-                                        </DataTemplate>
-                                    </ContextMenu.ItemTemplate>
+                                <ContextMenu>
+                                    <MenuItem Header="Expand" Command="{Binding ExpandTree}"/>
                                 </ContextMenu>
                             </StackPanel.ContextMenu>
                             <Image Source="{Binding NodeIcon, Converter={StaticResource variableImage}}"

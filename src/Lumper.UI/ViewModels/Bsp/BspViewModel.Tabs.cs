@@ -43,6 +43,7 @@ public partial class BspViewModel
         if (_openTabsSet.Add(viewNode))
             _openTabs.Add(viewNode);
         SelectedTab = viewNode;
+        viewNode.Open();
     }
 
     public void Close(BspNodeBase? bspNode)

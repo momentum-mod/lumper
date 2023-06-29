@@ -7,8 +7,8 @@ namespace Lumper.UI.Models.Matchers;
 /// </summary>
 public class SimpleMatcher : Matcher
 {
-    public SimpleMatcher(string pattern)
-        : base(pattern)
+    public SimpleMatcher(string pattern, bool isEmpty)
+        : base(pattern, isEmpty)
     {
     }
 

@@ -12,8 +12,8 @@ public class GlobMatcher : Matcher
 {
     private readonly Glob _matcher;
 
-    public GlobMatcher(string pattern, bool ignoreCase = false)
-        : base(pattern)
+    public GlobMatcher(string pattern, bool isEmpty, bool ignoreCase = false)
+        : base(pattern, isEmpty)
     {
         _matcher = new Glob(pattern,
             GlobOptions.Compiled | (ignoreCase

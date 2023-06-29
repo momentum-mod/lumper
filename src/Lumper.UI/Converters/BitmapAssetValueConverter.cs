@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Globalization;
 using System.Reflection;
 using Avalonia;
@@ -6,6 +7,8 @@ using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Bmp;
 
 namespace Lumper.UI.Converters;
 
@@ -35,35 +38,49 @@ public class BitmapAssetValueConverter : IValueConverter
                     new ArgumentNullException(nameof(value)),
                     BindingErrorType.DataValidationError);
             case string rawUri when targetType.IsAssignableFrom(typeof(Bitmap)):
-            {
-                Uri uri;
+                {
+                    Uri uri;
 
-                // Allow for assembly overrides
-                if (rawUri.StartsWith("avares://"))
-                {
-                    uri = new Uri(rawUri);
-                }
-                else
-                {
-                    string? assemblyName =
-                        Assembly.GetEntryAssembly()?.GetName().Name;
-                    if (assemblyName is null)
+                    // Allow for assembly overrides
+                    if (rawUri.StartsWith("avares://"))
+                    {
+                        uri = new Uri(rawUri);
+                    }
+                    else
+                    {
+                        string? assemblyName =
+                            Assembly.GetEntryAssembly()?.GetName().Name;
+                        if (assemblyName is null)
+                            return new BindingNotification(
+                                new ArgumentNullException(nameof(assemblyName)),
+                                BindingErrorType.DataValidationError);
+
+                        uri = new Uri($"avares://{assemblyName}{rawUri}");
+                    }
+
+                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
+                    if (assets is null)
                         return new BindingNotification(
-                            new ArgumentNullException(nameof(assemblyName)),
+                            new ArgumentNullException(nameof(assets)),
                             BindingErrorType.DataValidationError);
 
-                    uri = new Uri($"avares://{assemblyName}{rawUri}");
+                    var asset = assets.Open(uri);
+                    return new Bitmap(asset);
                 }
+            case Image img when targetType.IsAssignableFrom(typeof(Bitmap)):
+                {
+                    using var mem = new MemoryStream();
+                    var encoder = new BmpEncoder()
+                    {
+                        SupportTransparency = true,
+                        BitsPerPixel = BmpBitsPerPixel.Pixel32,
+                        SkipMetadata = false,
+                    };
+                    img.SaveAsBmp(mem, encoder);
+                    mem.Seek(0, SeekOrigin.Begin);
+                    return new Bitmap(mem);
 
-                var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                if (assets is null)
-                    return new BindingNotification(
-                        new ArgumentNullException(nameof(assets)),
-                        BindingErrorType.DataValidationError);
-
-                var asset = assets.Open(uri);
-                return new Bitmap(asset);
-            }
+                }
             default:
                 return new BindingNotification(
                     new ArgumentOutOfRangeException(nameof(value)),

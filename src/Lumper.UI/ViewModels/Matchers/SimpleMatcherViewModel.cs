@@ -13,6 +13,6 @@ public class SimpleMatcherViewModel : MatcherBase
 
     public override Matcher ConstructMatcher(string pattern)
     {
-        return new SimpleMatcher(pattern);
+        return new SimpleMatcher(pattern, string.IsNullOrEmpty(pattern));
     }
 }
