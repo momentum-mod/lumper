@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net7.0</TargetFramework>
@@ -6,31 +6,61 @@
         <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
         <TrimMode>copyused</TrimMode>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+        <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
     </PropertyGroup>
     <ItemGroup>
-        <Folder Include="Models\"/>
-        <AvaloniaResource Include="Assets\**"/>
-        <None Remove=".gitignore"/>
+        <Folder Include="Dependencies\Linux\" />
+        <Folder Include="Models\" />
+        <AvaloniaResource Include="Assets\**" />
+        <None Remove=".gitignore" />
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.
         If you will publish your application in self-contained mode with p:PublishTrimmed=true and it will use Fluent theme Default theme will be trimmed from the output and vice versa.
         https://github.com/AvaloniaUI/Avalonia/issues/5593 -->
-        <TrimmableAssembly Include="Avalonia.Themes.Fluent"/>
-        <TrimmableAssembly Include="Avalonia.Themes.Default"/>
+        <TrimmableAssembly Include="Avalonia.Themes.Fluent" />
+        <TrimmableAssembly Include="Avalonia.Themes.Default" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.0-preview4"/>
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4"/>
+        <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-preview4"/>
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4"/>
-        <PackageReference Include="Glob" Version="1.2.0-alpha0037"/>
-        <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev2"/>
-        <PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4"/>
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0-preview4" />
+        <PackageReference Include="Glob" Version="1.2.0-alpha0037" />
+        <PackageReference Include="MessageBox.Avalonia" Version="2.3.1-prev2" />
+        <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
+        <PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Lumper\Lumper.csproj"/>
+        <ProjectReference Include="..\Lumper\Lumper.csproj" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(IsWindows)'=='true'">
+      <Reference Include="VTFLib.NET">
+          <HintPath>Dependencies\Windows\VTFLib.NET.dll</HintPath>
+      </Reference>
+      <None Update="Dependencies\Windows\VTFLib.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>VTFLib.dll</TargetPath>
+      </None>
+      <None Update="Dependencies\Windows\VTFLib.NET.dll">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <TargetPath>VTFLib.NET.dll</TargetPath>
+      </None>
+    </ItemGroup>
+    <ItemGroup Condition="'$(IsLinux)'=='true'">
+        <Reference Include="VTFLib.NET">
+            <HintPath>Dependencies\Linux\VTFLib.NET.dll</HintPath>
+        </Reference>
+        <None Update="Dependencies\Linux\libvtflib.so">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>libvtflib.so</TargetPath>
+        </None>
+        <None Update="Dependencies\Linux\VTFLib.NET.dll">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <TargetPath>VTFLib.NET.dll</TargetPath>
+        </None>
     </ItemGroup>
 </Project>
