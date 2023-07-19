@@ -4,14 +4,14 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Bsp.Lumps.Entity.EntityPropertyStringTabView">
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto"
-          ColumnDefinitions="Auto,5,*">
-        <TextBlock Text="Value:"
-                   VerticalAlignment="Center"
-                   Grid.Row="0" Grid.Column="0" />
-
+    <Grid ColumnDefinitions="*,5,4*,50">
+        <TextBox Text="{Binding Key}" 
+                 VerticalAlignment="Center"/>
         <TextBox Text="{Binding Value}"
                  VerticalAlignment="Center"
-                 Grid.Row="0" Grid.Column="2" />
+                 Grid.Column="2" />
+        <Button  Command="{Binding Delete}"
+                 VerticalAlignment="Center"
+                 Grid.Column="3">X</Button>
     </Grid>
 </UserControl>

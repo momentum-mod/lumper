@@ -7,30 +7,26 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Bsp.Lumps.Entity.EntityTabView">
 
-    <ItemsControl Items="{Binding Nodes}">
-        <ItemsControl.DataTemplates>
-            <DataTemplate DataType="entmodels:EntityPropertyStringViewModel">
-                <Grid RowDefinitions="Auto,*" Margin="5">
-                    <TextBlock Grid.Row="0"
-                               FontSize="15"
-                               FontWeight="Bold"
-                               Margin="0,0,0,5"
-                               Text="{Binding NodeName}" />
-                    <entviews:EntityPropertyStringTabView Grid.Row="1"
-                                                          DataContext="{Binding }" />
-                </Grid>
-            </DataTemplate>
-            <DataTemplate DataType="entmodels:EntityPropertyIOViewModel">
-                <Grid RowDefinitions="Auto,*" Margin="5">
-                    <TextBlock Grid.Row="0"
-                               FontSize="15"
-                               FontWeight="Bold"
-                               Margin="0,0,0,5"
-                               Text="{Binding NodeName}" />
-                    <entviews:EntityPropertyIOTabView Grid.Row="1"
-                                                      DataContext="{Binding }" />
-                </Grid>
-            </DataTemplate>
-        </ItemsControl.DataTemplates>
-    </ItemsControl>
+    <Grid RowDefinitions="Auto,*">
+        <DockPanel Grid.Row="0">
+            <Button DockPanel.Dock="Left" Command="{Binding AddString}">Add keyvalue</Button>
+            <Button DockPanel.Dock="Left" Command="{Binding AddIO}">Add IO</Button>
+        </DockPanel>
+        <ItemsControl Items="{Binding Nodes}" Grid.Row="1">
+            <ItemsControl.DataTemplates>
+                <DataTemplate DataType="entmodels:EntityPropertyStringViewModel">
+                    <Grid RowDefinitions="Auto,*" Margin="5">
+                        <entviews:EntityPropertyStringTabView Grid.Row="1"
+                                                            DataContext="{Binding }" />
+                    </Grid>
+                </DataTemplate>
+                <DataTemplate DataType="entmodels:EntityPropertyIOViewModel">
+                    <Grid RowDefinitions="Auto,*" Margin="5">
+                        <entviews:EntityPropertyIOTabView Grid.Row="1"
+                                                        DataContext="{Binding }" />
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.DataTemplates>
+        </ItemsControl>
+    </Grid>
 </UserControl>

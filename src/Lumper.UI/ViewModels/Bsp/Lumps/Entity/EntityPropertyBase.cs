@@ -1,3 +1,6 @@
+using System.Reactive.Linq;
+using ReactiveUI;
+
 namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
 
 /// <summary>
@@ -9,13 +12,30 @@ public abstract class EntityPropertyBase : BspNodeBase
         Lib.BSP.Struct.Entity.Property property)
         : base(parent)
     {
-        Key = property.Key;
+        _key = property.Key;
+        _property = property;
     }
 
+    private string _key;
     public string Key
     {
-        get;
+        get => _key;
+        set => Modify(ref _key, value);
     }
 
     public override string NodeName => Key;
+
+    private readonly Lib.BSP.Struct.Entity.Property _property;
+    public Lib.BSP.Struct.Entity.Property Property => _property;
+
+    public override void Update()
+    {
+        _property.Key = _key;
+        base.Update();
+    }
+    public void Delete()
+    {
+        if (Parent is EntityViewModel vm)
+            vm.Delete(this);
+    }
 }

@@ -22,6 +22,15 @@
                     <TreeDataTemplate DataType="bspmodels:BspNodeBase"
                                       ItemsSource="{Binding FilteredNodes}">
                         <StackPanel Orientation="Horizontal" IsVisible="{Binding IsVisible}">
+                            <StackPanel.ContextMenu>
+                                <ContextMenu Items="{Binding ContextMenuItems}">
+                                    <ContextMenu.ItemTemplate>
+                                        <DataTemplate>
+                                            <Button Content="{Binding Key}" Command="{Binding Value}" />
+                                        </DataTemplate>
+                                    </ContextMenu.ItemTemplate>
+                                </ContextMenu>
+                            </StackPanel.ContextMenu>
                             <Image Source="{Binding NodeIcon, Converter={StaticResource variableImage}}"
                                    Width="24" Height="24"
                                    Margin="0,0,5,0" />

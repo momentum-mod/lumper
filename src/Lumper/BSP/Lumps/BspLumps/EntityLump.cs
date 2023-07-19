@@ -27,7 +27,8 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
                 var inSection = false;
                 var inString = false;
                 char x;
-                while ((x = reader.ReadChar()) != '\0')
+                while (reader.BaseStream.Position < reader.BaseStream.Length
+                       && (x = reader.ReadChar()) != '\0')
                 {
                     switch (x)
                     {
