@@ -8,7 +8,7 @@ namespace Lumper.Lib.BSP.Struct
     {
         public abstract class Property
         {
-            public string Key { get; protected set; }
+            public string Key { get; set; }
             public abstract string ValueString { get; set; }
             public override string ToString() => $"\"{Key}\" \"{ValueString}\"";
 

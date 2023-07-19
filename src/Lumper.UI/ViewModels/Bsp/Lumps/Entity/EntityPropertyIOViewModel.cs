@@ -20,8 +20,7 @@ public class EntityPropertyIOViewModel : EntityPropertyBase
 
     public EntityPropertyIOViewModel(EntityViewModel parent,
         Lib.BSP.Struct.Entity.Property<EntityIO> property)
-        : base(
-            parent, property)
+        : base(parent, property)
     {
         _entity = property.Value;
         _targetEntityName = _entity.TargetEntityName;
