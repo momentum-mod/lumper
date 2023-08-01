@@ -22,7 +22,7 @@ namespace Lumper.Lib.BSP
         public int Revision { get; set; }
         public int Version { get; set; }
 
-        public BspFileReader Reader { get; private set; }
+        protected MemoryStream Stream { get; private set; }
 
         public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = new();
 
@@ -39,7 +39,7 @@ namespace Lumper.Lib.BSP
             // TODO: loads of error handling
             Name = Path.GetFileNameWithoutExtension(path);
             var filePath = Uri.UnescapeDataString(Path.GetFullPath(path));
-            var stream = File.OpenRead(filePath);
+            using var stream = File.OpenRead(filePath);
             Load(stream);
             //set this at the end because Load(stream) resets it
             FilePath = filePath;
@@ -47,10 +47,12 @@ namespace Lumper.Lib.BSP
         public void Load(Stream stream)
         {
             FilePath = null;
-            if (Reader is not null)
-                Reader.Dispose();
-            Reader = new BspFileReader(this, stream);
-            Reader.Load();
+            if (Stream is not null)
+                Stream.Dispose();
+            Stream = new MemoryStream();
+            stream.CopyTo(Stream);
+            var reader = new BspFileReader(this, Stream);
+            reader.Load();
         }
 
         public void Save(string path)
