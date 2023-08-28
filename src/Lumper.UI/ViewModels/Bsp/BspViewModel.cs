@@ -14,6 +14,7 @@ public partial class BspViewModel : ViewModelBase
     public BspViewModel(BspFile bspFile)
     {
         BspFile = bspFile;
+        FilePath = BspFile.FilePath;
         BspNode = new BspNodeViewModel(this);
         SearchInit();
         TabsInit();
