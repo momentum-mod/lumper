@@ -155,11 +155,13 @@ public partial class MainWindowViewModel
 
         BspModel = new BspViewModel(bspFile);
         TasksModel = new Tasks.TasksViewModel(bspFile);
+        IsProgressBarVisible = true;
 
         if (BspModel.BspNode is BspNodeViewModel bspNodeViewModel)
             await bspNodeViewModel.InitializeAsync();
 
         Content = BspModel;
+        IsProgressBarVisible = false;
     }
 
     private async Task LoadBsp(IStorageFile file)
