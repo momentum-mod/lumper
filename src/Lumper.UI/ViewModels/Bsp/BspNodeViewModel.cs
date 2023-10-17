@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DynamicData;
@@ -17,13 +18,13 @@ namespace Lumper.UI.ViewModels.Bsp.Lumps;
 public class BspNodeViewModel : BspNodeBase, IDisposable
 {
     private readonly SourceList<LumpBase> _lumps = new();
+    private readonly BspViewModel _parent;
+
     public BspNodeViewModel(BspViewModel parent)
         : base(parent)
     {
+        _parent = parent;
         NodeName = Path.GetFileName(parent.BspFile.FilePath);
-        foreach (var (key, value) in parent.BspFile.Lumps)
-            ParseLump(key, value);
-        InitializeNodeChildrenObserver(_lumps);
     }
 
     public override string NodeName
@@ -36,15 +37,24 @@ public class BspNodeViewModel : BspNodeBase, IDisposable
         _lumps.Dispose();
     }
 
-    private void ParseLump(BspLumpType type, Lump<BspLumpType> lump)
+    internal async Task InitializeAsync()
     {
-        LumpBase lumpModel = lump switch
+        await Task.WhenAll(_parent.BspFile.Lumps.Select(lump => ParseLumpAsync(lump.Key, lump.Value)));
+        InitializeNodeChildrenObserver(_lumps);
+    }
+
+    private async Task ParseLumpAsync(BspLumpType type, Lump<BspLumpType> lump)
+    {
+        await Task.Run(() =>
         {
-            EntityLump el => new EntityLumpViewModel(BspView, el),
-            PakFileLump el => new PakFileLumpViewModel(BspView, el),
+            LumpBase lumpModel = lump switch
+            {
+                EntityLump el => new EntityLumpViewModel(BspView, el),
+                PakFileLump el => new PakFileLumpViewModel(BspView, el),
             _ => new UnmanagedLumpViewModel(BspView, type)
-        };
-        _lumps.Add(lumpModel);
+            };
+            _lumps.Add(lumpModel);
+        });
     }
 
     protected override ValueTask<bool> Match(Matcher matcher,

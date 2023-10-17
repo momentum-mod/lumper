@@ -9,6 +9,7 @@ using Avalonia.Platform.Storage;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.IO;
 using Lumper.UI.ViewModels.Bsp;
+using Lumper.UI.ViewModels.Bsp.Lumps;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
 using ReactiveUI;
@@ -148,11 +149,16 @@ public partial class MainWindowViewModel
         _bspModel.FilePath = path;
     }
 
-    private void LoadBsp(string path)
+    private async void LoadBsp(string path)
     {
         var bspFile = new BspFile(path);
+
         BspModel = new BspViewModel(bspFile);
         TasksModel = new Tasks.TasksViewModel(bspFile);
+
+        if (BspModel.BspNode is BspNodeViewModel bspNodeViewModel)
+            await bspNodeViewModel.InitializeAsync();
+
         Content = BspModel;
     }
 
@@ -165,7 +171,6 @@ public partial class MainWindowViewModel
         if (!file.TryGetUri(out var path))
         {
             throw new Exception("Failed to get file path");
-
         }
         LoadBsp(path.AbsolutePath);
     }
