@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
@@ -26,8 +25,6 @@ public partial class MainWindowViewModel
             .Where(m => m is not null)
             .Subscribe(x =>
                 BspModel!.RaisePropertyChanged(nameof(BspModel.FilePath)));
-
-        RxApp.MainThreadScheduler.Schedule(OnLoad);
     }
 
     private static IReadOnlyList<FilePickerFileType> GenerateBspFileFilter()

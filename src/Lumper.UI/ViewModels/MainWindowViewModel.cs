@@ -32,7 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Content = BspModel;
     }
 
-    private void OnLoad()
+    public void OnLoad()
     {
         if (Desktop.Args is not { Length: 1 })
             return;
