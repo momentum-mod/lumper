@@ -105,10 +105,10 @@ public partial class MainWindowViewModel
         try
         {
             //TODO: Copy bsp model tree for fallback if error occurs
-            _bspModel.Update();
+            await Task.Run(_bspModel.Update);
             await using var writer =
                 new BspFileWriter(_bspModel.BspFile, await file.OpenWriteAsync());
-            writer.Save();
+            await Task.Run(writer.Save);
         }
         catch (Exception e)
         {
@@ -130,10 +130,10 @@ public partial class MainWindowViewModel
             using (var stream = File.OpenWrite(path))
             {
                 //TODO: Copy bsp model tree for fallback if error occurs
-                _bspModel.Update();
+                await Task.Run(_bspModel.Update);
                 await using var writer =
                     new BspFileWriter(_bspModel.BspFile, stream);
-                writer.Save();
+                await Task.Run(writer.Save);
             }
         }
         catch (Exception e)
