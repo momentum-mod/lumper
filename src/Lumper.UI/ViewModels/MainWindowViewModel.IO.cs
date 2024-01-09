@@ -104,11 +104,17 @@ public partial class MainWindowViewModel
 
         try
         {
+            Content = null;
+            IsProgressBarVisible = true;
+
             //TODO: Copy bsp model tree for fallback if error occurs
             await Task.Run(_bspModel.Update);
             await using var writer =
                 new BspFileWriter(_bspModel.BspFile, await file.OpenWriteAsync());
             await Task.Run(writer.Save);
+
+            IsProgressBarVisible = false;
+            Content = _bspModel;
         }
         catch (Exception e)
         {
@@ -129,11 +135,17 @@ public partial class MainWindowViewModel
         {
             using (var stream = File.OpenWrite(path))
             {
+                Content = null;
+                IsProgressBarVisible = true;
+
                 //TODO: Copy bsp model tree for fallback if error occurs
                 await Task.Run(_bspModel.Update);
                 await using var writer =
                     new BspFileWriter(_bspModel.BspFile, stream);
                 await Task.Run(writer.Save);
+
+                IsProgressBarVisible = false;
+                Content = _bspModel;
             }
         }
         catch (Exception e)
@@ -148,6 +160,9 @@ public partial class MainWindowViewModel
 
     private async void LoadBsp(string path)
     {
+        BspModel = null;
+        Content = null;
+
         var bspFile = new BspFile(path);
 
         BspModel = new BspViewModel(bspFile);
