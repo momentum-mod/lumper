@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.IO;
 using Lumper.UI.ViewModels.Bsp;
+using Lumper.UI.ViewModels.Bsp.Lumps;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
 using ReactiveUI;
@@ -25,8 +25,6 @@ public partial class MainWindowViewModel
             .Where(m => m is not null)
             .Subscribe(x =>
                 BspModel!.RaisePropertyChanged(nameof(BspModel.FilePath)));
-
-        RxApp.MainThreadScheduler.Schedule(OnLoad);
     }
 
     private static IReadOnlyList<FilePickerFileType> GenerateBspFileFilter()
@@ -106,11 +104,17 @@ public partial class MainWindowViewModel
 
         try
         {
+            Content = null;
+            IsProgressBarVisible = true;
+
             //TODO: Copy bsp model tree for fallback if error occurs
-            _bspModel.Update();
+            await Task.Run(_bspModel.Update);
             await using var writer =
                 new BspFileWriter(_bspModel.BspFile, await file.OpenWriteAsync());
-            writer.Save();
+            await Task.Run(writer.Save);
+
+            IsProgressBarVisible = false;
+            Content = _bspModel;
         }
         catch (Exception e)
         {
@@ -131,11 +135,17 @@ public partial class MainWindowViewModel
         {
             using (var stream = File.OpenWrite(path))
             {
+                Content = null;
+                IsProgressBarVisible = true;
+
                 //TODO: Copy bsp model tree for fallback if error occurs
-                _bspModel.Update();
+                await Task.Run(_bspModel.Update);
                 await using var writer =
                     new BspFileWriter(_bspModel.BspFile, stream);
-                writer.Save();
+                await Task.Run(writer.Save);
+
+                IsProgressBarVisible = false;
+                Content = _bspModel;
             }
         }
         catch (Exception e)
@@ -148,12 +158,25 @@ public partial class MainWindowViewModel
         _bspModel.FilePath = path;
     }
 
-    private void LoadBsp(string path)
+    private async void LoadBsp(string path)
     {
+        BspModel = null;
+        Content = null;
+
         var bspFile = new BspFile(path);
+
         BspModel = new BspViewModel(bspFile);
+        BspModel.Loading.OnNext(true);
+
         TasksModel = new Tasks.TasksViewModel(bspFile);
+        IsProgressBarVisible = true;
+
+        if (BspModel.BspNode is BspNodeViewModel bspNodeViewModel)
+            await bspNodeViewModel.InitializeAsync();
+
         Content = BspModel;
+        IsProgressBarVisible = false;
+        BspModel.Loading.OnNext(false);
     }
 
     private async Task LoadBsp(IStorageFile file)
@@ -165,7 +188,6 @@ public partial class MainWindowViewModel
         if (!file.TryGetUri(out var path))
         {
             throw new Exception("Failed to get file path");
-
         }
         LoadBsp(path.AbsolutePath);
     }

@@ -18,4 +18,10 @@ public partial class MainWindow : Window
             throw new ArgumentOutOfRangeException();
         await model.OnClose(e);
     }
+
+    private void Window_OnOpened(object? sender,  EventArgs args)
+    {
+        if (DataContext is MainWindowViewModel model)
+            model.OnLoad();
+    }
 }

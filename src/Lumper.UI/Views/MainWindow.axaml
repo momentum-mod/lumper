@@ -9,6 +9,7 @@
         x:Class="Lumper.UI.Views.MainWindow"
         Icon="/Assets/Lumper.png"
         Closing="Window_OnClosing"
+        Opened="Window_OnOpened"
         Title="{Binding BspModel.FileName, StringFormat='Lumper - {0}',  FallbackValue='Lumper'}"
         TransparencyLevelHint="AcrylicBlur"
         ExtendClientAreaToDecorationsHint="True"
@@ -48,6 +49,12 @@
                         <MenuItem Header="_Tasks" Command="{Binding ViewTasks}" />
                     </MenuItem>
                 </Menu>
+            </DockPanel>
+            <DockPanel Grid.Row="1" Grid.Column="0" Width="250" HorizontalAlignment="Center" ClipToBounds="True">
+                <ProgressBar x:Name="ProgressBar"
+                             DockPanel.Dock="Top"
+                             IsIndeterminate="True"
+                             IsVisible="{Binding IsProgressBarVisible}"/>
             </DockPanel>
             <ContentControl Grid.Column="0" Grid.Row="1" Margin="0,0,2,0" Content="{Binding Content}" />
         </Grid>

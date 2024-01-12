@@ -16,6 +16,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private BspNodeBase? _selectedNode;
     private BspViewModel? _bspModel;
     private TasksViewModel? _tasksModel;
+    private bool _isProgressBarVisible;
 
     public MainWindowViewModel()
     {
@@ -31,13 +32,18 @@ public partial class MainWindowViewModel : ViewModelBase
         Content = BspModel;
     }
 
-    private void OnLoad()
+    public void OnLoad()
     {
         if (Desktop.Args is not { Length: 1 })
             return;
         LoadBsp(Desktop.Args[0]);
     }
 
+    public bool IsProgressBarVisible
+    {
+        get => _isProgressBarVisible;
+        set => this.RaiseAndSetIfChanged(ref _isProgressBarVisible, value);
+    }
     public ViewModelBase? Content
     {
         get => content;

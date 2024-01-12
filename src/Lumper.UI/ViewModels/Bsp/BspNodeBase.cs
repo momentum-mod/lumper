@@ -168,14 +168,28 @@ public abstract class BspNodeBase : ViewModelBase
             .DisposeMany()
             .Subscribe(_ => { }, RxApp.DefaultExceptionHandler.OnNext);
 
-        list.Connect()
-            .AutoRefreshOnObservable(x => x.WhenValueChanged(y => y.IsModified))
-            .Subscribe(x => { this.RaisePropertyChanged(nameof(IsModifiedRecursive)); });
+        // This is a probably hacky way of waiting for loading to complete before registering the
+        // IsModified change subscriptions. Using a Subject is probably wrong but I don't know
+        // Reactive C# stuff well.
+        BspView.Loading
+            .Where(x => !x)
+            .FirstAsync()
+            .Subscribe(
+                _ =>
+                {
+                    list.Connect()
+                        .AutoRefreshOnObservable(x => x.WhenValueChanged(y => y.IsModified))
+                        .Subscribe(_ => { this.RaisePropertyChanged(nameof(IsModified)); });
 
-        list.Connect()
-            .AutoRefreshOnObservable(x =>
-                x.WhenValueChanged(y => y.IsModifiedRecursive))
-            .Subscribe(x => { this.RaisePropertyChanged(nameof(IsModifiedRecursive)); });
+                    // TODO: Why are there two versions of this??
+                    list.Connect()
+                        .AutoRefreshOnObservable(x =>
+                            x.WhenValueChanged(y => y.IsModifiedRecursive))
+                        .Subscribe(_ =>
+                        {
+                            this.RaisePropertyChanged(nameof(IsModifiedRecursive));
+                        });
+                });
     }
 
     public TRet Modify<TRet>(
