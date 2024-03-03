@@ -3,8 +3,6 @@
         xmlns:vm="using:Lumper.UI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:bspviews="clr-namespace:Lumper.UI.Views.Bsp"
-        xmlns:taskviews="clr-namespace:Lumper.UI.Views.Tasks"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Lumper.UI.Views.MainWindow"
         Icon="/Assets/Lumper.png"
@@ -46,6 +44,7 @@
                     <MenuItem Header="_View">
                         <MenuItem Header="_Browser" Command="{Binding ViewBsp}" />
                         <MenuItem Header="_Tasks" Command="{Binding ViewTasks}" />
+                        <MenuItem Header="_Texture Browser" Command="{Binding ViewTextureBrowser}" />
                     </MenuItem>
                 </Menu>
             </DockPanel>
