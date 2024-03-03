@@ -33,7 +33,7 @@ public partial class BspViewModel
     }
 
     private static async void Search(
-        (string?, MatcherBase?, BspNodeBase?) args)
+        (string?, MatcherBase?, BspNodeBase) args)
     {
         (string? pattern, var matcherBase, var bspNode) = args;
         if (matcherBase is null || pattern is null)

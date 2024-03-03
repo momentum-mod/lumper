@@ -37,7 +37,7 @@ public partial class PakFileLumpView : UserControl
 
     private async ValueTask<string?> PickFolder(string title)
     {
-        string path = null;
+        string? path = null;
         if (Desktop.MainWindow is null)
             return path;
         var dialog = new FolderPickerOpenOptions()
