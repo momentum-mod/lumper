@@ -59,7 +59,7 @@ public class EntityLumpViewModel : LumpBase
     }
 
 
-    public void Open()
+    public override void Open()
     {
         using var mem = new MemoryStream();
         _entityLump.Write(mem);
