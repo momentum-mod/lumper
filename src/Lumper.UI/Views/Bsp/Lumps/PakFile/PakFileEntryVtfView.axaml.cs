@@ -68,8 +68,6 @@ public partial class PakFileEntryVtfView : UserControl
                 vm.SetNewImage(img);
             else
                 vm.SetImageData(img);
-            //open so we can check everything worked
-            vm.Open();
         }
     }
     private static IReadOnlyList<FilePickerFileType> GenerateImageFileFilter()
