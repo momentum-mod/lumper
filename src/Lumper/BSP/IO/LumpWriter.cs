@@ -3,6 +3,7 @@ using System.IO;
 using SharpCompress.Compressors.LZMA;
 using Lumper.Lib.BSP.Lumps;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP.IO
 {
@@ -12,8 +13,12 @@ namespace Lumper.Lib.BSP.IO
     {
         public static readonly int LzmaId = (('A' << 24) | ('M' << 16) | ('Z' << 8) | ('L'));
 
+        protected ILogger _logger;
+
         public LumpWriter(Stream output) : base(output)
-        { }
+        {
+            _logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+        }
         private long Compress(Stream uncompressedStream)
         {
             long compressedLength;
@@ -36,7 +41,7 @@ namespace Lumper.Lib.BSP.IO
             var w = new BinaryWriter(mem);
             if (mem.Length > uncompressedStream.Length)
             {
-                Console.WriteLine("Compressed lump bigger .. skipping");
+                _logger.LogInformation("Compressed lump bigger .. skipping");
                 uncompressedStream.Seek(0, SeekOrigin.Begin);
                 uncompressedStream.CopyTo(BaseStream);
                 compressedLength = -1;
@@ -64,7 +69,7 @@ namespace Lumper.Lib.BSP.IO
             if (lump is IUnmanagedLump unmanagedLump && unmanagedLump.Compressed)
             {
                 if (!lump.Compress)
-                    Console.WriteLine("UnmanagedLump is compressed but was set to be written uncompressed .. writing compressed lump");
+                    _logger.LogInformation("UnmanagedLump is compressed but was set to be written uncompressed .. writing compressed lump");
                 lump.Write(BaseStream);
                 uncompressedLength = unmanagedLump.UncompressedLength;
                 compressedLength = BaseStream.Position - offset;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using SharpCompress.Archives.Zip;
 using Lumper.Lib.BSP.Lumps.BspLumps;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 
@@ -79,7 +80,7 @@ public class PakFileLumpViewModel : LumpBase
         if (exportDir.GetFiles().Any()
             || exportDir.GetDirectories().Any())
         {
-            Console.WriteLine("Refusing to export to a directory containing stuff");
+            _logger.LogError("Refusing to export to a directory containing stuff");
             //todo messagebox .. but not here because of dependencies?
             //option to delete files?
             return;
@@ -94,7 +95,7 @@ public class PakFileLumpViewModel : LumpBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Failed to extract zip: " + ex.Message);
+            _logger.LogError("Failed to extract zip: " + ex.Message);
             return;
         }
         while (reader.MoveToNextEntry())

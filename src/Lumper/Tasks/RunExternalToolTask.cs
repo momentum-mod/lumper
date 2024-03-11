@@ -4,6 +4,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Lumper.Lib.BSP;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.Tasks
 {
@@ -83,7 +84,7 @@ namespace Lumper.Lib.Tasks
                 Progress.Max = fiIn.Length;
             }
             else
-                Console.WriteLine($"Warning: Inputfile not set for external command '{Path} {Args}'");
+                _logger.LogWarning($"Warning: Inputfile not set for external command '{Path} {Args}'");
 
             if (File.Exists(OutputFile))
                 File.Delete(OutputFile);
@@ -154,7 +155,7 @@ namespace Lumper.Lib.Tasks
                 else
                     stream = stdOut.Mem;
                 var r = new StreamReader(stream);
-                Console.WriteLine($"{System.IO.Path.GetFileName(Path)} ERROR: {r.ReadToEnd()}");
+                _logger.LogError($"{System.IO.Path.GetFileName(Path)} ERROR: {r.ReadToEnd()}");
             }
             return ret;
         }

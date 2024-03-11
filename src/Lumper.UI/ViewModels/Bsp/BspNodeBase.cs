@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -102,9 +102,13 @@ public abstract class BspNodeBase : ViewModelBase
     public virtual void Open()
     { }
 
-    public void Close()
+    public async ValueTask Close()
     {
-        BspView.Close(this);
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            BspView.Close(this);
+        });
+
     }
 
     //hack used for the hotkey on invisible button
@@ -112,9 +116,12 @@ public abstract class BspNodeBase : ViewModelBase
     //adding and removing the hotkey in code behind didn't work
     //hotkey in mainwindow menu didn't work either
     //so this is my ugly workaround
-    public void CloseSelected()
+    public async ValueTask CloseSelected()
     {
-        BspView.Close(BspView.SelectedTab);
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            BspView.Close(BspView.SelectedTab);
+        });
     }
 
     public async ValueTask Reset()
@@ -193,9 +200,13 @@ public abstract class BspNodeBase : ViewModelBase
         return result;
     }
 
-    public void ExpandTree()
+    public async ValueTask ExpandTree()
     {
-        ExpandTree(_ => true);
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            ExpandTree(_ => true);
+        });
+        
     }
     public void ExpandTree(Func<BspNodeBase, bool> fun)
     {

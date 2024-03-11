@@ -63,4 +63,7 @@
             <TargetPath>VTFLib.NET.dll</TargetPath>
         </None>
     </ItemGroup>
+    <ItemGroup>
+      <UpToDateCheckInput Remove="Views\Logs\LogsView.axaml" />
+    </ItemGroup>
 </Project>

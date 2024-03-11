@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 
@@ -12,6 +13,8 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
         { }
         public override void Read(BinaryReader reader, long length)
         {
+            var logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+
             var startPos = reader.BaseStream.Position;
 
             int dictEntries = reader.ReadInt32();
@@ -35,7 +38,7 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
                     if (remainingLength % StaticProps.StructureSize != 0)
                     {
                         StaticProps.ActualVersion = StaticPropVersion.V7s;
-                        Console.WriteLine($"Remaining length doesn't fit version {Version} .. trying V7*");
+                        logger.LogInformation($"Remaining length doesn't fit version {Version} .. trying V7*");
                     }
                     break;
             }

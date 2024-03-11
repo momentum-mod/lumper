@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps.GameLumps;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP.IO
 {
@@ -83,15 +84,15 @@ namespace Lumper.Lib.BSP.IO
                 Lumps.Add(new Tuple<Lump, LumpHeader>(lump, header));
 
                 if (_gameLump.Lumps.ContainsKey(type))
-                    Console.WriteLine($"WARNING: key {type} already in gamelumps .. skipping");
+                    _logger.LogWarning($"WARNING: key {type} already in gamelumps .. skipping");
                 else
                     _gameLump.Lumps.Add(type, lump);
 
-                Console.WriteLine($"Gamelump " + _gameLump.Lumps.Count);
-                Console.WriteLine($"\tId: {type} {(int)type}");
-                Console.WriteLine($"\tFlags: {lump.Flags}");
-                Console.WriteLine($"\tFileofs: {header.Offset}");
-                Console.WriteLine($"\tFilelen: {header.UncompressedLength}");
+                _logger.LogInformation($"Gamelump " + _gameLump.Lumps.Count);
+                _logger.LogInformation($"\tId: {type} {(int)type}");
+                _logger.LogInformation($"\tFlags: {lump.Flags}");
+                _logger.LogInformation($"\tFileofs: {header.Offset}");
+                _logger.LogInformation($"\tFilelen: {header.UncompressedLength}");
 
                 prevHeader = header;
                 //lump is compressed if the last bit is 1 

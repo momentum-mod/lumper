@@ -1,6 +1,6 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Lumper.Lib.BSP.Struct
 {
@@ -40,7 +40,8 @@ namespace Lumper.Lib.BSP.Struct
                     }
                     catch (Exception e) when (e is IndexOutOfRangeException || e is FormatException)
                     {
-                        Console.WriteLine($"Failed to pass entity IO value '{key}' '{value}'!");
+                        var logger = LumperLoggerFactory.GetInstance().CreateLogger<Property>();
+                        logger.LogError($"Failed to pass entity IO value '{key}' '{value}'!");
                     }
                 }
                 return new Property<string>(key, value);
@@ -70,6 +71,8 @@ namespace Lumper.Lib.BSP.Struct
 
         public Entity(IEnumerable<KeyValuePair<string, string>> keyValues)
         {
+            var logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+
             foreach (var kv in keyValues)
             {
                 if (kv.Key == "classname")
@@ -81,13 +84,13 @@ namespace Lumper.Lib.BSP.Struct
                         continue;
                     }
                     else
-                        Console.WriteLine("Found duplicate classname key, ignoring {0}", kv);
+                        logger.LogInformation("Found duplicate classname key, ignoring {0}", kv);
                 }
                 Properties.Add(Property.CreateProperty(kv));
             }
 
             if (ClassName is null)
-                Console.WriteLine("Warning: Found entity with missing classname!");
+                logger.LogWarning("Warning: Found entity with missing classname!");
         }
     }
 }

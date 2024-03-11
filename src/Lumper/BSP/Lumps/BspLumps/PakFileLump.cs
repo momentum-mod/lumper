@@ -2,13 +2,12 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using SharpCompress.Writers;
 using SharpCompress.Common;
 using SharpCompress.Archives.Zip;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Lumper.Lib.BSP.Struct;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
@@ -122,7 +121,8 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                var logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+                logger.LogError(ex.Message);
             }
         }
 

@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Lumper.UI.ViewModels;
 using Lumper.UI.Views;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.UI;
 
@@ -23,5 +24,7 @@ public class App : Application
             };
 
         base.OnFrameworkInitializationCompleted();
+
+        LumperLoggerFactory.GetInstance().CreateLogger(GetType()).LogInformation("Application Initialized");
     }
 }

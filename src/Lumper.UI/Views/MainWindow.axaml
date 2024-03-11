@@ -13,6 +13,23 @@
         WindowStartupLocation="CenterScreen"
         Background="Transparent">
 
+    <Window.Styles>
+        <Style Selector="TextBlock.gray">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#888888"/>
+        </Style>
+
+        <Style Selector="TextBlock.yellow">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FFFF00"/>
+        </Style>
+
+        <Style Selector="TextBlock.red">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FF0000"/>
+        </Style>
+    </Window.Styles>
+
     <Design.DataContext>
         <vm:MainWindowViewModel />
     </Design.DataContext>
@@ -45,6 +62,7 @@
                         <MenuItem Header="_Browser" Command="{Binding ViewBsp}" />
                         <MenuItem Header="_Tasks" Command="{Binding ViewTasks}" />
                         <MenuItem Header="_Texture Browser" Command="{Binding ViewTextureBrowser}" />
+                        <MenuItem Header="_Logs" Command="{Binding ViewLogs}" />
                     </MenuItem>
                 </Menu>
             </DockPanel>

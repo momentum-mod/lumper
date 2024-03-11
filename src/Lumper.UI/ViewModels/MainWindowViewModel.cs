@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Lumper.UI.ViewModels.Bsp;
+using Lumper.UI.ViewModels.Logs;
 using Lumper.UI.ViewModels.Tasks;
 using Lumper.UI.ViewModels.VtfBrowser;
 using ReactiveUI;
@@ -18,6 +19,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private BspViewModel? _bspModel;
     private TasksViewModel? _tasksModel;
     private VtfBrowserViewModel? _vtfBrowserModel;
+    private LogsViewModel? _logsModel;
 
     public MainWindowViewModel()
     {
@@ -29,8 +31,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
         Desktop = desktop;
 
+        _logsModel = new LogsViewModel();
+
         IOInit();
-        Content = BspModel;
+
+        // Show Logs as initial view
+        Content = LogsModel;
     }
 
     private void OnLoad()
@@ -75,6 +81,12 @@ public partial class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _vtfBrowserModel, value);
     }
 
+    public LogsViewModel? LogsModel
+    {
+        get => _logsModel;
+        set => this.RaiseAndSetIfChanged(ref _logsModel, value);
+    }
+
     public void ViewBsp()
     {
         Content = BspModel;
@@ -88,5 +100,10 @@ public partial class MainWindowViewModel : ViewModelBase
     public void ViewTextureBrowser()
     {
         Content = VtfBrowserModel;
+    }
+
+    public void ViewLogs()
+    {
+        Content = LogsModel;
     }
 }

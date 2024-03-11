@@ -13,6 +13,7 @@ using Lumper.UI.ViewModels.Bsp;
 using Lumper.UI.ViewModels.VtfBrowser;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
 namespace Lumper.UI.ViewModels;
@@ -52,27 +53,53 @@ public partial class MainWindowViewModel
 
     public async ValueTask OpenCommand()
     {
-        if (Desktop.MainWindow is null)
-            return;
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            if (Desktop.MainWindow is null)
+                return;
 
-        var dialog = new FilePickerOpenOptions();
-        dialog.AllowMultiple = false;
-        dialog.Title = "Pick BSP file";
-        dialog.FileTypeFilter = GenerateBspFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
-        if (result is not { Count: 1 })
-            return;
-        await LoadBsp(result[0]);
+            var dialog = new FilePickerOpenOptions();
+            dialog.AllowMultiple = false;
+            dialog.Title = "Pick BSP file";
+            dialog.FileTypeFilter = GenerateBspFileFilter();
+            var result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
+            if (result is not { Count: 1 })
+                return;
+            await LoadBsp(result[0]);
+        });
     }
 
     public async ValueTask SaveCommand()
     {
-        if (_bspModel is null)
-            return;
-
-        if (_bspModel.FilePath is null)
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
         {
-            if (Desktop.MainWindow is null)
+            if (_bspModel is null)
+                return;
+
+            if (_bspModel.FilePath is null)
+            {
+                if (Desktop.MainWindow is null)
+                    return;
+                var dialog = new FilePickerSaveOptions();
+                dialog.Title = "Pick BSP file";
+                dialog.FileTypeChoices = GenerateBspFileFilter();
+                var result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+                if (result is null)
+                    return;
+                Save(result);
+            }
+            else
+            {
+                Save(_bspModel.FilePath);
+            }
+        });
+    }
+
+    public async ValueTask SaveAsCommand()
+    {
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            if (Desktop.MainWindow is null || _bspModel is null)
                 return;
             var dialog = new FilePickerSaveOptions();
             dialog.Title = "Pick BSP file";
@@ -81,24 +108,7 @@ public partial class MainWindowViewModel
             if (result is null)
                 return;
             Save(result);
-        }
-        else
-        {
-            Save(_bspModel.FilePath);
-        }
-    }
-
-    public async ValueTask SaveAsCommand()
-    {
-        if (Desktop.MainWindow is null || _bspModel is null)
-            return;
-        var dialog = new FilePickerSaveOptions();
-        dialog.Title = "Pick BSP file";
-        dialog.FileTypeChoices = GenerateBspFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
-        if (result is null)
-            return;
-        Save(result);
+        });
     }
 
     private async void Save(IStorageFile file)
@@ -163,7 +173,7 @@ public partial class MainWindowViewModel
     {
         if (!file.CanOpenRead)
             return;
-        Console.WriteLine(file.Name);
+        _logger.LogInformation(file.Name);
         var folder = await file.GetParentAsync();
         if (!file.TryGetUri(out var path))
         {
@@ -173,25 +183,33 @@ public partial class MainWindowViewModel
         LoadBsp(path.AbsolutePath);
     }
 
-    public void BspToJsonCommand()
+    public async ValueTask BspToJsonCommand()
     {
-        if (BspModel is null)
-            return;
-        BspModel.BspFile.ToJson(false, false, false);
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            if (BspModel is null)
+                return;
+            BspModel.BspFile.ToJson(false, false, false);
+        });
+
+
     }
 
     public async Task CloseCommand()
     {
-        if (_bspModel is null || !_bspModel.BspNode.IsModifiedRecursive)
-            return;
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            if (_bspModel is null || !_bspModel.BspNode.IsModifiedRecursive)
+                return;
 
-        var messageBox = MessageBoxManager
-            .GetMessageBoxStandardWindow("You have unsaved changes",
-                "Do you want to discard changes?", ButtonEnum.OkCancel);
-        var result = await messageBox.ShowDialog(Desktop.MainWindow);
-        if (result != ButtonResult.Ok)
-            return;
-        BspModel = null;
+            var messageBox = MessageBoxManager
+                .GetMessageBoxStandardWindow("You have unsaved changes",
+                    "Do you want to discard changes?", ButtonEnum.OkCancel);
+            var result = await messageBox.ShowDialog(Desktop.MainWindow);
+            if (result != ButtonResult.Ok)
+                return;
+            BspModel = null;
+        });
     }
 
     public void ExitCommand()

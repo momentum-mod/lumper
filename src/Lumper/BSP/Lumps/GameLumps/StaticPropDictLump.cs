@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Text;
@@ -19,7 +20,8 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps
             var count = value.Length;
             if (count > StructureSize)
             {
-                Console.WriteLine($"WARNING: {this.GetType().Name} string to long");
+                var logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+                logger.LogWarning($"WARNING: {this.GetType().Name} string to long");
                 count = StructureSize;
             }
             Array.Copy(value, b, count);

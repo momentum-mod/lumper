@@ -1,6 +1,6 @@
-using System;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.Tasks
 {
@@ -30,7 +30,7 @@ namespace Lumper.Lib.Tasks
             int i = 0;
             foreach (var lump in map.Lumps)
             {
-                Console.WriteLine($"{i} {lump.Key} {lump.Value.GetType().Name}");
+                _logger.LogInformation($"{i} {lump.Key} {lump.Value.GetType().Name}");
                 i++;
 
                 if (lump.Value is not GameLump && lump.Value is not PakFileLump)

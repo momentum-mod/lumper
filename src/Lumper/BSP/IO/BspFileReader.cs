@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP.IO
 {
@@ -50,7 +51,7 @@ namespace Lumper.Lib.BSP.IO
                 throw new InvalidDataException("File doesn't look like a VBSP");
 
             _bsp.Version = ReadInt32();
-            Console.WriteLine($"BSP version: {_bsp.Version}");
+            _logger.LogInformation($"BSP version: {_bsp.Version}");
 
             for (var i = 0; i < BspFile.HeaderLumps; i++)
             {
@@ -85,7 +86,7 @@ namespace Lumper.Lib.BSP.IO
                     lumpHeader.UncompressedLength = fourCc;
                 }
 
-                Console.WriteLine($"Lump {type}({(int)type})"
+                _logger.LogInformation($"Lump {type}({(int)type})"
                                   + $"\toffset: {lumpHeader.Offset}"
                                   + $"\t length: {length}"
                                   + $"\t Version: {lump.Version}"
@@ -120,14 +121,14 @@ namespace Lumper.Lib.BSP.IO
                     gameLumpHeader = header;
                     if (gameLumpHeader.Length == 0 && gameLumpHeader.Offset == 0)
                     {
-                        Console.WriteLine("GameLump length and offset 0 .. won't set new length");
+                        _logger.LogInformation("GameLump length and offset 0 .. won't set new length");
                         break;
                     }
                 }
                 else if (gameLump is not null && header.Offset != 0 && header.Offset != gameLumpHeader.Offset)
                 {
                     gameLumpHeader.UncompressedLength = header.Offset - gameLumpHeader.Offset;
-                    Console.WriteLine($"Changed gamelump length to {gameLumpHeader.Length}");
+                    _logger.LogInformation($"Changed gamelump length to {gameLumpHeader.Length}");
                     break;
                 }
             }
@@ -171,15 +172,15 @@ namespace Lumper.Lib.BSP.IO
                     long prevEnd = prevHeader.Offset + prevHeader.Length;
                     if (header.Offset < prevEnd)
                     {
-                        Console.WriteLine($"Lumps {prevLump.Type} and {lump.Type} overlapping");
+                        _logger.LogInformation($"Lumps {prevLump.Type} and {lump.Type} overlapping");
                         if (prevLump.Type == BspLumpType.Game_lump)
-                            Console.WriteLine("but the previous lump was GAME_LUMP and the length is a lie");
+                            _logger.LogInformation("but the previous lump was GAME_LUMP and the length is a lie");
                         else
                             ret = true;
                     }
                     else if (header.Offset > prevEnd)
                     {
-                        Console.WriteLine($"Space between lumps {prevLump.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
+                        _logger.LogInformation($"Space between lumps {prevLump.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
                     }
 
                     if (header.Offset + header.Length >= prevEnd)
@@ -206,7 +207,7 @@ namespace Lumper.Lib.BSP.IO
                 if (end < 0)
                 {
                     end = texDataStringDataLump.Data.Length;
-                    Console.WriteLine("WARING: didn't find null at the end of texture string");
+                    _logger.LogWarning("WARNING: didn't find null at the end of texture string");
                 }
                 texture.TexName = end > 0
                     ? TexDataStringDataLump.TextureNameEncoding.GetString(

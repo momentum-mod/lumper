@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Lumper.Lib.BSP.Lumps.BspLumps;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP.IO
 {
@@ -67,13 +68,13 @@ namespace Lumper.Lib.BSP.IO
 
                 if ((lump is GameLump || lump is PakFileLump) && lump.Compress)
                 {
-                    Console.WriteLine($"Let's not compress {lump.GetType().Name} .. it's a silly place");
+                    _logger.LogInformation($"Let's not compress {lump.GetType().Name} .. it's a silly place");
                     lump.Compress = false;
                 }
                 LumpHeader newHeader = Write(lump);
                 LumpHeaders[lumpType] = new BspLumpHeader(newHeader, lump.Version);
 
-                Console.WriteLine($"Lump {lumpType}({(int)lumpType})\n\t{newHeader.Offset}\n\t{newHeader.Length}");
+                _logger.LogInformation($"Lump {lumpType}({(int)lumpType})\n\t{newHeader.Offset}\n\t{newHeader.Length}");
             }
         }
         private void ConstructTexDataLumps()

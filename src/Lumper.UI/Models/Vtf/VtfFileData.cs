@@ -5,6 +5,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VTFLib;
 using Lumper.Lib.BSP.Struct;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.UI.Models;
 
@@ -126,7 +127,9 @@ public class VtfFileData
                 ref createOptions))
         {
             string err = VTFAPI.GetLastError();
-            Console.WriteLine(err);
+
+            var logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+            logger.LogError(err);
         }
 
         SaveVtf();
@@ -143,7 +146,9 @@ public class VtfFileData
         if (!VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize))
         {
             string err = VTFAPI.GetLastError();
-            Console.WriteLine(err);
+
+            var logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+            logger.LogError(err);
         }
 
         _entry.DataStream.Seek(0, SeekOrigin.Begin);

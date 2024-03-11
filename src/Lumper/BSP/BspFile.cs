@@ -6,6 +6,7 @@ using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.IO;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP
 {
@@ -109,7 +110,8 @@ namespace Lumper.Lib.BSP
                 FileAccess.Write);
 
             ToJson(fileStream, sortLumps, sortProperties, ignoreOffset);
-            Console.WriteLine("JSON file: " + path);
+            var logger = LumperLoggerFactory.GetInstance().CreateLogger<BspFile>();
+            logger.LogInformation("JSON file: " + path);
         }
 
         public void ToJson(Stream stream,

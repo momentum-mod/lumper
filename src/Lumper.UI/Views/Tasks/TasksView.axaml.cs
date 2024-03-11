@@ -47,30 +47,36 @@ public partial class TasksView : UserControl
 
     public async void OnLoadClick(object sender, RoutedEventArgs e)
     {
-        if (Desktop.MainWindow is null)
-            return;
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            if (Desktop.MainWindow is null)
+                return;
 
-        var dialog = new FilePickerOpenOptions();
-        dialog.AllowMultiple = false;
-        dialog.Title = "Pick tasks file";
-        dialog.FileTypeFilter = GenerateJsonFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
-        if (result is not { Count: 1 })
-            return;
-        if (DataContext is TasksViewModel vm)
-            vm.Load(await result[0].OpenReadAsync());
+            var dialog = new FilePickerOpenOptions();
+            dialog.AllowMultiple = false;
+            dialog.Title = "Pick tasks file";
+            dialog.FileTypeFilter = GenerateJsonFileFilter();
+            var result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
+            if (result is not { Count: 1 })
+                return;
+            if (DataContext is TasksViewModel vm)
+                vm.Load(await result[0].OpenReadAsync());
+        });
     }
     public async void OnSaveClick(object sender, RoutedEventArgs e)
     {
-        if (Desktop.MainWindow is null)
-            return;
-        var dialog = new FilePickerSaveOptions();
-        dialog.Title = "Pick tasks file";
-        dialog.FileTypeChoices = GenerateJsonFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
-        if (result is null)
-            return;
-        if (DataContext is TasksViewModel vm)
-            vm.Save(await result.OpenWriteAsync());
+        await new LumperCodeExecutionHelper().ExecuteAndLogError(async () =>
+        {
+            if (Desktop.MainWindow is null)
+                return;
+            var dialog = new FilePickerSaveOptions();
+            dialog.Title = "Pick tasks file";
+            dialog.FileTypeChoices = GenerateJsonFileFilter();
+            var result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+            if (result is null)
+                return;
+            if (DataContext is TasksViewModel vm)
+                vm.Save(await result.OpenWriteAsync());
+        });        
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using SharpCompress.Compressors.LZMA;
 using Newtonsoft.Json;
 using Lumper.Lib.BSP.Lumps;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP.IO
 {
@@ -14,11 +15,15 @@ namespace Lumper.Lib.BSP.IO
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class LumpReader : BinaryReader
     {
+        protected ILogger _logger;
+
         // lumpheader information is only needed in the reader
         protected List<Tuple<Lump, LumpHeader>> Lumps = new();
 
         public LumpReader(Stream input) : base(input)
-        { }
+        {
+            _logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+        }
         protected abstract void ReadHeader();
         protected virtual void LoadAll()
         {
@@ -108,7 +113,7 @@ namespace Lumper.Lib.BSP.IO
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(ex.Message);
             }
         }
 

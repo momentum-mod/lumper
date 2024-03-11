@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -50,8 +51,12 @@ namespace Lumper.Lib.VTF
         private readonly List<string> _flags = new();
         public IEnumerable<string> Flags => _flags.AsEnumerable();
 
+        private ILogger _logger;
+
         public VtfFile(string path)
         {
+            _logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+
             ParseHeader(path);
         }
 
@@ -59,7 +64,7 @@ namespace Lumper.Lib.VTF
         {
             using var vtfFile = new BinaryReader(File.Open(path, FileMode.Open));
 
-            Console.WriteLine($"Opening: {path}");
+            _logger.LogInformation($"Opening: {path}");
 
             const string headerSignature = "VTF\0";
             var inputSignature = Encoding.Default.GetString(vtfFile.ReadBytes(4));
@@ -68,22 +73,22 @@ namespace Lumper.Lib.VTF
             {
                 VersionMajor = vtfFile.ReadInt32();
                 VersionMinor = vtfFile.ReadInt32();
-                Console.WriteLine($"VTF Version {VersionMajor}.{VersionMinor}");
+                _logger.LogInformation($"VTF Version {VersionMajor}.{VersionMinor}");
 
                 _headerSize = vtfFile.ReadInt32();
-                Console.WriteLine($"Header Size: {_headerSize} Bytes");
+                _logger.LogInformation($"Header Size: {_headerSize} Bytes");
 
                 LargestMipmapWidth = vtfFile.ReadInt16();
                 LargestMipmapHeight = vtfFile.ReadInt16();
-                Console.WriteLine($"Texture Dimensions: {LargestMipmapWidth} X {LargestMipmapHeight}");
+                _logger.LogInformation($"Texture Dimensions: {LargestMipmapWidth} X {LargestMipmapHeight}");
 
                 ParseFlags(vtfFile);
 
                 AmountOfFrames = vtfFile.ReadInt16();
-                Console.WriteLine($"Amount of Frames: {AmountOfFrames}");
+                _logger.LogInformation($"Amount of Frames: {AmountOfFrames}");
 
                 FirstFrame = vtfFile.ReadInt16();
-                Console.WriteLine($"First Frame: {FirstFrame}");
+                _logger.LogInformation($"First Frame: {FirstFrame}");
 
                 // Skip padding of 4 bytes.
                 vtfFile.ReadBytes(4);
@@ -94,20 +99,20 @@ namespace Lumper.Lib.VTF
                 vtfFile.ReadBytes(4);
 
                 BumpmapScale = vtfFile.ReadSingle();
-                Console.WriteLine($"Bumpmap Scale: {BumpmapScale}");
+                _logger.LogInformation($"Bumpmap Scale: {BumpmapScale}");
 
                 HighResolutionImageFormat = vtfFile.ReadInt32();
-                Console.WriteLine($"Texture Format: {(ImageFormats)HighResolutionImageFormat}");
+                _logger.LogInformation($"Texture Format: {(ImageFormats)HighResolutionImageFormat}");
 
                 AmountOfMipmaps = vtfFile.ReadByte();
-                Console.WriteLine($"Amount of Mipmaps: {AmountOfMipmaps}");
+                _logger.LogInformation($"Amount of Mipmaps: {AmountOfMipmaps}");
 
                 LowResolutionImageFormat = vtfFile.ReadUInt32();
-                Console.WriteLine($"Thumbnail Format: {(ImageFormats)LowResolutionImageFormat}");
+                _logger.LogInformation($"Thumbnail Format: {(ImageFormats)LowResolutionImageFormat}");
 
                 LowResolutionImageWidth = vtfFile.ReadByte();
                 LowResolutionImageHeight = vtfFile.ReadByte();
-                Console.WriteLine($"Thumbnail Dimensions: {LowResolutionImageWidth} X {LowResolutionImageHeight}");
+                _logger.LogInformation($"Thumbnail Dimensions: {LowResolutionImageWidth} X {LowResolutionImageHeight}");
 
                 ParseDepthAndResources(vtfFile);
             }
@@ -122,12 +127,12 @@ namespace Lumper.Lib.VTF
             _rawFlags = vtfFile.ReadUInt32();
             if (_rawFlags != 0)
             {
-                Console.WriteLine($"This VTF has the following flags: 0x{_rawFlags:x8}");
+                _logger.LogInformation($"This VTF has the following flags: 0x{_rawFlags:x8}");
                 foreach (uint currentFlag in Enum.GetValues(typeof(VtfFlags)))
                 {
                     if ((currentFlag & _rawFlags) == 0) continue;
 
-                    Console.WriteLine($"- {(VtfFlags)currentFlag,-30} (0x{currentFlag:x8})");
+                    _logger.LogInformation($"- {(VtfFlags)currentFlag,-30} (0x{currentFlag:x8})");
 
                     // Couldn't figure out how to do this in one line.
                     var castFlag = (VtfFlags)currentFlag;
@@ -136,7 +141,7 @@ namespace Lumper.Lib.VTF
             }
             else
             {
-                Console.WriteLine("No Flags found.");
+                _logger.LogInformation("No Flags found.");
             }
         }
 
@@ -147,7 +152,7 @@ namespace Lumper.Lib.VTF
                 _reflectivity[i] = vtfFile.ReadSingle();
             }
 
-            Console.WriteLine($"Reflectivity: {_reflectivity[0]} {_reflectivity[1]} {_reflectivity[2]}");
+            _logger.LogInformation($"Reflectivity: {_reflectivity[0]} {_reflectivity[1]} {_reflectivity[2]}");
         }
 
         private void ParseKeyValues(string keyValues)
@@ -169,14 +174,14 @@ namespace Lumper.Lib.VTF
             {
                 if (parsingKey)
                 {
-                    Console.Write($"  - {currentEntry}: ");
+                    _logger.LogInformation($"  - {currentEntry}: ");
                     entryKey = currentEntry;
                     parsingKey = false;
                     entryRepeat++;
                 }
                 else
                 {
-                    Console.WriteLine($"{currentEntry}");
+                    _logger.LogInformation($"{currentEntry}");
                     entryValue = currentEntry;
                     parsingKey = true;
                     entryRepeat++;
@@ -195,7 +200,7 @@ namespace Lumper.Lib.VTF
             if (VersionMinor < 2) return;
 
             TextureDepth = vtfFile.ReadInt16();
-            Console.WriteLine($"Texture Depth: {TextureDepth}");
+            _logger.LogInformation($"Texture Depth: {TextureDepth}");
 
             if (VersionMinor < 3) return;
 
@@ -203,7 +208,7 @@ namespace Lumper.Lib.VTF
             vtfFile.ReadBytes(3);
 
             _numberOfResources = vtfFile.ReadInt32();
-            Console.WriteLine($"Number of Resources: {_numberOfResources}");
+            _logger.LogInformation($"Number of Resources: {_numberOfResources}");
 
             // Skip 8 Bytes.
             vtfFile.ReadBytes(8);
@@ -216,7 +221,7 @@ namespace Lumper.Lib.VTF
                 {
                     if (inputTag != key) continue;
 
-                    Console.WriteLine($"- {value}");
+                    _logger.LogInformation($"- {value}");
                     _tags.Add(value);
                 }
 
@@ -228,7 +233,7 @@ namespace Lumper.Lib.VTF
                 {
                     var lodU = vtfFile.ReadByte();
                     var lodV = vtfFile.ReadByte();
-                    Console.WriteLine($"  - Clamp U: {lodU}\n  - Clamp V: {lodV}");
+                    _logger.LogInformation($"  - Clamp U: {lodU}\n  - Clamp V: {lodV}");
 
                     // Skip remainder bytes as the LOD values are in 2 bytes, not 4.
                     vtfFile.ReadBytes(2);

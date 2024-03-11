@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -11,6 +11,7 @@ using ReactiveUI;
 using Newtonsoft.Json;
 using Lumper.Lib.Tasks;
 using Lumper.Lib.BSP;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.UI.ViewModels.Tasks;
 
@@ -133,7 +134,7 @@ public partial class TasksViewModel : ViewModelBase
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _logger.LogError(e.Message);
             }
             IsRunning = false;
         });

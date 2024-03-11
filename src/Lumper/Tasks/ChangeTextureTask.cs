@@ -1,8 +1,8 @@
-using System;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.Tasks
 {
@@ -19,11 +19,11 @@ namespace Lumper.Lib.Tasks
             Progress.Max = texDataLump.Data.Count;
             foreach (var texture in texDataLump.Data)
             {
-                Console.Write($"TexName: {texture.TexName}");
+                _logger.LogInformation($"TexName: {texture.TexName}");
                 if (Replace.ContainsKey(texture.TexName))
                 {
                     texture.TexName = Replace[texture.TexName];
-                    Console.Write($" replace: {texture.TexName}");
+                    _logger.LogInformation($" replace: {texture.TexName}");
                 }
                 else
                 {
@@ -36,11 +36,11 @@ namespace Lumper.Lib.Tasks
                         if (texture.TexName != tmp)
                         {
                             texture.TexName = tmp;
-                            Console.Write($" replaceRegex: {texture.TexName}");
+                            _logger.LogInformation($" replaceRegex: {texture.TexName}");
                         }
                     }
                 }
-                Console.WriteLine();
+                _logger.LogInformation("");
                 Progress.Count++;
             }
             return TaskResult.Success;

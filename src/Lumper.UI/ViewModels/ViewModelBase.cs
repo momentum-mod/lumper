@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+using Microsoft.Extensions.Logging;
+using ReactiveUI;
 
 namespace Lumper.UI.ViewModels;
 
@@ -7,4 +8,10 @@ namespace Lumper.UI.ViewModels;
 /// </summary>
 public class ViewModelBase : ReactiveObject
 {
+    protected ILogger _logger;
+
+    public ViewModelBase()
+    {
+        _logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+    }
 }

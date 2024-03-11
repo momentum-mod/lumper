@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using Lumper.Lib.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.UI.ViewModels.Tasks;
 
@@ -21,7 +22,7 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            _logger.LogError(ex.Message);
         }
     }
 

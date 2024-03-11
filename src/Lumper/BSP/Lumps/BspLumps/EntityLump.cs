@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using System.Collections.Generic;
 using Lumper.Lib.BSP.Struct;
+using Microsoft.Extensions.Logging;
 
 namespace Lumper.Lib.BSP.Lumps.BspLumps
 {
@@ -18,6 +19,8 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
 
         private bool ReadEntity(BinaryReader reader, long endPos)
         {
+            var logger = LumperLoggerFactory.GetInstance().CreateLogger(GetType());
+
             var stringBuilder = new StringBuilder(512);
             var keyValues = new List<KeyValuePair<string, string>>();
 
@@ -78,7 +81,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
 
                                         if (key.Length == 0)
                                         {
-                                            Console.WriteLine(
+                                            logger.LogInformation(
                                                 "Entity parser skipped value \"{0}\" for empty key, how u do dis?", value);
                                         }
 
@@ -109,7 +112,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
             }
             catch (InvalidDataException e)
             {
-                Console.WriteLine(
+                logger.LogWarning(
                     "WARNING: Failed to parse entity: {0}, {1} in list.\n Saving this BSP could cause data loss!",
                     e.Message, Data.Count);
 
@@ -125,7 +128,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps
                     }
                 }
                 if (!foundEnd)
-                    Console.WriteLine("WARNING: End of entity not found!");
+                    logger.LogWarning("WARNING: End of entity not found!");
             }
 
             return false;
