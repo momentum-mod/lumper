@@ -1,10 +1,8 @@
+namespace Lumper.UI.Converters;
 using System;
 using System.Globalization;
-using System.Text;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
-
-namespace Lumper.UI.Converters;
 
 /// <summary>
 ///     format percentage string
@@ -19,15 +17,12 @@ public class PercentConverter : IValueConverter
     public object Convert(object? value, Type targetType, object? parameter,
         CultureInfo culture)
     {
-        double d = System.Convert.ToDouble(value);
+        var d = System.Convert.ToDouble(value);
         return $"{(int)d}%";
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter,
-        CultureInfo culture)
-    {
-        return new BindingNotification(
+        CultureInfo culture) => new BindingNotification(
             new ArgumentOutOfRangeException(nameof(value)),
             BindingErrorType.DataValidationError);
-    }
 }

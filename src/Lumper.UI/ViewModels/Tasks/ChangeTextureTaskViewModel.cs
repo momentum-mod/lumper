@@ -1,8 +1,7 @@
-﻿using System;
+namespace Lumper.UI.ViewModels.Tasks;
+using System;
 using System.Collections.ObjectModel;
 using Lumper.Lib.Tasks;
-
-namespace Lumper.UI.ViewModels.Tasks;
 
 /// <summary>
 ///     ViewModel for ChangeTextrue Task
@@ -14,9 +13,9 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
     {
         try
         {
-            foreach (var item in task.Replace)
+            foreach (System.Collections.Generic.KeyValuePair<string, string> item in task.Replace)
                 ReplaceItems.Add(new ChangeTextureReplaceItem(this, task, item));
-            foreach (var item in task.ReplaceRegex)
+            foreach (System.Collections.Generic.KeyValuePair<System.Text.RegularExpressions.Regex, string> item in task.ReplaceRegex)
                 RegexItems.Add(new ChangeTextureRegexItem(this, task, item));
         }
         catch (Exception ex)
@@ -25,8 +24,8 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
         }
     }
 
-    public ObservableCollection<ChangeTextureReplaceItem> ReplaceItems { get; private set; } = new();
-    public ObservableCollection<ChangeTextureRegexItem> RegexItems { get; private set; } = new();
+    public ObservableCollection<ChangeTextureReplaceItem> ReplaceItems { get; private set; } = [];
+    public ObservableCollection<ChangeTextureRegexItem> RegexItems { get; private set; } = [];
 
     public void AddReplaceItem()
     {

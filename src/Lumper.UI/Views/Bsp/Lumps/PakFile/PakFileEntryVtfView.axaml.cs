@@ -1,14 +1,13 @@
+namespace Lumper.UI.Views.Bsp.Lumps.PakFile;
 using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
-
-namespace Lumper.UI.Views.Bsp.Lumps.PakFile;
 
 public partial class PakFileEntryVtfView : UserControl
 {
@@ -18,8 +17,10 @@ public partial class PakFileEntryVtfView : UserControl
         if (Application.Current?.ApplicationLifetime is not
             IClassicDesktopStyleApplicationLifetime
             desktop)
+        {
             throw new InvalidCastException(
                 nameof(Application.Current.ApplicationLifetime));
+        }
 
         Desktop = desktop;
     }
@@ -29,19 +30,10 @@ public partial class PakFileEntryVtfView : UserControl
         get;
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
-    public void OnSetImageClick(object sender, RoutedEventArgs e)
-    {
-        SetImage(false);
-    }
-    public void OnNewImageClick(object sender, RoutedEventArgs e)
-    {
-        SetImage(true);
-    }
+    public void OnSetImageClick(object sender, RoutedEventArgs e) => SetImage(false);
+    public void OnNewImageClick(object sender, RoutedEventArgs e) => SetImage(true);
     private async void SetImage(bool createNew)
     {
         if (Desktop.MainWindow is null)
@@ -54,7 +46,7 @@ public partial class PakFileEntryVtfView : UserControl
             FileTypeFilter = GenerateImageFileFilter()
         };
 
-        var result = await Desktop.MainWindow.StorageProvider
+        IReadOnlyList<IStorageFile> result = await Desktop.MainWindow.StorageProvider
             .OpenFilePickerAsync(dialog);
 
         if (result is not { Count: 1 })
@@ -62,7 +54,7 @@ public partial class PakFileEntryVtfView : UserControl
 
         if (DataContext is PakFileEntryVtfViewModel vm)
         {
-            var img = PakFileEntryVtfViewModel.ImageFromFileStream(
+            SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Rgba32> img = PakFileEntryVtfViewModel.ImageFromFileStream(
                 await result[0].OpenReadAsync());
             if (createNew)
                 vm.SetNewImage(img);

@@ -1,3 +1,4 @@
+namespace Lumper.UI.ViewModels.Bsp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -5,13 +6,11 @@ using System.Reactive.Linq;
 using DynamicData;
 using ReactiveUI;
 
-namespace Lumper.UI.ViewModels.Bsp;
-
 // BspViewModel support for Tabs
 public partial class BspViewModel
 {
     private readonly SourceList<BspNodeBase> _openTabs = new();
-    private readonly HashSet<BspNodeBase> _openTabsSet = new();
+    private readonly HashSet<BspNodeBase> _openTabsSet = [];
 
     private /*readonly*/
         ReadOnlyObservableCollection<BspNodeBase> _openTabsReadOnly = null!;
@@ -27,14 +26,11 @@ public partial class BspViewModel
     public ReadOnlyObservableCollection<BspNodeBase> OpenTabs =>
         _openTabsReadOnly;
 
-    private void TabsInit()
-    {
-        _openTabs.Connect()
+    private void TabsInit() => _openTabs.Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Bind(out _openTabsReadOnly)
             .DisposeMany()
             .Subscribe(_ => { }, RxApp.DefaultExceptionHandler.OnNext);
-    }
 
     public void Open(BspNodeBase? bspNode)
     {

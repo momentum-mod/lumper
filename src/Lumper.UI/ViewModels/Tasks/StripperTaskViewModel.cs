@@ -1,14 +1,9 @@
-﻿using Lumper.Lib.Tasks;
-
 namespace Lumper.UI.ViewModels.Tasks;
+using Lumper.Lib.Tasks;
 
 /// <summary>
 ///     ViewModel for Stripper Task
 /// </summary>
-public class StripperTaskViewModel : TaskViewModel
+public class StripperTaskViewModel(StripperTask task) : TaskViewModel(task)
 {
-    public StripperTaskViewModel(StripperTask task)
-        : base(task)
-    {
-    }
 }

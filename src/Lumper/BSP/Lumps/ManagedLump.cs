@@ -1,10 +1,6 @@
-namespace Lumper.Lib.BSP.Lumps
+namespace Lumper.Lib.BSP.Lumps;
+
+public abstract class ManagedLump<T>(BspFile parent) : Lump<T>(parent)
+                             where T : System.Enum
 {
-    public abstract class ManagedLump<T> : Lump<T>
-                                 where T : System.Enum
-    {
-        public ManagedLump(BspFile parent) : base(parent)
-        {
-        }
-    }
 }

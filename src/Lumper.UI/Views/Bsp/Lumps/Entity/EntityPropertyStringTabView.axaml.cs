@@ -1,17 +1,10 @@
+namespace Lumper.UI.Views.Bsp.Lumps.Entity;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Lumper.UI.Views.Bsp.Lumps.Entity;
-
 public partial class EntityPropertyStringTabView : UserControl
 {
-    public EntityPropertyStringTabView()
-    {
-        InitializeComponent();
-    }
+    public EntityPropertyStringTabView() => InitializeComponent();
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 }

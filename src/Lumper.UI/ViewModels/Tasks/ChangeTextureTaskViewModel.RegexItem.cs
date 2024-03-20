@@ -1,8 +1,7 @@
-﻿using System.Text.RegularExpressions;
-using System.Collections.Generic;
-using Lumper.Lib.Tasks;
-
 namespace Lumper.UI.ViewModels.Tasks;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Lumper.Lib.Tasks;
 
 /// <summary>
 ///     ViewModel for ChangeTextrue Task

@@ -1,6 +1,5 @@
-﻿using ReactiveUI;
-
 namespace Lumper.UI.ViewModels;
+using ReactiveUI;
 
 /// <summary>
 ///     Base for all ViewModels

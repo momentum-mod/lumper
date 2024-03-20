@@ -1,15 +1,13 @@
-using ReactiveUI;
+namespace Lumper.UI.ViewModels.Bsp;
+using System.IO;
 using Lumper.Lib.BSP;
 using Lumper.UI.ViewModels.Bsp.Lumps;
-
-namespace Lumper.UI.ViewModels.Bsp;
-
-using System.IO;
+using ReactiveUI;
 
 /// <summary>
-///     View model for <see cref="Lumper.Lib.BSP.BspFile" />
+///     View model for <see cref="Lib.BSP.BspFile" />
 /// </summary>
-public partial class BspViewModel : ViewModelBase
+public partial class BspViewModel : ViewModelBase, System.IDisposable
 {
     private string? _filePath;
     private string? _fileName;
@@ -54,8 +52,7 @@ public partial class BspViewModel : ViewModelBase
     }
 
 
-    public void Update()
-    {
-        BspNode.Update();
-    }
+    public void Update() => BspNode.Update();
+
+    public void Dispose() => throw new System.NotImplementedException();
 }

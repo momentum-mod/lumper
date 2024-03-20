@@ -1,18 +1,15 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using DynamicData;
-using ReactiveUI;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using Lumper.Lib.BSP.Lumps.BspLumps;
-using Lumper.Lib.BSP.Struct;
-
-namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
+using ReactiveUI;
 
 /// <summary>
 ///     ViewModel for <see cref="EntityLump" />.
 /// </summary>
-public class EntityLumpViewModel : LumpBase
+public class EntityLumpViewModel : LumpBase, System.IDisposable
 {
     private readonly SourceList<EntityViewModel> _entities = new();
     private readonly EntityLump _entityLump;
@@ -32,14 +29,11 @@ public class EntityLumpViewModel : LumpBase
     public override BspNodeBase? ViewNode => this;
 
 
-    private bool contentChanged = false;
+    private bool contentChanged;
     private string _content = "";
     public string Content
     {
-        get
-        {
-            return _content;
-        }
+        get => _content;
         set
         {
             if (_content != value)
@@ -54,7 +48,7 @@ public class EntityLumpViewModel : LumpBase
     private void Init()
     {
         _entities.Clear();
-        foreach (var entity in _entityLump.Data)
+        foreach (Lib.BSP.Struct.Entity entity in _entityLump.Data)
             _entities.Add(new EntityViewModel(this, entity));
     }
 
@@ -84,8 +78,10 @@ public class EntityLumpViewModel : LumpBase
     public void AddEntity()
     {
         var properties = new List<KeyValuePair<string, string>>();
-        var entity = new Lumper.Lib.BSP.Struct.Entity(properties);
+        var entity = new Lib.BSP.Struct.Entity(properties);
         _entityLump.Data.Add(entity);
         _entities.Add(new EntityViewModel(this, entity));
     }
+
+    public void Dispose() => throw new System.NotImplementedException();
 }

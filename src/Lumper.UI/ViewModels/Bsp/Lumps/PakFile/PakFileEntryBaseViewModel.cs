@@ -1,14 +1,14 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using DynamicData;
-using SharpCompress.Archives.Zip;
 using ReactiveUI;
+using SharpCompress.Archives.Zip;
 
-namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
-public abstract class PakFileEntryBaseViewModel : BspNodeBase
+public abstract class PakFileEntryBaseViewModel : BspNodeBase, IDisposable
 {
     protected PakFileEntryBaseViewModel(BspNodeBase parent, string name)
         : base(parent)
@@ -58,11 +58,11 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
 
     protected string GetPath()
     {
-        List<string> path = new();
+        List<string> path = [];
         GetPath(ref path, true);
         path.Reverse();
         var ret = string.Join("/", path);
-        if (ret.Any())
+        if (ret.Length != 0)
             ret += "/";
         return ret;
     }
@@ -79,11 +79,11 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase
 
     public virtual void Save(ZipArchive zip, ref List<Stream> streams)
     {
-        foreach (var entry in _entries.Items)
+        foreach (PakFileEntryBaseViewModel entry in _entries.Items)
         {
             entry.Save(zip, ref streams);
         }
     }
 
-
+    public void Dispose() => throw new NotImplementedException();
 }

@@ -1,8 +1,8 @@
-﻿using ReactiveUI;
-using Lumper.Lib.Tasks;
-using Lumper.Lib.BSP;
-
 namespace Lumper.UI.ViewModels.Tasks;
+using Lumper.Lib.BSP;
+using Lumper.Lib.Tasks;
+using ReactiveUI;
+
 public enum TaskStatus
 {
     Unknown,
@@ -23,20 +23,14 @@ public class TaskViewModel : ViewModelBase
     {
         Task = task;
         Task.Progress.OnPercentChanged +=
-            (object source, double newPercent) =>
-            {
-                this.RaisePropertyChanged(nameof(ProgressPercent));
-            };
+            (object source, double newPercent) => this.RaisePropertyChanged(nameof(ProgressPercent));
     }
 
     public LumperTask Task
     {
         get;
     }
-    public double ProgressPercent
-    {
-        get => Task.Progress.Percent;
-    }
+    public double ProgressPercent => Task.Progress.Percent;
     public TaskStatus _status;
     public TaskStatus Status
     {
@@ -53,7 +47,7 @@ public class TaskViewModel : ViewModelBase
 
     public bool Run(BspFile bsp)
     {
-        bool success = true;
+        var success = true;
         Status = TaskStatus.Running;
         switch (Task.Run(bsp))
         {
@@ -66,6 +60,8 @@ public class TaskViewModel : ViewModelBase
                 break;
             case TaskResult.Unknwon:
                 Status = TaskStatus.Unknown;
+                break;
+            default:
                 break;
         }
         return success;

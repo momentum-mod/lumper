@@ -1,11 +1,10 @@
+namespace Lumper.UI.Converters;
 using System;
 using System.Globalization;
 using System.Text;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Lumper.UI.ViewModels.Bsp;
-
-namespace Lumper.UI.Converters;
 
 /// <summary>
 ///     Generates full name for bsp node.
@@ -28,18 +27,15 @@ public class BmpNodeTitleConverter : IValueConverter
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter,
-        CultureInfo culture)
-    {
-        return new BindingNotification(
+        CultureInfo culture) => new BindingNotification(
             new ArgumentOutOfRangeException(nameof(value)),
             BindingErrorType.DataValidationError);
-    }
 
     private static string BuildName(BspNodeBase node)
     {
         var builder = new StringBuilder();
         builder.Append(node.NodeName);
-        var currentNode = node;
+        BspNodeBase? currentNode = node;
         while (currentNode is not null)
         {
             builder.Insert(0, $"{currentNode.NodeName}.");

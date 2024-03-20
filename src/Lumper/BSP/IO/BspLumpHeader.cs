@@ -1,20 +1,11 @@
-namespace Lumper.Lib.BSP.IO
-{
-    public class BspLumpHeader
-    {
-        public BspLumpHeader(LumpHeader header, int version)
-        {
-            Offset = (int)header.Offset;
-            Length = (int)header.Length;
-            Version = version;
-            FourCc = header.Compressed
-                        ? (int)header.UncompressedLength
-                        : 0;
-        }
+namespace Lumper.Lib.BSP.IO;
 
-        public int Offset { get; set; }
-        public int Length { get; set; }
-        public int Version { get; set; }
-        public int FourCc { get; set; }
-    }
+public class BspLumpHeader(LumpHeader header, int version)
+{
+    public int Offset { get; set; } = (int)header.Offset;
+    public int Length { get; set; } = (int)header.Length;
+    public int Version { get; set; } = version;
+    public int FourCc { get; set; } = header.Compressed
+                    ? (int)header.UncompressedLength
+                    : 0;
 }

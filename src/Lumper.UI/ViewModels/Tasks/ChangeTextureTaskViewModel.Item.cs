@@ -1,30 +1,23 @@
-﻿using ReactiveUI;
-using Lumper.Lib.Tasks;
-
 namespace Lumper.UI.ViewModels.Tasks;
+using Lumper.Lib.Tasks;
+using ReactiveUI;
 
 /// <summary>
 ///     ViewModel for ChangeTextrue Task
 /// </summary>
 public partial class ChangeTextureTaskViewModel : TaskViewModel
 {
-    public abstract class ChangeTextureItem : ViewModelBase
+    public abstract class ChangeTextureItem(ChangeTextureTaskViewModel parent,
+                             ChangeTextureTask task) : ViewModelBase
     {
-        public ChangeTextureItem(ChangeTextureTaskViewModel parent,
-                                 ChangeTextureTask task)
-        {
-            Parent = parent;
-            _task = task;
-        }
-
         ~ChangeTextureItem()
         {
             Remove();
         }
 
-        public ChangeTextureTaskViewModel Parent { get; }
+        public ChangeTextureTaskViewModel Parent { get; } = parent;
 
-        protected readonly ChangeTextureTask _task;
+        protected readonly ChangeTextureTask _task = task;
 
         protected string _source = "";
         public string Source

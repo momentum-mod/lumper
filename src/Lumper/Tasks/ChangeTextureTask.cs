@@ -1,49 +1,47 @@
+namespace Lumper.Lib.Tasks;
 using System;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
-namespace Lumper.Lib.Tasks
+public class ChangeTextureTask : LumperTask
 {
-    public class ChangeTextureTask : LumperTask
+    public override string Type { get; } = "ChangeTextureTask";
+    public ChangeTextureTask()
+    { }
+    public Dictionary<string, string> Replace { get; set; } = [];
+    public List<KeyValuePair<Regex, string>> ReplaceRegex { get; set; } = [];
+    public override TaskResult Run(BspFile map)
     {
-        public override string Type { get; } = "ChangeTextureTask";
-        public ChangeTextureTask()
-        { }
-        public Dictionary<string, string> Replace { get; set; } = new();
-        public List<KeyValuePair<Regex, string>> ReplaceRegex { get; set; } = new();
-        public override TaskResult Run(BspFile map)
+        TexDataLump texDataLump = map.GetLump<TexDataLump>();
+        Progress.Max = texDataLump.Data.Count;
+        foreach (BSP.Struct.TexData texture in texDataLump.Data)
         {
-            var texDataLump = map.GetLump<TexDataLump>();
-            Progress.Max = texDataLump.Data.Count;
-            foreach (var texture in texDataLump.Data)
+            Console.Write($"TexName: {texture.TexName}");
+            if (Replace.TryGetValue(texture.TexName, out var value))
             {
-                Console.Write($"TexName: {texture.TexName}");
-                if (Replace.ContainsKey(texture.TexName))
+                texture.TexName = value;
+                Console.Write($" replace: {texture.TexName}");
+            }
+            else
+            {
+                foreach (KeyValuePair<Regex, string> replaceRegex in ReplaceRegex)
                 {
-                    texture.TexName = Replace[texture.TexName];
-                    Console.Write($" replace: {texture.TexName}");
-                }
-                else
-                {
-                    foreach (var replaceRegex in ReplaceRegex)
-                    {
-                        string tmp = replaceRegex.Key.Replace(
-                            texture.TexName,
-                            replaceRegex.Value);
+                    var tmp = replaceRegex.Key.Replace(
+                        texture.TexName,
+                        replaceRegex.Value);
 
-                        if (texture.TexName != tmp)
-                        {
-                            texture.TexName = tmp;
-                            Console.Write($" replaceRegex: {texture.TexName}");
-                        }
+                    if (texture.TexName != tmp)
+                    {
+                        texture.TexName = tmp;
+                        Console.Write($" replaceRegex: {texture.TexName}");
                     }
                 }
-                Console.WriteLine();
-                Progress.Count++;
             }
-            return TaskResult.Success;
+            Console.WriteLine();
+            Progress.Count++;
         }
+        return TaskResult.Success;
     }
 }

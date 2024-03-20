@@ -1,18 +1,17 @@
-﻿using System;
+namespace Lumper.UI.ViewModels.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using DynamicData;
 using DynamicData.Binding;
-using ReactiveUI;
-using Newtonsoft.Json;
-using Lumper.Lib.Tasks;
 using Lumper.Lib.BSP;
-
-namespace Lumper.UI.ViewModels.Tasks;
+using Lumper.Lib.Tasks;
+using Newtonsoft.Json;
+using ReactiveUI;
 
 /// <summary>
 ///     ViewModel for Tasks
@@ -22,13 +21,13 @@ public partial class TasksViewModel : ViewModelBase
     public TasksViewModel(BspFile bsp)
     {
         BspFile = bsp;
-        TaskTypes = new()
-        {
+        TaskTypes =
+        [
             new TaskMenuItem(this, typeof(ChangeTextureTask)),
             new TaskMenuItem(this, typeof(StripperTask)),
             new TaskMenuItem(this, typeof(CompressionTask)),
             new TaskMenuItem(this, typeof(RunExternalToolTask)),
-        };
+        ];
         this.WhenAnyPropertyChanged(nameof(SelectedTask))
          .Subscribe(_ => OnSelectedTaskChanged());
     }
@@ -51,7 +50,7 @@ public partial class TasksViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _selectedTask, value);
     }
     public List<TaskMenuItem> TaskTypes { get; private set; }
-    public ObservableCollection<TaskViewModel> Tasks { get; private set; } = new();
+    public ObservableCollection<TaskViewModel> Tasks { get; private set; } = [];
 
     private ViewModelBase? _content;
     public ViewModelBase? Content
@@ -60,41 +59,29 @@ public partial class TasksViewModel : ViewModelBase
         private set => this.RaiseAndSetIfChanged(ref _content, value);
     }
 
-    private void OnSelectedTaskChanged()
-    {
-        Content = SelectedTask ?? null;
-    }
+    private void OnSelectedTaskChanged() => Content = SelectedTask ?? null;
 
-    public TaskViewModel CreateTaskViewModel(LumperTask lumperTask)
+    public static TaskViewModel CreateTaskViewModel(LumperTask lumperTask) => lumperTask switch
     {
-        return lumperTask switch
-        {
-            StripperTask stripperTask => new StripperTaskViewModel(stripperTask),
-            RunExternalToolTask runExternal => new RunExternalToolTaskViewModel(runExternal),
-            ChangeTextureTask changeTexture => new ChangeTextureTaskViewModel(changeTexture),
-            CompressionTask compression => new CompressionTaskViewModel(compression),
-            _ => new TaskViewModel(lumperTask)
-        };
-    }
+        StripperTask stripperTask => new StripperTaskViewModel(stripperTask),
+        RunExternalToolTask runExternal => new RunExternalToolTaskViewModel(runExternal),
+        ChangeTextureTask changeTexture => new ChangeTextureTaskViewModel(changeTexture),
+        CompressionTask compression => new CompressionTaskViewModel(compression),
+        _ => new TaskViewModel(lumperTask)
+    };
 
     private enum MoveDir { Up = -1, Down = 1 }
-    public void MoveSelectedTaskUp()
-    {
-        MoveSelectedTaskDir(MoveDir.Up);
-    }
-    public void MoveSelectedTaskDown()
-    {
-        MoveSelectedTaskDir(MoveDir.Down);
-    }
+    public void MoveSelectedTaskUp() => MoveSelectedTaskDir(MoveDir.Up);
+    public void MoveSelectedTaskDown() => MoveSelectedTaskDir(MoveDir.Down);
 
     private void MoveSelectedTaskDir(MoveDir dir)
     {
         if (SelectedTask is null || Tasks.Count <= 1)
             return;
 
-        int offset = (int)dir;
-        int idx = Tasks.IndexOf(SelectedTask);
-        int newIdx = idx + offset;
+        var offset = (int)dir;
+        var idx = Tasks.IndexOf(SelectedTask);
+        var newIdx = idx + offset;
 
         if (newIdx < 0)
             newIdx = Tasks.Count + offset;
@@ -121,11 +108,11 @@ public partial class TasksViewModel : ViewModelBase
         {
             try
             {
-                foreach (var task in Tasks)
+                foreach (TaskViewModel task in Tasks)
                 {
                     task.Reset();
                 }
-                foreach (var task in Tasks)
+                foreach (TaskViewModel task in Tasks)
                 {
                     if (!task.Run(BspFile))
                         return;
@@ -147,12 +134,12 @@ public partial class TasksViewModel : ViewModelBase
         };
         using var sr = new StreamReader(stream);
         using var reader = new JsonTextReader(sr);
-        var tasks = serializer.Deserialize<List<LumperTask>>(reader);
+        List<LumperTask>? tasks = serializer.Deserialize<List<LumperTask>>(reader);
         if (tasks == null)
             return;
         Tasks.Clear();
         SelectedTask = null;
-        foreach (var task in tasks)
+        foreach (LumperTask task in tasks)
         {
             Tasks.Add(CreateTaskViewModel(task));
         }

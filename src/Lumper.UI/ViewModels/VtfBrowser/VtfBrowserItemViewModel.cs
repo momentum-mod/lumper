@@ -1,11 +1,9 @@
+namespace Lumper.UI.ViewModels.VtfBrowser;
+using System.Linq;
+using Lumper.UI.Models;
 using ReactiveUI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using Lumper.UI.Models;
-using Lumper.Lib.VTF;
-using System.Linq;
-
-namespace Lumper.UI.ViewModels.VtfBrowser;
 
 public class VtfBrowserItemViewModel : ViewModelBase
 {
@@ -43,16 +41,13 @@ public class VtfBrowserItemViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _path, value);
     }
 
-    private Image<Rgba32>? _image = null;
+    private Image<Rgba32>? _image;
 
     public Image<Rgba32>? Image
     {
         get
         {
-            if (_image is null)
-            {
-                _image = _vtfFileData.GetImage(0, 0, 0, 0);
-            }
+            _image ??= _vtfFileData.GetImage(0, 0, 0, 0);
             return _image;
         }
         set => this.RaiseAndSetIfChanged(ref _image, value);

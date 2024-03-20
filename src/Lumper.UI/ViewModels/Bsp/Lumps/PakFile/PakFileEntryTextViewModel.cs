@@ -1,18 +1,12 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 using System.IO;
 using System.Linq;
-using ReactiveUI;
 using Lumper.Lib.BSP.Struct;
+using ReactiveUI;
 
-namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
-
-public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
+public class PakFileEntryTextViewModel(PakFileEntryBranchViewModel parent,
+    PakFileEntry entry, string name) : PakFileEntryLeafViewModel(parent, entry, name)
 {
-    public PakFileEntryTextViewModel(PakFileEntryBranchViewModel parent,
-        PakFileEntry entry, string name)
-        : base(parent, entry, name)
-    {
-    }
-
     private string _content = "";
     public string Content
     {
@@ -23,11 +17,11 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
             _isModified = true;
         }
     }
-    private bool _isModified = false;
-    public override bool IsModified { get => _isModified; }
+    private bool _isModified;
+    public override bool IsModified => _isModified;
 
 
-    private bool _isContentVisible = false;
+    private bool _isContentVisible;
     public bool IsContentVisible
     {
         get => _isContentVisible;
@@ -35,18 +29,18 @@ public class PakFileEntryTextViewModel : PakFileEntryLeafViewModel
     }
 
     private readonly string[] KnownFileTypes =
-    {
+    [
         ".txt",
         ".vbsp",
         ".vmt"
-    };
+    ];
     private readonly System.Text.Encoding _encoding
         = System.Text.Encoding.ASCII;
 
 
     public void ShowContent()
     {
-        var stream = _entry.DataStream;
+        Stream stream = _entry.DataStream;
         if (stream.CanSeek)
             stream.Seek(0, SeekOrigin.Begin);
         var sr = new StreamReader(stream, _encoding);

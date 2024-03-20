@@ -1,17 +1,10 @@
+namespace Lumper.UI.Views.Bsp;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Lumper.UI.Views.Bsp;
-
 public partial class BspSearchView : UserControl
 {
-    public BspSearchView()
-    {
-        InitializeComponent();
-    }
+    public BspSearchView() => InitializeComponent();
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 }

@@ -1,10 +1,9 @@
+namespace Lumper.UI.Converters;
 using System;
 using System.Globalization;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Lumper.UI.ViewModels.Tasks;
-
-namespace Lumper.UI.Converters;
 
 /// <summary>
 ///     format TaskStatus
@@ -25,27 +24,18 @@ public class TaskStatusConverter : IValueConverter
                 new ArgumentOutOfRangeException(nameof(value)),
                 BindingErrorType.DataValidationError);
         }
-        switch (status)
+        return status switch
         {
-            case TaskStatus.Waiting:
-                return "|";
-            case TaskStatus.Running:
-                return "➠";
-            case TaskStatus.Success:
-                return "✓";
-            case TaskStatus.Failed:
-                return "⚠";
-            case TaskStatus.Unknown:
-            default:
-                return " ";
-        }
+            TaskStatus.Waiting => "|",
+            TaskStatus.Running => "➠",
+            TaskStatus.Success => "✓",
+            TaskStatus.Failed => "⚠",
+            _ => " ",
+        };
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter,
-        CultureInfo culture)
-    {
-        return new BindingNotification(
+        CultureInfo culture) => new BindingNotification(
             new ArgumentOutOfRangeException(nameof(value)),
             BindingErrorType.DataValidationError);
-    }
 }

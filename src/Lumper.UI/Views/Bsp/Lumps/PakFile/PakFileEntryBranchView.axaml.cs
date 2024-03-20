@@ -1,13 +1,12 @@
+namespace Lumper.UI.Views.Bsp.Lumps.PakFile;
 using System;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
-using Avalonia.Controls.ApplicationLifetimes;
 using Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
-
-namespace Lumper.UI.Views.Bsp.Lumps.PakFile;
 
 public partial class PakFileEntryBranchView : UserControl
 {
@@ -18,8 +17,10 @@ public partial class PakFileEntryBranchView : UserControl
         if (Application.Current?.ApplicationLifetime is not
             IClassicDesktopStyleApplicationLifetime
             desktop)
+        {
             throw new InvalidCastException(
                 nameof(Application.Current.ApplicationLifetime));
+        }
 
         Desktop = desktop;
     }
@@ -29,10 +30,7 @@ public partial class PakFileEntryBranchView : UserControl
         get;
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
     public async void OnAddFileClick(object sender, RoutedEventArgs e)
     {
@@ -44,10 +42,10 @@ public partial class PakFileEntryBranchView : UserControl
             AllowMultiple = true,
             Title = "Pick files to add to PakFile"
         };
-        var result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
+        System.Collections.Generic.IReadOnlyList<IStorageFile> result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
         if (DataContext is PakFileEntryBranchViewModel vm)
         {
-            foreach (var r in result)
+            foreach (IStorageFile r in result)
                 vm.AddFile(r.Name, await r.OpenReadAsync());
         }
     }

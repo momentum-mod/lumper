@@ -1,3 +1,4 @@
+namespace Lumper.UI.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,11 +12,7 @@ using Lumper.Lib.BSP.IO;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.UI.ViewModels.Bsp;
 using Lumper.UI.ViewModels.VtfBrowser;
-using MessageBox.Avalonia;
-using MessageBox.Avalonia.Enums;
 using ReactiveUI;
-
-namespace Lumper.UI.ViewModels;
 
 // MainWindowViewModel support for reading and writing of <see cref="BspFile"/>.
 public partial class MainWindowViewModel
@@ -33,19 +30,23 @@ public partial class MainWindowViewModel
 
     private static IReadOnlyList<FilePickerFileType> GenerateBspFileFilter()
     {
-        var bspFilter = new FilePickerFileType("BSP files");
-        bspFilter.Patterns = new[] { "*.bsp" };
-        //MIME references from:
-        //https://www.wikidata.org/wiki/Q105858735
-        //https://www.wikidata.org/wiki/Q105859836
-        //https://www.wikidata.org/wiki/Q2701652
-        bspFilter.MimeTypes = new[]
+        var bspFilter = new FilePickerFileType("BSP files")
+        {
+            Patterns = new[] { "*.bsp" },
+            //MIME references from:
+            //https://www.wikidata.org/wiki/Q105858735
+            //https://www.wikidata.org/wiki/Q105859836
+            //https://www.wikidata.org/wiki/Q2701652
+            MimeTypes = new[]
         {
             "application/octet-stream", "model/vnd.valve.source.compiled-map"
+        }
         };
 
-        var anyFilter = new FilePickerFileType("All files");
-        anyFilter.Patterns = new[] { "*" };
+        var anyFilter = new FilePickerFileType("All files")
+        {
+            Patterns = new[] { "*" }
+        };
 
         return new[] { bspFilter, anyFilter };
     }
@@ -55,11 +56,13 @@ public partial class MainWindowViewModel
         if (Desktop.MainWindow is null)
             return;
 
-        var dialog = new FilePickerOpenOptions();
-        dialog.AllowMultiple = false;
-        dialog.Title = "Pick BSP file";
-        dialog.FileTypeFilter = GenerateBspFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
+        var dialog = new FilePickerOpenOptions
+        {
+            AllowMultiple = false,
+            Title = "Pick BSP file",
+            FileTypeFilter = GenerateBspFileFilter()
+        };
+        IReadOnlyList<IStorageFile> result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
         if (result is not { Count: 1 })
             return;
         await LoadBsp(result[0]);
@@ -74,10 +77,12 @@ public partial class MainWindowViewModel
         {
             if (Desktop.MainWindow is null)
                 return;
-            var dialog = new FilePickerSaveOptions();
-            dialog.Title = "Pick BSP file";
-            dialog.FileTypeChoices = GenerateBspFileFilter();
-            var result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+            var dialog = new FilePickerSaveOptions
+            {
+                Title = "Pick BSP file",
+                FileTypeChoices = GenerateBspFileFilter()
+            };
+            IStorageFile? result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
             if (result is null)
                 return;
             Save(result);
@@ -92,10 +97,12 @@ public partial class MainWindowViewModel
     {
         if (Desktop.MainWindow is null || _bspModel is null)
             return;
-        var dialog = new FilePickerSaveOptions();
-        dialog.Title = "Pick BSP file";
-        dialog.FileTypeChoices = GenerateBspFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+        var dialog = new FilePickerSaveOptions
+        {
+            Title = "Pick BSP file",
+            FileTypeChoices = GenerateBspFileFilter()
+        };
+        IStorageFile? result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
         if (result is null)
             return;
         Save(result);
@@ -131,7 +138,7 @@ public partial class MainWindowViewModel
 
         try
         {
-            using (var stream = File.OpenWrite(path))
+            using (FileStream stream = File.OpenWrite(path))
             {
                 //TODO: Copy bsp model tree for fallback if error occurs
                 _bspModel.Update();
@@ -159,12 +166,12 @@ public partial class MainWindowViewModel
         Content = BspModel;
     }
 
-    private async Task LoadBsp(IStorageFile file)
+    private static async Task LoadBsp(IStorageFile file)
     {
         if (!file.CanOpenRead)
             return;
         Console.WriteLine(file.Name);
-        var folder = await file.GetParentAsync();
+        IStorageFolder? folder = await file.GetParentAsync();
         if (!file.TryGetUri(out var path))
         {
             throw new Exception("Failed to get file path");
@@ -194,10 +201,7 @@ public partial class MainWindowViewModel
         BspModel = null;
     }
 
-    public void ExitCommand()
-    {
-        Desktop.MainWindow?.Close();
-    }
+    public void ExitCommand() => Desktop.MainWindow?.Close();
 
     public async Task OnClose(CancelEventArgs e)
     {
