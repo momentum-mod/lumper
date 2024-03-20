@@ -1,5 +1,4 @@
 namespace Lumper.Lib.BSP.IO;
-
 public class GameLumpHeader
 {
     public GameLumpHeader()

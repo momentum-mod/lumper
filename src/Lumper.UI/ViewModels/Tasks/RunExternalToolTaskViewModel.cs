@@ -5,5 +5,4 @@ using Lumper.Lib.Tasks;
 ///     ViewModel for RunExternalTool Task
 /// </summary>
 public class RunExternalToolTaskViewModel(RunExternalToolTask task) : TaskViewModel(task)
-{
-}
+{ }

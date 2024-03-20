@@ -89,7 +89,7 @@ public class VtfFileData
             (uint)image.Width,
             (uint)image.Height,
             ImageFormat
-        );
+            );
 
         VTFFile.ImageSetData(frame, face, slice, mipmapLevel, vtfImageData);
         SaveVtf();
@@ -104,10 +104,10 @@ public class VtfFileData
         createOptions.imageFormat =
             hasAlpha ? VTFImageFormat.IMAGE_FORMAT_DXT5 : VTFImageFormat.IMAGE_FORMAT_DXT1;
         if (!VTFFile.ImageCreateSingle(
-                (uint)image.Width,
-                (uint)image.Height,
-                buffer,
-                ref createOptions))
+            (uint)image.Width,
+            (uint)image.Height,
+            buffer,
+            ref createOptions))
         {
             var err = VTFAPI.GetLastError();
             Console.WriteLine(err);

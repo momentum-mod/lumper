@@ -16,7 +16,7 @@ public partial class VtfBrowserViewModel : ViewModelBase
         foreach (Lib.BSP.Struct.PakFileEntry? entry in entries)
         {
             TextureBrowserItems.Add(new VtfBrowserItemViewModel(
-            entry.Key, new VtfFileData(entry)));
+                entry.Key, new VtfFileData(entry)));
         }
 
         UpdateItems();
@@ -95,7 +95,7 @@ public partial class VtfBrowserViewModel : ViewModelBase
             }
 
             item.IsVisible = string.IsNullOrWhiteSpace(TextureSearch)
-                   || matcher.Match(item.Name).Result;
+                             || matcher.Match(item.Name).Result;
 
             if (item.IsVisible)
                 count++;

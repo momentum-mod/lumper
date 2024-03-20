@@ -15,10 +15,10 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
 
     [JsonProperty]
     public IReadOnlyDictionary<BspLumpType, LumpHeader> Headers => Lumps.ToDictionary(
-            x => x.Item1 is Lump<BspLumpType> lump
-                            ? lump.Type
-                            : BspLumpType.Unknown,
-            x => x.Item2);
+        x => x.Item1 is Lump<BspLumpType> lump
+            ? lump.Type
+            : BspLumpType.Unknown,
+        x => x.Item2);
 
     public void Load()
     {

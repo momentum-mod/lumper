@@ -29,7 +29,7 @@ public partial class TasksViewModel : ViewModelBase
             new TaskMenuItem(this, typeof(RunExternalToolTask)),
         ];
         this.WhenAnyPropertyChanged(nameof(SelectedTask))
-         .Subscribe(_ => OnSelectedTaskChanged());
+            .Subscribe(_ => OnSelectedTaskChanged());
     }
 
     //todo load new map without creating a new TasksViewModel?

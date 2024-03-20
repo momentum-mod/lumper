@@ -89,8 +89,8 @@ public class BspFile
     public Lump<BspLumpType> GetLump(BspLumpType lumpType) => Lumps[lumpType];
 
     public void ToJson(bool sortLumps,
-                      bool sortProperties,
-                      bool ignoreOffset)
+        bool sortProperties,
+        bool ignoreOffset)
     {
         var dir = Path.GetDirectoryName(FilePath) ?? ".";
         var name = Path.GetFileNameWithoutExtension(FilePath);
