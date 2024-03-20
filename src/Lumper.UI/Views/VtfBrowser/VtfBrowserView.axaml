@@ -13,7 +13,7 @@
 
     <Grid RowDefinitions="*, Auto">
         <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-            <ItemsControl HorizontalAlignment="Center" Items="{Binding TextureBrowserItems}">
+            <ItemsControl HorizontalAlignment="Center" ItemsSource="{Binding TextureBrowserItems}">
 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

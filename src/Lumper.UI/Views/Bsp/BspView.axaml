@@ -20,7 +20,7 @@
             <bspviews:BspTreeView Grid.Row="1" Margin="0, 0, 0,8" DataContext="{Binding}" />
             <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />
             <TabControl Grid.Column="2" Grid.Row="1"
-                        Items="{Binding OpenTabs}"
+                        ItemsSource="{Binding OpenTabs}"
                         SelectedItem="{Binding SelectedTab}">
                 <TabControl.ItemTemplate>
                     <DataTemplate>
@@ -36,7 +36,7 @@
                                     Width="15" Height="15"
                                     Command="{Binding Close}"/>
                             <Button IsVisible="false"
-                                    Command="{Binding CloseSelected}" 
+                                    Command="{Binding CloseSelected}"
                                     HotKey="Ctrl+W"/>
                         </Grid>
                     </DataTemplate>

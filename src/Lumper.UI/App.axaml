@@ -15,7 +15,11 @@
     </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme Mode="Dark" />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <FluentTheme>
+            <FluentTheme.Palettes>
+                <ColorPaletteResources x:Key="Dark" Accent="DodgerBlue" RegionColor="DimGray" ErrorText="Yellow" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
     </Application.Styles>
 </Application>

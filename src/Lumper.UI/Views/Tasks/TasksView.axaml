@@ -16,11 +16,11 @@
             <Button DockPanel.Dock="Left" Click="OnLoadClick" IsEnabled="{Binding !IsRunning}">Load Tasks</Button>
             <Button DockPanel.Dock="Left" Click="OnSaveClick" IsEnabled="{Binding !IsRunning}">Save Tasks</Button>
         </DockPanel>
-        <ListBox Grid.Row="1" Grid.Column="0" 
-                 Items="{Binding Tasks}" 
+        <ListBox Grid.Row="1" Grid.Column="0"
+                 ItemsSource="{Binding Tasks}"
                  SelectedItem="{Binding SelectedTask}">
             <ListBox.ContextMenu>
-                <ContextMenu Items="{Binding TaskTypes}">
+                <ContextMenu ItemsSource="{Binding TaskTypes}">
                     <ContextMenu.Styles>
                         <Style Selector="MenuItem">
                             <Setter Property="Header" Value="{Binding Name}"/>
