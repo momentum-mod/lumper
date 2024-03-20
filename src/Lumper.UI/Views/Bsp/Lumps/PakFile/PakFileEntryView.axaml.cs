@@ -1,18 +1,11 @@
+namespace Lumper.UI.Views.Bsp.Lumps.PakFile;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
-namespace Lumper.UI.Views.Bsp.Lumps.PakFile;
-
 public partial class PakFileEntryView : UserControl
 {
-    public PakFileEntryView()
-    {
-        InitializeComponent();
-    }
+    public PakFileEntryView() => InitializeComponent();
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 }

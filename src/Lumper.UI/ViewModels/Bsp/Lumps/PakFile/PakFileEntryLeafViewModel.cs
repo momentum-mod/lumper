@@ -1,18 +1,16 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 using System;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using ReactiveUI;
 using Lumper.Lib.BSP.Struct;
+using ReactiveUI;
 
-
-
-namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
 {
     protected readonly PakFileEntry _entry;
-    public PakFileEntry Entry { get => _entry; }
-    public string Extension { get => new FileInfo(Name).Extension.ToLower(); }
+    public PakFileEntry Entry => _entry;
+    public string Extension => new FileInfo(Name).Extension.ToLower(System.Globalization.CultureInfo.CurrentCulture);
 
     public PakFileEntryLeafViewModel(PakFileEntryBranchViewModel parent,
         PakFileEntry entry, string name)
@@ -34,13 +32,13 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
             .Where(m => m is not null)
             .Subscribe(_ =>
             {
-                string newKey = Path + Name;
+                var newKey = Path + Name;
                 if (newKey != Entry.Key)
                 {
                     Entry.Key = newKey;
                     if (Parent is PakFileEntryBranchViewModel branch)
                     {
-                        var dir = branch.CreatePathRoot(Entry.Key, out _);
+                        PakFileEntryBranchViewModel dir = branch.CreatePathRoot(Entry.Key, out _);
                         dir.MoveNode(this);
                     }
                 }
@@ -53,9 +51,6 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
             branch.Delete(this);
     }
 
-    public void OpenTab()
-    {
-        BspView.Open(this);
-    }
+    public void OpenTab() => BspView.Open(this);
 
 }

@@ -1,33 +1,32 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
-using ReactiveUI;
 using Lumper.Lib.BSP.Struct;
-
-namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
+using ReactiveUI;
 
 /// <summary>
-///     ViewModel for <see cref="Lib.BSP.Struct.Entity" />.
+///     ViewModel for <see cref="Entity" />.
 /// </summary>
 public class EntityViewModel : BspNodeBase
 {
     private readonly string _className;
-    private readonly Lib.BSP.Struct.Entity _entity;
+    private readonly Entity _entity;
 
     public EntityViewModel(EntityLumpViewModel parent,
-        Lib.BSP.Struct.Entity entity)
+        Entity entity)
         : base(parent)
     {
         _className = entity.ClassName;
         _entity = entity;
-        foreach (var property in entity.Properties)
+        foreach (Entity.Property property in entity.Properties)
             AddProperty(property);
         InitializeNodeChildrenObserver(Properties);
 
         this.WhenAnyValue(x => x.IsModified)
            .ObserveOn(RxApp.MainThreadScheduler)
-           .Where(m => m == true)
+           .Where(m => m)
            .Subscribe(_ =>
                {
                    if (parent is EntityLumpViewModel entityLump)
@@ -45,18 +44,18 @@ public class EntityViewModel : BspNodeBase
     public override string NodeName =>
         $"Entity{(string.IsNullOrWhiteSpace(_className) ? "" : $" ({_className})")}";
 
-    private bool _isModified = false;
+    private bool _isModified;
     public override bool IsModified =>
         _isModified
         || (Nodes is { Count: > 0 } && Nodes.Any(n => n.IsModified));
 
-    private void AddProperty(Lib.BSP.Struct.Entity.Property property)
+    private void AddProperty(Entity.Property property)
     {
         EntityPropertyBase propertyViewModel = property switch
         {
-            Lib.BSP.Struct.Entity.Property<string> sp =>
+            Entity.Property<string> sp =>
                 new EntityPropertyStringViewModel(this, sp),
-            Lib.BSP.Struct.Entity.Property<EntityIO> sio =>
+            Entity.Property<EntityIO> sio =>
                 new EntityPropertyIOViewModel(this, sio),
             _ => throw new ArgumentOutOfRangeException(nameof(property))
         };
@@ -65,19 +64,19 @@ public class EntityViewModel : BspNodeBase
 
     public void AddString()
     {
-        var prop = new Lib.BSP.Struct.Entity.Property<string>(
+        var prop = new Entity.Property<string>(
                 "newproperty", "newvalue");
         Add(prop);
     }
 
     public void AddIO()
     {
-        var prop = new Lib.BSP.Struct.Entity.Property<EntityIO>(
+        var prop = new Entity.Property<EntityIO>(
                     "newproperty", new EntityIO());
         Add(prop);
     }
 
-    private void Add(Lib.BSP.Struct.Entity.Property prop)
+    private void Add(Entity.Property prop)
     {
         AddProperty(prop);
         _entity.Properties.Add(prop);

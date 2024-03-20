@@ -1,12 +1,8 @@
 namespace Lumper.UI.ViewModels.Bsp;
 
 /// <summary>
-///     ViewModel base for all <see cref="Lumper.Lib.BSP.Lumps.Lump" /> instances.
+///     ViewModel base for all <see cref="Lib.BSP.Lumps.Lump" /> instances.
 /// </summary>
-public abstract class LumpBase : BspNodeBase
+public abstract class LumpBase(BspViewModel parent) : BspNodeBase(parent)
 {
-    public LumpBase(BspViewModel parent)
-        : base(parent)
-    {
-    }
 }

@@ -1,23 +1,15 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 using System;
 using System.IO;
 using Lumper.Lib.BSP.Struct;
 using Lumper.UI.Models;
-using Lumper.UI.ViewModels.VtfBrowser;
 using ReactiveUI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using VTFLib;
 
-namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
-
-public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
+public class PakFileEntryVtfViewModel(PakFileEntryBranchViewModel parent,
+    PakFileEntry entry, string name) : PakFileEntryLeafViewModel(parent, entry, name)
 {
-    public PakFileEntryVtfViewModel(PakFileEntryBranchViewModel parent,
-        PakFileEntry entry, string name)
-        : base(parent, entry, name)
-    {
-    }
-
     public override BspNodeBase? ViewNode => this;
 
     public override string NodeName =>
@@ -31,11 +23,11 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         set => this.RaiseAndSetIfChanged(ref _info, value);
     }
 
-    private bool _isModified = false;
+    private bool _isModified;
 
     public override bool IsModified => _isModified;
 
-    private Image<Rgba32>? _image = null;
+    private Image<Rgba32>? _image;
 
     public Image<Rgba32>? Image
     {
@@ -120,15 +112,9 @@ public class PakFileEntryVtfViewModel : PakFileEntryLeafViewModel
         UpdateImage();
     }
 
-    private void UpdateImage()
-    {
-        Image = _vtfData?.GetImage(Frame, Face, Slice, MipmapLevel);
-    }
+    private void UpdateImage() => Image = _vtfData?.GetImage(Frame, Face, Slice, MipmapLevel);
 
-    public static Image<Rgba32> ImageFromFileStream(Stream fileSteam)
-    {
-        return SixLabors.ImageSharp.Image.Load<Rgba32>(fileSteam);
-    }
+    public static Image<Rgba32> ImageFromFileStream(Stream fileSteam) => SixLabors.ImageSharp.Image.Load<Rgba32>(fileSteam);
 
     public void SetImageData(Image<Rgba32> image)
     {

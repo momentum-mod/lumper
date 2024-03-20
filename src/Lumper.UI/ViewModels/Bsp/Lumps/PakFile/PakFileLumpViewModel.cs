@@ -1,31 +1,28 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using SharpCompress.Archives.Zip;
-using Lumper.Lib.BSP.Lumps.BspLumps;
-
 namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Lumper.Lib.BSP.Lumps.BspLumps;
+using SharpCompress.Archives.Zip;
 
 /// <summary>
 ///     ViewModel for the PakFile
 /// </summary>
 public class PakFileLumpViewModel : LumpBase
 {
-    private readonly PakFileEntryBranchViewModel _entryRoot;
-    public PakFileEntryBranchViewModel EntryRoot { get => _entryRoot; }
+    public PakFileEntryBranchViewModel EntryRoot { get; }
     private readonly PakFileLump _lump;
     public PakFileLumpViewModel(BspViewModel parent, PakFileLump pakFileLump)
         : base(parent)
     {
         _lump = pakFileLump;
-        _entryRoot = new(this, pakFileLump);
+        EntryRoot = new(this, pakFileLump);
 
-        InitializeNodeChildrenObserver(_entryRoot._entries);
+        InitializeNodeChildrenObserver(EntryRoot._entries);
     }
 
     public override string NodeName => "PakFile";
-    public List<PakFileEntryLeafViewModel> ZipEntries { get; } = new();
+    public List<PakFileEntryLeafViewModel> ZipEntries { get; } = [];
 
     public override BspNodeBase? ViewNode => this;
 
@@ -41,31 +38,33 @@ public class PakFileLumpViewModel : LumpBase
         ZipEntries.Clear();
         AddFilesRecusive(importDir, importDir, zip);
         _lump.Zip = zip;
-        _entryRoot.CreateNodes(_lump.Entries);
+        EntryRoot.CreateNodes(_lump.Entries);
     }
 
     private static void AddFilesRecusive(DirectoryInfo dir,
                                   DirectoryInfo importDir,
                                   ZipArchive zip)
     {
-        foreach (var file in dir.GetFiles())
+        foreach (FileInfo file in dir.GetFiles())
         {
             using var fs = new FileStream(file.FullName, FileMode.Open);
             var mem = new MemoryStream();
             fs.CopyTo(mem);
             if (!file.FullName.StartsWith(importDir.FullName))
+            {
                 throw new InvalidDataException(
                     "how did you do that?" +
                     $"'{importDir.FullName}' -> '{file.FullName}'");
+            }
 
-            string entryPath = file.FullName[importDir.FullName.Length..];
+            var entryPath = file.FullName[importDir.FullName.Length..];
             //using the filestream instead of the memorystream here means
             //we have to keep all the files open .. if we close them, we can't save the bsp
             //because we can't create the zip from closed streams
             zip.AddEntry(entryPath, mem);
         }
 
-        foreach (var subdir in dir.GetDirectories())
+        foreach (DirectoryInfo subdir in dir.GetDirectories())
         {
             AddFilesRecusive(subdir, importDir, zip);
         }
@@ -76,8 +75,8 @@ public class PakFileLumpViewModel : LumpBase
         var exportDir = new DirectoryInfo(path);
         if (!exportDir.Exists)
             throw new DirectoryNotFoundException(path);
-        if (exportDir.GetFiles().Any()
-            || exportDir.GetDirectories().Any())
+        if (exportDir.GetFiles().Length != 0
+            || exportDir.GetDirectories().Length != 0)
         {
             Console.WriteLine("Refusing to export to a directory containing stuff");
             //todo messagebox .. but not here because of dependencies?
@@ -100,7 +99,7 @@ public class PakFileLumpViewModel : LumpBase
         while (reader.MoveToNextEntry())
         {
             FileInfo fi = new(Path.Join(exportDir.FullName, reader.Entry.Key));
-            string? name = fi.Directory?.FullName;
+            var name = fi.Directory?.FullName;
             if (!string.IsNullOrWhiteSpace(name))
             {
                 Directory.CreateDirectory(name);
@@ -110,8 +109,5 @@ public class PakFileLumpViewModel : LumpBase
         }
     }
 
-    public void AddFile(string key, Stream stream)
-    {
-        _entryRoot.AddFile(key, stream);
-    }
+    public void AddFile(string key, Stream stream) => EntryRoot.AddFile(key, stream);
 }

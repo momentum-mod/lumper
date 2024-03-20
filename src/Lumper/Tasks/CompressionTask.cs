@@ -1,53 +1,48 @@
+namespace Lumper.Lib.Tasks;
 using System;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
-namespace Lumper.Lib.Tasks
+public class CompressionTask : LumperTask
 {
-    public class CompressionTask : LumperTask
+    public override string Type { get; } = "CompressionTask";
+    public bool CompressLumps { get; set; }
+    public bool CompressPakFile { get; set; }
+
+    public CompressionTask()
+    { }
+
+    public CompressionTask(bool compressLumps) => CompressLumps = compressLumps;
+
+    public override TaskResult Run(BspFile map)
     {
-        public override string Type { get; } = "CompressionTask";
-        public bool CompressLumps { get; set; }
-        public bool CompressPakFile { get; set; }
-
-        public CompressionTask()
-        { }
-
-        public CompressionTask(bool compressLumps)
+        if (!CompressLumps)
         {
-            CompressLumps = compressLumps;
+            //todo error message?
+            return TaskResult.Failed;
         }
 
-        public override TaskResult Run(BspFile map)
+        Progress.Max = map.Lumps.Count;
+        var i = 0;
+        foreach (System.Collections.Generic.KeyValuePair<BspLumpType, BSP.Lumps.Lump<BspLumpType>> lump in map.Lumps)
         {
-            if (!CompressLumps)
+            Console.WriteLine($"{i} {lump.Key} {lump.Value.GetType().Name}");
+            i++;
+
+            if (lump.Value is not GameLump and not PakFileLump)
             {
-                //todo error message?
-                return TaskResult.Failed;
+                lump.Value.Compress = CompressLumps;
+            }
+            else if (lump.Value is GameLump gameLump)
+            {
+                foreach (System.Collections.Generic.KeyValuePair<BSP.Lumps.GameLumps.GameLumpType, BSP.Lumps.Lump> lump2 in gameLump.Lumps)
+                {
+                    lump2.Value.Compress = CompressLumps;
+                }
             }
 
-            Progress.Max = map.Lumps.Count;
-            int i = 0;
-            foreach (var lump in map.Lumps)
-            {
-                Console.WriteLine($"{i} {lump.Key} {lump.Value.GetType().Name}");
-                i++;
-
-                if (lump.Value is not GameLump && lump.Value is not PakFileLump)
-                {
-                    lump.Value.Compress = CompressLumps;
-                }
-                else if (lump.Value is GameLump gameLump)
-                {
-                    foreach (var lump2 in gameLump.Lumps)
-                    {
-                        lump2.Value.Compress = CompressLumps;
-                    }
-                }
-
-                Progress.Count++;
-            }
-            return TaskResult.Success;
+            Progress.Count++;
         }
+        return TaskResult.Success;
     }
 }
