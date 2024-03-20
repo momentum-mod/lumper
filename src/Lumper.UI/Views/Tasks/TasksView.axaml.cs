@@ -68,14 +68,17 @@ public partial class TasksView : UserControl
     {
         if (Desktop.MainWindow is null)
             return;
+
         var dialog = new FilePickerSaveOptions
         {
             Title = "Pick tasks file",
             FileTypeChoices = GenerateJsonFileFilter()
         };
         IStorageFile? result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+
         if (result is null)
             return;
+
         if (DataContext is TasksViewModel vm)
             vm.Save(await result.OpenWriteAsync());
     }

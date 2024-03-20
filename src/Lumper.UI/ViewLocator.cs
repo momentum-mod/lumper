@@ -6,12 +6,12 @@ using Lumper.UI.ViewModels;
 
 public class ViewLocator : IDataTemplate
 {
-    public static IControl Build(object? data)
+    public Control Build(object? param)
     {
-        if (data is null)
+        if (param is null)
             return new TextBlock { Text = "Null referenced object" };
 
-        var name = data.GetType().FullName!.Replace("ViewModel", "View");
+        var name = param.GetType().FullName!.Replace("ViewModel", "View");
         var type = Type.GetType(name);
 
         if (type != null)

@@ -8,8 +8,8 @@
 
     <Grid RowDefinitions="Auto,*,Auto,*" ColumnDefinitions="*">
         <Button Grid.Row="0" Command="{Binding AddReplaceItem}">Add replace item</Button>
-        <ListBox Grid.Row="1" Grid.Column="0" 
-                 Items="{Binding ReplaceItems}" 
+        <ListBox Grid.Row="1" Grid.Column="0"
+                 ItemsSource="{Binding ReplaceItems}"
                  SelectedItem="{Binding SelectedReplaceItem}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -27,8 +27,8 @@
             </ListBox.ItemTemplate>
         </ListBox>
         <Button Grid.Row="2" Command="{Binding AddRegexItem}">Add regex item</Button>
-        <ListBox Grid.Row="3" Grid.Column="0" 
-                 Items="{Binding RegexItems}" 
+        <ListBox Grid.Row="3" Grid.Column="0"
+                 ItemsSource="{Binding RegexItems}"
                  SelectedItem="{Binding SelectedRegexItem}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
