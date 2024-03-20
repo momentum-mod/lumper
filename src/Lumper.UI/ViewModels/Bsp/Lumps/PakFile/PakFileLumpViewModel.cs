@@ -42,8 +42,8 @@ public class PakFileLumpViewModel : LumpBase
     }
 
     private static void AddFilesRecusive(DirectoryInfo dir,
-                                  DirectoryInfo importDir,
-                                  ZipArchive zip)
+        DirectoryInfo importDir,
+        ZipArchive zip)
     {
         foreach (FileInfo file in dir.GetFiles())
         {

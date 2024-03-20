@@ -1,5 +1,4 @@
 namespace Lumper.Lib.BSP.Lumps.BspLumps;
-
 public enum BspLumpType
 {
     Unknown = -1,

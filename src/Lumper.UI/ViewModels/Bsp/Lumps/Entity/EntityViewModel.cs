@@ -25,13 +25,13 @@ public class EntityViewModel : BspNodeBase
         InitializeNodeChildrenObserver(Properties);
 
         this.WhenAnyValue(x => x.IsModified)
-           .ObserveOn(RxApp.MainThreadScheduler)
-           .Where(m => m)
-           .Subscribe(_ =>
-               {
-                   if (parent is EntityLumpViewModel entityLump)
-                       entityLump.Open();
-               });
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Where(m => m)
+            .Subscribe(_ =>
+            {
+                if (parent is EntityLumpViewModel entityLump)
+                    entityLump.Open();
+            });
     }
 
     public SourceList<EntityPropertyBase> Properties
@@ -65,14 +65,14 @@ public class EntityViewModel : BspNodeBase
     public void AddString()
     {
         var prop = new Entity.Property<string>(
-                "newproperty", "newvalue");
+            "newproperty", "newvalue");
         Add(prop);
     }
 
     public void AddIO()
     {
         var prop = new Entity.Property<EntityIO>(
-                    "newproperty", new EntityIO());
+            "newproperty", new EntityIO());
         Add(prop);
     }
 

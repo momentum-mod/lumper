@@ -4,8 +4,10 @@ using System.Linq;
 using Lumper.Lib.BSP.Struct;
 using ReactiveUI;
 
-public class PakFileEntryTextViewModel(PakFileEntryBranchViewModel parent,
-    PakFileEntry entry, string name) : PakFileEntryLeafViewModel(parent, entry, name)
+public class PakFileEntryTextViewModel(
+    PakFileEntryBranchViewModel parent,
+    PakFileEntry entry,
+    string name) : PakFileEntryLeafViewModel(parent, entry, name)
 {
     private string _content = "";
     public string Content

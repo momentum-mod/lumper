@@ -5,5 +5,4 @@ using ReactiveUI;
 ///     Base for all ViewModels
 /// </summary>
 public class ViewModelBase : ReactiveObject
-{
-}
+{ }

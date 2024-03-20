@@ -12,7 +12,7 @@ using ReactiveUI;
 public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 {
     public PakFileEntryBranchViewModel(PakFileLumpViewModel parent, PakFileLump pakFile)
-    : base(parent, "root")
+        : base(parent, "root")
     {
         _pakFile = pakFile;
         _pakFileViewModel = parent;
@@ -21,7 +21,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     }
 
     public PakFileEntryBranchViewModel(PakFileEntryBranchViewModel parent,
-                                       string name)
+        string name)
         : base(parent, name)
     {
         _pakFile = parent._pakFile;
@@ -30,9 +30,9 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     }
 
     private void Init() => _entries
-            .Connect()
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(x =>
+        .Connect()
+        .ObserveOn(RxApp.MainThreadScheduler)
+        .Subscribe(x =>
         {
             //todo 'clear' doesn't work with this 
             //its a x.Item.Rang and x.Item.Current is null
@@ -40,13 +40,13 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 
             IEnumerable<PakFileEntryLeafViewModel> addList
                 = list.Where(x => x.Item.Reason is ListChangeReason.Add
-                            or ListChangeReason.AddRange)
+                        or ListChangeReason.AddRange)
                     .Select(x => (PakFileEntryLeafViewModel)x.Item.Current);
             IEnumerable<PakFileEntryLeafViewModel> deleteList
                 = list.Where(x => x.Item.Reason is ListChangeReason.Remove
-                               or ListChangeReason.RemoveRange
-                               or ListChangeReason.Clear)
-                      .Select(x => (PakFileEntryLeafViewModel)x.Item.Current);
+                        or ListChangeReason.RemoveRange
+                        or ListChangeReason.Clear)
+                    .Select(x => (PakFileEntryLeafViewModel)x.Item.Current);
             if (deleteList.Any())
                 _pakFileViewModel.ZipEntries.RemoveMany(deleteList);
             if (addList.Any())
@@ -71,8 +71,8 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     {
         PakFileEntryBaseViewModel? dir =
             _entries.AsObservableList().Items
-            .FirstOrDefault(x => x is PakFileEntryBranchViewModel branch
-                                && branch.Name == name, null);
+                .FirstOrDefault(x => x is PakFileEntryBranchViewModel branch
+                                     && branch.Name == name, null);
         if (dir is null)
         {
             dir = new PakFileEntryBranchViewModel(this, name);
@@ -85,8 +85,8 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     private void AddLeaf(string name, PakFileEntry entry)
     {
         if (!_entries.Items.Any(
-                x => x is PakFileEntryLeafViewModel leaf
-                     && leaf.Entry == entry))
+            x => x is PakFileEntryLeafViewModel leaf
+                 && leaf.Entry == entry))
         {
             if (name.ToLower(System.Globalization.CultureInfo.CurrentCulture).EndsWith(".vtf"))
                 _entries.Add(new PakFileEntryVtfViewModel(this, entry, name));

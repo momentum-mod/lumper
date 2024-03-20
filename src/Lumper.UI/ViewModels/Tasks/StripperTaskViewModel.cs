@@ -5,5 +5,4 @@ using Lumper.Lib.Tasks;
 ///     ViewModel for Stripper Task
 /// </summary>
 public class StripperTaskViewModel(StripperTask task) : TaskViewModel(task)
-{
-}
+{ }

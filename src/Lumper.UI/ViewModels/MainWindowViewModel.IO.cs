@@ -151,8 +151,8 @@ public partial class MainWindowViewModel
         {
             using FileStream stream = File.OpenWrite(path);
 
-                //TODO: Copy bsp model tree for fallback if error occurs
-                _bspModel.Update();
+            //TODO: Copy bsp model tree for fallback if error occurs
+            _bspModel.Update();
             await using var writer = new BspFileWriter(_bspModel.BspFile, stream);
             writer.Save();
         }

@@ -4,7 +4,7 @@ using System.IO;
 
 // lumps which contain a list/array of data U with fixed length
 public abstract class FixedLump<T, U> : ManagedLump<T>
-                              where T : System.Enum
+    where T : System.Enum
 {
     public List<U> Data { get; set; } = [];
 
@@ -35,6 +35,5 @@ public abstract class FixedLump<T, U> : ManagedLump<T>
     public override bool Empty() => Data.Count == 0;
 
     protected FixedLump(BspFile parent) : base(parent)
-    {
-    }
+    { }
 }

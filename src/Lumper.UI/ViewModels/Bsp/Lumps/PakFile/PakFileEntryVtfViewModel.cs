@@ -7,8 +7,10 @@ using ReactiveUI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-public class PakFileEntryVtfViewModel(PakFileEntryBranchViewModel parent,
-    PakFileEntry entry, string name) : PakFileEntryLeafViewModel(parent, entry, name)
+public class PakFileEntryVtfViewModel(
+    PakFileEntryBranchViewModel parent,
+    PakFileEntry entry,
+    string name) : PakFileEntryLeafViewModel(parent, entry, name)
 {
     public override BspNodeBase? ViewNode => this;
 

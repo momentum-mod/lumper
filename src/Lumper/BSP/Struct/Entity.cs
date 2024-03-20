@@ -31,7 +31,7 @@ public class Entity
                             Delay = delay,
                             TimesToFire = timestofire
                         }
-                    );
+                        );
                 }
                 catch (Exception e) when (e is IndexOutOfRangeException or FormatException)
                 {

@@ -82,10 +82,10 @@ public class EntityPropertyIOViewModel : EntityPropertyBase
 
     protected override async ValueTask<bool> Match(Matcher matcher,
         CancellationToken? cancellationToken) => await matcher.Match(_targetEntityName)
-               || await matcher.Match(_input)
-               || await matcher.Match(_parameter)
-               || await matcher.Match(
-                   _delay.ToString(CultureInfo.InvariantCulture))
-               || await matcher.Match(_timeToFire.ToString())
-               || await base.Match(matcher, cancellationToken);
+                                                 || await matcher.Match(_input)
+                                                 || await matcher.Match(_parameter)
+                                                 || await matcher.Match(
+                                                     _delay.ToString(CultureInfo.InvariantCulture))
+                                                 || await matcher.Match(_timeToFire.ToString())
+                                                 || await base.Match(matcher, cancellationToken);
 }

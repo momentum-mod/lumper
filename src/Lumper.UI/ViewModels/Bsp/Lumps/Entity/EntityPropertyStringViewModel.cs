@@ -6,7 +6,8 @@ using Lumper.UI.Models;
 /// <summary>
 ///     ViewModel for <see cref="string" /> <see cref="Lib.BSP.Struct.Entity.Property" />.
 /// </summary>
-public class EntityPropertyStringViewModel(EntityViewModel parent,
+public class EntityPropertyStringViewModel(
+    EntityViewModel parent,
     Lib.BSP.Struct.Entity.Property<string> property) : EntityPropertyBase(parent, property)
 {
     private readonly Lib.BSP.Struct.Entity.Property<string> _property = property;
@@ -31,5 +32,5 @@ public class EntityPropertyStringViewModel(EntityViewModel parent,
 
     protected override async ValueTask<bool> Match(Matcher matcher,
         CancellationToken? cancellationToken) => await matcher.Match(_value)
-               || await base.Match(matcher, cancellationToken);
+                                                 || await base.Match(matcher, cancellationToken);
 }

@@ -5,5 +5,4 @@ using Lumper.Lib.Tasks;
 ///     ViewModel for Compression Task
 /// </summary>
 public class CompressionTaskViewModel(CompressionTask task) : TaskViewModel(task)
-{
-}
+{ }

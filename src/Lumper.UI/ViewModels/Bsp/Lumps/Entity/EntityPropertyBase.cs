@@ -1,9 +1,9 @@
 namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
-
 /// <summary>
 ///     Base ViewModel for <see cref="Lib.BSP.Struct.Entity.Property" />.
 /// </summary>
-public abstract class EntityPropertyBase(EntityViewModel parent,
+public abstract class EntityPropertyBase(
+    EntityViewModel parent,
     Lib.BSP.Struct.Entity.Property property) : BspNodeBase(parent)
 {
     private string _key = property.Key;

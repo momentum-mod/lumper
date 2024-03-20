@@ -11,8 +11,8 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
     public class ChangeTextureRegexItem : ChangeTextureItem
     {
         public ChangeTextureRegexItem(ChangeTextureTaskViewModel parent,
-                                      ChangeTextureTask task,
-                                      KeyValuePair<Regex, string>? item = null)
+            ChangeTextureTask task,
+            KeyValuePair<Regex, string>? item = null)
             : base(parent, task)
         {
             if (item is not null)
@@ -23,7 +23,7 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
         }
 
         public override bool Add(string? source = null,
-                                 string? target = null)
+            string? target = null)
         {
             source ??= Source;
             target ??= Target;
@@ -37,7 +37,7 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
         {
             var idx = _task.ReplaceRegex.FindIndex(
                 x => x.Key.ToString() == Source
-                    && x.Value == Target);
+                     && x.Value == Target);
             if (idx > 0)
                 _task.ReplaceRegex.RemoveAt(idx);
         }

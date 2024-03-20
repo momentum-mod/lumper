@@ -23,10 +23,10 @@ public partial class BspViewModel
     }
 
     private void SearchInit() => this.WhenAnyValue(x => x.SearchPattern, x => x.SelectedMatcher
-        , x => x.BspNode)
-            .Throttle(TimeSpan.FromMilliseconds(400))
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(Search);
+            , x => x.BspNode)
+        .Throttle(TimeSpan.FromMilliseconds(400))
+        .ObserveOn(RxApp.MainThreadScheduler)
+        .Subscribe(Search);
 
     private static async void Search(
         (string?, MatcherBase?, BspNodeBase) args)

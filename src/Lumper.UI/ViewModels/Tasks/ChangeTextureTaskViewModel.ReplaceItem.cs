@@ -10,8 +10,8 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
     public class ChangeTextureReplaceItem : ChangeTextureItem
     {
         public ChangeTextureReplaceItem(ChangeTextureTaskViewModel parent,
-                                      ChangeTextureTask task,
-                                      KeyValuePair<string, string>? item = null)
+            ChangeTextureTask task,
+            KeyValuePair<string, string>? item = null)
             : base(parent, task)
         {
             if (item is not null)
@@ -22,7 +22,7 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
         }
 
         public override bool Add(string? source = null,
-                                 string? target = null)
+            string? target = null)
         {
             source ??= Source;
             target ??= Target;

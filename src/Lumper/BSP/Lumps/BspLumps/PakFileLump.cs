@@ -106,8 +106,8 @@ public class PakFileLump : ManagedLump<BspLumpType>
     {
         var dataStream = new MemoryStream();
         CompressionType compressionType = Compress
-                                ? CompressionType.LZMA
-                                : CompressionType.None;
+            ? CompressionType.LZMA
+            : CompressionType.None;
         Zip.SaveTo(dataStream, new WriterOptions(compressionType));
         return dataStream;
     }

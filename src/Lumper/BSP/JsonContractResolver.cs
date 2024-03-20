@@ -20,21 +20,21 @@ public class JsonContractResolver(bool sortProperties, bool ignoreOffset) : Defa
         if (SortProperties)
         {
             ordered = ordered.OrderBy(p => p.Order ?? int.MaxValue)
-                             .ThenBy(p => p.PropertyName);
+                .ThenBy(p => p.PropertyName);
         }
 
         if (IgnoreOffset)
         {
             ordered = ordered.Where(x =>
                 !(x.DeclaringType.IsAssignableTo(typeof(IUnmanagedLump))
-                && x.PropertyName == nameof(IUnmanagedLump.DataStreamOffset)));
+                  && x.PropertyName == nameof(IUnmanagedLump.DataStreamOffset)));
             ordered = ordered.Where(x =>
                 !((
-                   x.DeclaringType.IsAssignableFrom(typeof(LumpHeader))
-                || x.DeclaringType.IsAssignableFrom(typeof(BspLumpHeader))
-                || x.DeclaringType.IsAssignableFrom(typeof(GameLumpHeader))
-                )
-                && x.PropertyName == nameof(LumpHeader.Offset)));
+                      x.DeclaringType.IsAssignableFrom(typeof(LumpHeader))
+                      || x.DeclaringType.IsAssignableFrom(typeof(BspLumpHeader))
+                      || x.DeclaringType.IsAssignableFrom(typeof(GameLumpHeader))
+                  )
+                  && x.PropertyName == nameof(LumpHeader.Offset)));
         }
         return ordered.ToList();
     }
