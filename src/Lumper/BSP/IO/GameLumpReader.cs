@@ -84,11 +84,11 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
             Console.WriteLine($"\tFilelen: {header.UncompressedLength}");
 
             prevHeader = header;
-            //lump is compressed if the last bit is 1 
+            //lump is compressed if the last bit is 1
             prevCompressed = (lump.Flags & 1) == 1;
         }
-        // won't set compressedLength on the last entry 
-        // but it should be 0 and if its not we don't know the length 
+        // won't set compressedLength on the last entry
+        // but it should be 0 and if its not we don't know the length
         // so its probably not compressed
     }
 }
