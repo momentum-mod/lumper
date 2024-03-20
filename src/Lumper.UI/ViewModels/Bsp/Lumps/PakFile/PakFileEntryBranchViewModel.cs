@@ -1,14 +1,14 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using DynamicData;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Struct;
 using ReactiveUI;
 
-namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 {
     public PakFileEntryBranchViewModel(PakFileLumpViewModel parent, PakFileLump pakFile)
@@ -29,25 +29,23 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         Init();
     }
 
-    private void Init()
-    {
-        _entries
+    private void Init() => _entries
             .Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(x =>
         {
             //todo 'clear' doesn't work with this 
             //its a x.Item.Rang and x.Item.Current is null
-            var list = x.Where(x => x.Item.Current is PakFileEntryLeafViewModel);
+            IEnumerable<Change<PakFileEntryBaseViewModel>> list = x.Where(x => x.Item.Current is PakFileEntryLeafViewModel);
 
-            var addList
-                = list.Where(x => x.Item.Reason == ListChangeReason.Add
-                            || x.Item.Reason == ListChangeReason.AddRange)
+            IEnumerable<PakFileEntryLeafViewModel> addList
+                = list.Where(x => x.Item.Reason is ListChangeReason.Add
+                            or ListChangeReason.AddRange)
                     .Select(x => (PakFileEntryLeafViewModel)x.Item.Current);
-            var deleteList
-                = list.Where(x => x.Item.Reason == ListChangeReason.Remove
-                               || x.Item.Reason == ListChangeReason.RemoveRange
-                               || x.Item.Reason == ListChangeReason.Clear)
+            IEnumerable<PakFileEntryLeafViewModel> deleteList
+                = list.Where(x => x.Item.Reason is ListChangeReason.Remove
+                               or ListChangeReason.RemoveRange
+                               or ListChangeReason.Clear)
                       .Select(x => (PakFileEntryLeafViewModel)x.Item.Current);
             if (deleteList.Any())
                 _pakFileViewModel.ZipEntries.RemoveMany(deleteList);
@@ -56,8 +54,6 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 
         });
 
-    }
-
     private readonly PakFileLump _pakFile;
     private readonly PakFileLumpViewModel _pakFileViewModel;
     public override BspNodeBase? ViewNode => this;
@@ -65,7 +61,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     public void CreateNodes(IEnumerable<PakFileEntry> entries)
     {
         _entries.Clear();
-        foreach (var entry in entries)
+        foreach (PakFileEntry entry in entries)
         {
             CreateNodes(entry);
         }
@@ -73,7 +69,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 
     private PakFileEntryBranchViewModel AddBranch(string name)
     {
-        var dir =
+        PakFileEntryBaseViewModel? dir =
             _entries.AsObservableList().Items
             .FirstOrDefault(x => x is PakFileEntryBranchViewModel branch
                                 && branch.Name == name, null);
@@ -92,27 +88,24 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
                 x => x is PakFileEntryLeafViewModel leaf
                      && leaf.Entry == entry))
         {
-            if (name.ToLower().EndsWith(".vtf"))
+            if (name.ToLower(System.Globalization.CultureInfo.CurrentCulture).EndsWith(".vtf"))
                 _entries.Add(new PakFileEntryVtfViewModel(this, entry, name));
             else
                 _entries.Add(new PakFileEntryTextViewModel(this, entry, name));
         }
     }
 
-    public PakFileEntryBranchViewModel CreatePathRoot(string entryKey, out string name)
-    {
-        return _pakFileViewModel.EntryRoot.CreatePath(entryKey, out name);
-    }
+    public PakFileEntryBranchViewModel CreatePathRoot(string entryKey, out string name) => _pakFileViewModel.EntryRoot.CreatePath(entryKey, out name);
 
     private PakFileEntryBranchViewModel CreatePath(string entryKey, out string name, int index = 0)
     {
-        string[] path = entryKey.Split('/');
+        var path = entryKey.Split('/');
 
-        bool isDir = index < path.Length - 1;
+        var isDir = index < path.Length - 1;
         name = path[index];
         if (isDir)
         {
-            var dir = AddBranch(name);
+            PakFileEntryBranchViewModel dir = AddBranch(name);
             return dir.CreatePath(entryKey, out name, index + 1);
         }
         else
@@ -123,7 +116,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 
     public void CreateNodes(PakFileEntry entry)
     {
-        var dir = CreatePath(entry.Key, out string name);
+        PakFileEntryBranchViewModel dir = CreatePath(entry.Key, out var name);
         dir.AddLeaf(name, entry);
     }
 
@@ -136,25 +129,29 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
 
     private bool DeleteEmptyNodes()
     {
-        bool hasLeafs = false;
-        List<PakFileEntryBranchViewModel> deleteList = new();
-        foreach (var entry in _entries.Items)
+        var hasLeafs = false;
+        List<PakFileEntryBranchViewModel> deleteList = [];
+        foreach (PakFileEntryBaseViewModel entry in _entries.Items)
         {
             if (entry is PakFileEntryBranchViewModel branch)
             {
-                bool entryHasLeafs = branch.DeleteEmptyNodes();
+                var entryHasLeafs = branch.DeleteEmptyNodes();
                 if (entryHasLeafs)
                     hasLeafs = entryHasLeafs;
                 else
                     deleteList.Add(branch);
             }
             else if (entry is PakFileEntryLeafViewModel)
+            {
                 hasLeafs = true;
+            }
             else
+            {
                 throw new InvalidDataException(
                     $"what is this doing here {entry.GetType().Name}");
+            }
         }
-        foreach (var branch in deleteList)
+        foreach (PakFileEntryBranchViewModel branch in deleteList)
             _entries.Remove(branch);
         return hasLeafs;
     }
@@ -162,8 +159,11 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     public void AddFile(string key, Stream stream)
     {
         if (key.Contains('/'))
+        {
             throw new NotSupportedException(
                 "no path here for now .. only the directory name");
+        }
+
         var entry = new PakFileEntry(key, stream);
         _pakFile.Entries.Add(entry);
         AddLeaf(key, entry);
@@ -172,15 +172,18 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
     public void AddDir(string key)
     {
         if (key.Contains('/'))
+        {
             throw new NotSupportedException(
                 "no path here for now .. only the directory name");
+        }
+
         AddBranch(key);
     }
 
     //todo close the open tab on delete
     public void Delete()
     {
-        foreach (var entry in _entries.Items)
+        foreach (PakFileEntryBaseViewModel entry in _entries.Items)
         {
             if (entry is PakFileEntryBranchViewModel branch)
                 branch.Delete();

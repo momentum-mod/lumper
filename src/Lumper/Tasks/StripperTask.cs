@@ -1,105 +1,89 @@
+namespace Lumper.Lib.Tasks;
 using System;
-using System.IO;
 using System.Collections.Generic;
-using Newtonsoft.Json;
+using System.IO;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
+using Newtonsoft.Json;
 
-namespace Lumper.Lib.Tasks
+//change entities wth stripper config
+public partial class StripperTask : LumperTask
 {
-    //change entities wth stripper config
-    public partial class StripperTask : LumperTask
+    public override string Type { get; } = "StripperTask";
+
+    [JsonIgnore]
+    protected List<Block> blocks = [];
+    public string ConfigPath { get; set; }
+    public StripperTask()
+    { }
+
+    public StripperTask(string configPath) => ConfigPath = configPath;
+
+    public void Load(string configPath)
     {
-        public override string Type { get; } = "StripperTask";
+        ConfigPath = configPath;
+        Parse(File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.Read));
+    }
 
-        [JsonIgnore]
-        protected List<Block> blocks = new();
-        public string ConfigPath { get; set; }
-        public StripperTask()
-        { }
+    ///expects trimmed string
+    protected static bool IsComment(string line) => line.StartsWith(";")
+                 || line.StartsWith("//")
+                 || line.StartsWith("#")
+                 || line == "";
 
-        public StripperTask(string configPath)
+    public void Parse(Stream stream)
+    {
+        var reader = new StreamReader(stream);
+
+        string line;
+        var lineNr = 0;
+        var prevBlock = "";
+        while ((line = reader.ReadLine()) != null)
         {
-            ConfigPath = configPath;
-        }
+            lineNr++;
 
-        public void Load(string configPath)
-        {
-            ConfigPath = configPath;
-            Parse(File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.Read));
-        }
+            line = line.Trim();
+            if (string.IsNullOrEmpty(line))
+                continue;
 
-        ///expects trimmed string
-        protected static bool IsComment(string line)
-        {
-            return line.StartsWith(";")
-                     || line.StartsWith("//")
-                     || line.StartsWith("#")
-                     || line == "";
-        }
-
-        public void Parse(Stream stream)
-        {
-            var reader = new StreamReader(stream);
-
-            string line;
-            int lineNr = 0;
-            string prevBlock = "";
-            while ((line = reader.ReadLine()) != null)
+            var blockOpen = false;
+            if (line == "{")
             {
-                lineNr++;
-
-                line = line.Trim();
-                if (string.IsNullOrEmpty(line))
-                    continue;
-
-                Block block;
-
-                bool blockOpen = false;
-                if (line == "{")
-                {
-                    line = prevBlock;
-                    blockOpen = true;
-                }
-                else if (IsComment(line))
-                    continue;
-
-                switch (line)
-                {
-                    case "filter:":
-                    case "remove:":
-                        block = new Filter();
-                        break;
-                    case "add:":
-                        block = new Add();
-                        break;
-                    case "modify:":
-                        block = new Modify();
-                        break;
-                    default:
-                        throw new NotImplementedException($"Unknown title '{line}' in line {lineNr}");
-                }
-                prevBlock = line;
-
-                block.Parse(reader, blockOpen, ref lineNr);
-                blocks.Add(block);
+                line = prevBlock;
+                blockOpen = true;
             }
-        }
-
-        public override TaskResult Run(BspFile map)
-        {
-            if (!Path.Exists(ConfigPath))
-                return TaskResult.Failed;
-
-            Load(ConfigPath);
-            Progress.Max = blocks.Count;
-            var entityLump = map.GetLump<EntityLump>();
-            foreach (var block in blocks)
+            else if (IsComment(line))
             {
-                block.Apply(entityLump);
-                Progress.Count++;
+                continue;
             }
-            return TaskResult.Success;
+
+            Block block = line switch
+            {
+                "filter:" or "remove:" => new Filter(),
+                "add:" => new Add(),
+                "modify:" => new Modify(),
+                _ => throw new NotImplementedException($"Unknown title '{line}' in line {lineNr}"),
+            };
+            prevBlock = line;
+
+            block.Parse(reader, blockOpen, ref lineNr);
+            blocks.Add(block);
         }
+    }
+
+    public override TaskResult Run(BspFile map)
+    {
+        if (!Path.Exists(ConfigPath))
+            return TaskResult.Failed;
+
+        Load(ConfigPath);
+        Progress.Max = blocks.Count;
+        EntityLump entityLump = map.GetLump<EntityLump>();
+        foreach (Block block in blocks)
+        {
+            block.Apply(entityLump);
+            Progress.Count++;
+        }
+        return TaskResult.Success;
     }
 }

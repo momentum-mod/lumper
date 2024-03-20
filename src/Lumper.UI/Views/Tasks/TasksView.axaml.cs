@@ -1,14 +1,13 @@
-using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
+namespace Lumper.UI.Views.Tasks;
 using System;
 using System.Collections.Generic;
 using Avalonia;
-using Avalonia.Interactivity;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Interactivity;
+using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Lumper.UI.ViewModels.Tasks;
-
-namespace Lumper.UI.Views.Tasks;
 
 public partial class TasksView : UserControl
 {
@@ -24,23 +23,26 @@ public partial class TasksView : UserControl
         if (Application.Current?.ApplicationLifetime is not
             IClassicDesktopStyleApplicationLifetime
             desktop)
+        {
             throw new InvalidCastException(
                 nameof(Application.Current.ApplicationLifetime));
+        }
 
         Desktop = desktop;
     }
 
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
+    private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
     private static IReadOnlyList<FilePickerFileType> GenerateJsonFileFilter()
     {
-        var jsonFilter = new FilePickerFileType("JSON files");
-        jsonFilter.Patterns = new[] { "*.json" };
-        var anyFilter = new FilePickerFileType("All files");
-        anyFilter.Patterns = new[] { "*" };
+        var jsonFilter = new FilePickerFileType("JSON files")
+        {
+            Patterns = new[] { "*.json" }
+        };
+        var anyFilter = new FilePickerFileType("All files")
+        {
+            Patterns = new[] { "*" }
+        };
 
         return new[] { jsonFilter, jsonFilter };
     }
@@ -50,11 +52,13 @@ public partial class TasksView : UserControl
         if (Desktop.MainWindow is null)
             return;
 
-        var dialog = new FilePickerOpenOptions();
-        dialog.AllowMultiple = false;
-        dialog.Title = "Pick tasks file";
-        dialog.FileTypeFilter = GenerateJsonFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
+        var dialog = new FilePickerOpenOptions
+        {
+            AllowMultiple = false,
+            Title = "Pick tasks file",
+            FileTypeFilter = GenerateJsonFileFilter()
+        };
+        IReadOnlyList<IStorageFile> result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
         if (result is not { Count: 1 })
             return;
         if (DataContext is TasksViewModel vm)
@@ -64,10 +68,12 @@ public partial class TasksView : UserControl
     {
         if (Desktop.MainWindow is null)
             return;
-        var dialog = new FilePickerSaveOptions();
-        dialog.Title = "Pick tasks file";
-        dialog.FileTypeChoices = GenerateJsonFileFilter();
-        var result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+        var dialog = new FilePickerSaveOptions
+        {
+            Title = "Pick tasks file",
+            FileTypeChoices = GenerateJsonFileFilter()
+        };
+        IStorageFile? result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
         if (result is null)
             return;
         if (DataContext is TasksViewModel vm)

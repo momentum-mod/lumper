@@ -1,12 +1,11 @@
-﻿using System;
+namespace Lumper.UI.ViewModels;
+using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Lumper.UI.ViewModels.Bsp;
 using Lumper.UI.ViewModels.Tasks;
 using Lumper.UI.ViewModels.VtfBrowser;
 using ReactiveUI;
-
-namespace Lumper.UI.ViewModels;
 
 /// <summary>
 ///     ViewModel for MainWindow
@@ -24,8 +23,10 @@ public partial class MainWindowViewModel : ViewModelBase
         if (Application.Current?.ApplicationLifetime is not
             IClassicDesktopStyleApplicationLifetime
             desktop)
+        {
             throw new InvalidCastException(
                 nameof(Application.Current.ApplicationLifetime));
+        }
 
         Desktop = desktop;
 
@@ -75,18 +76,9 @@ public partial class MainWindowViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _vtfBrowserModel, value);
     }
 
-    public void ViewBsp()
-    {
-        Content = BspModel;
-    }
+    public void ViewBsp() => Content = BspModel;
 
-    public void ViewTasks()
-    {
-        Content = TasksModel;
-    }
+    public void ViewTasks() => Content = TasksModel;
 
-    public void ViewTextureBrowser()
-    {
-        Content = VtfBrowserModel;
-    }
+    public void ViewTextureBrowser() => Content = VtfBrowserModel;
 }

@@ -1,13 +1,12 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.BSP.Struct;
 using Lumper.UI.Models;
 
-namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
-
 /// <summary>
-///     ViewModel for <see cref="EntityIO" /> <see cref="Lib.BSP.Struct.Entity.Property" />.
+///     ViewModel for <see cref="EntityIO" /> <see cref="Entity.Property" />.
 /// </summary>
 public class EntityPropertyIOViewModel : EntityPropertyBase
 {
@@ -19,7 +18,7 @@ public class EntityPropertyIOViewModel : EntityPropertyBase
     private int _timeToFire;
 
     public EntityPropertyIOViewModel(EntityViewModel parent,
-        Lib.BSP.Struct.Entity.Property<EntityIO> property)
+        Entity.Property<EntityIO> property)
         : base(parent, property)
     {
         _entity = property.Value;
@@ -82,14 +81,11 @@ public class EntityPropertyIOViewModel : EntityPropertyBase
     }
 
     protected override async ValueTask<bool> Match(Matcher matcher,
-        CancellationToken? cancellationToken)
-    {
-        return await matcher.Match(_targetEntityName)
+        CancellationToken? cancellationToken) => await matcher.Match(_targetEntityName)
                || await matcher.Match(_input)
                || await matcher.Match(_parameter)
                || await matcher.Match(
                    _delay.ToString(CultureInfo.InvariantCulture))
                || await matcher.Match(_timeToFire.ToString())
                || await base.Match(matcher, cancellationToken);
-    }
 }

@@ -1,74 +1,92 @@
+namespace Lumper.Lib.BSP.Lumps.GameLumps;
 using System;
 using System.IO;
 
-namespace Lumper.Lib.BSP.Lumps.GameLumps
+public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
 {
-    public class Sprp : ManagedLump<GameLumpType>
+    public StaticPropDictLump StaticPropsDict { get; set; }
+    public StaticPropLeafLump StaticPropsLeaf { get; set; }
+    public StaticPropLump StaticProps { get; set; }
+
+    public override void Read(BinaryReader reader, long length)
     {
-        public StaticPropDictLump StaticPropsDict { get; set; }
-        public StaticPropLeafLump StaticPropsLeaf { get; set; }
-        public StaticPropLump StaticProps { get; set; }
-        public Sprp(BspFile parent) : base(parent)
-        { }
-        public override void Read(BinaryReader reader, long length)
+        var startPos = reader.BaseStream.Position;
+
+        var dictEntries = reader.ReadInt32();
+        StaticPropsDict = new(Parent);
+        StaticPropsDict.Read(reader, dictEntries * StaticPropsDict.StructureSize);
+
+        var leafEntries = reader.ReadInt32();
+        StaticPropsLeaf = new(Parent)
         {
-            var startPos = reader.BaseStream.Position;
+            Version = Version
+        };
+        StaticPropsLeaf.Read(reader, leafEntries * StaticPropsLeaf.StructureSize);
 
-            int dictEntries = reader.ReadInt32();
-            StaticPropsDict = new(Parent);
-            StaticPropsDict.Read(reader, dictEntries * StaticPropsDict.StructureSize);
+        var entries = reader.ReadInt32();
+        StaticProps = new(Parent);
+        var remainingLength = (int)(length - (reader.BaseStream.Position - startPos));
 
-            int leafEntries = reader.ReadInt32();
-            StaticPropsLeaf = new(Parent);
-            StaticPropsLeaf.Version = Version;
-            StaticPropsLeaf.Read(reader, leafEntries * StaticPropsLeaf.StructureSize);
-
-            int entries = reader.ReadInt32();
-            StaticProps = new(Parent);
-            int remainingLength = (int)(length - (reader.BaseStream.Position - startPos));
-
-            StaticProps.SetVersion(Version);
-            switch (StaticProps.ActualVersion)
-            {
-                case StaticPropVersion.V7:
-                case StaticPropVersion.V10:
-                    if (remainingLength % StaticProps.StructureSize != 0)
-                    {
-                        StaticProps.ActualVersion = StaticPropVersion.V7s;
-                        Console.WriteLine($"Remaining length doesn't fit version {Version} .. trying V7*");
-                    }
-                    break;
-            }
-            if (StaticProps.ActualVersion != StaticPropVersion.Unknown)
-            {
-                var tmpLength = entries * StaticProps.StructureSize;
-                if (tmpLength != remainingLength)
-                    throw new InvalidDataException($"Funny staticprop length ({tmpLength} != {remainingLength})");
-                StaticProps.Read(reader, tmpLength);
-            }
-            else
-                throw new NotImplementedException($"Unknown staticprop version (Version: {StaticProps.Version})");
+        StaticProps.SetVersion(Version);
+        switch (StaticProps.ActualVersion)
+        {
+            case StaticPropVersion.V7:
+            case StaticPropVersion.V10:
+                if (remainingLength % StaticProps.StructureSize != 0)
+                {
+                    StaticProps.ActualVersion = StaticPropVersion.V7s;
+                    Console.WriteLine($"Remaining length doesn't fit version {Version} .. trying V7*");
+                }
+                break;
+            case StaticPropVersion.Unknown:
+                break;
+            case StaticPropVersion.V4:
+                break;
+            case StaticPropVersion.V5:
+                break;
+            case StaticPropVersion.V6:
+                break;
+            case StaticPropVersion.V7s:
+                break;
+            case StaticPropVersion.V8:
+                break;
+            case StaticPropVersion.V9:
+                break;
+            case StaticPropVersion.V11:
+                break;
+            case StaticPropVersion.V12:
+                break;
+            default:
+                break;
         }
-
-        public override void Write(Stream stream)
+        if (StaticProps.ActualVersion != StaticPropVersion.Unknown)
         {
-            var w = new BinaryWriter(stream);
-
-            w.Write((int)StaticPropsDict.Data.Count);
-            StaticPropsDict.Write(w.BaseStream);
-
-            w.Write((int)StaticPropsLeaf.Data.Count);
-            StaticPropsLeaf.Write(w.BaseStream);
-
-            w.Write((int)StaticProps.Data.Count);
-            StaticProps.Write(w.BaseStream);
+            var tmpLength = entries * StaticProps.StructureSize;
+            if (tmpLength != remainingLength)
+                throw new InvalidDataException($"Funny staticprop length ({tmpLength} != {remainingLength})");
+            StaticProps.Read(reader, tmpLength);
         }
-
-        public override bool Empty()
+        else
         {
-            return StaticPropsDict.Empty()
-                && StaticPropsLeaf.Empty()
-                && StaticProps.Empty();
+            throw new NotImplementedException($"Unknown staticprop version (Version: {StaticProps.Version})");
         }
     }
+
+    public override void Write(Stream stream)
+    {
+        var w = new BinaryWriter(stream);
+
+        w.Write(StaticPropsDict.Data.Count);
+        StaticPropsDict.Write(w.BaseStream);
+
+        w.Write(StaticPropsLeaf.Data.Count);
+        StaticPropsLeaf.Write(w.BaseStream);
+
+        w.Write(StaticProps.Data.Count);
+        StaticProps.Write(w.BaseStream);
+    }
+
+    public override bool Empty() => StaticPropsDict.Empty()
+            && StaticPropsLeaf.Empty()
+            && StaticProps.Empty();
 }

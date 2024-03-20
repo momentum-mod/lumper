@@ -1,15 +1,14 @@
+namespace Lumper.UI.ViewModels.Bsp.Lumps;
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DynamicData;
-using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps;
+using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.UI.Models;
 using Lumper.UI.ViewModels.Bsp.Lumps.Entity;
 using Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
-
-namespace Lumper.UI.ViewModels.Bsp.Lumps;
 
 /// <summary>
 ///     ViewModel for the top most BspNode
@@ -21,7 +20,7 @@ public class BspNodeViewModel : BspNodeBase, IDisposable
         : base(parent)
     {
         NodeName = Path.GetFileName(parent.BspFile.FilePath);
-        foreach (var (key, value) in parent.BspFile.Lumps)
+        foreach ((BspLumpType key, Lump<BspLumpType> value) in parent.BspFile.Lumps)
             ParseLump(key, value);
         InitializeNodeChildrenObserver(_lumps);
     }
@@ -31,10 +30,7 @@ public class BspNodeViewModel : BspNodeBase, IDisposable
         get;
     }
 
-    public void Dispose()
-    {
-        _lumps.Dispose();
-    }
+    public void Dispose() => _lumps.Dispose();
 
     private void ParseLump(BspLumpType type, Lump<BspLumpType> lump)
     {
@@ -48,8 +44,5 @@ public class BspNodeViewModel : BspNodeBase, IDisposable
     }
 
     protected override ValueTask<bool> Match(Matcher matcher,
-        CancellationToken? cancellationToken)
-    {
-        return ValueTask.FromResult(true);
-    }
+        CancellationToken? cancellationToken) => ValueTask.FromResult(true);
 }
