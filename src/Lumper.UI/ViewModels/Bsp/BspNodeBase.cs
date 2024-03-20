@@ -1,4 +1,5 @@
-﻿using System;
+namespace Lumper.UI.ViewModels.Bsp;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
@@ -10,10 +11,8 @@ using DynamicData.Binding;
 using Lumper.UI.Models;
 using ReactiveUI;
 
-namespace Lumper.UI.ViewModels.Bsp;
-
 /// <summary>
-///     ViewModel base for <see cref="Lumper.Lib.BSP.Lumps.Lump" /> TreeNode representation
+///     ViewModel base for <see cref="Lib.BSP.Lumps.Lump" /> TreeNode representation
 /// </summary>
 public abstract class BspNodeBase : ViewModelBase
 {
@@ -39,8 +38,8 @@ public abstract class BspNodeBase : ViewModelBase
     }
 
     public bool IsModifiedRecursive => IsModified
-                                       || _nodes is not null && _nodes.Any(n =>
-                                           n.IsModifiedRecursive);
+                                       || (_nodes is not null && _nodes.Any(n =>
+                                           n.IsModifiedRecursive));
 
     public virtual bool IsModified => false;
 
@@ -86,61 +85,56 @@ public abstract class BspNodeBase : ViewModelBase
     public virtual void Update()
     {
         if (_nodes is { Count: > 0 })
-            foreach (var node in _nodes)
+        {
+            foreach (BspNodeBase node in _nodes)
                 node.Update();
+        }
 
         this.RaisePropertyChanged(nameof(IsModified));
         this.RaisePropertyChanged(nameof(IsModifiedRecursive));
     }
 
     protected virtual async ValueTask<bool> Match(Matcher matcher,
-        CancellationToken? cancellationToken)
-    {
-        return await matcher.Match(NodeName);
-    }
+        CancellationToken? cancellationToken) => await matcher.Match(NodeName);
 
     public virtual void Open()
     { }
 
-    public void Close()
-    {
-        BspView.Close(this);
-    }
+    public void Close() => BspView.Close(this);
 
     //hack used for the hotkey on invisible button
     //hotkey always calls the first tab
     //adding and removing the hotkey in code behind didn't work
     //hotkey in mainwindow menu didn't work either
     //so this is my ugly workaround
-    public void CloseSelected()
-    {
-        BspView.Close(BspView.SelectedTab);
-    }
+    public void CloseSelected() => BspView.Close(BspView.SelectedTab);
 
     public async ValueTask Reset()
     {
         IsVisible = true;
         if (_nodes is not null)
-            foreach (var node in _nodes)
+        {
+            foreach (BspNodeBase node in _nodes)
                 await node.Reset();
+        }
     }
 
     public async ValueTask<bool> Filter(Matcher matcher,
         CancellationToken? cancellationToken = null)
     {
-        bool anyChildVisible = false;
+        var anyChildVisible = false;
         if (_nodes is not null)
         {
             //TODO: Add visibility cache for restoration of changed state
             if (cancellationToken is { IsCancellationRequested: true })
                 return _isVisible;
-            foreach (var node in _nodes)
+            foreach (BspNodeBase node in _nodes)
                 anyChildVisible |= await node.Filter(matcher);
         }
 
         if (cancellationToken is { IsCancellationRequested: true })
             return _isVisible;
-        bool visible =
+        var visible =
             anyChildVisible || await Match(matcher, cancellationToken);
         IsExpanded = !matcher.IsEmpty && anyChildVisible;
         IsVisible = visible;
@@ -170,12 +164,12 @@ public abstract class BspNodeBase : ViewModelBase
 
         list.Connect()
             .AutoRefreshOnObservable(x => x.WhenValueChanged(y => y.IsModified))
-            .Subscribe(x => { this.RaisePropertyChanged(nameof(IsModifiedRecursive)); });
+            .Subscribe(x => this.RaisePropertyChanged(nameof(IsModifiedRecursive)));
 
         list.Connect()
             .AutoRefreshOnObservable(x =>
                 x.WhenValueChanged(y => y.IsModifiedRecursive))
-            .Subscribe(x => { this.RaisePropertyChanged(nameof(IsModifiedRecursive)); });
+            .Subscribe(x => this.RaisePropertyChanged(nameof(IsModifiedRecursive)));
     }
 
     public TRet Modify<TRet>(
@@ -183,7 +177,7 @@ public abstract class BspNodeBase : ViewModelBase
         TRet newValue,
         [CallerMemberName] string? propertyName = null)
     {
-        var result =
+        TRet? result =
             this.RaiseAndSetIfChanged(ref backingField, newValue, propertyName);
         this.RaisePropertyChanged(nameof(IsModified));
         this.RaisePropertyChanged(nameof(IsModifiedRecursive));
@@ -193,16 +187,13 @@ public abstract class BspNodeBase : ViewModelBase
         return result;
     }
 
-    public void ExpandTree()
-    {
-        ExpandTree(_ => true);
-    }
+    public void ExpandTree() => ExpandTree(_ => true);
     public void ExpandTree(Func<BspNodeBase, bool> fun)
     {
         IsExpanded = fun(this);
         if (Nodes is not null)
         {
-            foreach (var node in Nodes)
+            foreach (BspNodeBase node in Nodes)
             {
                 node.ExpandTree(fun);
             }

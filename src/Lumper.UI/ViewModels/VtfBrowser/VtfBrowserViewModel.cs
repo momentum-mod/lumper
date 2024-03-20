@@ -1,3 +1,4 @@
+namespace Lumper.UI.ViewModels.VtfBrowser;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -6,17 +7,15 @@ using Lumper.UI.Models;
 using Lumper.UI.Models.Matchers;
 using ReactiveUI;
 
-namespace Lumper.UI.ViewModels.VtfBrowser;
-
 public partial class VtfBrowserViewModel : ViewModelBase
 {
     public VtfBrowserViewModel(PakFileLump pakFileLump)
     {
-        var entries = pakFileLump.Entries.Where(
-            x => x.Key.ToLower().EndsWith(".vtf"));
-        foreach (var entry in entries)
+        System.Collections.Generic.IEnumerable<Lib.BSP.Struct.PakFileEntry> entries = pakFileLump.Entries.Where(
+            x => x.Key.ToLower(System.Globalization.CultureInfo.CurrentCulture).EndsWith(".vtf"));
+        foreach (Lib.BSP.Struct.PakFileEntry? entry in entries)
         {
-            _textureBrowserItems.Add(new VtfBrowserItemViewModel(
+            TextureBrowserItems.Add(new VtfBrowserItemViewModel(
             entry.Key, new VtfFileData(entry)));
         }
 
@@ -76,21 +75,18 @@ public partial class VtfBrowserViewModel : ViewModelBase
     [GeneratedRegex(@"^((c-?\d+_-?\d+_-?\d+)|cubemapdefault)(\.hdr){0,}\.vtf$")]
     private static partial Regex _rgxCubemap();
 
-    private ObservableCollection<VtfBrowserItemViewModel> _textureBrowserItems =
-        new();
-
-    public ObservableCollection<VtfBrowserItemViewModel> TextureBrowserItems => _textureBrowserItems;
+    public ObservableCollection<VtfBrowserItemViewModel> TextureBrowserItems { get; } = [];
 
     private void UpdateItems()
     {
-        bool isGlobPattern = TextureSearch.Contains('*') || TextureSearch.Contains('?');
-        var matcher = isGlobPattern
+        var isGlobPattern = TextureSearch.Contains('*') || TextureSearch.Contains('?');
+        GlobMatcher matcher = isGlobPattern
             ? new GlobMatcher(TextureSearch, false, true)
             : new GlobMatcher($"*{TextureSearch}*", false, true);
 
-        int count = 0;
+        var count = 0;
 
-        foreach (var item in TextureBrowserItems)
+        foreach (VtfBrowserItemViewModel item in TextureBrowserItems)
         {
             if (!_showCubemaps && _rgxCubemap().IsMatch(item.Name))
             {
@@ -98,10 +94,11 @@ public partial class VtfBrowserViewModel : ViewModelBase
                 continue;
             }
 
-            item.IsVisible =  string.IsNullOrWhiteSpace(TextureSearch)
+            item.IsVisible = string.IsNullOrWhiteSpace(TextureSearch)
                    || matcher.Match(item.Name).Result;
 
-            if (item.IsVisible) count++;
+            if (item.IsVisible)
+                count++;
         }
 
         TexturesCount = $"{count} Items";

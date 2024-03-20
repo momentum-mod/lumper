@@ -1,14 +1,9 @@
-﻿using Lumper.Lib.Tasks;
-
 namespace Lumper.UI.ViewModels.Tasks;
+using Lumper.Lib.Tasks;
 
 /// <summary>
 ///     ViewModel for Compression Task
 /// </summary>
-public class CompressionTaskViewModel : TaskViewModel
+public class CompressionTaskViewModel(CompressionTask task) : TaskViewModel(task)
 {
-    public CompressionTaskViewModel(CompressionTask task)
-        : base(task)
-    {
-    }
 }

@@ -1,6 +1,3 @@
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using CommandLine;
 
 public enum JsonOptions
@@ -30,7 +27,9 @@ public class CommandLineOptions
         if (errors.Any(
             x => (x is BadFormatConversionError or MissingValueOptionError)
                  && ((NamedError)x).NameInfo.LongName == jsonOptionName))
+        {
             Console.WriteLine("Available JSON options: " +
                 string.Join(", ", Enum.GetNames(typeof(JsonOptions))));
+        }
     }
 }

@@ -1,6 +1,5 @@
-using Lumper.UI.Models;
-
 namespace Lumper.UI.ViewModels.Bsp;
+using Lumper.UI.Models;
 
 /// <summary>
 ///     ViewModel base for all <see cref="Matcher" /> instances.

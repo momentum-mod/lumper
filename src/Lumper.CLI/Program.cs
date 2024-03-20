@@ -1,9 +1,8 @@
-﻿using CommandLine;
+namespace Lumper.CLI;
+using CommandLine;
 using Lumper.Lib.BSP;
 
-namespace Lumper.CLI;
-
-internal class Program
+internal sealed class Program
 {
     public static void Main(string[] args)
     {
@@ -12,12 +11,12 @@ internal class Program
             with.HelpWriter = Console.Out;
             with.CaseInsensitiveEnumValues = true;
         });
-        var parserResult = parser.ParseArguments<CommandLineOptions>(args);
+        ParserResult<CommandLineOptions> parserResult = parser.ParseArguments<CommandLineOptions>(args);
 
         string? path = null;
         parserResult
             .WithParsed(x => path = x.Path)
-            .WithNotParsed(x => CommandLineOptions.ErrorHandler(x));
+            .WithNotParsed(CommandLineOptions.ErrorHandler);
         if (path == null)
             return;
 
@@ -25,11 +24,11 @@ internal class Program
         {
             var bspFile = new BspFile(path);
 
-            bool sortLumps = parserResult.Value.Json.Any(
+            var sortLumps = parserResult.Value.Json.Any(
                 x => x == JsonOptions.SortLumps);
-            bool sortProperties = parserResult.Value.Json.Any(
+            var sortProperties = parserResult.Value.Json.Any(
                 x => x == JsonOptions.SortProperties);
-            bool ignoreOffset = parserResult.Value.Json.Any(
+            var ignoreOffset = parserResult.Value.Json.Any(
                 x => x == JsonOptions.IgnoreOffset);
             bspFile.ToJson(sortLumps, sortProperties, ignoreOffset);
         }

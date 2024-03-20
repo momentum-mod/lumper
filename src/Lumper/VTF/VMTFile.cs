@@ -1,7 +1,6 @@
-namespace Lumper.Lib.VTF
-{
-    public class VMTFile
-    {
+namespace Lumper.Lib.VTF;
 
-    }
+public class VMTFile
+{
+
 }

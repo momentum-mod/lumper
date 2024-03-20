@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using Lumper.Lib.Tasks;
-
 namespace Lumper.UI.ViewModels.Tasks;
+using System.Collections.Generic;
+using Lumper.Lib.Tasks;
 
 /// <summary>
 ///     ViewModel for Stripper Task
@@ -28,18 +27,14 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
             source ??= Source;
             target ??= Target;
 
-            if (!_task.Replace.ContainsKey(source))
+            if (_task.Replace.TryAdd(source, target))
             {
-                _task.Replace.Add(source, target);
                 return true;
             }
             return false;
         }
 
-        protected override void Remove()
-        {
-            _task.Replace.Remove(Source);
-        }
+        protected override void Remove() => _task.Replace.Remove(Source);
 
         protected override void UpdateValue(string? newValue)
         {

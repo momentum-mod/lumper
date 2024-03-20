@@ -1,6 +1,5 @@
-using System.Threading.Tasks;
-
 namespace Lumper.UI.Models;
+using System.Threading.Tasks;
 
 /// <summary>
 ///     Base class for pattern matching
