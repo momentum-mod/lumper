@@ -9,6 +9,6 @@
         <PackageReference Include="CommandLineParser" Version="2.9.1"/>
   </ItemGroup>
   <ItemGroup>
-      <ProjectReference Include="..\Lumper\Lumper.csproj"/>
+      <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj" />
   </ItemGroup>
 </Project>
