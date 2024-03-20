@@ -131,8 +131,8 @@ public class RunExternalToolTask : LumperTask
 
             Task.WaitAll(taskStdOut, taskStdErr);
             ret = process.ExitCode == 0
-                             ? TaskResult.Success
-                             : TaskResult.Failed;
+                ? TaskResult.Success
+                : TaskResult.Failed;
         }
 
         stdOut.Mem.Seek(0, SeekOrigin.Begin);

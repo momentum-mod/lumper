@@ -27,7 +27,7 @@ public abstract class PakFileEntryBaseViewModel : BspNodeBase, IDisposable
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Where(m => m is not null)
                 .Subscribe(_ =>
-                   Path = GetPath());
+                    Path = GetPath());
             InitializeNodeChildrenObserver(_entries);
         }
     }

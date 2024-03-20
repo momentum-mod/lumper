@@ -16,10 +16,10 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
 
     [JsonProperty]
     public IReadOnlyDictionary<GameLumpType, LumpHeader> Headers => Lumps.ToDictionary(
-            x => x.Item1 is Lump<GameLumpType> lump
-                            ? lump.Type
-                            : GameLumpType.Unknown,
-            x => x.Item2);
+        x => x.Item1 is Lump<GameLumpType> lump
+            ? lump.Type
+            : GameLumpType.Unknown,
+        x => x.Item2);
 
     public GameLumpReader(GameLump gamelump, BinaryReader reader, long length)
         : this(gamelump, reader.BaseStream, length)

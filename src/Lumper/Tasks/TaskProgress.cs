@@ -1,6 +1,4 @@
-
 namespace Lumper.Lib.Tasks;
-
 public class TaskProgress
 {
     public double Percent { get; private set; }
@@ -36,8 +34,8 @@ public class TaskProgress
     private void UpdatePercent()
     {
         Percent = (Count >= 0 && Max > 0)
-                   ? (double)Count / Max * 100
-                   : 0;
+            ? (double)Count / Max * 100
+            : 0;
         if (OnPercentChanged is not null)
             OnPercentChanged(this, Percent);
     }

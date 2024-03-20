@@ -1,6 +1,4 @@
-
 namespace Lumper.Lib.BSP.Struct;
-
 //todo builtin type for this?
 public struct Vector
 {

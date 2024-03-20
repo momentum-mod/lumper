@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 // Lump with a enum type variable 
 public abstract class Lump<T> : Lump
-                      where T : System.Enum
+    where T : System.Enum
 {
     public T Type { get; set; }
     protected Lump(BspFile parent) : base(parent)
@@ -14,7 +14,6 @@ public abstract class Lump<T> : Lump
 
 // implements how a lump will be read from a stream (same for write)
 // doesn't store offset or length because header information is separate
-
 [JsonConverter(typeof(JsonSubtypes), "Class")]
 public abstract class Lump
 {

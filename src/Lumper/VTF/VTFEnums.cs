@@ -1,5 +1,4 @@
 namespace Lumper.Lib.VTF;
-
 public enum ImageFormats
 {
     IMAGEFORMATNONE = -1,

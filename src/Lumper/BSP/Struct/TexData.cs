@@ -1,5 +1,4 @@
 namespace Lumper.Lib.BSP.Struct;
-
 public class TexData
 {
     public float[] Reflectivity { get; set; }

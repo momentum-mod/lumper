@@ -27,10 +27,10 @@ public partial class BspViewModel
         _openTabsReadOnly;
 
     private void TabsInit() => _openTabs.Connect()
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Bind(out _openTabsReadOnly)
-            .DisposeMany()
-            .Subscribe(_ => { }, RxApp.DefaultExceptionHandler.OnNext);
+        .ObserveOn(RxApp.MainThreadScheduler)
+        .Bind(out _openTabsReadOnly)
+        .DisposeMany()
+        .Subscribe(_ => { }, RxApp.DefaultExceptionHandler.OnNext);
 
     public void Open(BspNodeBase? bspNode)
     {

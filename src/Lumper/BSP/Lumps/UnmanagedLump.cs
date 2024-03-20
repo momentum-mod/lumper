@@ -14,7 +14,7 @@ public interface IUnmanagedLump
 }
 // only points to the data in the inputstream and knows if it's compressed or not
 public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
-                      where T : Enum
+    where T : Enum
 {
     public bool Compressed { get; set; }
     public long UncompressedLength { get; set; }

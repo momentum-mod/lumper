@@ -27,9 +27,9 @@ public partial class StripperTask : LumperTask
 
     ///expects trimmed string
     protected static bool IsComment(string line) => line.StartsWith(";")
-                 || line.StartsWith("//")
-                 || line.StartsWith("#")
-                 || line == "";
+                                                    || line.StartsWith("//")
+                                                    || line.StartsWith("#")
+                                                    || line == "";
 
     public void Parse(Stream stream)
     {

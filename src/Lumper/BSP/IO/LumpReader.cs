@@ -9,7 +9,6 @@ using Newtonsoft.Json;
 using SharpCompress.Compressors.LZMA;
 
 // handles decompressing and fills lumps with data
-
 [JsonObject(MemberSerialization.OptIn)]
 public abstract class LumpReader(Stream input) : BinaryReader(input)
 {
@@ -43,9 +42,9 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
         Read(properties, 0, 5);
 
         var lzmaStream = new LzmaStream(properties,
-                                        BaseStream,
-                                        lzmaSize,
-                                        actualSize);
+            BaseStream,
+            lzmaSize,
+            actualSize);
         lzmaStream.CopyTo(decompressedStream);
         decompressedStream.Flush();
         decompressedStream.Seek(0, SeekOrigin.Begin);
@@ -63,8 +62,8 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
         {
             unmanagedLump.Compressed = lumpHeader.Compressed;
             unmanagedLump.UncompressedLength = lumpHeader.Compressed
-                                            ? lumpHeader.UncompressedLength
-                                            : -1;
+                ? lumpHeader.UncompressedLength
+                : -1;
 
             lumpReader = this;
             lumpStreamLength = lumpHeader.Length;

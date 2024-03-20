@@ -11,7 +11,7 @@ public partial class StripperTask
     protected abstract partial class Block
     {
         private static readonly Regex pairRegex =
-             MyRegex();
+            MyRegex();
 
         public abstract void Parse(StreamReader reader, bool blockOpen, ref int lineNr);
 
