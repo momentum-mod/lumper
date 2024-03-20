@@ -77,10 +77,10 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             }
 
             Console.WriteLine($"Lump {type}({(int)type})"
-                              + $"\toffset: {lumpHeader.Offset}"
-                              + $"\t length: {length}"
-                              + $"\t Version: {lump.Version}"
-                              + $"\t FourCc: {fourCc}");
+                              + $"\t\tOffset: {lumpHeader.Offset}"
+                              + $"\t\tLength: {length}"
+                              + $"\t\tVersion: {lump.Version}"
+                              + $"\t\tFourCc: {fourCc}");
 
             _bsp.Lumps.Add(type, lump);
             Lumps.Add(new Tuple<Lump, LumpHeader>(lump, lumpHeader));

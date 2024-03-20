@@ -47,12 +47,16 @@ public partial class PakFileLumpView : UserControl
         if (result is not { Count: 1 })
             return path;
 
-        if (result[0].TryGetUri(out var uri))
+        try
         {
-            path = uri.AbsolutePath;
+            return result[0].Path.AbsolutePath;
         }
-        return path;
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
+
 
     public async void OnImportClick(object sender, RoutedEventArgs e)
     {

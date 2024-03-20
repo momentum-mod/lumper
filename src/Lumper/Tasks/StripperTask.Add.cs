@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Struct;
-
-using Prop = KeyValuePair<string, string>;
+using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
 public partial class StripperTask
 {

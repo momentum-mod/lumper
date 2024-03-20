@@ -12,7 +12,7 @@
             <Button DockPanel.Dock="Left" Command="{Binding AddString}">Add keyvalue</Button>
             <Button DockPanel.Dock="Left" Command="{Binding AddIO}">Add IO</Button>
         </DockPanel>
-        <ItemsControl Items="{Binding Nodes}" Grid.Row="1">
+        <ItemsControl ItemsSource="{Binding Nodes}" Grid.Row="1">
             <ItemsControl.DataTemplates>
                 <DataTemplate DataType="entmodels:EntityPropertyStringViewModel">
                     <Grid RowDefinitions="Auto,*" Margin="5">

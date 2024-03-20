@@ -1,17 +1,19 @@
 namespace Lumper.UI.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.IO;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.UI.ViewModels.Bsp;
 using Lumper.UI.ViewModels.VtfBrowser;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using ReactiveUI;
 
 // MainWindowViewModel support for reading and writing of <see cref="BspFile"/>.
@@ -32,23 +34,32 @@ public partial class MainWindowViewModel
     {
         var bspFilter = new FilePickerFileType("BSP files")
         {
-            Patterns = new[] { "*.bsp" },
+            Patterns = new[]
+            {
+                "*.bsp"
+            },
             //MIME references from:
             //https://www.wikidata.org/wiki/Q105858735
             //https://www.wikidata.org/wiki/Q105859836
             //https://www.wikidata.org/wiki/Q2701652
             MimeTypes = new[]
-        {
-            "application/octet-stream", "model/vnd.valve.source.compiled-map"
-        }
+            {
+                "application/octet-stream", "model/vnd.valve.source.compiled-map"
+            }
         };
 
         var anyFilter = new FilePickerFileType("All files")
         {
-            Patterns = new[] { "*" }
+            Patterns = new[]
+            {
+                "*"
+            }
         };
 
-        return new[] { bspFilter, anyFilter };
+        return new[]
+        {
+            bspFilter, anyFilter
+        };
     }
 
     public async ValueTask OpenCommand()
@@ -65,7 +76,7 @@ public partial class MainWindowViewModel
         IReadOnlyList<IStorageFile> result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
         if (result is not { Count: 1 })
             return;
-        await LoadBsp(result[0]);
+        LoadBsp(result[0]);
     }
 
     public async ValueTask SaveCommand()
@@ -110,7 +121,7 @@ public partial class MainWindowViewModel
 
     private async void Save(IStorageFile file)
     {
-        if (_bspModel is null || !file.CanOpenWrite)
+        if (_bspModel is null)
             return;
 
         try
@@ -123,7 +134,7 @@ public partial class MainWindowViewModel
         }
         catch (Exception e)
         {
-            MessageBoxManager.GetMessageBoxStandardWindow("Error",
+            MessageBoxManager.GetMessageBoxStandard("Error",
                 $"Error while saving file \n{e.Message}");
             return;
         }
@@ -138,18 +149,16 @@ public partial class MainWindowViewModel
 
         try
         {
-            using (FileStream stream = File.OpenWrite(path))
-            {
+            using FileStream stream = File.OpenWrite(path);
+
                 //TODO: Copy bsp model tree for fallback if error occurs
                 _bspModel.Update();
-                await using var writer =
-                    new BspFileWriter(_bspModel.BspFile, stream);
-                writer.Save();
-            }
+            await using var writer = new BspFileWriter(_bspModel.BspFile, stream);
+            writer.Save();
         }
         catch (Exception e)
         {
-            MessageBoxManager.GetMessageBoxStandardWindow("Error",
+            MessageBoxManager.GetMessageBoxStandard("Error",
                 $"Error while saving file \n{e.Message}");
             return;
         }
@@ -166,52 +175,50 @@ public partial class MainWindowViewModel
         Content = BspModel;
     }
 
-    private static async Task LoadBsp(IStorageFile file)
+    private void LoadBsp(IStorageFile file)
     {
-        if (!file.CanOpenRead)
-            return;
         Console.WriteLine(file.Name);
-        IStorageFolder? folder = await file.GetParentAsync();
-        if (!file.TryGetUri(out var path))
-        {
+        if (!file.Path.IsFile)
             throw new Exception("Failed to get file path");
 
-        }
-        LoadBsp(path.AbsolutePath);
+        Console.WriteLine(file.Path.AbsolutePath);
+        LoadBsp(file.Path.AbsolutePath);
     }
 
-    public void BspToJsonCommand()
-    {
-        if (BspModel is null)
-            return;
-        BspModel.BspFile.ToJson(false, false, false);
-    }
+    public void BspToJsonCommand() => BspModel?.BspFile.ToJson(false, false, false);
 
     public async Task CloseCommand()
     {
         if (_bspModel is null || !_bspModel.BspNode.IsModifiedRecursive)
             return;
 
-        var messageBox = MessageBoxManager
-            .GetMessageBoxStandardWindow("You have unsaved changes",
-                "Do you want to discard changes?", ButtonEnum.OkCancel);
-        var result = await messageBox.ShowDialog(Desktop.MainWindow);
+        ButtonResult result = await MessageBoxManager
+            .GetMessageBoxStandard(
+                "You have unsaved changes",
+                "Do you want to discard changes?", ButtonEnum.OkCancel)
+            .ShowWindowDialogAsync(Desktop.MainWindow);
+
         if (result != ButtonResult.Ok)
             return;
+
         BspModel = null;
     }
 
     public void ExitCommand() => Desktop.MainWindow?.Close();
 
-    public async Task OnClose(CancelEventArgs e)
+    public async Task OnClose(WindowClosingEventArgs e)
     {
         e.Cancel = true;
+
         if (_bspModel is not null && _bspModel.BspNode.IsModifiedRecursive)
         {
-            var messageBox = MessageBoxManager.GetMessageBoxStandardWindow(
-                "You have unsaved changes", "Do you want to close application without saving?",
-                ButtonEnum.OkCancel);
-            var result = await messageBox.ShowDialog(Desktop.MainWindow);
+            ButtonResult result = await MessageBoxManager
+                .GetMessageBoxStandard(
+                    "You have unsaved changes",
+                    "Do you want to close application without saving?",
+                    ButtonEnum.OkCancel)
+                .ShowWindowDialogAsync(Desktop.MainWindow);
+
             if (result != ButtonResult.Ok)
                 return;
         }

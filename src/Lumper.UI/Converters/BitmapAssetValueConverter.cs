@@ -3,7 +3,6 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using Avalonia;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
@@ -41,7 +40,7 @@ public class BitmapAssetValueConverter : IValueConverter
                 Uri uri;
 
                 // Allow for assembly overrides
-                if (rawUri.StartsWith("avares://"))
+                if (rawUri.StartsWith("avares://", StringComparison.Ordinal))
                 {
                     uri = new Uri(rawUri);
                 }
@@ -52,28 +51,19 @@ public class BitmapAssetValueConverter : IValueConverter
                     if (assemblyName is null)
                     {
                         return new BindingNotification(
-                            new ArgumentNullException(nameof(assemblyName)),
+                            new ArgumentNullException(nameof(value)),
                             BindingErrorType.DataValidationError);
                     }
 
                     uri = new Uri($"avares://{assemblyName}{rawUri}");
                 }
 
-                var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                if (assets is null)
-                {
-                    return new BindingNotification(
-                        new ArgumentNullException(nameof(assets)),
-                        BindingErrorType.DataValidationError);
-                }
-
-                var asset = assets.Open(uri);
-                return new Bitmap(asset);
+                return new Bitmap(AssetLoader.Open(uri));
             }
             case Image img when targetType.IsAssignableFrom(typeof(Bitmap)):
             {
                 using var mem = new MemoryStream();
-                var encoder = new BmpEncoder()
+                var encoder = new BmpEncoder
                 {
                     SupportTransparency = true,
                     BitsPerPixel = BmpBitsPerPixel.Pixel32,
@@ -93,6 +83,6 @@ public class BitmapAssetValueConverter : IValueConverter
 
     public object ConvertBack(object? value, Type targetType, object? parameter,
         CultureInfo culture) => new BindingNotification(
-            new ArgumentOutOfRangeException(nameof(value)),
-            BindingErrorType.DataValidationError);
+        new ArgumentOutOfRangeException(nameof(value)),
+        BindingErrorType.DataValidationError);
 }
