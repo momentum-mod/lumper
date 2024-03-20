@@ -36,7 +36,7 @@
         <PackageReference Include="XamlNameReferenceGenerator" Version="1.3.4" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\Lumper\Lumper.csproj" />
+        <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj" />
     </ItemGroup>
     <ItemGroup Condition="'$(IsWindows)'=='true'">
       <Reference Include="VTFLib.NET">
