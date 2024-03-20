@@ -12,7 +12,6 @@ public enum TaskStatus
     Failed
 
 }
-
 /// <summary>
 ///     ViewModel for Stripper Task
 /// </summary>

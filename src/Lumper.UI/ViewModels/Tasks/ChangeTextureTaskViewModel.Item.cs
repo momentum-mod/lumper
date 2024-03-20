@@ -7,8 +7,9 @@ using ReactiveUI;
 /// </summary>
 public partial class ChangeTextureTaskViewModel : TaskViewModel
 {
-    public abstract class ChangeTextureItem(ChangeTextureTaskViewModel parent,
-                             ChangeTextureTask task) : ViewModelBase
+    public abstract class ChangeTextureItem(
+        ChangeTextureTaskViewModel parent,
+        ChangeTextureTask task) : ViewModelBase
     {
         ~ChangeTextureItem()
         {
@@ -52,7 +53,7 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
         }
 
         public abstract bool Add(string? source = null,
-                                 string? target = null);
+            string? target = null);
 
         protected abstract void Remove();
 

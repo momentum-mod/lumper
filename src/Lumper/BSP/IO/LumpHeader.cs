@@ -13,8 +13,8 @@ public class LumpHeader
         CompressedLength = -1;
     }
     public LumpHeader(long offset,
-                      long uncompressedLength,
-                      long compressedLength)
+        long uncompressedLength,
+        long compressedLength)
     {
         Offset = offset;
         UncompressedLength = uncompressedLength;
