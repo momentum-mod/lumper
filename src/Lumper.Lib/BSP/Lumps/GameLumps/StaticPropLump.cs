@@ -68,72 +68,54 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
     };
     protected override void ReadItem(BinaryReader reader)
     {
-        var startpos = reader.BaseStream.Position;
-        StaticProp prop = new()
-        {
-            // v4
-            Origin = new Vector()
-            {
-                X = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Y = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Z = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            },
-            Angle = new Angle()
-            {
-                Pitch = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Yaw = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Roll = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            },
+        var startPos = reader.BaseStream.Position;
 
-            // v4
-            PropType = reader.ReadUInt16(),
-            FirstLeaf = reader.ReadUInt16(),
-            LeafCount = reader.ReadUInt16(),
-            Solid = reader.ReadByte(),
-            // every version except v7*
-            //if (Version != StaticPropVersion.V7s)
-            Flags = reader.ReadByte(),
-            // v4 still
-            Skin = reader.ReadInt32(),
-            FadeMinDist = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            FadeMaxDist = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            LightingOrigin = new Vector()
-            {
-                X = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Y = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Z = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            }
-        };
-        // since v5
-        if (ActualVersion >= StaticPropVersion.V5)
-            prop.ForcedFadeScale = System.BitConverter.ToSingle(reader.ReadBytes(4));
-        // v6, v7, and v7* only
-        switch (ActualVersion)
+        float ReadSingle() => System.BitConverter.ToSingle(reader.ReadBytes(4));
+
+        // Disable object initializer rule - unhelpful here
+#pragma warning disable IDE0017
+        StaticProp prop = new();
+
+        // v4
+        prop.Origin = new Vector3
         {
-            case StaticPropVersion.V6:
-            case StaticPropVersion.V7:
-            case StaticPropVersion.V7s:
-                prop.MinDXLevel = reader.ReadUInt16();
-                prop.MaxDXLevel = reader.ReadUInt16();
-                break;
-            case StaticPropVersion.Unknown:
-                break;
-            case StaticPropVersion.V4:
-                break;
-            case StaticPropVersion.V5:
-                break;
-            case StaticPropVersion.V8:
-                break;
-            case StaticPropVersion.V9:
-                break;
-            case StaticPropVersion.V10:
-                break;
-            case StaticPropVersion.V11:
-                break;
-            case StaticPropVersion.V12:
-                break;
-            default:
-                break;
+            X = ReadSingle(),
+            Y = ReadSingle(),
+            Z = ReadSingle()
+        };
+        prop.Angle = new Angle
+        {
+            Pitch = ReadSingle(),
+            Yaw = ReadSingle(),
+            Roll = ReadSingle(),
+        };
+
+        // v4
+        prop.PropType = reader.ReadUInt16();
+        prop.FirstLeaf = reader.ReadUInt16();
+        prop.LeafCount = reader.ReadUInt16();
+        prop.Solid = reader.ReadByte();
+
+        // Every version except v7*
+        //if (Version != StaticPropVersion.V7s)
+        prop.Flags = reader.ReadByte();
+
+        // v4 still
+        prop.Skin = reader.ReadInt32();
+        prop.FadeMinDist = ReadSingle();
+        prop.FadeMaxDist = ReadSingle();
+        prop.LightingOrigin = new Vector3
+        {
+            X = ReadSingle(),
+            Y = ReadSingle(),
+            Z = ReadSingle()
+        };
+
+        // v6, v7, and v7* only
+        if (ActualVersion is StaticPropVersion.V6 or StaticPropVersion.V7 or StaticPropVersion.V7s)
+        {
+            prop.MinDXLevel = reader.ReadUInt16();
+            prop.MaxDXLevel = reader.ReadUInt16();
         }
         // v7* only
         if (ActualVersion == StaticPropVersion.V7s)
