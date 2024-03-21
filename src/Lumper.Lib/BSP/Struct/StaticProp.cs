@@ -1,10 +1,11 @@
 namespace Lumper.Lib.BSP.Struct;
 using System.Drawing;
+using System.Numerics;
 
 public class StaticProp
 {
     // v4
-    public Vector Origin { get; set; }          // origin
+    public Vector3 Origin { get; set; }          // origin
     public Angle Angle { get; set; }            // orientation (pitch yaw roll)
 
     // v4
@@ -18,7 +19,7 @@ public class StaticProp
     public int Skin { get; set; }               // model skin numbers
     public float FadeMinDist { get; set; }
     public float FadeMaxDist { get; set; }
-    public Vector LightingOrigin { get; set; }  // for lighting
+    public Vector3 LightingOrigin { get; set; }  // for lighting
     // since v5
     public float ForcedFadeScale { get; set; }  // fade distance scale
     // v6, v7, and v7* only
