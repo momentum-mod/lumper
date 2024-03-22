@@ -1,3 +1,3 @@
 namespace Lumper.Lib.VTF;
-public class VMTFile
-{ }
+
+public class VmtFile;
