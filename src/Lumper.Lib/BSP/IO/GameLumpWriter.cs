@@ -49,11 +49,11 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
     private void WriteAllLumps()
     {
         Seek((int)LumpdataStart, SeekOrigin.Begin);
-        foreach (KeyValuePair<GameLumpType, Lump> entry in _gameLump.Lumps)
+        foreach ((GameLumpType key, Lump? lump) in _gameLump.Lumps)
         {
-            if (entry.Key == 0)
+            if (key == 0 || lump is null)
                 continue;
-            Lump lump = entry.Value;
+
             LumpHeader newHeader = Write(lump);
 
             //todo meh
@@ -62,7 +62,7 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
             else
                 lump.Version = (ushort)lump.Version;
 
-            LumpHeaders.Add(new GameLumpHeader(newHeader, (ushort)lump.Version, (int)entry.Key));
+            LumpHeaders.Add(new GameLumpHeader(newHeader, (ushort)lump.Version, (int)key));
         }
 
         if (LumpHeaders.Count != 0 && LumpHeaders.Last().Id != 0)

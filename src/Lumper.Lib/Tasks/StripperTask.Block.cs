@@ -62,12 +62,12 @@ public partial class StripperTask
         public abstract void Apply(EntityLump lump);
         protected static bool MatchKeyValue(Prop filterProp, Entity.Property entityProp)
         {
-            if (filterProp.Key != entityProp.Key)
+            (var filterKey, var filterValue) = filterProp;
+
+            if (filterKey != entityProp.Key)
                 return false;
 
-            if (filterProp.Value.Length > 2
-                && filterProp.Value.StartsWith("/")
-                && filterProp.Value.EndsWith("/"))
+            if (filterValue.Length > 2 && filterValue.StartsWith('/') && filterValue.EndsWith('/'))
             {
 
                 //todo perl regex or warning
