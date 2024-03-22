@@ -8,15 +8,17 @@ public class GameLumpHeader
     {
         Id = id;
         FileOfs = (int)tmpHeader.Offset;
-        //set last bit to 0 (only seen flags as 1 and 0 so far but its probably a bitfield)
+
+        // Set last bit to 0 (only seen flags as 1 and 0 so far but its probably a bitfield)
         Flags &= 0xFFFE;
-        //length is always the uncompressed length
         FileLen = (int)tmpHeader.UncompressedLength;
         if (tmpHeader.Compressed)
-        {
-            //set flag if its compressed
+
+        // Length is always the uncompressed length
+
+        // Set flag if its compressed
             Flags += 1;
-        }
+
         Version = version;
     }
     public const int StructureSize = 16;

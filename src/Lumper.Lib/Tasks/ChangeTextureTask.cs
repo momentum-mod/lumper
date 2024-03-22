@@ -15,8 +15,9 @@ public class ChangeTextureTask : LumperTask
     public override TaskResult Run(BspFile map)
     {
         TexDataLump texDataLump = map.GetLump<TexDataLump>();
+
         Progress.Max = texDataLump.Data.Count;
-        foreach (BSP.Struct.TexData texture in texDataLump.Data)
+        foreach (TexData texture in texDataLump.Data)
         {
             Console.Write($"TexName: {texture.TexName}");
             if (Replace.TryGetValue(texture.TexName, out var value))

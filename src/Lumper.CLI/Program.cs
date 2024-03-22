@@ -20,16 +20,13 @@ internal sealed class Program
         if (path == null)
             return;
 
-        if (parserResult.Value.Json.Any())
+        if (parserResult.Value.Json is not null && parserResult.Value.Json.Any())
         {
             var bspFile = new BspFile(path);
 
-            var sortLumps = parserResult.Value.Json.Any(
-                x => x == JsonOptions.SortLumps);
-            var sortProperties = parserResult.Value.Json.Any(
-                x => x == JsonOptions.SortProperties);
-            var ignoreOffset = parserResult.Value.Json.Any(
-                x => x == JsonOptions.IgnoreOffset);
+            var sortLumps = parserResult.Value.Json.Any(x => x == JsonOptions.SortLumps);
+            var sortProperties = parserResult.Value.Json.Any(x => x == JsonOptions.SortProperties);
+            var ignoreOffset = parserResult.Value.Json.Any(x => x == JsonOptions.IgnoreOffset);
             bspFile.ToJson(sortLumps, sortProperties, ignoreOffset);
         }
     }

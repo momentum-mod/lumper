@@ -17,12 +17,14 @@ public enum StaticPropVersion
     V9 = 90,
     V10 = 100,
     V11 = 110,
-    V12 = 120,
+    V12 = 120
 }
+
 public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp>(parent)
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public StaticPropVersion ActualVersion { get; set; }
+
     public override int StructureSize => ActualVersion switch
     {
         StaticPropVersion.V4 => 56,
@@ -117,6 +119,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             prop.MinDXLevel = reader.ReadUInt16();
             prop.MaxDXLevel = reader.ReadUInt16();
         }
+
         // v7* only
         if (ActualVersion == StaticPropVersion.V7s)
         {
@@ -124,6 +127,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             prop.LightmapResX = reader.ReadUInt16();
             prop.LightmapResY = reader.ReadUInt16();
         }
+
         // since v8
         if (ActualVersion >= StaticPropVersion.V8)
         {
@@ -132,6 +136,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             prop.MinGPULevel = reader.ReadByte();
             prop.MaxGPULevel = reader.ReadByte();
         }
+
         // since v7
         if (ActualVersion >= StaticPropVersion.V7)
         {
@@ -141,13 +146,16 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             var a = reader.ReadByte();
             prop.DiffuseModulation = Color.FromArgb(a, r, g, b);
         }
+
         // v9 and v10 only
         // and v11?
         if (ActualVersion >= StaticPropVersion.V9)
             prop.DisableX360 = reader.ReadInt32() > 0;
+
         // since v10
         if (ActualVersion >= StaticPropVersion.V10)
             prop.FlagsEx = reader.ReadUInt32();
+
         // since v11
         if (ActualVersion >= StaticPropVersion.V11)
             prop.UniformScale = System.BitConverter.ToSingle(reader.ReadBytes(4));

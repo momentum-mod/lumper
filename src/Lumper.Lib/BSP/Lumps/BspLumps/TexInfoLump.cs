@@ -18,13 +18,17 @@ public class TexInfoLump(BspFile parent) : FixedLump<BspLumpType, TexInfo>(paren
         for (var i = 0; i < 2; i++)
         {
             for (var j = 0; j < 4; j++)
+            {
                 item.TextureVectors[i, j] = reader.ReadSingle();
+            }
         }
 
         for (var i = 0; i < 2; i++)
         {
             for (var j = 0; j < 4; j++)
+            {
                 item.LightmapVectors[i, j] = reader.ReadSingle();
+            }
         }
 
         item.Flags = (SurfaceFlag)reader.ReadInt32();
@@ -39,13 +43,17 @@ public class TexInfoLump(BspFile parent) : FixedLump<BspLumpType, TexInfo>(paren
         for (var i = 0; i < 2; i++)
         {
             for (var j = 0; j < 4; j++)
+            {
                 writer.Write(texInfo.TextureVectors[i, j]);
+            }
         }
 
         for (var i = 0; i < 2; i++)
         {
             for (var j = 0; j < 4; j++)
+            {
                 writer.Write(texInfo.LightmapVectors[i, j]);
+            }
         }
 
         writer.Write((int)texInfo.Flags);

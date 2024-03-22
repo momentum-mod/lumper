@@ -58,6 +58,7 @@ public partial class StripperTask
                 }
             }
         }
+
         public abstract void Apply(EntityLump lump);
         protected static bool MatchKeyValue(Prop filterProp, Entity.Property entityProp)
         {

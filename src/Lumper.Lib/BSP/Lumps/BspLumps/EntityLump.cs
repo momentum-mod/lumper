@@ -33,23 +33,17 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                 {
                     case '}':
                         if (!inSection && !inString)
-                        {
                             throw new InvalidDataException("Closed unopened section");
-                        }
-
                         if (!inString)
                         {
                             Data.Add(new Entity(keyValues));
                             return true;
                         }
-
                         break;
 
                     case '{':
                         if (inSection && !inString)
-                        {
                             throw new InvalidDataException("Opened unclosed section");
-                        }
 
                         if (!inString)
                         {
@@ -61,9 +55,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                     case '"':
                     {
                         if (!inSection)
-                        {
                             throw new InvalidDataException("String in unopened section");
-                        }
 
                         if (inString)
                         {
@@ -80,7 +72,6 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                                     Console.WriteLine(
                                         "Entity parser skipped value \"{0}\" for empty key, how u do dis?", value);
                                 }
-
                                 else
                                 {
                                     keyValues.Add(new KeyValuePair<string, string>(key, value));
@@ -98,9 +89,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
                     default:
                         if (inSection && inString)
-                        {
                             stringBuilder.Append(x);
-                        }
 
                         break;
                 }
@@ -143,5 +132,6 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         }
         stream.Write(Encoding.ASCII.GetBytes("\0"));
     }
+
     public override bool Empty() => Data.Count == 0;
 }

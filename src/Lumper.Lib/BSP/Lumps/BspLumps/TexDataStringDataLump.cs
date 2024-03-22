@@ -18,6 +18,7 @@ public class TexDataStringDataLump(BspFile parent) : ManagedLump<BspLumpType>(pa
 
     public override bool Empty() => Data.Length <= 0;
 }
+
 public class ByteArrayJsonConverter : JsonConverter<byte[]>
 {
     public override void WriteJson(JsonWriter writer, byte[]? value, JsonSerializer serializer)

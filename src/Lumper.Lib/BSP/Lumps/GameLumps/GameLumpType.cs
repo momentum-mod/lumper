@@ -1,6 +1,8 @@
 namespace Lumper.Lib.BSP.Lumps.GameLumps;
-// the gamelump id is a 4 byte int with the value just beeing the ascii code
-// so the names are just the hex value here
+
+// Gamelump ID is a 4 byte int with the value being the ASCII code
+// So the names are just the hex value here,
+// e.g. "sprp" in ASCII = "0x73707270" in hexadecimal
 public enum GameLumpType
 {
     Unknown = 0,
