@@ -101,15 +101,13 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
     {
         Lump gameLump = null;
         LumpHeader gameLumpHeader = null;
-        foreach (Tuple<Lump, LumpHeader>? l in Lumps.OrderBy(x => x.Item2.Offset))
+        foreach ((Lump? lump, LumpHeader? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
-            Lump lump = l.Item1;
-            LumpHeader header = l.Item2;
             if (lump is GameLump)
             {
                 gameLump = lump;
                 gameLumpHeader = header;
-                if (gameLumpHeader.Length == 0 && gameLumpHeader.Offset == 0)
+                if (gameLumpHeader is { Length: 0, Offset: 0 })
                 {
                     Console.WriteLine("GameLump length and offset 0 .. won't set new length");
                     break;
@@ -129,11 +127,11 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
     private void SortLumps()
     {
         Dictionary<BspLumpType, Lump<BspLumpType>> newLumps = [];
-        foreach (Tuple<Lump, LumpHeader>? l in Lumps.OrderBy(x => x.Item2.Offset))
+        foreach ((Lump? lump, _) in Lumps.OrderBy(x => x.Item2.Offset))
         {
-            KeyValuePair<BspLumpType, Lump<BspLumpType>> temp = _bsp.Lumps.First(x => x.Value == l.Item1);
-            newLumps.Add(temp.Key, temp.Value);
-            _bsp.Lumps.Remove(temp.Key);
+            (BspLumpType key, Lump<BspLumpType>? value) = _bsp.Lumps.First(x => x.Value == lump);
+            newLumps.Add(key, value);
+            _bsp.Lumps.Remove(key);
         }
 
         if (_bsp.Lumps.Count != 0)
@@ -148,10 +146,9 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
         LumpHeader prevHeader = null;
         var result = false;
         var first = true;
-        foreach (Tuple<Lump, LumpHeader>? l in Lumps.OrderBy(x => x.Item2.Offset))
+        foreach ((Lump? tmpLump, LumpHeader? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
-            var lump = (Lump<BspLumpType>)l.Item1;
-            LumpHeader header = l.Item2;
+            var lump = (Lump<BspLumpType>)tmpLump;
             if (first)
             {
                 first = false;

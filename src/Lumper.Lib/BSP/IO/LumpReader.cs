@@ -19,10 +19,8 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
 
     protected virtual void LoadAll()
     {
-        foreach (Tuple<Lump, LumpHeader> l in Lumps)
+        foreach ((Lump lump, LumpHeader lumpHeader) in Lumps)
         {
-            Lump lump = l.Item1;
-            LumpHeader lumpHeader = l.Item2;
             if (lumpHeader.Length > 0)
                 Read(lump, lumpHeader);
         }
