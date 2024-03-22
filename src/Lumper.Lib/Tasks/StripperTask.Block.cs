@@ -65,17 +65,19 @@ public partial class StripperTask
             if (filterProp.Key != entityProp.Key)
                 return false;
 
-            if (filterProp.Value.Length > 2
-                && filterProp.Value.StartsWith("/")
-                && filterProp.Value.EndsWith("/"))
+            if (filterProp.Value.Length > 2 && filterProp.Value.StartsWith('/') && filterProp.Value.EndsWith('/') &&
+                entityProp.ValueString is not null)
             {
-
-                //todo perl regex or warning
-                var regex = new Regex(
-                    filterProp.Value[1..(filterProp.Value.Length - 2)]);
-
-                var ret = regex.IsMatch(entityProp.ValueString);
-                return ret;
+                try
+                {
+                    var regex = new Regex(filterProp.Value[1..^2]);
+                    return regex.IsMatch(entityProp.ValueString);
+                }
+                catch (Exception _) when (_ is ArgumentException or ArgumentNullException)
+                {
+                    Logger.Warn(
+                        $"Error: Invalid regex {filterProp.Value}. Stripper uses Perl-style regexes, Lumper uses .NET; your regex may need adjusting.");
+                }
             }
             return filterProp.Value == entityProp.ValueString;
         }
