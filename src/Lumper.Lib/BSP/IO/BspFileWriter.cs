@@ -61,7 +61,7 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
                 startPosition = (int)BaseStream.Position;
             }
 
-            if ((lump is GameLump || lump is PakFileLump) && lump.Compress)
+            if (lump is GameLump or PakFileLump && lump.Compress)
             {
                 Console.WriteLine($"Let's not compress {lump.GetType().Name} .. it's a silly place");
                 lump.Compress = false;
