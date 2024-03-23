@@ -37,7 +37,7 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
     {
         var startPos = BaseStream.Position;
         var count = ReadInt32();
-        LumpHeader prevHeader = null;
+        LumpHeader? prevHeader = null;
         var prevCompressed = false;
         for (var i = 0; i < count; i++)
         {

@@ -7,16 +7,16 @@ using Lumper.Lib.BSP.Lumps.GameLumps;
 
 public class GameLump : ManagedLump<BspLumpType>
 {
-    public GameLumpReader Reader { get; private set; }
-    public Dictionary<GameLumpType, Lump> Lumps { get; set; } = [];
     public T GetLump<T>() where T : Lump<GameLumpType>
     {
         Dictionary<System.Type, GameLumpType> typeMap = new()
         {
             { typeof(Sprp), GameLumpType.sprp }
         };
+    public GameLumpReader? Reader { get; private set; }
 
     public GameLump(BspFile parent) : base(parent) => Compress = false;
+    public Dictionary<GameLumpType, Lump?> Lumps { get; } = [];
 
         if (typeMap.ContainsKey(typeof(T)))
         {
