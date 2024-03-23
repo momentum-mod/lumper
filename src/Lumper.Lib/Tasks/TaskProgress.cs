@@ -26,7 +26,7 @@ public class TaskProgress
         }
     }
     public delegate void PercentChangedHandler(object source, double newPercent);
-    public event PercentChangedHandler OnPercentChanged;
+    public event PercentChangedHandler? OnPercentChanged;
 
     public TaskProgress()
     { }
@@ -37,8 +37,7 @@ public class TaskProgress
         Percent = (Count >= 0 && Max > 0)
             ? (double)Count / Max * 100
             : 0;
-        if (OnPercentChanged is not null)
-            OnPercentChanged(this, Percent);
+        OnPercentChanged?.Invoke(this, Percent);
     }
 
     public void Reset()

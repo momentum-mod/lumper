@@ -15,12 +15,12 @@ public class BspFile
     public const int MaxLumps = 128;
 
     [JsonIgnore]
-    public string FilePath { get; private set; }
-    public string Name { get; private set; }
+    public string? FilePath { get; private set; }
+    public string Name { get; private set; } = null!;
     public int Revision { get; set; }
     public int Version { get; set; }
 
-    protected MemoryStream Stream { get; private set; }
+    protected MemoryStream Stream { get; private set; } = null!;
 
     public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = [];
 
@@ -42,7 +42,7 @@ public class BspFile
     public void Load(Stream stream)
     {
         FilePath = null;
-        Stream?.Dispose();
+        Stream.Dispose();
         Stream = new MemoryStream();
         stream.CopyTo(Stream);
         var reader = new BspFileReader(this, Stream);
