@@ -22,7 +22,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
         try
         {
-            string key = null;
+            string? key = null;
             var inSection = false;
             var inString = false;
             char x;

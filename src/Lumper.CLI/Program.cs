@@ -20,7 +20,7 @@ internal sealed class Program
         if (path == null)
             return;
 
-        if (parserResult.Value.Json.Any())
+        if (parserResult.Value.Json != null && parserResult.Value.Json.Any())
         {
             var bspFile = new BspFile(path);
 
