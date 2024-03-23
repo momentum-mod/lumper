@@ -51,7 +51,7 @@ public class Entity
         public T Value { get; set; }
         public override string ValueString
         {
-            get => Value.ToString();
+            get => Value.ToString()!;
             set => Value = (T)Convert.ChangeType(value, typeof(T));
         }
     }

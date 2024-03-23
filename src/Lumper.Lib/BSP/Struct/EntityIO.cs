@@ -4,9 +4,9 @@ using System.Linq;
 
 public class EntityIO
 {
-    public string TargetEntityName { get; set; }
-    public string Input { get; set; }
-    public string Parameter { get; set; }
+    public string? TargetEntityName { get; set; }
+    public string? Input { get; set; }
+    public string? Parameter { get; set; }
     public float Delay { get; set; }
     public int TimesToFire { get; set; }
 

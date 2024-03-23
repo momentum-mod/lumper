@@ -19,22 +19,17 @@ public class PakFileEntry
     }
 
     [JsonIgnore]
-    private readonly ZipArchiveEntry _entry;
+    private readonly ZipArchiveEntry? _entry;
 
     public string Key { get; set; }
 
     [JsonIgnore]
-    public Stream? _dataStream = null;
+    private Stream? _dataStream;
+
     [JsonIgnore]
     public Stream DataStream
     {
-        get
-        {
-            if (_dataStream is null)
-                return _entry.OpenEntryStream();
-            else
-                return _dataStream;
-        }
+        get => _dataStream ?? _entry!.OpenEntryStream(); // Ctors take either entry or stream, one is non-null
         set
         {
             if (_dataStream is not null)
