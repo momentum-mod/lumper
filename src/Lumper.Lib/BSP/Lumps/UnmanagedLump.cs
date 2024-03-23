@@ -21,9 +21,9 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump 
     public long UncompressedLength { get; set; }
 
     [JsonIgnore]
-    public Stream DataStream { get; set; }
+    public Stream? DataStream { get; set; }
 
-    public byte[] HashMD5 { get; private set; }
+    public byte[] HashMd5 { get; private set; } = null!;
     public long DataStreamOffset { get; set; }
     public long DataStreamLength { get; set; }
     public static readonly int LzmaId = ('A' << 24) | ('M' << 16) | ('Z' << 8) | ('L');

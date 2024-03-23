@@ -99,8 +99,8 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
     // Finding the real gamelump length by looking at the next lump
     private void UpdateGameLumpLength()
     {
-        Lump gameLump = null;
-        LumpHeader gameLumpHeader = null;
+        Lump? gameLump = null;
+        LumpHeader? gameLumpHeader = null;
         foreach ((Lump? lump, LumpHeader? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
             if (lump is GameLump)
@@ -142,9 +142,11 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
     // Test for overlapping offsets
     private bool CheckOverlapping()
     {
-        Lump<BspLumpType> prevLump = null;
-        LumpHeader prevHeader = null;
         var result = false;
+
+        Lump<BspLumpType>? prevLump = null;
+        LumpHeader? prevHeader = null;
+
         var first = true;
         foreach ((Lump? tmpLump, LumpHeader? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
@@ -157,10 +159,10 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             }
             else if (header.Length > 0)
             {
-                var prevEnd = prevHeader.Offset + prevHeader.Length;
+                var prevEnd = prevHeader!.Offset + prevHeader.Length;
                 if (header.Offset < prevEnd)
                 {
-                    Console.WriteLine($"Lumps {prevLump.Type} and {lump.Type} overlapping");
+                    Console.WriteLine($"Lumps {prevLump!.Type} and {lump.Type} overlapping");
                     if (prevLump.Type == BspLumpType.GameLump)
                         Console.WriteLine("but the previous lump was GAME_LUMP and the length is a lie");
                     else
@@ -168,7 +170,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                 }
                 else if (header.Offset > prevEnd)
                 {
-                    Console.WriteLine($"Space between lumps {prevLump.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
+                    Console.WriteLine($"Space between lumps {prevLump!.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
                 }
 
                 if (header.Offset + header.Length >= prevEnd)

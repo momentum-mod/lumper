@@ -4,9 +4,9 @@ using System.IO;
 
 public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
 {
-    public StaticPropDictLump StaticPropsDict { get; set; }
-    public StaticPropLeafLump StaticPropsLeaf { get; set; }
-    public StaticPropLump StaticProps { get; set; }
+    public StaticPropDictLump StaticPropsDict { get; set; } = null!;
+    public StaticPropLeafLump StaticPropsLeaf { get; set; } = null!;
+    public StaticPropLump StaticProps { get; set; } = null!;
 
     public override void Read(BinaryReader reader, long length)
     {
