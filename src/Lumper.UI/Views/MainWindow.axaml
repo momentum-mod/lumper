@@ -52,6 +52,8 @@
                 </Menu>
             </DockPanel>
             <ContentControl Grid.Column="0" Grid.Row="1" Margin="0,0,2,0" Content="{Binding Content}" />
+            <GridSplitter Grid.Row="2" ResizeDirection="Rows" />
+            <logViewer:LogViewerView DataContext="{Binding LogViewer}" Grid.Row="3" />
         </Grid>
     </Panel>
 </Window>

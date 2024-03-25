@@ -1,0 +1,25 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.LogViewer.LogViewerView"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.LogViewer"
+             x:CompileBindings="True"
+             x:DataType="vm:LogViewerViewModel">
+
+    <Grid RowDefinitions="Auto, Auto, *" ColumnDefinitions="*, Auto">
+        <ScrollViewer Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" Name="ScrollViewer" VerticalAlignment="Stretch"
+                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Background="#55000000" MaxHeight="Infinity">
+            <SelectableTextBlock Name="Logs" FontSize="14" FontFamily="'Roboto Mono',Consolas,Courier" ClipToBounds="True"
+                                 VerticalAlignment="Stretch" Padding="16" />
+        </ScrollViewer>
+        <Button Click="ScrollToBottom" Margin="4" Width="28" Height="28" Grid.Column="1" Grid.Row="0" ToolTip.Tip="Scroll to Bottom">
+            <materialIcons:MaterialIconExt Kind="FormatAlignBottom" Size="24" />
+        </Button>
+        <ToggleButton Name="AutoScroll" IsChecked="True" Margin="4 0 4 4" Width="28" Height="28" Grid.Column="1" Grid.Row="1" ToolTip.Tip="Auto Scroll">
+            <materialIcons:MaterialIconExt Kind="ArrowVerticalLock" Size="24" />
+        </ToggleButton>
+    </Grid>
+</UserControl>
