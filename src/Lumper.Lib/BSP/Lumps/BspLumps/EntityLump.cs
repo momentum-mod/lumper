@@ -4,10 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Lumper.Lib.BSP.Struct;
+using NLog;
 
 public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
     public List<Entity> Data { get; set; } = [];
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public override void Read(BinaryReader reader, long length)
     {
@@ -69,8 +72,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
                                 if (key.Length == 0)
                                 {
-                                    Console.WriteLine(
-                                        "Entity parser skipped value \"{0}\" for empty key, how u do dis?", value);
+                                    _logger.Warn($"Entity parser skipped value \"{value}\" for empty key, how u do dis?");
                                 }
                                 else
                                 {
@@ -97,9 +99,8 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         }
         catch (InvalidDataException e)
         {
-            Console.WriteLine(
-                "WARNING: Failed to parse entity: {0}, {1} in list.\n Saving this BSP could cause data loss!",
-                e.Message, Data.Count);
+            _logger.Error($"Failed to parse entity: {e.Message}.\n"
+                         + "Entity was {Data.Count} in list. Saving this BSP could cause data loss!");
 
             // Read to end of entity
             var foundEnd = false;
@@ -112,8 +113,9 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                     break;
                 }
             }
+
             if (!foundEnd)
-                Console.WriteLine("WARNING: End of entity not found!");
+                _logger.Error("End of entity not found!!");
         }
 
         return false;

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Lumper.Lib.BSP.Lumps;
 using Newtonsoft.Json;
+using NLog;
 using SharpCompress.Compressors.LZMA;
 
 // Handles decompressing and fills lumps with data
@@ -15,6 +16,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
     protected List<Tuple<Lump, LumpHeader>> Lumps = [];
     // Lump header information is only needed in the reader
 
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
     protected abstract void ReadHeader();
 
     protected virtual void LoadAll()

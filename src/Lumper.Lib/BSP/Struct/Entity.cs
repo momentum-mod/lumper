@@ -1,6 +1,7 @@
 namespace Lumper.Lib.BSP.Struct;
 using System;
 using System.Collections.Generic;
+using NLog;
 
 public class Entity
 {
@@ -9,6 +10,8 @@ public class Entity
         public string Key { get; set; } = key;
         public abstract string ValueString { get; set; }
         public override string ToString() => $"\"{Key}\" \"{ValueString}\"";
+
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public static EntityProperty? CreateProperty(KeyValuePair<string, string> kv) => CreateProperty(kv.Key, kv.Value);
         public static EntityProperty? CreateProperty(string key, string value)
@@ -35,7 +38,7 @@ public class Entity
                 }
                 catch (Exception e) when (e is IndexOutOfRangeException or FormatException)
                 {
-                    Console.WriteLine($"Failed to pass entity IO value '{key}' '{value}'!");
+                    Logger.Error($"Failed to pass entity IO value '{key}' '{value}'!");
                 }
             }
             return new EntityProperty<string>(key, value);
@@ -61,6 +64,8 @@ public class Entity
 
     public List<EntityProperty> Properties { get; set; } = [];
 
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     public Entity(IEnumerable<KeyValuePair<string, string>> keyValues)
     {
         foreach (KeyValuePair<string, string> kv in keyValues)
@@ -74,7 +79,7 @@ public class Entity
                     continue;
                 }
 
-                Console.WriteLine($"Found duplicate classname key, ignoring {kv}");
+                _logger.Warn($"Found duplicate classname key, ignoring. {kv}");
             }
 
             var prop = EntityProperty.CreateProperty(kv);
@@ -84,9 +89,9 @@ public class Entity
 
         if (_className is null)
         {
-            Console.WriteLine("Warning: Found entity with missing classname!");
             // After this line _className and ClassName are safe to mark ClassName as non-null
             ClassName = "<missing classname>";
+            _logger.Warn("Found entity with missing classname!");
         }
     }
 }

@@ -11,6 +11,7 @@ using DynamicData.Binding;
 using Lumper.Lib.BSP;
 using Lumper.Lib.Tasks;
 using Newtonsoft.Json;
+using NLog;
 using ReactiveUI;
 
 /// <summary>
@@ -58,6 +59,8 @@ public partial class TasksViewModel : ViewModelBase
         get => _content;
         private set => this.RaiseAndSetIfChanged(ref _content, value);
     }
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private void OnSelectedTaskChanged() => Content = SelectedTask ?? null;
 
@@ -120,8 +123,9 @@ public partial class TasksViewModel : ViewModelBase
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _logger.Error($"Task execution failed! {nameof(e)}: {e.Message}");
             }
+
             IsRunning = false;
         });
     }

@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Lumper.Lib.BSP.Struct;
+using NLog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VTFLib;
@@ -23,6 +24,8 @@ public class VtfFileData
     public uint ImageWidth { get; private set; }
     public uint ImageHeight { get; private set; }
     public VTFImageFormat ImageFormat { get; private set; }
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     static VtfFileData() => VTFAPI.Initialize();
     public VtfFileData(PakFileEntry entry)
@@ -110,7 +113,7 @@ public class VtfFileData
             ref createOptions))
         {
             var err = VTFAPI.GetLastError();
-            Console.WriteLine(err);
+            _logger.Error($"Error updating VTF ${_pakFileEntry.Key}: ${err}");
         }
 
         SaveVtf();
@@ -127,7 +130,7 @@ public class VtfFileData
         if (!VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize))
         {
             var err = VTFAPI.GetLastError();
-            Console.WriteLine(err);
+            _logger.Error($"Error saving VTF ${_pakFileEntry.Key}: ${err}");
         }
 
         _entry.DataStream.Seek(0, SeekOrigin.Begin);

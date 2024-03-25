@@ -1,12 +1,15 @@
 namespace Lumper.Lib.BSP.Lumps.GameLumps;
 using System;
 using System.IO;
+using NLog;
 
 public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
 {
     public StaticPropDictLump StaticPropsDict { get; set; } = null!;
     public StaticPropLeafLump StaticPropsLeaf { get; set; } = null!;
     public StaticPropLump StaticProps { get; set; } = null!;
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public override void Read(BinaryReader reader, long length)
     {
@@ -35,7 +38,7 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
                 if (remainingLength % StaticProps.StructureSize != 0)
                 {
                     StaticProps.ActualVersion = StaticPropVersion.V7s;
-                    Console.WriteLine($"Remaining length doesn't fit version {Version} .. trying V7*");
+                    _logger.Warn($"Remaining length of staticprop lump doesn't fit version {Version}.. trying V7s");
                 }
                 break;
             case StaticPropVersion.Unknown:

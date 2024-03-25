@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
+using NLog;
+using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
 
@@ -14,6 +17,8 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
 
     [JsonProperty]
     public Dictionary<BspLumpType, BspLumpHeader> LumpHeaders { get; set; } = [];
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public void Save()
     {
@@ -61,13 +66,16 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
 
             if (lump is GameLump or PakFileLump && lump.Compress)
             {
-                Console.WriteLine($"Let's not compress {lump.GetType().Name} .. it's a silly place");
+                _logger.Debug($"{lump.GetType().Name} marked with Compress = true, ignoring");
                 lump.Compress = false;
             }
+
             LumpHeader newHeader = Write(lump);
             LumpHeaders[lumpType] = new BspLumpHeader(newHeader, lump.Version);
 
-            Console.WriteLine($"Lump {lumpType}({(int)lumpType})\n\t{newHeader.Offset}\n\t{newHeader.Length}");
+            _logger.Info($"Wrote {lumpType} ({(int)lumpType})".PadRight(48)
+                       + $"offset: {newHeader.Offset}".PadRight(24)
+                       + $"length: {newHeader.Length}");
         }
     }
 

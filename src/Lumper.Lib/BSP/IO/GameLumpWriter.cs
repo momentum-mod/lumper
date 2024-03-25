@@ -7,6 +7,7 @@ using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps.GameLumps;
 using Newtonsoft.Json;
+using NLog;
 
 public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWriter(output)
 {
@@ -17,6 +18,8 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
     private long LumpDataStart { get; set; }
     private long LumpDataEnd { get; set; }
     public List<GameLumpHeader> LumpHeaders { get; set; } = [];
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public void Save()
     {
@@ -64,6 +67,10 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
                 lump.Version = (ushort)lump.Version;
 
             LumpHeaders.Add(new GameLumpHeader(newHeader, (ushort)lump.Version, (int)key));
+
+            _logger.Info($"Wrote gamelump {key} {(int)key}".PadRight(48)
+                         + $"offset: {newHeader.Offset}".PadRight(24)
+                         + $"length: {newHeader.UncompressedLength}".PadRight(24));
         }
 
         if (LumpHeaders.Count != 0 && LumpHeaders.Last().Id != 0)

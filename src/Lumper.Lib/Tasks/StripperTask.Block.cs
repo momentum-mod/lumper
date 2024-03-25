@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Struct;
+using NLog;
 using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
 public partial class StripperTask
@@ -14,6 +15,8 @@ public partial class StripperTask
         private static partial Regex PairRegex();
 
         public abstract void Parse(StreamReader reader, bool blockOpen, ref int lineNr);
+
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         protected static Prop ParseProp(string line, int lineNr)
         {
@@ -54,7 +57,7 @@ public partial class StripperTask
                 }
                 else
                 {
-                    throw new NotImplementedException($"Can't get KeyValuePair from '{line}' line {lineNr}");
+                    Logger.Error($"Can't get KeyValuePair from '{line}' line {lineNr}");
                 }
             }
         }
@@ -78,10 +81,8 @@ public partial class StripperTask
                 var ret = regex.IsMatch(entityProp.ValueString);
                 return ret;
             }
-            return filterProp.Value == entityProp.ValueString;
-        }
 
-            return filterValue == entityProp.ValueString;
+            return filterProp.Value == entityProp.ValueString;
         }
     }
 }

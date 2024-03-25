@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
+using Lumper.Lib.BSP.Struct;
+using NLog;
 
 public class ChangeTextureTask : LumperTask
 {
@@ -13,6 +15,8 @@ public class ChangeTextureTask : LumperTask
     public Dictionary<string, string> Replace { get; set; } = [];
     public List<KeyValuePair<Regex, string>> ReplaceRegex { get; set; } = [];
 
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     public override TaskResult Run(BspFile bsp)
     {
         TexDataLump texDataLump = bsp.GetLump<TexDataLump>();
@@ -20,30 +24,21 @@ public class ChangeTextureTask : LumperTask
         Progress.Max = texDataLump.Data.Count;
         foreach (TexData texture in texDataLump.Data)
         {
-            Console.Write($"TexName: {texture.TexName}");
             if (Replace.TryGetValue(texture.TexName, out var value))
             {
+                _logger.Info($"Replaced {texture.TexName} with {value}");
                 texture.TexName = value;
-                Console.Write($" replace: {texture.TexName}");
             }
             else
             {
                 foreach (KeyValuePair<Regex, string> replaceRegex in ReplaceRegex)
                 {
-                    var tmp = replaceRegex.Key.Replace(
-                        texture.TexName,
-                        replaceRegex.Value);
-
-                    if (texture.TexName != tmp)
-                    {
-                        texture.TexName = tmp;
-                        Console.Write($" replaceRegex: {texture.TexName}");
-                    }
+                    _logger.Info($"Replaced {texture.TexName} with {newName}");
                 }
             }
-            Console.WriteLine();
             Progress.Count++;
         }
+
         return TaskResult.Success;
     }
 }

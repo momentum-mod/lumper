@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.BSP;
+using NLog;
 
 public class RunExternalToolTask(
     string? path,
@@ -22,6 +23,8 @@ public class RunExternalToolTask(
     public string? InputFile { get; set; } = inputFile;
     public string? OutputFile { get; set; } = outputFile;
     public bool UseStdOut { get; set; } = useStdOut;
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private sealed class Output : IDisposable
     {
@@ -70,14 +73,21 @@ public class RunExternalToolTask(
         }
         else
         {
-            Console.WriteLine($"Warning: Inputfile not set for external command '{Path} {Args}'");
+            _logger.Warn($"Input file not set for external command '{Path} {Args}'");
+            return TaskResult.Failed;
+        }
+
+        if (OutputFile is null)
+        {
+            _logger.Warn($"Warning: Output file not set for external command '{Path} {Args}'");
+            return TaskResult.Failed;
         }
 
         if (File.Exists(OutputFile))
         {
             // TODO: This is *probably* okay but maybe best to have a toggle button for this
             // behaviour, just in case it nukes a file someone actual cares about.
-            Console.WriteLine("Warning: Output file exists, overwriting");
+            _logger.Warn("Warning: Output file exists, overwriting");
             File.Delete(OutputFile);
         }
 
@@ -147,7 +157,7 @@ public class RunExternalToolTask(
             else
                 stream = stdOut.Mem;
             var r = new StreamReader(stream);
-            Console.WriteLine($"{System.IO.Path.GetFileName(Path)} ERROR: {r.ReadToEnd()}");
+            _logger.Error($"{System.IO.Path.GetFileName(Path)} ERROR: {r.ReadToEnd()}");
         }
         return ret;
     }

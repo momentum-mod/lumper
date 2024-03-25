@@ -115,17 +115,10 @@ public class PakFileLump : ManagedLump<BspLumpType>
 
     public override void Write(Stream stream)
     {
-        try
-        {
-            UpdateZip(true);
-            using Stream dataStream = SaveZip();
-            dataStream.Seek(0, SeekOrigin.Begin);
-            dataStream.CopyTo(stream);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
+        UpdateZip(true);
+        using Stream dataStream = SaveZip();
+        dataStream.Seek(0, SeekOrigin.Begin);
+        dataStream.CopyTo(stream);
     }
 
     public override bool Empty() => Entries.Count == 0;

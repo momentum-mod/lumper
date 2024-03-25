@@ -4,6 +4,7 @@ using System.IO;
 using Lumper.Lib.BSP.Struct;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using NLog;
 
 public enum StaticPropVersion
 {
@@ -24,6 +25,8 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public StaticPropVersion ActualVersion { get; set; }
+
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public override int StructureSize => ActualVersion switch
     {
@@ -159,9 +162,16 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         // since v11
         if (ActualVersion >= StaticPropVersion.V11)
             prop.UniformScale = System.BitConverter.ToSingle(reader.ReadBytes(4));
+
         Data.Add(prop);
-        if (reader.BaseStream.Position - startpos != StructureSize)
-            throw new InvalidDataException($"StaticProp structuresize doesn't match reader position after read ({reader.BaseStream.Position - startpos} != {StructureSize})");
+
+        if (reader.BaseStream.Position - startPos != StructureSize)
+        {
+            _logger.Warn($"StaticProp StructureSize doesn't match reader position after read "
+                       + $"({reader.BaseStream.Position - startPos} != {StructureSize})");
+            // throw new InvalidDataException($"StaticProp StructureSize doesn't match reader position after read"
+            //                                + $"({reader.BaseStream.Position - startPos} != {StructureSize})");
+        }
     }
 
     protected override void WriteItem(BinaryWriter writer, int index)
@@ -238,6 +248,6 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         if (ActualVersion >= StaticPropVersion.V11)
             writer.Write(prop.UniformScale);
         if (writer.BaseStream.Position - startPos != StructureSize)
-            throw new InvalidDataException($"StaticProp structuresize doesn't match writer position after write ({writer.BaseStream.Position - startPos} != {StructureSize})");
+            throw new InvalidDataException($"StaticProp StructureSize doesn't match writer position after write ({writer.BaseStream.Position - startPos} != {StructureSize})");
     }
 }

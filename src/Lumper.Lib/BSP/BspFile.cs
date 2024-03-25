@@ -7,6 +7,7 @@ using Lumper.Lib.BSP.IO;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
+using NLog;
 
 public class BspFile
 {
@@ -23,6 +24,7 @@ public class BspFile
     protected MemoryStream Stream { get; private set; } = null!;
 
     public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = [];
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public BspFile()
     { }
@@ -100,7 +102,7 @@ public class BspFile
             FileAccess.Write);
 
         ToJson(fileStream, sortLumps, sortProperties, ignoreOffset);
-        Console.WriteLine($"JSON file: {path}");
+        _logger.Info($"Successfully dumped JSON to {path}");
     }
 
     public void ToJson(Stream stream, bool sortLumps, bool sortProperties, bool ignoreOffset)
