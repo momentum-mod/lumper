@@ -3,32 +3,17 @@ namespace Lumper.Lib.BSP.Lumps.GameLumps;
 using System.Drawing;
 using System.IO;
 using System.Numerics;
+using Enum;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Struct;
-
-public enum StaticPropVersion
-{
-    Unknown = 0,
-    V4 = 40,
-    V5 = 50,
-    V6 = 60,
-    V7s = 70,
-    V7 = 71,
-    V8 = 80,
-    V9 = 90,
-    V10 = 100,
-    V11 = 110,
-    V12 = 120,
-    V13 = 130
-}
 
 public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp>(parent)
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public StaticPropVersion ActualVersion { get; set; }
-    public override int StructureSize => ActualVersion switch
-    {
+
+    public override int StructureSize => ActualVersion switch {
         StaticPropVersion.V4 => 56,
         StaticPropVersion.V5 => 60,
         StaticPropVersion.V6 => 64,
@@ -43,8 +28,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         _ => 1
     };
 
-    public void SetVersion(int version) => ActualVersion = version switch
-    {
+    public void SetVersion(int version) => ActualVersion = version switch {
         4 => StaticPropVersion.V4,
         5 => StaticPropVersion.V5,
         6 => StaticPropVersion.V6,
@@ -58,8 +42,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         _ => StaticPropVersion.Unknown
     };
 
-    public int GetVersion() => ActualVersion switch
-    {
+    public int GetVersion() => ActualVersion switch {
         StaticPropVersion.V4 => 4,
         StaticPropVersion.V5 => 5,
         StaticPropVersion.V6 => 6,

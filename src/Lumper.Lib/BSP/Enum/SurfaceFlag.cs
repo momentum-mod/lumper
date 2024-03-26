@@ -1,4 +1,5 @@
 namespace Lumper.Lib.BSP.Enum;
+
 public enum SurfaceFlag
 {
     Light,
