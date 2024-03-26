@@ -9,8 +9,7 @@ public class TexInfoLump(BspFile parent) : FixedLump<BspLumpType, TexInfo>(paren
 
     protected override void ReadItem(BinaryReader reader)
     {
-        var item = new TexInfo
-        {
+        var item = new TexInfo {
             TextureVectors = new float[2, 4],
             LightmapVectors = new float[2, 4]
         };
