@@ -37,7 +37,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
 
         var ident = ReadBytes(4);
 
-        if (Encoding.Default.GetString(ident) != "VBSP")
+        if (Encoding.ASCII.GetString(ident) != "VBSP")
             throw new InvalidDataException("File doesn't look like a VBSP");
 
         _bsp.Version = ReadInt32();
@@ -202,7 +202,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             }
 
             texture.TexName = end > 0
-                ? TexDataStringDataLump.TextureNameEncoding.GetString(
+                ? Encoding.ASCII.GetString(
                     texDataStringDataLump.Data,
                     stringTableOffset,
                     end - stringTableOffset)

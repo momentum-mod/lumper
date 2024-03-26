@@ -26,7 +26,7 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
     {
         Seek(0, SeekOrigin.Begin);
 
-        Write(Encoding.Default.GetBytes("VBSP"));
+        Write(Encoding.ASCII.GetBytes("VBSP"));
         Write(_bsp.Version);
 
         foreach (BspLumpHeader? lump in LumpHeaders.OrderBy(x => x.Key).Select(x => x.Value))
@@ -94,7 +94,7 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
 
             tex.StringTablePointer = stringTable.Count - 1;
 
-            var bytes = TexDataStringDataLump.TextureNameEncoding.GetBytes(tex.TexName);
+            var bytes = Encoding.ASCII.GetBytes(tex.TexName);
             Array.Copy(bytes, 0, texDataStringDataLump.Data, pos, bytes.Length);
             pos += bytes.Length;
             texDataStringDataLump.Data[pos] = 0;
