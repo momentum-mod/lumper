@@ -57,7 +57,7 @@ public class TaskViewModel : ViewModelBase
                 Status = TaskStatus.Failed;
                 success = false;
                 break;
-            case TaskResult.Unknwon:
+            case TaskResult.Unknown:
                 Status = TaskStatus.Unknown;
                 break;
             default:

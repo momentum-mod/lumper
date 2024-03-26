@@ -1,12 +1,14 @@
 namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
+using Lib.BSP.Struct;
+
 /// <summary>
-///     Base ViewModel for <see cref="Lib.BSP.Struct.Entity.Property" />.
+///     Base ViewModel for <see cref="Entity.EntityProperty" />.
 /// </summary>
 public abstract class EntityPropertyBase(
     EntityViewModel parent,
-    Lib.BSP.Struct.Entity.Property property) : BspNodeBase(parent)
+    Entity.EntityProperty entityProperty) : BspNodeBase(parent)
 {
-    private string _key = property.Key;
+    private string _key = entityProperty.Key;
     public string Key
     {
         get => _key;
@@ -15,11 +17,11 @@ public abstract class EntityPropertyBase(
 
     public override string NodeName => Key;
 
-    public Lib.BSP.Struct.Entity.Property Property { get; } = property;
+    public Entity.EntityProperty EntityProperty { get; } = entityProperty;
 
     public override void Update()
     {
-        Property.Key = _key;
+        EntityProperty.Key = _key;
         base.Update();
     }
     public void Delete()

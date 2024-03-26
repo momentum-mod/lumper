@@ -24,8 +24,11 @@ public class BspFile
 
     public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = [];
 
-    public BspFile()
-    { }
+    // The nullability of all sorts of parts of this class and its members is based on the assumption
+    // that an actual BSP has been loaded.
+    // We don't support or plan to support creating BSPs from scratch, so private ctor blocks
+    // creating a BspFile instance without loading an actual BSP.
+    private BspFile() { }
 
     public BspFile(string path) => Load(path);
 
@@ -116,8 +119,7 @@ public class BspFile
         using var bspWriter = new BspFileWriter(this, bspStream);
         bspWriter.Save();
 
-        var jsonSerializerSettings = new JsonSerializerSettings
-        {
+        var jsonSerializerSettings = new JsonSerializerSettings {
             ContractResolver = new JsonContractResolver(sortProperties, ignoreOffset),
             Formatting = Formatting.Indented
         };
@@ -125,11 +127,6 @@ public class BspFile
         var serializer = JsonSerializer.Create(jsonSerializerSettings);
         using var sw = new StreamWriter(stream);
         using var writer = new JsonTextWriter(sw);
-        serializer.Serialize(writer,
-            new
-            {
-                Bsp = this,
-                Writer = bspWriter
-            });
+        serializer.Serialize(writer, new { Bsp = this, Writer = bspWriter });
     }
 }

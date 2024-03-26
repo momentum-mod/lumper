@@ -6,38 +6,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.BSP;
 
-public class RunExternalToolTask : LumperTask
+public class RunExternalToolTask(
+    string? path,
+    string? args,
+    string? inputFile,
+    string? outputFile,
+    bool useStdOut = false)
+    : LumperTask
 {
-    public override string Type { get; } = "RunExternalToolTask";
-    public string Path { get; set; }
-    public string Args { get; set; }
-    //The current BSP will be saved to this and it should be the input for the command
-    //Null if you don't want to save and override all previous changes
-    public string InputFile { get; set; }
-    public string OutputFile { get; set; }
-    public bool UseStdOut { get; set; }
+    public override string Type => "RunExternalToolTask";
+    public string? Path { get; set; } = path;
+    public string? Args { get; set; } = args;
+    // The current BSP will be saved to this and it should be the input for the command
+    // Null if you don't want to save and override all previous changes
+    public string? InputFile { get; set; } = inputFile;
+    public string? OutputFile { get; set; } = outputFile;
+    public bool UseStdOut { get; set; } = useStdOut;
 
-
-    public RunExternalToolTask() { }
-    public RunExternalToolTask(string path, string args)
-    {
-        Path = path;
-        Args = args;
-    }
-    public RunExternalToolTask(string path, string args, string inputFile, string outputFile)
-        : this(path, args)
-    {
-        InputFile = inputFile;
-        OutputFile = outputFile;
-        UseStdOut = false;
-    }
-    public RunExternalToolTask(string path, string args, string inputFile, bool useStdOut)
-        : this(path, args)
-    {
-        InputFile = inputFile;
-        OutputFile = null;
-        UseStdOut = useStdOut;
-    }
     private sealed class Output : IDisposable
     {
         public MemoryStream Mem;
@@ -72,11 +57,12 @@ public class RunExternalToolTask : LumperTask
             }
         }
     }
-    public override TaskResult Run(BspFile map)
+
+    public override TaskResult Run(BspFile bsp)
     {
         if (InputFile is not null)
         {
-            map.Save(InputFile);
+            bsp.Save(InputFile);
             var fiIn = new FileInfo(InputFile);
             // Guessing based on input file length
             // Probably wrong but better than nothing (?)
@@ -147,9 +133,9 @@ public class RunExternalToolTask : LumperTask
         if (ret == TaskResult.Success)
         {
             if (UseStdOut)
-                map.Load(stdOut.Mem);
+                bsp.Load(stdOut.Mem);
             else
-                map.Load(OutputFile);
+                bsp.Load(OutputFile);
 
             Progress.Count = Progress.Max;
         }

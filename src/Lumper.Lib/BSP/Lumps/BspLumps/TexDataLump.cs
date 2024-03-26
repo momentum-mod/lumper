@@ -5,16 +5,11 @@ using Lumper.Lib.BSP.Struct;
 public class TexDataLump(BspFile parent) : FixedLump<BspLumpType, TexData>(parent)
 {
     public override int StructureSize => 32;
+
     protected override void ReadItem(BinaryReader reader)
     {
-        var item = new TexData
-        {
-            Reflectivity =
-            [
-                reader.ReadSingle(),
-                reader.ReadSingle(),
-                reader.ReadSingle()
-            ],
+        var item = new TexData {
+            Reflectivity = [reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()],
             StringTablePointer = reader.ReadInt32(),
             Width = reader.ReadInt32(),
             Height = reader.ReadInt32(),

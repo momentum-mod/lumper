@@ -10,14 +10,14 @@ public partial class StripperTask
 {
     protected abstract partial class Block
     {
-        private static readonly Regex pairRegex =
-            MyRegex();
+        [GeneratedRegex("\"([^\"]+)\"\\s+\"([^\"]+)\"")]
+        private static partial Regex PairRegex();
 
         public abstract void Parse(StreamReader reader, bool blockOpen, ref int lineNr);
 
         protected static Prop ParseProp(string line, int lineNr)
         {
-            Match match = pairRegex.Match(line);
+            Match match = PairRegex().Match(line);
             if (match.Success)
             {
                 var pair = new Prop(
@@ -60,7 +60,8 @@ public partial class StripperTask
         }
 
         public abstract void Apply(EntityLump lump);
-        protected static bool MatchKeyValue(Prop filterProp, Entity.Property entityProp)
+
+        protected static bool MatchKeyValue(Prop filterProp, Entity.EntityProperty entityProp)
         {
             if (filterProp.Key != entityProp.Key)
                 return false;
@@ -82,7 +83,7 @@ public partial class StripperTask
             return filterProp.Value == entityProp.ValueString;
         }
 
-        [GeneratedRegex("\"([^\"]+)\"\\s+\"([^\"]+)\"")]
-        private static partial Regex MyRegex();
+            return filterValue == entityProp.ValueString;
+        }
     }
 }

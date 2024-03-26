@@ -12,9 +12,10 @@ public class ChangeTextureTask : LumperTask
     { }
     public Dictionary<string, string> Replace { get; set; } = [];
     public List<KeyValuePair<Regex, string>> ReplaceRegex { get; set; } = [];
-    public override TaskResult Run(BspFile map)
+
+    public override TaskResult Run(BspFile bsp)
     {
-        TexDataLump texDataLump = map.GetLump<TexDataLump>();
+        TexDataLump texDataLump = bsp.GetLump<TexDataLump>();
 
         Progress.Max = texDataLump.Data.Count;
         foreach (TexData texture in texDataLump.Data)
