@@ -14,16 +14,18 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
     private readonly GameLump _gameLump = gameLump;
 
     private readonly long _startPos = output.Position;
-    private long LumpdataStart { get; set; }
-    private long LumpdataEnd { get; set; }
+    private long LumpDataStart { get; set; }
+    private long LumpDataEnd { get; set; }
     public List<GameLumpHeader> LumpHeaders { get; set; } = [];
 
     public void Save()
     {
         if (!_gameLump.Lumps.ContainsKey(0))
             _gameLump.Lumps.Add(0, null);
-        LumpdataStart = BaseStream.Position + 4 /*gamelump count 32bit int*/ + (_gameLump.Lumps.Count * GameLumpHeader.StructureSize);
         // The last gamelump header should be 0 so we add a empty lump at the end
+
+        LumpDataStart = BaseStream.Position + 4 /* gamelump count 32bit int */ +
+                        (_gameLump.Lumps.Count * GameLumpHeader.StructureSize);
         WriteAllLumps();
         WriteHeader();
     }
@@ -40,34 +42,34 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
             Write(header.FileOfs);
             Write(header.FileLen);
         }
-        if (LumpHeaders.Count != 0 && BaseStream.Position != LumpdataStart)
             throw new NotImplementedException("Failed to write GameLump header: bad length");
+
+        if (LumpHeaders.Count != 0 && BaseStream.Position != LumpDataStart)
 
         BaseStream.Seek(LumpDataEnd, SeekOrigin.Begin);
     }
 
     private void WriteAllLumps()
     {
-        Seek((int)LumpdataStart, SeekOrigin.Begin);
+        Seek((int)LumpDataStart, SeekOrigin.Begin);
         foreach ((GameLumpType key, Lump? lump) in _gameLump.Lumps)
         {
             if (key == 0 || lump is null)
                 continue;
 
-            LumpHeader newHeader = Write(lump);
+            LumpHeaderInfo newHeaderInfo = Write(lump);
 
-            //todo meh
-            if (entry.Value is Sprp sprp)
-                lump.Version = (ushort)sprp.StaticProps.GetVersion();
-            else
-                lump.Version = (ushort)lump.Version;
+            // TODO: meh
+            lump.Version = lump is Sprp sprp
+                ? (ushort)sprp.StaticProps.GetVersion()
+                : (ushort)lump.Version;
 
-            LumpHeaders.Add(new GameLumpHeader(newHeader, (ushort)lump.Version, (int)key));
+            LumpHeaders.Add(new GameLumpHeader(newHeaderInfo, (ushort)lump.Version, (int)key));
         }
 
         if (LumpHeaders.Count != 0 && LumpHeaders.Last().Id != 0)
             LumpHeaders.Add(new GameLumpHeader());
 
-        LumpdataEnd = (int)BaseStream.Position;
+        LumpDataEnd = (int)BaseStream.Position;
     }
 }

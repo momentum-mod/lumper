@@ -12,7 +12,7 @@ using SharpCompress.Writers;
 //[JsonConverter(typeof(PakFileJsonConverter))]
 public class PakFileLump : ManagedLump<BspLumpType>
 {
-    public List<PakFileEntry> Entries { get; set; } = [];
+    public List<PakfileEntry> Entries { get; private set; } = [];
 
     private ZipArchive _zip;
     [JsonIgnore]
