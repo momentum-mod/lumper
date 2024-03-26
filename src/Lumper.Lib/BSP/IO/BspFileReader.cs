@@ -188,7 +188,6 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
         TexDataLump texDataLump = _bsp.GetLump<TexDataLump>();
         foreach (Struct.TexData texture in texDataLump.Data)
         {
-            var name = new StringBuilder();
             TexDataStringTableLump texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
             var stringTableOffset = texDataStringTableLump.Data[texture.StringTablePointer];
             TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
