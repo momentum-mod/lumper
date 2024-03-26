@@ -20,7 +20,7 @@ public class EntityViewModel : BspNodeBase
     {
         _className = entity.ClassName;
         _entity = entity;
-        foreach (Entity.Property property in entity.Properties)
+        foreach (Entity.EntityProperty property in entity.Properties)
             AddProperty(property);
         InitializeNodeChildrenObserver(Properties);
 
@@ -49,9 +49,9 @@ public class EntityViewModel : BspNodeBase
         _isModified
         || (Nodes is { Count: > 0 } && Nodes.Any(n => n.IsModified));
 
-    private void AddProperty(Entity.Property property)
+    private void AddProperty(Entity.EntityProperty entityProperty)
     {
-        EntityPropertyBase propertyViewModel = property switch
+        EntityPropertyBase propertyViewModel = entityProperty switch
         {
             Entity.Property<string> sp =>
                 new EntityPropertyStringViewModel(this, sp),
@@ -62,21 +62,11 @@ public class EntityViewModel : BspNodeBase
         Properties.Add(propertyViewModel);
     }
 
-    public void AddString()
-    {
-        var prop = new Entity.Property<string>(
-            "newproperty", "newvalue");
-        Add(prop);
-    }
+    public void AddString() => Add(new Entity.EntityProperty<string>("newproperty", "newvalue"));
 
-    public void AddIO()
-    {
-        var prop = new Entity.Property<EntityIO>(
-            "newproperty", new EntityIO());
-        Add(prop);
-    }
+    public void AddIO() => Add(new Entity.EntityProperty<EntityIO>("newproperty", new EntityIO()));
 
-    private void Add(Entity.Property prop)
+    private void Add(Entity.EntityProperty prop)
     {
         AddProperty(prop);
         _entity.Properties.Add(prop);
@@ -87,7 +77,7 @@ public class EntityViewModel : BspNodeBase
     public void Delete(EntityPropertyBase prop)
     {
         Properties.Remove(prop);
-        _entity.Properties.Remove(prop.Property);
+        _entity.Properties.Remove(prop.EntityProperty);
         _isModified = true;
         this.RaisePropertyChanged(nameof(IsModified));
     }

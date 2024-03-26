@@ -2,11 +2,11 @@ namespace Lumper.Lib.BSP.Lumps;
 using System.Collections.Generic;
 using System.IO;
 
-public abstract class FixedLump<T, U> : ManagedLump<T>
 // Lumps which contain a list/array of data U with fixed length
+public abstract class FixedLump<T, TData>(BspFile parent) : ManagedLump<T>(parent)
     where T : System.Enum
 {
-    public List<U> Data { get; set; } = [];
+    public List<TData> Data { get; set; } = [];
 
     public abstract int StructureSize { get; }
 
@@ -31,6 +31,4 @@ public abstract class FixedLump<T, U> : ManagedLump<T>
 
     public override bool Empty() => Data.Count == 0;
 
-    protected FixedLump(BspFile parent) : base(parent)
-    { }
 }

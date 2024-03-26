@@ -4,19 +4,19 @@ public class GameLumpHeader
     public GameLumpHeader()
     { }
 
-    public GameLumpHeader(LumpHeader tmpHeader, ushort version, int id)
+    public GameLumpHeader(LumpHeader header, ushort version, int id)
     {
         Id = id;
-        FileOfs = (int)tmpHeader.Offset;
+        FileOfs = (int)header.Offset;
 
         // Set last bit to 0 (only seen flags as 1 and 0 so far but its probably a bitfield)
         Flags &= 0xFFFE;
-        FileLen = (int)tmpHeader.UncompressedLength;
-        if (tmpHeader.Compressed)
 
         // Length is always the uncompressed length
+        FileLen = (int)header.UncompressedLength;
 
         // Set flag if its compressed
+        if (header.Compressed)
             Flags += 1;
 
         Version = version;

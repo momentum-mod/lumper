@@ -1,17 +1,23 @@
 namespace Lumper.UI.ViewModels.Bsp.Lumps.Entity;
 using System.Threading;
 using System.Threading.Tasks;
+using Lib.BSP.Struct;
 using Lumper.UI.Models;
 
 /// <summary>
-///     ViewModel for <see cref="string" /> <see cref="Lib.BSP.Struct.Entity.Property" />.
+///     ViewModel for <see cref="string" /> <see cref="Entity.EntityProperty" />.
 /// </summary>
-public class EntityPropertyStringViewModel(
-    EntityViewModel parent,
-    Lib.BSP.Struct.Entity.Property<string> property) : EntityPropertyBase(parent, property)
+public class EntityPropertyStringViewModel : EntityPropertyBase
 {
-    private readonly Lib.BSP.Struct.Entity.Property<string> _property = property;
-    private string _value = property.Value;
+    private readonly Entity.EntityProperty<string> _property;
+    private string _value;
+
+    public EntityPropertyStringViewModel(EntityViewModel parent, Entity.EntityProperty<string> entityProperty)
+        : base(parent, entityProperty)
+    {
+        _property = entityProperty;
+        _value = entityProperty.Value;
+    }
 
     public override BspNodeBase? ViewNode => Parent;
 

@@ -4,14 +4,14 @@ using System.Collections.Generic;
 
 public class Entity
 {
-    public abstract class Property
+    public abstract class EntityProperty(string key)
     {
-        public string Key { get; set; }
+        public string Key { get; set; } = key;
         public abstract string ValueString { get; set; }
         public override string ToString() => $"\"{Key}\" \"{ValueString}\"";
 
-        public static Property CreateProperty(KeyValuePair<string, string> kv) => CreateProperty(kv.Key, kv.Value);
-        public static Property CreateProperty(string key, string value)
+        public static EntityProperty? CreateProperty(KeyValuePair<string, string> kv) => CreateProperty(kv.Key, kv.Value);
+        public static EntityProperty? CreateProperty(string key, string value)
         {
             if (EntityIO.IsIO(value))
             {
@@ -22,7 +22,7 @@ public class Entity
                     var delay = float.Parse(props[3]);
                     var timestofire = int.Parse(props[4]);
 
-                    return new Property<EntityIO>(key,
+                    return new EntityProperty<EntityIO>(key,
                         new EntityIO
                         {
                             TargetEntityName = props[0],
@@ -38,30 +38,28 @@ public class Entity
                     Console.WriteLine($"Failed to pass entity IO value '{key}' '{value}'!");
                 }
             }
-            return new Property<string>(key, value);
+            return new EntityProperty<string>(key, value);
         }
     }
-    public class Property<T> : Property
+
+    public class EntityProperty<T>(string key, T value) : EntityProperty(key) where T : notnull
     {
-        public Property(string Key, T Value)
-        {
-            this.Key = Key;
-            this.Value = Value;
-        }
-        public T Value { get; set; }
+        public T Value { get; set; } = value;
         public override string ValueString
         {
             get => Value.ToString()!;
             set => Value = (T)Convert.ChangeType(value, typeof(T));
         }
     }
-    private readonly Property<string> _ClassName;
+
+    private readonly EntityProperty<string>? _className;
     public string ClassName
     {
-        get => _ClassName.Value;
-        set => _ClassName.Value = value;
+        get => _className!.Value;
+        set => _className!.Value = value;
     }
-    public List<Property> Properties { get; set; } = [];
+
+    public List<EntityProperty> Properties { get; set; } = [];
 
     public Entity(IEnumerable<KeyValuePair<string, string>> keyValues)
     {
@@ -69,21 +67,26 @@ public class Entity
         {
             if (kv.Key == "classname")
             {
-                if (_ClassName is null)
+                if (_className is null)
                 {
-                    _ClassName = new Property<string>(kv.Key, kv.Value);
-                    Properties.Add(_ClassName);
+                    _className = new EntityProperty<string>(kv.Key, kv.Value);
+                    Properties.Add(_className);
                     continue;
                 }
-                else
-                {
-                    Console.WriteLine("Found duplicate classname key, ignoring {0}", kv);
-                }
+
+                Console.WriteLine($"Found duplicate classname key, ignoring {kv}");
             }
-            Properties.Add(Property.CreateProperty(kv));
+
+            var prop = EntityProperty.CreateProperty(kv);
+            if (prop is not null)
+                Properties.Add(prop);
         }
 
-        if (ClassName is null)
+        if (_className is null)
+        {
             Console.WriteLine("Warning: Found entity with missing classname!");
+            // After this line _className and ClassName are safe to mark ClassName as non-null
+            ClassName = "<missing classname>";
+        }
     }
 }

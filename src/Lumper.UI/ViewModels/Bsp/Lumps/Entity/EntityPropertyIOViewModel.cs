@@ -6,7 +6,7 @@ using Lumper.Lib.BSP.Struct;
 using Lumper.UI.Models;
 
 /// <summary>
-///     ViewModel for <see cref="EntityIO" /> <see cref="Entity.Property" />.
+///     ViewModel for <see cref="EntityIO" /> <see cref="Entity.EntityProperty" />.
 /// </summary>
 public class EntityPropertyIOViewModel : EntityPropertyBase
 {
@@ -18,10 +18,10 @@ public class EntityPropertyIOViewModel : EntityPropertyBase
     private int _timeToFire;
 
     public EntityPropertyIOViewModel(EntityViewModel parent,
-        Entity.Property<EntityIO> property)
-        : base(parent, property)
+        Entity.EntityProperty<EntityIO> entityProperty)
+        : base(parent, entityProperty)
     {
-        _entity = property.Value;
+        _entity = entityProperty.Value;
         _targetEntityName = _entity.TargetEntityName;
         _input = _entity.Input;
         _parameter = _entity.Parameter;
@@ -32,11 +32,9 @@ public class EntityPropertyIOViewModel : EntityPropertyBase
     public override BspNodeBase? ViewNode => Parent;
 
     public override bool IsModified => base.IsModified
-                                       || _entity.TargetEntityName
-                                       != _targetEntityName
+                                       || _entity.TargetEntityName != _targetEntityName
                                        || _entity.Input != _input
                                        || _entity.Parameter != _parameter
-                                       // ReSharper disable once CompareOfFloatsByEqualityOperator
                                        || _entity.Delay != _delay
                                        || _entity.TimesToFire != _timeToFire;
 

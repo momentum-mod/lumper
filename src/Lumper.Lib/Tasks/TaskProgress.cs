@@ -4,37 +4,36 @@ public class TaskProgress
 {
     public double Percent { get; private set; }
 
-
-    private long _Count;
+    private long _count;
     public long Count
     {
-        get => _Count;
+        get => _count;
         internal set
         {
-            _Count = value;
+            _count = value;
             UpdatePercent();
         }
     }
-    private long _Max = -1;
+
+    private long _max;
     public long Max
     {
-        get => _Max;
+        get => _max;
         internal set
         {
-            _Max = value;
+            _max = value;
             UpdatePercent();
         }
     }
+
     public delegate void PercentChangedHandler(object source, double newPercent);
     public event PercentChangedHandler? OnPercentChanged;
 
-    public TaskProgress()
-    { }
-    public TaskProgress(long max) => Max = max;
+    public TaskProgress(long max = -1) => Max = max;
 
     private void UpdatePercent()
     {
-        Percent = (Count >= 0 && Max > 0)
+        Percent = Count >= 0 && Max > 0
             ? (double)Count / Max * 100
             : 0;
         OnPercentChanged?.Invoke(this, Percent);

@@ -6,18 +6,15 @@ using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
 
-public partial class StripperTask : LumperTask
 // Change entities using stripper config
+public partial class StripperTask(string? configPath) : LumperTask
 {
     public override string Type { get; } = "StripperTask";
 
     [JsonIgnore]
     protected List<Block> blocks = [];
-    public string ConfigPath { get; set; }
-    public StripperTask()
-    { }
 
-    public StripperTask(string configPath) => ConfigPath = configPath;
+    public string? ConfigPath { get; set; } = configPath;
 
     public void Load(string configPath)
     {
@@ -71,14 +68,14 @@ public partial class StripperTask : LumperTask
         }
     }
 
-    public override TaskResult Run(BspFile map)
+    public override TaskResult Run(BspFile bsp)
     {
         if (!Path.Exists(ConfigPath))
             return TaskResult.Failed;
 
         Load(ConfigPath);
         Progress.Max = blocks.Count;
-        EntityLump entityLump = map.GetLump<EntityLump>();
+        EntityLump entityLump = bsp.GetLump<EntityLump>();
 
         foreach (Block block in Blocks)
         {

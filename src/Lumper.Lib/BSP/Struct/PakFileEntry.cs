@@ -43,7 +43,7 @@ public class PakFileEntry
 
     public bool IsModified => _dataStream != null;
 
-    public byte[] HashMD5
+    public byte[] HashMd5
     {
         get
         {

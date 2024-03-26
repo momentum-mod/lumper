@@ -3,7 +3,7 @@ using JsonSubTypes;
 using Lumper.Lib.BSP;
 using Newtonsoft.Json;
 
-public enum TaskResult { Unknwon, Success, Failed }
+public enum TaskResult { Unknown, Success, Failed }
 
 [JsonConverter(typeof(JsonSubtypes), "Type")]
 public abstract class LumperTask
@@ -13,5 +13,5 @@ public abstract class LumperTask
     [JsonIgnore]
     public TaskProgress Progress { get; protected set; } = new();
 
-    public abstract TaskResult Run(BspFile map);
+    public abstract TaskResult Run(BspFile bsp);
 }
