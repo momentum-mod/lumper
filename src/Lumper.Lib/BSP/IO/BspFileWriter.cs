@@ -45,7 +45,6 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
         // Seek past the header
         BaseStream.Seek(BspFile.HeaderSize, SeekOrigin.Begin);
 
-        var startPosition = 0;
         var lumpTypes = _bsp.Lumps.Select(x => x.Key).ToList();
         foreach (BspLumpType lumpType in lumpTypes)
         {
@@ -58,7 +57,6 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
                 var pad = new byte[padTo - (BaseStream.Position % padTo)];
                 if (pad.Length != padTo)
                     Write(pad);
-                startPosition = (int)BaseStream.Position;
             }
 
             if (lump is GameLump or PakFileLump && lump.Compress)

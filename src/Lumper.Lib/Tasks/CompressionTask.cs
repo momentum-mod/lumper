@@ -24,13 +24,10 @@ public class CompressionTask(bool compressLumps) : LumperTask
             return TaskResult.Failed;
         }
 
-        var i = 0;
         Progress.Max = bsp.Lumps.Count;
         foreach (Lump<BspLumpType>? value in bsp.Lumps.Values)
         {
             Console.WriteLine($"{i} {lump.Key} {lump.Value.GetType().Name}");
-            i++;
-
             if (value is not GameLump and not PakFileLump)
             {
                 value.Compress = CompressLumps;
