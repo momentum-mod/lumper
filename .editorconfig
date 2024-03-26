@@ -278,7 +278,7 @@ csharp_style_namespace_declarations = file_scoped:warning
 # .NET Naming Rules
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/naming-rules
 ##########################################
-# "Identifiers should not match keywords" - matches Visual Basic keyboards?? Fuck off Microsoft
+# "Identifiers should not match keywords" - matches Visual Basic keywords?? Fuck off Microsoft
 dotnet_diagnostic.CA1716.severity = none
 
 ##########################################

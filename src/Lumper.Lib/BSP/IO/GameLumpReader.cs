@@ -9,11 +9,11 @@ using Lumper.Lib.BSP.Lumps.GameLumps;
 using Newtonsoft.Json;
 using NLog;
 
-public sealed class GameLumpReader(GameLump gamelump, Stream input, long length) : LumpReader(input)
+public sealed class GameLumpReader : LumpReader
 {
     [JsonIgnore]
-    private readonly GameLump _gameLump = gamelump;
-    private readonly long _length = length;
+    private readonly GameLump _gameLump;
+    private readonly long _length;
 
     [JsonProperty]
     public IReadOnlyDictionary<GameLumpType, LumpHeader> Headers => Lumps.ToDictionary(
@@ -23,6 +23,17 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
         x => x.Item2);
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    public GameLumpReader(GameLump gamelump, BinaryReader reader, long length)
+        : this(gamelump, reader.BaseStream, length)
+    { }
+
+    public GameLumpReader(GameLump gamelump, Stream input, long length)
+        : base(input)
+    {
+        _gameLump = gamelump;
+        _length = length;
+    }
 
     public void Load()
     {
