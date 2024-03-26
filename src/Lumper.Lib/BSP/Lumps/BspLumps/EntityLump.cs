@@ -12,7 +12,8 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
     public override void Read(BinaryReader reader, long length)
     {
         while (ReadEntity(reader, reader.BaseStream.Position + length))
-        { }
+        {
+        }
     }
 
     private bool ReadEntity(BinaryReader reader, long endPos)
@@ -39,6 +40,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                             Data.Add(new Entity(keyValues));
                             return true;
                         }
+
                         break;
 
                     case '{':
@@ -46,9 +48,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                             throw new InvalidDataException("Opened unclosed section");
 
                         if (!inString)
-                        {
                             inSection = true;
-                        }
 
                         break;
 
@@ -124,7 +124,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         foreach (Entity ent in Data)
         {
             stream.Write(Encoding.ASCII.GetBytes("{\n"));
-            foreach (Entity.Property prop in ent.Properties)
+            foreach (Entity.EntityProperty prop in ent.Properties)
             {
                 stream.Write(Encoding.ASCII.GetBytes($"{prop}\n"));
             }

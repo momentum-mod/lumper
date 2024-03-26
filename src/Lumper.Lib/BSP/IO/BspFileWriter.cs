@@ -66,8 +66,8 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
                 Console.WriteLine($"Let's not compress {lump.GetType().Name} .. it's a silly place");
                 lump.Compress = false;
             }
-            LumpHeader newHeader = Write(lump);
-            LumpHeaders[lumpType] = new BspLumpHeader(newHeader, lump.Version);
+            LumpHeaderInfo newHeaderInfo = Write(lump);
+            LumpHeaders[lumpType] = new BspLumpHeader(newHeaderInfo, lump.Version);
 
             Console.WriteLine($"Lump {lumpType}({(int)lumpType})\n\t{newHeader.Offset}\n\t{newHeader.Length}");
         }

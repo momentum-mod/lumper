@@ -1,4 +1,5 @@
 namespace Lumper.Lib.BSP.Struct;
+
 using System.Drawing;
 using System.Numerics;
 
@@ -41,5 +42,5 @@ public class StaticProp
     // since v10
     public uint FlagsEx { get; set; }           // Further bitflags.
     // since v11
-    public Vector3 UniformScale { get; set; }      // Prop scale
+    public Vector3 UniformScale { get; set; } // Prop scale
 }

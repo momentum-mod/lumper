@@ -14,11 +14,10 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
     private readonly BspFile _bsp = file;
 
     [JsonProperty]
-    public IReadOnlyDictionary<BspLumpType, LumpHeader> Headers => Lumps.ToDictionary(
-        x => x.Item1 is Lump<BspLumpType> lump
-            ? lump.Type
-            : BspLumpType.Unknown,
-        x => x.Item2);
+    public IReadOnlyDictionary<BspLumpType, LumpHeaderInfo> Headers
+        => Lumps.ToDictionary(
+            x => x.Item1 is Lump<BspLumpType> lump ? lump.Type : BspLumpType.Unknown,
+            x => x.Item2);
 
     public void Load()
     {
@@ -47,33 +46,33 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
         {
             var type = (BspLumpType)i;
 
-            Lump<BspLumpType> lump = type switch
-            {
+            Lump<BspLumpType> lump = type switch {
                 BspLumpType.Entities => new EntityLump(_bsp),
                 BspLumpType.Texinfo => new TexInfoLump(_bsp),
                 BspLumpType.Texdata => new TexDataLump(_bsp),
                 BspLumpType.TexdataStringTable => new TexDataStringTableLump(_bsp),
                 BspLumpType.TexdataStringData => new TexDataStringDataLump(_bsp),
-                BspLumpType.Pakfile => new PakFileLump(_bsp),
+                BspLumpType.Pakfile => new PakfileLump(_bsp),
                 BspLumpType.GameLump => new GameLump(_bsp),
                 _ => new UnmanagedLump<BspLumpType>(_bsp)
             };
-            LumpHeader lumpHeader = new();
+
+            LumpHeaderInfo lumpHeaderInfo = new();
 
             lump.Type = type;
-            lumpHeader.Offset = ReadInt32();
+            lumpHeaderInfo.Offset = ReadInt32();
             var length = ReadInt32();
             lump.Version = ReadInt32();
             var fourCc = ReadInt32();
             if (fourCc == 0)
             {
-                lumpHeader.CompressedLength = -1;
-                lumpHeader.UncompressedLength = length;
+                lumpHeaderInfo.CompressedLength = -1;
+                lumpHeaderInfo.UncompressedLength = length;
             }
             else
             {
-                lumpHeader.CompressedLength = length;
-                lumpHeader.UncompressedLength = fourCc;
+                lumpHeaderInfo.CompressedLength = length;
+                lumpHeaderInfo.UncompressedLength = fourCc;
             }
 
             Console.WriteLine($"Lump {type}({(int)type})"
@@ -83,7 +82,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                               + $"\t\tFourCc: {fourCc}");
 
             _bsp.Lumps.Add(type, lump);
-            Lumps.Add(new Tuple<Lump, LumpHeader>(lump, lumpHeader));
+            Lumps.Add(new Tuple<Lump, LumpHeaderInfo>(lump, lumpHeaderInfo));
         }
 
         _bsp.Revision = ReadInt32();
@@ -100,8 +99,8 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
     private void UpdateGameLumpLength()
     {
         Lump? gameLump = null;
-        LumpHeader? gameLumpHeader = null;
-        foreach ((Lump? lump, LumpHeader? header) in Lumps.OrderBy(x => x.Item2.Offset))
+        LumpHeaderInfo? gameLumpHeader = null;
+        foreach ((Lump? lump, LumpHeaderInfo? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
             if (lump is GameLump)
             {
@@ -145,10 +144,10 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
         var result = false;
 
         Lump<BspLumpType>? prevLump = null;
-        LumpHeader? prevHeader = null;
+        LumpHeaderInfo? prevHeader = null;
 
         var first = true;
-        foreach ((Lump? tmpLump, LumpHeader? header) in Lumps.OrderBy(x => x.Item2.Offset))
+        foreach ((Lump? tmpLump, LumpHeaderInfo? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
             var lump = (Lump<BspLumpType>)tmpLump;
             if (first)

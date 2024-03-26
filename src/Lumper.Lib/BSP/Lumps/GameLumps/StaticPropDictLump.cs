@@ -7,7 +7,8 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
 {
     public override int StructureSize => 128;
 
-    protected override void ReadItem(BinaryReader reader) => Data.Add(new string(reader.ReadChars(StructureSize)));
+    protected override void ReadItem(BinaryReader reader)
+        => Data.Add(new string(reader.ReadChars(StructureSize)));
 
     protected override void WriteItem(BinaryWriter writer, int index)
     {
@@ -19,6 +20,7 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
             Console.WriteLine($"WARNING: {GetType().Name} string to long");
             count = StructureSize;
         }
+
         Array.Copy(value, b, count);
         writer.Write(b);
     }

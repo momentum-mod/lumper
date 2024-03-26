@@ -12,8 +12,8 @@ using SharpCompress.Compressors.LZMA;
 [JsonObject(MemberSerialization.OptIn)]
 public abstract class LumpReader(Stream input) : BinaryReader(input)
 {
-    protected List<Tuple<Lump, LumpHeader>> Lumps = [];
     // Lump header information is only needed in the reader
+    protected List<Tuple<Lump, LumpHeaderInfo>> Lumps { get; set; } = [];
 
     protected abstract void ReadHeader();
 
@@ -52,12 +52,12 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
         return decompressedStream;
     }
 
-    protected void Read(Lump lump, LumpHeader lumpHeader)
+    protected void Read(Lump lump, LumpHeaderInfo lhi)
     {
-        BinaryReader lumpReader;
+        BinaryReader reader;
         long lumpStreamLength;
 
-        BaseStream.Seek(lumpHeader.Offset, SeekOrigin.Begin);
+        BaseStream.Seek(lhi.Offset, SeekOrigin.Begin);
 
         if (lump is IUnmanagedLump unmanagedLump)
         {
@@ -69,19 +69,18 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
             lumpReader = this;
             lumpStreamLength = lumpHeader.Length;
         }
-        else if (lumpHeader.Compressed)
+        else if (lhi.Compressed)
         {
             MemoryStream decompressedStream = Decompress();
-            lumpReader = new BinaryReader(decompressedStream);
+            reader = new BinaryReader(decompressedStream);
             lumpStreamLength = decompressedStream.Length;
         }
         else
         {
-            lumpReader = this;
-            lumpStreamLength = lumpHeader.UncompressedLength;
+            reader = this;
+            lumpStreamLength = lhi.UncompressedLength;
         }
 
-        var startPos = lumpReader.BaseStream.Position;
         lump.Read(lumpReader, lumpStreamLength);
         lumpReader.BaseStream.Seek(startPos, SeekOrigin.Begin);
     }

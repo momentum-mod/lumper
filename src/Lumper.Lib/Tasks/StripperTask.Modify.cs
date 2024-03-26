@@ -27,11 +27,11 @@ public partial class StripperTask
                 line = line.Trim();
                 List<Prop> props = null;
 
-                var blockOpen = false;
+                var blockOpenInner = false;
                 if (line == "{")
                 {
                     line = prevBlock;
-                    blockOpen = true;
+                    blockOpenInner = true;
                 }
                 else if (IsComment(line))
                 {
@@ -48,7 +48,7 @@ public partial class StripperTask
                 };
                 prevBlock = line;
 
-                ParseBlock(reader, blockOpen, ref lNr, (line, lNr) => props.Add(ParseProp(line, lNr)));
+                ParseBlock(reader, blockOpenInner, ref lNr, (lineParam, lNrParam) => props.Add(ParseProp(lineParam, lNrParam)));
             });
         }
 

@@ -30,7 +30,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
 
         mem.Seek(0, SeekOrigin.Begin);
 
-        var w = new BinaryWriter(mem);
+        var writer = new BinaryWriter(mem);
         if (mem.Length > uncompressedStream.Length)
         {
             Console.WriteLine("Compressed lump larger than uncompressed, skipping");
@@ -44,11 +44,13 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
         {
             mem.Seek(0, SeekOrigin.Begin);
             compressedLength = mem.Length;
-            w.Write(LzmaId);
-            w.Write((int)uncompressedStream.Length);
-            w.Write((int)mem.Length - headerSize);
-            w.Write(lzmaStream.Properties);
-            if (w.BaseStream.Position != headerSize)
+
+            writer.Write(LzmaId);
+            writer.Write((int)uncompressedStream.Length);
+            writer.Write((int)mem.Length - headerSize);
+            writer.Write(lzmaStream.Properties);
+
+            if (writer.BaseStream.Position != headerSize)
                 throw new InvalidDataException("Failed to compress stream: bad LZMA header");
 
             mem.Seek(0, SeekOrigin.Begin);
