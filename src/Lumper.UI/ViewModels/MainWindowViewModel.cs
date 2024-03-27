@@ -5,7 +5,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using ReactiveUI;
 
 /// <summary>
-///     ViewModel for MainWindow
+///     ViewModel for MainWindow. Handles File, View menus etc., and page loading
 /// </summary>
 public partial class MainWindowViewModel : ViewModelBase
 {
@@ -24,6 +24,14 @@ public partial class MainWindowViewModel : ViewModelBase
     {
     }
 
+    private void OnInitialized()
     {
+        if (Desktop.Args is { Length: 1 })
+        {
+            // This is an async method but we want it on this thread, just use the scheduler.
+            Observable.Start(
+                () => ActiveBspService.Instance.Load(Desktop.Args[0]),
+                RxApp.MainThreadScheduler);
+        }
     }
 }
