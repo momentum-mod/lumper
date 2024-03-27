@@ -4,24 +4,27 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
-using DynamicData;
 using DynamicData.Binding;
 using Lumper.Lib.BSP;
 using Lumper.Lib.Tasks;
 using Newtonsoft.Json;
 using NLog;
 using ReactiveUI;
+using Services;
 
 /// <summary>
 ///     ViewModel for Tasks
 /// </summary>
 public partial class TasksViewModel : ViewModelBase
 {
-    public TasksViewModel(BspFile bsp)
+    public TasksViewModel()
     {
-        BspFile = bsp;
+        // TODO: as w bird's todo below, probably don't need this
+        if (!ActiveBspService.Instance.HasLoadedBsp)
+            throw new InvalidOperationException();
+
+        BspFile = ActiveBspService.Instance.BspFile!;
         TaskTypes =
         [
             new TaskMenuItem(this, typeof(ChangeTextureTask)),

@@ -34,7 +34,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
         .ObserveOn(RxApp.MainThreadScheduler)
         .Subscribe(x =>
         {
-            //todo 'clear' doesn't work with this 
+            //todo 'clear' doesn't work with this
             //its a x.Item.Rang and x.Item.Current is null
             IEnumerable<Change<PakFileEntryBaseViewModel>> list = x.Where(x => x.Item.Current is PakFileEntryLeafViewModel);
 
@@ -88,7 +88,7 @@ public class PakFileEntryBranchViewModel : PakFileEntryBaseViewModel
             x => x is PakFileEntryLeafViewModel leaf
                  && leaf.Entry == entry))
         {
-            if (name.ToLower(System.Globalization.CultureInfo.CurrentCulture).EndsWith(".vtf"))
+            if (name.ToLower().EndsWith(".vtf"))
                 _entries.Add(new PakFileEntryVtfViewModel(this, entry, name));
             else
                 _entries.Add(new PakFileEntryTextViewModel(this, entry, name));

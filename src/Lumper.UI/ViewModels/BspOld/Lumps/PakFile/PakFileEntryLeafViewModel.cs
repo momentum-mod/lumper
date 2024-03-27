@@ -10,7 +10,7 @@ public class PakFileEntryLeafViewModel : PakFileEntryBaseViewModel
 {
     protected readonly PakFileEntry _entry;
     public PakFileEntry Entry => _entry;
-    public string Extension => new FileInfo(Name).Extension.ToLower(System.Globalization.CultureInfo.CurrentCulture);
+    public string Extension => new FileInfo(Name).Extension.ToLower();
 
     public PakFileEntryLeafViewModel(PakFileEntryBranchViewModel parent,
         PakFileEntry entry, string name)

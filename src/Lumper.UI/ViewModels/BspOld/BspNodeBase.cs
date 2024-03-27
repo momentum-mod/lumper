@@ -177,12 +177,11 @@ public abstract class BspNodeBase : ViewModelBase
         TRet newValue,
         [CallerMemberName] string? propertyName = null)
     {
-        TRet? result =
-            this.RaiseAndSetIfChanged(ref backingField, newValue, propertyName);
+        TRet result = this.RaiseAndSetIfChanged(ref backingField, newValue, propertyName);
         this.RaisePropertyChanged(nameof(IsModified));
         this.RaisePropertyChanged(nameof(IsModifiedRecursive));
         if (ViewNode is not null && ViewNode != this)
-            ViewNode.RaisePropertyChanged(nameof(IsModified));
+            ViewNode.RaisePropertyChanged(nameof(IsModified)); // TODO: shouldnt it be ViewNode.IsModified?
 
         return result;
     }

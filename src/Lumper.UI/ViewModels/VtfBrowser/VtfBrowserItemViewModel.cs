@@ -1,53 +1,28 @@
 namespace Lumper.UI.ViewModels.VtfBrowser;
 using System.Linq;
-using Lumper.UI.Models;
+using Models.VTF;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-public class VtfBrowserItemViewModel : ViewModelBase
+public class VtfBrowserItemViewModel(string key, VtfFile vtfFile) : ViewModelBase
 {
-    public VtfBrowserItemViewModel(string key, VtfFileData vtfFileData)
-    {
-        Path = key;
-        Name = key.Split('/').Last();
-        _vtfFileData = vtfFileData;
-    }
+    [Reactive]
+    public bool IsVisible { get; set; } = true;
 
-    private readonly VtfFileData _vtfFileData;
+    [Reactive]
+    public string Name { get; set; } = key.Split('/').Last();
 
-    private bool _isVisible = true;
-
-    public bool IsVisible
-    {
-        get => _isVisible;
-        set => this.RaiseAndSetIfChanged(ref _isVisible, value);
-    }
-
-
-    private string _name = "";
-
-    public string Name
-    {
-        get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
-    }
-
-    private string _path = "";
-
-    public string Path
-    {
-        get => _path;
-        set => this.RaiseAndSetIfChanged(ref _path, value);
-    }
+    [Reactive]
+    public string Path { get; set; } = key;
 
     private Image<Rgba32>? _image;
-
     public Image<Rgba32>? Image
     {
         get
         {
-            _image ??= _vtfFileData.GetImage(0, 0, 0, 0);
+            _image ??= vtfFile.GetImage(0, 0, 0, 0);
             return _image;
         }
         set => this.RaiseAndSetIfChanged(ref _image, value);

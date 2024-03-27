@@ -2,7 +2,7 @@ namespace Lumper.UI.ViewModels.Bsp.Lumps.PakFile;
 using System;
 using System.IO;
 using Lumper.Lib.BSP.Struct;
-using Lumper.UI.Models;
+using Models.VTF;
 using ReactiveUI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -89,11 +89,11 @@ public class PakFileEntryVtfViewModel(
     public uint FaceMax => _vtfData?.FaceCount - 1 ?? 0;
     public uint MipmapMax => _vtfData?.MipmapCount - 1 ?? 0;
 
-    private VtfFileData? _vtfData;
+    private VtfFile? _vtfData;
 
     public override void Open()
     {
-        _vtfData = new VtfFileData(_entry);
+        _vtfData = new VtfFile(_entry);
 
         this.RaisePropertyChanged(nameof(FrameMax));
         this.RaisePropertyChanged(nameof(FaceMax));

@@ -36,7 +36,7 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
         DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
         var buffer = new byte[DataStreamLength];
         DataStream.Read(buffer, 0, buffer.Length);
-        HashMD5 = MD5.HashData(buffer);
+        HashMd5 = MD5.HashData(buffer);
     }
 
     public override void Write(Stream stream)

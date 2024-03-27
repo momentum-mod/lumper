@@ -1,6 +1,8 @@
 namespace Lumper.Lib.BSP.Lumps.GameLumps;
+using System;
 using System.Drawing;
 using System.IO;
+using System.Numerics;
 using Lumper.Lib.BSP.Struct;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -161,8 +163,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
 
         // since v11
         if (ActualVersion >= StaticPropVersion.V11)
-            prop.UniformScale = System.BitConverter.ToSingle(reader.ReadBytes(4));
-
+            prop.UniformScale = ReadSingle();
         Data.Add(prop);
 
         if (reader.BaseStream.Position - startPos != StructureSize)

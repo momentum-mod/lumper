@@ -1,29 +1,32 @@
 namespace Lumper.UI.ViewModels.VtfBrowser;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Lumper.Lib.BSP.Lumps.BspLumps;
-using Lumper.UI.Models;
-using Lumper.UI.Models.Matchers;
+using Lib.BSP.Lumps.BspLumps;
+using Lib.BSP.Struct;
+using Models.Matchers;
+using Models.VTF;
 using ReactiveUI;
+using Services;
 
 public partial class VtfBrowserViewModel : ViewModelBase
 {
-    public VtfBrowserViewModel(PakFileLump pakFileLump)
+    public VtfBrowserViewModel()
     {
-        System.Collections.Generic.IEnumerable<Lib.BSP.Struct.PakFileEntry> entries = pakFileLump.Entries.Where(
-            x => x.Key.ToLower(System.Globalization.CultureInfo.CurrentCulture).EndsWith(".vtf"));
-        foreach (Lib.BSP.Struct.PakFileEntry? entry in entries)
+        if (!ActiveBspService.Instance.HasLoadedBsp)
+            throw new InvalidOperationException();
+
+        foreach (PakFileEntry? entry in ActiveBspService.Instance.BspFile!.GetLump<PakFileLump>().Entries
+            .Where(x => x.Key.ToLower().EndsWith(".vtf")))
         {
-            TextureBrowserItems.Add(new VtfBrowserItemViewModel(
-                entry.Key, new VtfFileData(entry)));
+            TextureBrowserItems.Add(new VtfBrowserItemViewModel(entry.Key, new VtfFile(entry)));
         }
 
         UpdateItems();
     }
 
     private double _dimensions = 128;
-
     public double Dimensions
     {
         get => _dimensions;
@@ -35,10 +38,9 @@ public partial class VtfBrowserViewModel : ViewModelBase
     }
 
     // 8 is how much the text will be offset from the sides, so 4px left and 4px right
-    public uint MaxNameWidth => (uint)_dimensions - 8;
+    public uint MaxNameWidth => (uint)Dimensions - 8;
 
-    private bool _showCubemaps = true;
-
+    private bool _showCubemaps = false;
     public bool ShowCubemaps
     {
         get => _showCubemaps;
@@ -50,7 +52,6 @@ public partial class VtfBrowserViewModel : ViewModelBase
     }
 
     private string _textureSearch = "";
-
     public string TextureSearch
     {
         get => _textureSearch;
@@ -62,22 +63,21 @@ public partial class VtfBrowserViewModel : ViewModelBase
     }
 
     private string _texturesCount = "";
-
     public string TexturesCount
     {
         get => _texturesCount;
         set => this.RaiseAndSetIfChanged(ref _texturesCount, value);
     }
 
-    // matches cubemap names which are formatted as cX_cY_cZ.vtf or cubemapdefault.vtf, including .hdr.vtf versions
+    // Matches cubemap names which are formatted as cX_cY_cZ.vtf or cubemapdefault.vtf, including .hdr.vtf versions
     // X Y Z are the cubemap's origin
     // https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/utils/vbsp/cubemap.cpp
     [GeneratedRegex(@"^((c-?\d+_-?\d+_-?\d+)|cubemapdefault)(\.hdr){0,}\.vtf$")]
-    private static partial Regex _rgxCubemap();
+    private static partial Regex CubemapRegex();
 
     public ObservableCollection<VtfBrowserItemViewModel> TextureBrowserItems { get; } = [];
 
-    private void UpdateItems()
+    private async void UpdateItems()
     {
         var isGlobPattern = TextureSearch.Contains('*') || TextureSearch.Contains('?');
         GlobMatcher matcher = isGlobPattern
@@ -88,14 +88,13 @@ public partial class VtfBrowserViewModel : ViewModelBase
 
         foreach (VtfBrowserItemViewModel item in TextureBrowserItems)
         {
-            if (!_showCubemaps && _rgxCubemap().IsMatch(item.Name))
+            if (!_showCubemaps && CubemapRegex().IsMatch(item.Name))
             {
                 item.IsVisible = false;
                 continue;
             }
 
-            item.IsVisible = string.IsNullOrWhiteSpace(TextureSearch)
-                             || matcher.Match(item.Name).Result;
+            item.IsVisible = string.IsNullOrWhiteSpace(TextureSearch) || await matcher.Match(item.Name);
 
             if (item.IsVisible)
                 count++;

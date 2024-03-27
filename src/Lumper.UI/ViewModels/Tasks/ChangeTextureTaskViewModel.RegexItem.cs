@@ -36,8 +36,7 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
         protected override void Remove()
         {
             var idx = _task.ReplaceRegex.FindIndex(
-                x => x.Key.ToString() == Source
-                     && x.Value == Target);
+                x => x.Key.ToString() == Source && x.Value == Target);
             if (idx > 0)
                 _task.ReplaceRegex.RemoveAt(idx);
         }

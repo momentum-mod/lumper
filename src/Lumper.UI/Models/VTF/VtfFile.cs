@@ -1,4 +1,4 @@
-namespace Lumper.UI.Models;
+namespace Lumper.UI.Models.VTF;
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -8,9 +8,12 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using VTFLib;
 
-public class VtfFileData
+// This is a simple wrapper around VTFLib.NET (which is itself a wrapper around VTFLib).
+// It lives in Lumper.UI/Models rather than Lumper.Lib due to its extra dependencies,
+// and fact that it's really just a wrapper class for UI-specific stuff.
+public class VtfFile
 {
-    private readonly PakFileEntry _entry;
+    private readonly PakFileEntry _pakFileEntry;
     private readonly uint _imageIndex;
 
     public uint FrameCount { get; private set; }
@@ -27,12 +30,12 @@ public class VtfFileData
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    static VtfFileData() => VTFAPI.Initialize();
-    public VtfFileData(PakFileEntry entry)
+    static VtfFile() => VTFAPI.Initialize();
+    public VtfFile(PakFileEntry pakFileEntry)
     {
-        _entry = entry;
+        _pakFileEntry = pakFileEntry;
         using var mem = new MemoryStream();
-        _entry.DataStream.CopyTo(mem);
+        _pakFileEntry.DataStream.CopyTo(mem);
         var vtfBuffer = mem.ToArray();
 
         VTFFile.CreateImage(ref _imageIndex);
@@ -48,9 +51,7 @@ public class VtfFileData
         VTFFile.BindImage(_imageIndex);
 
         if (VTFFile.ImageGetHasImage() == 0)
-        {
             return null;
-        }
 
         var imageData = VTFFile.ImageGetData(frame, face, slice, mipmapLevel);
         var imageSize = (int)VTFFile.ImageComputeImageSize(ImageWidth, ImageHeight, 1, 1, ImageFormat);
@@ -124,7 +125,7 @@ public class VtfFileData
         var size = VTFFile.ImageGetSize();
 
         var vtfBuffer = new byte[size];
-        _entry.DataStream = new MemoryStream(vtfBuffer);
+        _pakFileEntry.DataStream = new MemoryStream(vtfBuffer);
 
         uint uiSize = 0;
         if (!VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize))
@@ -133,7 +134,7 @@ public class VtfFileData
             _logger.Error($"Error saving VTF ${_pakFileEntry.Key}: ${err}");
         }
 
-        _entry.DataStream.Seek(0, SeekOrigin.Begin);
+        _pakFileEntry.DataStream.Seek(0, SeekOrigin.Begin);
         Update();
     }
 

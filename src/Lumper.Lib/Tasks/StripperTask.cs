@@ -9,33 +9,32 @@ using Newtonsoft.Json;
 // Change entities using stripper config
 public partial class StripperTask(string? configPath) : LumperTask
 {
-    public override string Type { get; } = "StripperTask";
+    public override string Type => "StripperTask";
 
     [JsonIgnore]
-    protected List<Block> blocks = [];
+    protected List<Block> Blocks { get; set; } = [];
 
     public string? ConfigPath { get; set; } = configPath;
 
-    public void Load(string configPath)
+    private void Load(string configPath)
     {
         ConfigPath = configPath;
         Parse(File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.Read));
     }
 
-    ///expects trimmed string
-    protected static bool IsComment(string line) => line.StartsWith(";")
-                                                    || line.StartsWith("//")
-                                                    || line.StartsWith("#")
-                                                    || line == "";
+    // Expects trimmed string
+    private static bool IsComment(string line) =>
+        line.StartsWith(';') ||
+        line.StartsWith("//", StringComparison.Ordinal) ||
+        line.StartsWith('#') ||
+        line == "";
 
-    public void Parse(Stream stream)
+    private void Parse(Stream stream)
     {
         var reader = new StreamReader(stream);
-
-        string line;
         var lineNr = 0;
         var prevBlock = "";
-        while ((line = reader.ReadLine()) != null)
+        while (reader.ReadLine() is { } line)
         {
             lineNr++;
 
@@ -59,12 +58,12 @@ public partial class StripperTask(string? configPath) : LumperTask
                 "filter:" or "remove:" => new Filter(),
                 "add:" => new Add(),
                 "modify:" => new Modify(),
-                _ => throw new NotImplementedException($"Unknown title '{line}' in line {lineNr}"),
+                _ => throw new NotImplementedException($"Unknown title '{line}' in line {lineNr}")
             };
             prevBlock = line;
 
             block.Parse(reader, blockOpen, ref lineNr);
-            blocks.Add(block);
+            Blocks.Add(block);
         }
     }
 
@@ -74,7 +73,7 @@ public partial class StripperTask(string? configPath) : LumperTask
             return TaskResult.Failed;
 
         Load(ConfigPath);
-        Progress.Max = blocks.Count;
+        Progress.Max = Blocks.Count;
         EntityLump entityLump = bsp.GetLump<EntityLump>();
 
         foreach (Block block in Blocks)

@@ -1,5 +1,4 @@
 namespace Lumper.Lib.Tasks;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,7 +24,6 @@ public partial class StripperTask
             ParseBlock(reader, blockOpen, ref lineNr, (line, lNr) =>
             {
                 line = line.Trim();
-                List<Prop> props = null;
 
                 var blockOpenInner = false;
                 if (line == "{")
@@ -38,14 +36,15 @@ public partial class StripperTask
                     return;
                 }
 
-                props = line switch
+                List<Prop> props = line switch
                 {
                     "match:" => Match,
                     "replace:" => Replace,
                     "delete:" => Delete,
                     "insert:" => Insert,
-                    _ => throw new NotImplementedException($"Unknown title {line} in line {lNr}"),
+                    _ => throw new InvalidDataException($"Unknown title {line} in line {lNr}"),
                 };
+
                 prevBlock = line;
 
                 ParseBlock(reader, blockOpenInner, ref lNr, (lineParam, lNrParam) => props.Add(ParseProp(lineParam, lNrParam)));
@@ -54,36 +53,33 @@ public partial class StripperTask
 
         public override void Apply(EntityLump lump)
         {
-            foreach (Entity entity in lump.Data)
+            foreach (Entity entity in lump.Data.Where(entity => Match.All(
+                filterProperty => entity.Properties.Any(
+                    entityProperty => MatchKeyValue(filterProperty, entityProperty)))))
             {
-                if (Match.All(
-                    f => entity.Properties.Any(
-                        e => MatchKeyValue(f, e))))
+                foreach (Prop replaceProp in Replace)
                 {
-                    foreach (Prop prop in Replace)
+                    foreach (Entity.EntityProperty prop in
+                        entity.Properties.Where(prop => prop.Key == replaceProp.Key))
                     {
-                        IEnumerable<Entity.Property> replaceEntProp = entity.Properties.Where(
-                            x => x.Key == prop.Key);
-                        foreach (Entity.Property? rep in replaceEntProp)
-                        {
-                            rep.ValueString = prop.Value;
-                        }
+                        prop.ValueString = replaceProp.Value;
                     }
-                    foreach (Prop prop in Delete)
+                }
+
+                foreach (Prop deleteProp in Delete)
+                {
+                    foreach (Entity.EntityProperty toDelete in
+                        entity.Properties.Where(prop => MatchKeyValue(deleteProp, prop)))
                     {
-                        var deleteEntProp = new List<Entity.Property>();
-                        foreach (Entity.Property del in entity.Properties)
-                        {
-                            if (MatchKeyValue(prop, del))
-                                deleteEntProp.Add(del);
-                        }
-                        foreach (Entity.Property del in deleteEntProp)
-                            entity.Properties.Remove(del);
+                        entity.Properties.Remove(toDelete);
                     }
-                    foreach (Prop prop in Insert)
-                    {
-                        entity.Properties.Add(Entity.Property.CreateProperty(prop));
-                    }
+                }
+
+                foreach (Prop insertProp in Insert)
+                {
+                    var newProp = Entity.EntityProperty.CreateProperty(insertProp);
+                    if (newProp is not null)
+                        entity.Properties.Add(newProp);
                 }
             }
         }

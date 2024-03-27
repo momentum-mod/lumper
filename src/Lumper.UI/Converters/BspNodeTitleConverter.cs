@@ -9,12 +9,9 @@ using Lumper.UI.ViewModels.Bsp;
 /// <summary>
 ///     Generates full name for bsp node.
 /// </summary>
-public class BmpNodeTitleConverter : IValueConverter
+public class BspNodeTitleConverter : IValueConverter
 {
-    public static BmpNodeTitleConverter Instance
-    {
-        get;
-    } = new();
+    public static BspNodeTitleConverter Instance { get; } = new();
 
     public object Convert(object? value, Type targetType, object? parameter,
         CultureInfo culture)

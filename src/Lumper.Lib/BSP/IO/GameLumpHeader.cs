@@ -1,4 +1,5 @@
 namespace Lumper.Lib.BSP.IO;
+
 public class GameLumpHeader
 {
     public GameLumpHeader()
@@ -21,6 +22,7 @@ public class GameLumpHeader
 
         Version = version;
     }
+
     public const int StructureSize = 16;
     public int Id { get; set; }
     public ushort Flags { get; set; }

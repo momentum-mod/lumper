@@ -10,14 +10,10 @@ public partial class VtfBrowserView : UserControl
 
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
-    private void Item_DoubleTapped(object? sender, TappedEventArgs e)
+    private void Item_DoubleTapped(object? sender, TappedEventArgs _e)
     {
         var selectedVtf = (VtfBrowserItemViewModel)((Border)sender!).DataContext!;
-
-        var window = new VtfImageWindow
-        {
-            DataContext = selectedVtf
-        };
+        var window = new VtfImageWindow { DataContext = selectedVtf };
         window.Show();
     }
 }

@@ -52,20 +52,20 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <Border Grid.Row="1" BorderBrush="Silver" Margin="5 5 5 0" BorderThickness="0 1 0 0 ">
-            <Grid Grid.Row="1" Height="64" ColumnDefinitions="128, 120, 6, *, *">
-                <TextBox HorizontalAlignment="Center" Height="32" Width="128" Margin="5"
+        <Border Grid.Row="1" BorderBrush="Silver" Padding="4" BorderThickness="1">
+            <Grid ColumnDefinitions="164, Auto, Auto, *, *">
+                <TextBox HorizontalAlignment="Center" Height="32" Width="164" Margin="8"
                          Text="{Binding TextureSearch}" Watermark="Search"/>
-                <CheckBox Grid.Column="1" Margin="5" VerticalAlignment="Center"
-                          HorizontalAlignment="Stretch" IsChecked="{Binding ShowCubemaps, Mode=TwoWay}">Cubemaps</CheckBox>
-
-                <Border Grid.Column="2" Height="32" Width="1" Margin="0 0 20 0 " BorderBrush="Silver" BorderThickness="0 0  5 0" />
-
+                <CheckBox Grid.Column="1" Margin="4" VerticalAlignment="Center"
+                          HorizontalAlignment="Stretch" IsChecked="{Binding ShowCubemaps, Mode=TwoWay}">
+                    Cubemaps
+                </CheckBox>
+                <Border Grid.Column="2" Height="32" Width="1" Margin="8 0 12 0" BorderBrush="Silver"
+                        BorderThickness="1 0" />
                 <TextBlock Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Left"
                            Text="{Binding TexturesCount}" />
-                <Slider Grid.Column="4" Width="200" Margin="0 5 20 5" HorizontalAlignment="Right"
-                        Minimum="128" Maximum="512"
-                        Value="{Binding Dimensions, Mode=TwoWay}" />
+                <Slider Grid.Column="4" Width="200" Margin="0 0 16 0" HorizontalAlignment="Right"
+                        Minimum="128" Maximum="512" Value="{Binding Dimensions, Mode=TwoWay}" />
             </Grid>
         </Border>
     </Grid>

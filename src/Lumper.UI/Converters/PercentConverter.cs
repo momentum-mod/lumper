@@ -9,10 +9,7 @@ using Avalonia.Data.Converters;
 /// </summary>
 public class PercentConverter : IValueConverter
 {
-    public static PercentConverter Instance
-    {
-        get;
-    } = new();
+    public static PercentConverter Instance { get; } = new();
 
     public object Convert(object? value, Type targetType, object? parameter,
         CultureInfo culture)

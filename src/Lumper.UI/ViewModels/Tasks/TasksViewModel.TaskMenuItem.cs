@@ -5,7 +5,7 @@ using Lumper.Lib.Tasks;
 /// <summary>
 ///     ViewModel for Tasks
 /// </summary>
-public partial class TasksViewModel : ViewModelBase
+public partial class TasksViewModel
 {
     public class TaskMenuItem(TasksViewModel TasksVM, Type t)
     {

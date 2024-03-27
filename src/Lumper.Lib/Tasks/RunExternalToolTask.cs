@@ -28,7 +28,7 @@ public class RunExternalToolTask(
 
     private sealed class Output : IDisposable
     {
-        public MemoryStream Mem;
+        public MemoryStream Mem { get; set; }
         private readonly BinaryWriter _writer;
         private readonly Stream _stream;
         private readonly byte[] _buffer;
@@ -91,33 +91,26 @@ public class RunExternalToolTask(
             File.Delete(OutputFile);
         }
 
-
-        var startInfo = new ProcessStartInfo()
-        {
-            FileName = Path,
-            Arguments = Args,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
-        Output stdOut;
-        Output stdErr;
+        Output stdOut, stdErr;
         TaskResult ret;
         using (var process = new Process())
         {
-            process.StartInfo = startInfo;
+            process.StartInfo = new ProcessStartInfo
+            {
+                FileName = Path,
+                Arguments = Args,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
             process.Start();
 
             stdOut = new Output(process.StandardOutput.BaseStream);
             stdErr = new Output(process.StandardError.BaseStream);
 
-            Task taskStdOut = stdOut.Read();
-            Task taskStdErr = stdErr.Read();
-
             while (!process.HasExited)
             {
-
                 if (UseStdOut)
                 {
                     Progress.Count = stdOut.Mem.Length;
@@ -131,7 +124,7 @@ public class RunExternalToolTask(
                 Thread.Sleep(30);
             }
 
-            Task.WaitAll(taskStdOut, taskStdErr);
+            Task.WaitAll(stdOut.Read(), stdErr.Read());
             ret = process.ExitCode == 0
                 ? TaskResult.Success
                 : TaskResult.Failed;
@@ -151,14 +144,10 @@ public class RunExternalToolTask(
         }
         else
         {
-            MemoryStream stream;
-            if (stdErr.Mem.Length > 0)
-                stream = stdErr.Mem;
-            else
-                stream = stdOut.Mem;
-            var r = new StreamReader(stream);
+            var r = new StreamReader(stdErr.Mem.Length > 0 ? stdErr.Mem : stdOut.Mem);
             _logger.Error($"{System.IO.Path.GetFileName(Path)} ERROR: {r.ReadToEnd()}");
         }
+
         return ret;
     }
 }

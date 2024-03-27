@@ -10,10 +10,7 @@ using Lumper.UI.ViewModels.Tasks;
 /// </summary>
 public class TaskStatusConverter : IValueConverter
 {
-    public static TaskStatusConverter Instance
-    {
-        get;
-    } = new();
+    public static TaskStatusConverter Instance { get; } = new();
 
     public object Convert(object? value, Type targetType, object? parameter,
         CultureInfo culture)
@@ -30,7 +27,7 @@ public class TaskStatusConverter : IValueConverter
             TaskStatus.Running => "➠",
             TaskStatus.Success => "✓",
             TaskStatus.Failed => "⚠",
-            _ => " ",
+            _ => " "
         };
     }
 

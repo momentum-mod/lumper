@@ -13,8 +13,8 @@ using SharpCompress.Compressors.LZMA;
 [JsonObject(MemberSerialization.OptIn)]
 public abstract class LumpReader(Stream input) : BinaryReader(input)
 {
-    protected List<Tuple<Lump, LumpHeader>> Lumps = [];
     // Lump header information is only needed in the reader
+    protected List<Tuple<Lump, LumpHeader>> Lumps { get; set; } = [];
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
     protected abstract void ReadHeader();

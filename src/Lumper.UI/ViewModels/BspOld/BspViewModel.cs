@@ -3,6 +3,7 @@ using System.IO;
 using Lumper.Lib.BSP;
 using Lumper.UI.ViewModels.Bsp.Lumps;
 using ReactiveUI;
+using Services;
 
 /// <summary>
 ///     View model for <see cref="Lib.BSP.BspFile" />
@@ -12,9 +13,9 @@ public partial class BspViewModel : ViewModelBase, System.IDisposable
     private string? _filePath;
     private string? _fileName;
 
-    public BspViewModel(BspFile bspFile)
+    public BspViewModel()
     {
-        BspFile = bspFile;
+        BspFile = ActiveBspService.Instance.BspFile!;
 
         FilePath = BspFile.FilePath;
         FileName = Path.GetFileNameWithoutExtension(BspFile.FilePath);

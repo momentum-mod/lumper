@@ -25,10 +25,7 @@ public class BspNodeViewModel : BspNodeBase, IDisposable
         InitializeNodeChildrenObserver(_lumps);
     }
 
-    public override string NodeName
-    {
-        get;
-    }
+    public override string NodeName { get; }
 
     public void Dispose() => _lumps.Dispose();
 
@@ -43,6 +40,6 @@ public class BspNodeViewModel : BspNodeBase, IDisposable
         _lumps.Add(lumpModel);
     }
 
-    protected override ValueTask<bool> Match(Matcher matcher,
-        CancellationToken? cancellationToken) => ValueTask.FromResult(true);
+    protected override ValueTask<bool> Match(Matcher matcher, CancellationToken? cancellationToken) =>
+        ValueTask.FromResult(true);
 }

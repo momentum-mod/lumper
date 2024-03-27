@@ -16,7 +16,7 @@ public class PakFileLumpViewModel : LumpBase
         : base(parent)
     {
         _lump = pakFileLump;
-        EntryRoot = new(this, pakFileLump);
+        EntryRoot = new PakFileEntryBranchViewModel(this, pakFileLump);
 
         InitializeNodeChildrenObserver(EntryRoot._entries);
     }
@@ -75,8 +75,7 @@ public class PakFileLumpViewModel : LumpBase
         var exportDir = new DirectoryInfo(path);
         if (!exportDir.Exists)
             throw new DirectoryNotFoundException(path);
-        if (exportDir.GetFiles().Length != 0
-            || exportDir.GetDirectories().Length != 0)
+        if (exportDir.GetFiles().Length != 0 || exportDir.GetDirectories().Length != 0)
         {
             Console.WriteLine("Refusing to export to a directory containing stuff");
             //todo messagebox .. but not here because of dependencies?

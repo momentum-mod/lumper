@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 public abstract class Matcher
 {
     //todo meh
-    //IsEmpty needs to be seperate because the pattern 
+    //IsEmpty needs to be seperate because the pattern
     //could have been changed by the matcher
     protected Matcher(string pattern, bool isEmpty)
     {
@@ -25,5 +25,5 @@ public abstract class Matcher
         get;
     }
 
-    public abstract ValueTask<bool> Match(string value);
+    public abstract ValueTask<bool> Match(string? value);
 }

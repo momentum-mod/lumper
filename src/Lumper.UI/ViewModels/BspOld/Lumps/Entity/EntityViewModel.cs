@@ -53,11 +53,11 @@ public class EntityViewModel : BspNodeBase
     {
         EntityPropertyBase propertyViewModel = entityProperty switch
         {
-            Entity.Property<string> sp =>
+            Entity.EntityProperty<string> sp =>
                 new EntityPropertyStringViewModel(this, sp),
-            Entity.Property<EntityIO> sio =>
+            Entity.EntityProperty<EntityIO> sio =>
                 new EntityPropertyIOViewModel(this, sio),
-            _ => throw new ArgumentOutOfRangeException(nameof(property))
+            _ => throw new ArgumentOutOfRangeException(nameof(entityProperty))
         };
         Properties.Add(propertyViewModel);
     }

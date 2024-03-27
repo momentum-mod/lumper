@@ -30,30 +30,32 @@ public partial class StripperTask
             }
             else
             {
-                throw new NotImplementedException($"Can't parse KeyValuePair '{line}' in line {lineNr}");
+                throw new InvalidDataException($"Can't parse KeyValuePair '{line}' in line {lineNr}");
             }
         }
+
         protected static void ParseBlock(StreamReader reader, bool blockOpen, ref int lineNr, Action<string, int> fun)
         {
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            while (reader.ReadLine() is { } line)
             {
                 lineNr++;
                 line = line.Trim();
+
                 if (string.IsNullOrEmpty(line))
-                {
                     continue;
-                }
-                else if (!blockOpen && line == "{")
+
+                if (!blockOpen && line == "{")
                 {
                     blockOpen = true;
                 }
                 else if (blockOpen)
                 {
                     if (line == "}")
+                    {
                         break;
-                    else
-                        fun(line, lineNr);
+                    }
+
+                    fun(line, lineNr);
                 }
                 else
                 {
@@ -73,13 +75,15 @@ public partial class StripperTask
 
             if (filterValue.Length > 2 && filterValue.StartsWith('/') && filterValue.EndsWith('/'))
             {
-
-                //todo perl regex or warning
-                var regex = new Regex(
-                    filterProp.Value[1..(filterProp.Value.Length - 2)]);
-
-                var ret = regex.IsMatch(entityProp.ValueString);
-                return ret;
+                try
+                {
+                    var regex = new Regex(filterValue[1..^2]);
+                    return regex.IsMatch(entityProp.ValueString);
+                }
+                catch (Exception _) when (_ is ArgumentException or ArgumentNullException)
+                {
+                    Console.WriteLine($"Error: Invalid regex {filterValue}. Stripper uses Perl-style regexes, Lumper uses .NET; your regex may need adjusting.");
+                }
             }
 
             return filterProp.Value == entityProp.ValueString;

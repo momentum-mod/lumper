@@ -205,7 +205,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                 _logger.Warn($"Didn't find null at the end of texture string! ({texture.TexName})");
             }
             texture.TexName = end > 0
-                ? TexDataStringDataLump.TextureNameEncoding.GetString(
+                ? Encoding.ASCII.GetString(
                     texDataStringDataLump.Data,
                     stringTableOffset,
                     end - stringTableOffset)

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using NLog;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
-using Newtonsoft.Json;
+using Lumper.Lib.BSP.Struct;
 
 public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
 {
@@ -53,7 +53,7 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
         var lumpTypes = _bsp.Lumps.Select(x => x.Key).ToList();
         foreach (BspLumpType lumpType in lumpTypes)
         {
-            Lumps.Lump<BspLumpType> lump = _bsp.Lumps[lumpType];
+            Lump<BspLumpType> lump = _bsp.Lumps[lumpType];
             if (!lump.Empty())
             {
                 // Lump offsets (and their corresponding data lumps) are always rounded
@@ -82,18 +82,15 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
     private void ConstructTexDataLumps()
     {
         // TODO: check obeys source limits
-        List<string> texStrings = [];
+        List<TexData> texData = _bsp.GetLump<TexDataLump>().Data;
+        TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
 
-        List<Struct.TexData> texData = _bsp.GetLump<TexDataLump>().Data;
+        // Ensure stringdata lump can fit everything we're about to stuff in
+        texDataStringDataLump.Resize(texData.Sum(x => Encoding.ASCII.GetByteCount(x.TexName) + 1));
 
         List<int> stringTable = [];
         var pos = 0;
-
-        // loop through every texture name
-        TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
-        var sum = texData.Sum(x => TexDataStringDataLump.TextureNameEncoding.GetByteCount(x.TexName) + 1);
-        Array.Resize(ref texDataStringDataLump.Data, sum);
-        foreach (Struct.TexData tex in texData)
+        foreach (TexData tex in texData)
         {
             // At start of texture string, put its loc in stringtable
             stringTable.Add(pos);

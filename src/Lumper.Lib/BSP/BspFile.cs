@@ -21,19 +21,15 @@ public class BspFile
     public int Revision { get; set; }
     public int Version { get; set; }
 
-    protected MemoryStream Stream { get; private set; } = null!;
+    protected MemoryStream? Stream { get; private set; }
 
     public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = [];
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-    public BspFile()
-    { }
 
     public BspFile(string path) => Load(path);
 
     public void Load(string path)
     {
-        // TODO: loads of error handling
         Name = Path.GetFileNameWithoutExtension(path);
         var filePath = Uri.UnescapeDataString(Path.GetFullPath(path));
         using FileStream stream = File.OpenRead(filePath);
@@ -44,7 +40,7 @@ public class BspFile
     public void Load(Stream stream)
     {
         FilePath = null;
-        Stream.Dispose();
+        Stream?.Dispose();
         Stream = new MemoryStream();
         stream.CopyTo(Stream);
         var reader = new BspFileReader(this, Stream);
@@ -55,6 +51,7 @@ public class BspFile
     {
         if (path == FilePath)
             throw new IOException("Can't write BSP to the same file");
+
         using FileStream stream = File.Open(path, FileMode.Create);
         Save(stream);
     }
@@ -79,27 +76,24 @@ public class BspFile
             { typeof(GameLump), BspLumpType.GameLump }
         };
 
+        // TODO: Why do we need this? Isn't bottom bit alone fine?
+
+        // Can't use a switch here since these are runtime-dependent, this approach
+        // with typeMap is less repetitive than a tower of `if`s
         if (typeMap.ContainsKey(typeof(T)))
-        {
             return (T)Lumps[typeMap[typeof(T)]];
-        }
-        IEnumerable<KeyValuePair<BspLumpType, Lump<BspLumpType>>> tLumps = Lumps.Where(x => x.Value.GetType() == typeof(T));
-        return (T)tLumps.Select(x => x.Value).First();
+
+        return (T)Lumps.Values.First(x => x.GetType() == typeof(T));
     }
 
     public Lump<BspLumpType> GetLump(BspLumpType lumpType) => Lumps[lumpType];
 
-    public void ToJson(bool sortLumps,
-        bool sortProperties,
-        bool ignoreOffset)
+    public void ToJson(bool sortLumps, bool sortProperties, bool ignoreOffset)
     {
         var dir = Path.GetDirectoryName(FilePath) ?? ".";
         var name = Path.GetFileNameWithoutExtension(FilePath);
         var path = $"{dir}/{name}.json";
-        using var fileStream = new FileStream(
-            path,
-            FileMode.Create,
-            FileAccess.Write);
+        using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
 
         ToJson(fileStream, sortLumps, sortProperties, ignoreOffset);
         _logger.Info($"Successfully dumped JSON to {path}");
@@ -127,11 +121,6 @@ public class BspFile
         var serializer = JsonSerializer.Create(jsonSerializerSettings);
         using var sw = new StreamWriter(stream);
         using var writer = new JsonTextWriter(sw);
-        serializer.Serialize(writer,
-            new
-            {
-                Bsp = this,
-                Writer = bspWriter
-            });
+        serializer.Serialize(writer, new { Bsp = this, Writer = bspWriter });
     }
 }

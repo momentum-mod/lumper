@@ -1,6 +1,8 @@
 namespace Lumper.UI.ViewModels.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using Lumper.Lib.Tasks;
 
 /// <summary>
@@ -13,13 +15,14 @@ public partial class ChangeTextureTaskViewModel : TaskViewModel
     {
         try
         {
-            foreach (System.Collections.Generic.KeyValuePair<string, string> item in task.Replace)
+            foreach (KeyValuePair<string, string> item in task.Replace)
                 ReplaceItems.Add(new ChangeTextureReplaceItem(this, task, item));
-            foreach (System.Collections.Generic.KeyValuePair<System.Text.RegularExpressions.Regex, string> item in task.ReplaceRegex)
+            foreach (KeyValuePair<Regex, string> item in task.ReplaceRegex)
                 RegexItems.Add(new ChangeTextureRegexItem(this, task, item));
         }
         catch (Exception ex)
         {
+            // TODO: What
             Console.WriteLine(ex.Message);
         }
     }

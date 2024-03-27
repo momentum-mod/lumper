@@ -16,32 +16,31 @@ public class Entity
         public static EntityProperty? CreateProperty(KeyValuePair<string, string> kv) => CreateProperty(kv.Key, kv.Value);
         public static EntityProperty? CreateProperty(string key, string value)
         {
-            if (EntityIO.IsIO(value))
+            if (!EntityIO.IsIO(value))
+                return new EntityProperty<string>(key, value);
+
+            var props = value.Split(',');
+            try
             {
-                var props = value.Split(',');
+                var delay = float.Parse(props[3]);
+                var timesToFire = int.Parse(props[4]);
 
-                try
-                {
-                    var delay = float.Parse(props[3]);
-                    var timestofire = int.Parse(props[4]);
-
-                    return new EntityProperty<EntityIO>(key,
-                        new EntityIO
-                        {
-                            TargetEntityName = props[0],
-                            Input = props[1],
-                            Parameter = props[2],
-                            Delay = delay,
-                            TimesToFire = timestofire
-                        }
-                        );
-                }
-                catch (Exception e) when (e is IndexOutOfRangeException or FormatException)
-                {
-                    Logger.Error($"Failed to pass entity IO value '{key}' '{value}'!");
-                }
+                return new EntityProperty<EntityIO>(key,
+                    new EntityIO
+                    {
+                        TargetEntityName = props[0],
+                        Input = props[1],
+                        Parameter = props[2],
+                        Delay = delay,
+                        TimesToFire = timesToFire
+                    }
+                    );
             }
-            return new EntityProperty<string>(key, value);
+            catch (Exception e) when (e is IndexOutOfRangeException or FormatException)
+            {
+                Logger.Error($"Failed to parse entity IO value '{key}' '{value}'!");
+                return null;
+            }
         }
     }
 

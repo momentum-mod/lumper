@@ -21,10 +21,7 @@ using SixLabors.ImageSharp.Formats.Bmp;
 /// </summary>
 public class BitmapAssetValueConverter : IValueConverter
 {
-    public static BitmapAssetValueConverter Instance
-    {
-        get;
-    } = new();
+    public static BitmapAssetValueConverter Instance { get; } = new();
 
     public object Convert(object? value, Type targetType, object? parameter,
         CultureInfo culture)
@@ -40,7 +37,7 @@ public class BitmapAssetValueConverter : IValueConverter
                 Uri uri;
 
                 // Allow for assembly overrides
-                if (rawUri.StartsWith("avares://", StringComparison.Ordinal))
+                if (rawUri.StartsWith("avares://"))
                 {
                     uri = new Uri(rawUri);
                 }
@@ -67,7 +64,7 @@ public class BitmapAssetValueConverter : IValueConverter
                 {
                     SupportTransparency = true,
                     BitsPerPixel = BmpBitsPerPixel.Pixel32,
-                    SkipMetadata = false,
+                    SkipMetadata = false
                 };
                 img.SaveAsBmp(mem, encoder);
                 mem.Seek(0, SeekOrigin.Begin);

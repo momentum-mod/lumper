@@ -62,10 +62,10 @@ public sealed class GameLumpReader : LumpReader
             lump.Flags = ReadUInt16();
             lump.Version = ReadUInt16();
 
-            var header = new LumpHeader()
+            var header = new LumpHeader
             {
                 Offset = ReadInt32(),
-                UncompressedLength = ReadInt32(),
+                UncompressedLength = ReadInt32()
             };
 
             if (prevHeader != null)

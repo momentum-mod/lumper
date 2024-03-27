@@ -1,6 +1,7 @@
 namespace Lumper.Lib.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
@@ -9,9 +10,8 @@ using NLog;
 
 public class ChangeTextureTask : LumperTask
 {
-    public override string Type { get; } = "ChangeTextureTask";
-    public ChangeTextureTask()
-    { }
+    public override string Type => "ChangeTextureTask";
+
     public Dictionary<string, string> Replace { get; set; } = [];
     public List<KeyValuePair<Regex, string>> ReplaceRegex { get; set; } = [];
 
@@ -31,7 +31,9 @@ public class ChangeTextureTask : LumperTask
             }
             else
             {
-                foreach (KeyValuePair<Regex, string> replaceRegex in ReplaceRegex)
+                foreach (var newName in ReplaceRegex
+                    .Select(replaceRegex => replaceRegex.Key.Replace(texture.TexName, replaceRegex.Value))
+                    .Where(newName => texture.TexName != newName))
                 {
                     _logger.Info($"Replaced {texture.TexName} with {newName}");
                 }

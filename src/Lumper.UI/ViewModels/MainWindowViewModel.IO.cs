@@ -15,15 +15,17 @@ using Services;
 public partial class MainWindowViewModel
 {
     public static ActiveBspService BspService => ActiveBspService.Instance;
+    public BspViewModel BspModel { get; set; } // TODO: KILL ME!!!
+
     private void IOInit()
     {
+        // TODO: What is this actually doing
         this.WhenAnyValue(x => x.BspModel)
             .ObserveOn(RxApp.MainThreadScheduler)
             .Where(m => m is not null)
-            .Subscribe(x =>
-                BspModel!.RaisePropertyChanged(nameof(BspModel.FilePath)));
+            .Subscribe(_ => BspModel!.RaisePropertyChanged(nameof(BspModel.FilePath)));
 
-        RxApp.MainThreadScheduler.Schedule(OnLoad);
+        // RxApp.MainThreadScheduler.Schedule(OnLoad);
     }
 
     public async Task OpenCommand()

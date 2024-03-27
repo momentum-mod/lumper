@@ -14,7 +14,8 @@ public class PakFileLump : ManagedLump<BspLumpType>
 {
     public List<PakFileEntry> Entries { get; set; } = [];
 
-    private ZipArchive _zip;
+    private ZipArchive _zip = null!;
+
     [JsonIgnore]
     public ZipArchive Zip
     {
@@ -25,6 +26,9 @@ public class PakFileLump : ManagedLump<BspLumpType>
             UpdateEntries();
         }
     }
+
+    public PakFileLump(BspFile parent) : base(parent) => Compress = false;
+
 
     public override void Read(BinaryReader reader, long length)
     {
@@ -44,41 +48,33 @@ public class PakFileLump : ManagedLump<BspLumpType>
         Zip = ZipArchive.Open(dataStream);
     }
 
-    private void UpdateEntries()
-    {
-        Entries.Clear();
-        foreach (ZipArchiveEntry entry in Zip.Entries)
-        {
-            Entries.Add(new PakFileEntry(entry));
-        }
-    }
+    private void UpdateEntries() => Entries = Zip.Entries.Select(entry => new PakFileEntry(entry)).ToList();
 
     private void UpdateZip(bool closeStream)
     {
-        List<ZipArchiveEntry> deleteList = [];
-        foreach (ZipArchiveEntry entry in Zip.Entries)
-        {
-            if (!Entries.Any(x => x.Key == entry.Key))
-                deleteList.Add(entry);
-        }
-        foreach (ZipArchiveEntry entry in deleteList)
+        // Delete every item from the zip that's not in the PakLump entries
+        foreach (ZipArchiveEntry entry in Zip.Entries.Where(entry => Entries.All(x => x.Key != entry.Key)))
             Zip.RemoveEntry(entry);
 
         foreach (PakFileEntry entry in Entries)
         {
-            IEnumerable<ZipArchiveEntry> existing =
-                Zip.Entries.Where(x => x.Key == entry.Key);
-            if (existing.Any() && !entry.IsModified)
-                continue;
-            if (existing.Count() == 1)
+            // Count entries already in the zip
+            var entriesInZip = Zip.Entries.Where(x => x.Key == entry.Key).ToList();
+            switch (entriesInZip.Count)
             {
-                Zip.RemoveEntry(existing.First());
-            }
-            else if (existing.Count() > 1)
-            {
-                throw new NotSupportedException(
-                    $"Paklump has multiple entries of the same key: " +
-                    "{existing.Key}");
+                // If we have an unmodified entry continue on, otherwise delete it
+                // so we can insert an updated version.
+                case 1:
+                    if (!entry.IsModified)
+                        continue;
+                    Zip.RemoveEntry(entriesInZip.First());
+                    break;
+                // More than one match somehow - you done fucked it
+                case 2:
+                    throw new NotSupportedException(
+                        $"Paklump has multiple entries of the same key: {entriesInZip.First().Key}");
+                default:
+                    break;
             }
 
             Stream stream = entry.DataStream;
@@ -103,7 +99,7 @@ public class PakFileLump : ManagedLump<BspLumpType>
         }
     }
 
-    private Stream SaveZip()
+    private MemoryStream SaveZip()
     {
         var dataStream = new MemoryStream();
         CompressionType compressionType = Compress
@@ -122,6 +118,4 @@ public class PakFileLump : ManagedLump<BspLumpType>
     }
 
     public override bool Empty() => Entries.Count == 0;
-
-    public PakFileLump(BspFile parent) : base(parent) => Compress = false;
 }

@@ -1,20 +1,14 @@
 namespace Lumper.Lib.Tasks;
-using System;
+using System.Linq;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
 public class CompressionTask(bool compressLumps) : LumperTask
 {
-    public override string Type { get; } = "CompressionTask";
-    public bool CompressLumps { get; set; }
+    public override string Type => "CompressionTask";
     public bool CompressLumps { get; set; } = compressLumps;
     public bool CompressPakFile { get; set; }
-
-    public CompressionTask()
-    { }
-
-    public CompressionTask(bool compressLumps) => CompressLumps = compressLumps;
 
     public override TaskResult Run(BspFile bsp)
     {
@@ -27,7 +21,6 @@ public class CompressionTask(bool compressLumps) : LumperTask
         Progress.Max = bsp.Lumps.Count;
         foreach (Lump<BspLumpType>? value in bsp.Lumps.Values)
         {
-            Console.WriteLine($"{i} {lump.Key} {lump.Value.GetType().Name}");
             if (value is not GameLump and not PakFileLump)
             {
                 value.Compress = CompressLumps;

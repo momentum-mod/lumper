@@ -12,26 +12,19 @@ public partial class StripperTask
     {
         public List<Prop> Properties { get; set; } = [];
 
-        public Filter()
-        { }
-
-        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr) => ParseBlock(reader, blockOpen, ref lineNr, (line, lNr) => Properties.Add(ParseProp(line, lNr)));
+        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr) =>
+            ParseBlock(
+                reader,
+                blockOpen,
+                ref lineNr,
+                (line, lNr) => Properties.Add(ParseProp(line, lNr)));
 
         public override void Apply(EntityLump lump)
         {
-            var del = new List<Entity>();
-
-            foreach (Entity entity in lump.Data)
-            {
-                if (Properties.All(
-                    f => entity.Properties.Any(
-                        e => MatchKeyValue(f, e))))
-                {
-                    del.Add(entity);
-                }
-            }
-
-            foreach (Entity entity in del)
+            foreach (Entity entity in lump.Data.Where(
+                entity => Properties.All(
+                    filterProperty => entity.Properties.Any(
+                        entityProperty => MatchKeyValue(filterProperty, entityProperty)))))
             {
                 lump.Data.Remove(entity);
             }

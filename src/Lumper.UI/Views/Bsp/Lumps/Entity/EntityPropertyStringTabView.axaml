@@ -7,7 +7,7 @@
     <Grid ColumnDefinitions="*,5,4*,50">
         <TextBox Text="{Binding Key}" 
                  VerticalAlignment="Center"/>
-        <TextBox Text="{Binding Value}"
+        <TextBox Text="{Binding Lazy}"
                  VerticalAlignment="Center"
                  Grid.Column="2" />
         <Button  Command="{Binding Delete}"
