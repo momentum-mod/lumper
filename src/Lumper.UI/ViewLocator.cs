@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Lumper.UI.ViewModels;
 
+// https://docs.avaloniaui.net/docs/0.10.x/tutorials/todo-list-app/locating-views
 public class ViewLocator : IDataTemplate
 {
     public Control Build(object? param)

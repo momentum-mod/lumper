@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Lumper.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/Lumper.png"
         Closing="Window_OnClosing"
         Title="{Binding BspModel.FileName, StringFormat='Lumper - {0}',  FallbackValue='Lumper'}"
@@ -42,16 +43,16 @@
                         <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
                     </MenuItem>
                     <MenuItem Header="_View">
-                        <MenuItem Header="_Browser" Command="{Binding ViewBsp}"
+                        <MenuItem Header="_Browser" Command="{Binding ViewPage}" CommandParameter="Bsp"
                                   HotKey="Ctrl+D1" InputGesture="Ctrl+D1" />
-                        <MenuItem Header="_Tasks" Command="{Binding ViewTasks}"
+                        <MenuItem Header="_Tasks" Command="{Binding ViewPage}" CommandParameter="Tasks"
                                   HotKey="Ctrl+D2" InputGesture="Ctrl+D2" />
-                        <MenuItem Header="_Texture Browser" Command="{Binding ViewTextureBrowser}"
+                        <MenuItem Header="_Texture Browser" Command="{Binding ViewPage}" CommandParameter="VtfBrowser"
                                   HotKey="Ctrl+D3" InputGesture="Ctrl+D3" />
                     </MenuItem>
                 </Menu>
             </DockPanel>
-            <ContentControl Grid.Column="0" Grid.Row="1" Margin="0,0,2,0" Content="{Binding Content}" />
+            <ContentControl Grid.Column="0" Grid.Row="1" Margin="0,0,2,0" Content="{Binding ActivePage}" />
             <GridSplitter Grid.Row="2" ResizeDirection="Rows" />
             <logViewer:LogViewerView DataContext="{Binding LogViewer}" Grid.Row="3" />
         </Grid>

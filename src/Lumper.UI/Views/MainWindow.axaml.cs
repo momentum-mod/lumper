@@ -1,16 +1,17 @@
 namespace Lumper.UI.Views;
-using System;
 using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using Lumper.UI.ViewModels;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {
     public MainWindow() => InitializeComponent();
 
-    private async void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    private async void Window_OnClosing(object? _, WindowClosingEventArgs e)
     {
-        if (DataContext is not MainWindowViewModel model)
-            throw new ArgumentOutOfRangeException();
-        await model.OnClose(e);
+        if (ViewModel is null)
+            return;
+
+        await ViewModel.OnClose(e);
     }
 }
