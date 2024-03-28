@@ -55,7 +55,7 @@ public partial class MainWindowViewModel
         ViewPage(_lastPage ?? DefaultPage);
     }
 
-    // This interface is required because we need a covariant type for GetAndLoad,
+    // This interface is required because we need a covariant type for Get(),
     // so that e.g. LazyPage<VtfBrowserViewModel> is assignable to LazyPage<ViewModelBase>.
     private interface IPage<out T>
     {

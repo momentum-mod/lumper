@@ -7,16 +7,18 @@ using Lumper.Lib.BSP.Struct;
 using Models;
 
 /// <summary>
-///     ViewModel representing an <see cref="Entity" />.
+///     ViewModel representing an <see cref="_entity" />.
 /// </summary>
 public class EntityViewModel : BspNodeBase
 {
-    private Entity Entity { get; }
-    private SourceList<EntityPropertyBase> Properties { get; } = new();
+    private readonly EntityEditorViewModel _parent;
+    private readonly Entity _entity;
+    private readonly SourceList<EntityPropertyBaseViewModel> _properties = new();
 
-    public EntityViewModel(Entity entity)
+    public EntityViewModel(EntityEditorViewModel parent, Entity entity)
     {
-        Entity = entity;
+        _entity = entity;
+        _parent = parent;
         _className = entity.ClassName;
 
         foreach (Entity.EntityProperty property in entity.Properties)
@@ -44,7 +46,7 @@ public class EntityViewModel : BspNodeBase
     public string Name => !string.IsNullOrWhiteSpace(_className) ? ClassName! : "<missing classname>";
 
     private void AddProperty(Entity.EntityProperty entityProperty) =>
-        Properties.Add(entityProperty switch
+        _properties.Add(entityProperty switch
         {
             Entity.EntityProperty<string> sp => new EntityPropertyStringViewModel(sp),
             Entity.EntityProperty<EntityIO> sio => new EntityPropertyIOViewModel(sio),
@@ -58,16 +60,18 @@ public class EntityViewModel : BspNodeBase
     private void Add(Entity.EntityProperty prop)
     {
         AddProperty(prop);
-        Entity.Properties.Add(prop);
+        _entity.Properties.Add(prop);
         MarkAsModified();
     }
 
-    public void Delete(EntityPropertyBase prop)
+    public void Delete(EntityPropertyBaseViewModel prop)
     {
-        Properties.Remove(prop);
-        Entity.Properties.Remove(prop.EntityProperty);
+        _properties.Remove(prop);
+        _entity.Properties.Remove(prop.EntityProperty);
         MarkAsModified();
     }
+
+    public void CloseTab() => _parent.CloseTab(this);
 
     protected override async ValueTask<bool> Match(Matcher matcher, CancellationToken? _) =>
         await matcher.Match(Name);

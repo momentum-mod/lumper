@@ -1,4 +1,4 @@
-namespace Lumper.UI.ViewModels.Bsp;
+namespace Lumper.UI.ViewModels;
 using Lumper.UI.Models;
 
 /// <summary>
@@ -6,10 +6,7 @@ using Lumper.UI.Models;
 /// </summary>
 public abstract class MatcherBase : ViewModelBase
 {
-    public abstract string Name
-    {
-        get;
-    }
+    public abstract string Name { get; }
 
     public abstract Matcher ConstructMatcher(string pattern);
 }

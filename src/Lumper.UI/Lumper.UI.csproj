@@ -12,7 +12,6 @@
     <ItemGroup>
         <Folder Include="Dependencies\Linux\" />
         <AvaloniaResource Include="Assets\**" />
-        <Folder Include="Views\EntityEditor\" />
         <None Remove=".gitignore" />
     </ItemGroup>
     <ItemGroup>
@@ -67,5 +66,11 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <TargetPath>VTFLib.NET.dll</TargetPath>
         </None>
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Views\EntityEditor\EntityEditorView.axaml.cs">
+        <DependentUpon>BspView.axaml</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 </Project>

@@ -4,7 +4,7 @@ using Lib.BSP.Struct;
 /// <summary>
 ///     Base ViewModel for <see cref="Entity.EntityProperty" />.
 /// </summary>
-public abstract class EntityPropertyBase(Entity.EntityProperty entityProperty) : BspNodeBase
+public abstract class EntityPropertyBaseViewModel(Entity.EntityProperty entityProperty) : BspNodeBase
 {
     public Entity.EntityProperty EntityProperty { get; } = entityProperty;
 

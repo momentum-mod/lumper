@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:Lumper.UI.Views.EntityEditor"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.EntityEditor"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.EntityEditor.EntityEditorView"
+             x:CompileBindings="True"
+             x:DataType="vm:EntityEditorViewModel">
+
+    <Border BorderBrush="{DynamicResource BackgroundExtraDark}" BorderThickness="1" Margin="8">
+        <Grid ColumnDefinitions="Auto, 1, 4*" RowDefinitions="Auto, *" Background="{DynamicResource BackgroundDark}">
+            <TextBox Grid.Row="0" Margin="6" Text="{Binding SearchPattern}" />
+            <Border Grid.Row="1" Grid.Column="0" BorderBrush="{DynamicResource BackgroundExtraDark}" BorderThickness="1" Margin="8">
+                <!-- <Grid RowDefinitions="Auto, *" Background="{DynamicResource BackgroundDark}"> -->
+                <!--     <TreeView Grid.Row="1" -->
+                <!--               ItemsSource="{Binding BspNode.FilteredNodes}" -->
+                <!--               SelectedItem="{Binding SelectedNode}" -->
+                <!--               Margin="0, 0, 0, 8" -->
+                <!--               KeyDown="OnKeyDown" -->
+                <!--               Tapped="OnClick"> -->
+                <!--         <TreeView.Styles> -->
+                <!--             <Style Selector="TreeViewItem"> -->
+                <!--                 <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" /> -->
+                <!--             </Style> -->
+                <!--         </TreeView.Styles> -->
+                <!--         <TreeView.DataTemplates> -->
+                <!--             <TreeDataTemplate DataType="bspmodels:BspNodeBase" -->
+                <!--                               ItemsSource="{Binding FilteredNodes}"> -->
+                <!--                 <StackPanel Orientation="Horizontal" IsVisible="{Binding IsVisible}"> -->
+                <!--                     <StackPanel.ContextMenu> -->
+                <!--                         <ContextMenu> -->
+                <!--                             <MenuItem Header="Expand" Command="{Binding ExpandTree}" /> -->
+                <!--                         </ContextMenu> -->
+                <!--                     </StackPanel.ContextMenu> -->
+                <!--                     <Image Source="{Binding NodeIcon, Converter={StaticResource variableImage}}" -->
+                <!--                            Width="24" Height="24" -->
+                <!--                            Margin="0,0,5,0" /> -->
+                <!--                     <TextBlock Text="*" -->
+                <!--                                IsVisible="{Binding IsModified}" -->
+                <!--                                Margin="0,0,5,0" /> -->
+                <!--                     <TextBlock Text="{Binding NodeName}" VerticalAlignment="Center" /> -->
+                <!--                 </StackPanel> -->
+                <!--             </TreeDataTemplate> -->
+                <!--         </TreeView.DataTemplates> -->
+                <!--     </TreeView> -->
+                <!-- </Grid> -->
+            </Border>
+            <GridSplitter Grid.Column="1" Grid.Row="1" ResizeDirection="Columns" />
+            <Button Grid.Column="0" Grid.Row="0" IsVisible="false" Command="{Binding CloseSelectedTab}" HotKey="Ctrl+W" />
+            <TabControl Grid.Column="2" Grid.Row="1" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="Auto, *,Auto">
+                            <TextBlock Grid.Column="0" Text="*" Margin="0,0,5,0" IsVisible="{Binding IsModified}" />
+                            <TextBlock Grid.Column="1" Text="{Binding Name}" Margin="0,0,5,0" />
+                            <Button Grid.Column="2" Width="15" Height="15" Command="{Binding CloseTab}" />
+                        </Grid>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+                <!--TODO: Figure out how to wrap ScrollViewer over all possible data templates-->
+                <!-- <TabControl.DataTemplates> -->
+                <!--     <DataTemplate DataType="entmodels:EntityViewModel"> -->
+                <!--         <ScrollViewer> -->
+                <!--             <entviews:EntityTabView DataContext="{Binding }" /> -->
+                <!--         </ScrollViewer> -->
+                <!--     </DataTemplate> -->
+                <!-- </TabControl.DataTemplates> -->
+            </TabControl>
+        </Grid>
+    </Border>
+</UserControl>

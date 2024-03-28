@@ -8,7 +8,7 @@ using Lumper.UI.Models;
 ///     ViewModel for <see cref="string" /> <see cref="Entity.EntityProperty" />.
 /// </summary>
 public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityProperty)
-    : EntityPropertyBase(entityProperty)
+    : EntityPropertyBaseViewModel(entityProperty)
 {
     private string Property { get; } = entityProperty.Value;
 
