@@ -13,6 +13,10 @@
         <Folder Include="Dependencies\Linux\" />
         <AvaloniaResource Include="Assets\**" />
         <None Remove=".gitignore" />
+        <AvaloniaResource Remove="ViewModels\BspOld\**" />
+        <None Remove="ViewModels\BspOld\**" />
+        <AvaloniaResource Remove="Views\Bsp\**" />
+        <None Remove="Views\Bsp\**" />
     </ItemGroup>
     <ItemGroup>
         <!--This helps with theme dll-s trimming.
@@ -72,5 +76,19 @@
         <DependentUpon>BspView.axaml</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Remove="ViewModels\BspOld\**" />
+      <Compile Remove="Views\Bsp\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <AvaloniaXaml Remove="ViewModels\BspOld\**" />
+      <AvaloniaXaml Remove="Views\Bsp\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Remove="ViewModels\BspOld\**" />
+      <EmbeddedResource Remove="Views\Bsp\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <AdditionalFiles Remove="ViewModels\BspOld\**" />
+      <AdditionalFiles Remove="Views\Bsp\**" />
     </ItemGroup>
 </Project>

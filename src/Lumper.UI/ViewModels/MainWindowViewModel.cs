@@ -26,13 +26,19 @@ public partial class MainWindowViewModel : ViewModelBase
 
         Desktop = desktop;
 
-        SetupLogging();
+        LoggingInit();
         PagesInit();
-        IOInit();
-        OnInitialized();
+
+        if (Desktop.Args is { Length: 1 })
+        {
+            // This is an async method but we want it on this thread, just use the scheduler.
+            Observable.Start(
+                () => ActiveBspService.Instance.Load(Desktop.Args[0]),
+                RxApp.MainThreadScheduler);
+        }
     }
 
-    private void SetupLogging()
+    private void LoggingInit()
     {
         LogManager
             .Setup()
@@ -46,16 +52,5 @@ public partial class MainWindowViewModel : ViewModelBase
                 builder.ForLogger().WriteToConsole();
 #endif
             });
-    }
-
-    private void OnInitialized()
-    {
-        if (Desktop.Args is { Length: 1 })
-        {
-            // This is an async method but we want it on this thread, just use the scheduler.
-            Observable.Start(
-                () => ActiveBspService.Instance.Load(Desktop.Args[0]),
-                RxApp.MainThreadScheduler);
-        }
     }
 }

@@ -1,7 +1,6 @@
 namespace Lumper.UI.ViewModels.Matchers;
 using Lumper.UI.Models;
 using Lumper.UI.Models.Matchers;
-using Lumper.UI.ViewModels.Bsp;
 
 /// <summary>
 ///     ViewModel for <see cref="SimpleMatcher" />.

@@ -2,6 +2,7 @@ namespace Lumper.UI.ViewModels.VtfBrowser;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using Lib.BSP.Lumps.BspLumps;
 using Lib.BSP.Struct;
@@ -20,7 +21,8 @@ public partial class VtfBrowserViewModel : ViewModelBase
         foreach (PakFileEntry? entry in ActiveBspService.Instance.BspFile!.GetLump<PakFileLump>().Entries
             .Where(x => x.Key.ToLower().EndsWith(".vtf")))
         {
-            TextureBrowserItems.Add(new VtfBrowserItemViewModel(entry.Key, new VtfFile(entry)));
+            Observable.Start(() =>
+                TextureBrowserItems.Add(new VtfBrowserItemViewModel(entry.Key, new VtfFile(entry))), RxApp.TaskpoolScheduler);
         }
 
         UpdateItems();

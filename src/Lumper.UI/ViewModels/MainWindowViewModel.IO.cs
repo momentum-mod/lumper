@@ -5,28 +5,14 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using Lumper.UI.ViewModels.Bsp;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using ReactiveUI;
 using Services;
 
 // MainWindowViewModel support for reading and writing of <see cref="BspFile"/>.
 public partial class MainWindowViewModel
 {
     public static ActiveBspService BspService => ActiveBspService.Instance;
-    public BspViewModel BspModel { get; set; } // TODO: KILL ME!!!
-
-    private void IOInit()
-    {
-        // TODO: What is this actually doing
-        this.WhenAnyValue(x => x.BspModel)
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Where(m => m is not null)
-            .Subscribe(_ => BspModel!.RaisePropertyChanged(nameof(BspModel.FilePath)));
-
-        // RxApp.MainThreadScheduler.Schedule(OnLoad);
-    }
 
     public async Task OpenCommand()
     {
@@ -35,9 +21,7 @@ public partial class MainWindowViewModel
 
         var dialog = new FilePickerOpenOptions
         {
-            AllowMultiple = false,
-            Title = "Pick BSP File",
-            FileTypeFilter = GenerateBspFileFilter()
+            AllowMultiple = false, Title = "Pick BSP File", FileTypeFilter = GenerateBspFileFilter()
         };
 
         IReadOnlyList<IStorageFile> result = await Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
@@ -50,13 +34,11 @@ public partial class MainWindowViewModel
 
         if (!await ActiveBspService.Instance.Load(result[0]))
             MessageBoxManager.GetMessageBoxStandard("Error loading BSP", "Failed to load BSP file! See log panel for error.");
-
-        LoadDefaultPage();
     }
 
     public async Task SaveCommand()
     {
-        if (BspModel.FilePath is null)
+        if (ActiveBspService.Instance.BspFile?.FilePath is null)
         {
             await SaveAsCommand();
         }
@@ -74,8 +56,7 @@ public partial class MainWindowViewModel
 
         var dialog = new FilePickerSaveOptions
         {
-            Title = "Pick BSP file",
-            FileTypeChoices = GenerateBspFileFilter()
+            Title = "Pick BSP file", FileTypeChoices = GenerateBspFileFilter()
         };
 
         IStorageFile? result = await Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
@@ -86,7 +67,11 @@ public partial class MainWindowViewModel
             MessageBoxManager.GetMessageBoxStandard("Error saving BSP", "Failed to save BSP file! See log panel for error.");
     }
 
-    public void BspToJsonCommand() => BspModel?.BspFile.ToJson(false, false, false);
+    public static void BspToJsonCommand() =>
+        ActiveBspService.Instance.BspFile?.ToJson(
+            sortLumps: false,
+            sortProperties: false,
+            ignoreOffset: false);
 
     public async Task CloseCommand()
     {

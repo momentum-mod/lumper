@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Reactive.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Lib.BSP;
@@ -43,6 +44,21 @@ public sealed class ActiveBspService : ReactiveObject
     public bool IsLoading { get; set; }
 
     /// <summary>
+    ///     The name of the BSP file, without .bsp extension. null is no BSP is loaded.
+    /// </summary>
+    public IObservable<string?> FileName => this.WhenAnyValue(x => x.BspFile).Select(x => x?.Name);
+
+    /// <summary>
+    ///     The name of the BSP file, without .bsp extension. null is no BSP is loaded.
+    /// </summary>
+    public IObservable<string?> FilePath => this.WhenAnyValue(x => x.BspFile).Select(x => x?.FilePath);
+
+    /// <summary>
+    ///     Observable that notifies whenever a BSP is unloaded
+    /// </summary>
+    public IObservable<BspFile?> FileChanged => this.WhenAnyValue(x => x.BspFile);
+
+    /// <summary>
     ///     Observable that notifies whenever a BSP is unloaded
     /// </summary>
     public IObservable<BspFile?> BspUnloaded => this.WhenAnyValue(x => x.BspFile).Where(x => x is null);
@@ -55,7 +71,7 @@ public sealed class ActiveBspService : ReactiveObject
     /// <summary>
     ///     Returns whether the service current has a loaded BSP file
     /// </summary>
-    public bool HasLoadedBsp => BspFile is null;
+    public bool HasLoadedBsp => BspFile is not null;
 
     /// <summary>
     ///     Load a BSP file from a system file

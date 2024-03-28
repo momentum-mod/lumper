@@ -24,15 +24,18 @@ public partial class MainWindowViewModel
     [Reactive]
     public ViewModelBase? ActivePage { get; set; }
     private string? _lastPage; // Using string for these instead of an enum for easier binding
-    private const string DefaultPage = "Bsp";
+    private const string DefaultPage = "EntityEditor";
 
     private void PagesInit() =>
-        ActiveBspService.Instance.BspUnloaded
+        ActiveBspService.Instance.FileChanged
             .ObserveOn(RxApp.MainThreadScheduler)
-            .Subscribe(_ =>
+            .Subscribe(file =>
             {
-                _logger.Debug("wowee!");
-                ActivePage = null;
+                _logger.Debug($"wowee! {file is null}");
+                if (file is not null)
+                    LoadDefaultPage();
+                else
+                    ActivePage = null;
             });
 
     public void ViewPage(string pageName)
