@@ -40,5 +40,5 @@ public class StaticProp
     // since v10
     public uint FlagsEx { get; set; }           // Further bitflags.
     // since v11
-    public float UniformScale { get; set; }      // Prop scale
+    public Vector3 UniformScale { get; set; }      // Prop scale
 }

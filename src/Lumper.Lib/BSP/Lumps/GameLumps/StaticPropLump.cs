@@ -18,6 +18,7 @@ public enum StaticPropVersion
     V10 = 100,
     V11 = 110,
     V12 = 120,
+    V13 = 130
 }
 public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp>(parent)
 {
@@ -35,6 +36,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         StaticPropVersion.V10 => 76,
         StaticPropVersion.V11 => 80,
         StaticPropVersion.V12 => 80,
+        StaticPropVersion.V13 => 88,
         _ => 1
     };
 
@@ -49,6 +51,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         10 => StaticPropVersion.V10,
         11 => StaticPropVersion.V11,
         12 => StaticPropVersion.V12,
+        13 => StaticPropVersion.V13,
         _ => StaticPropVersion.Unknown
     };
 
@@ -168,7 +171,12 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             prop.FlagsEx = reader.ReadUInt32();
         // since v11
         if (ActualVersion >= StaticPropVersion.V11)
-            prop.UniformScale = System.BitConverter.ToSingle(reader.ReadBytes(4));
+        {
+            var x = reader.ReadSingle();
+            prop.UniformScale = ActualVersion < StaticPropVersion.V13
+                ? new Vector3 { X = x, Y = x, Z = x }
+                : new Vector3 { X = x, Y = reader.ReadSingle(), Z = reader.ReadSingle() };
+        }
         Data.Add(prop);
         if (reader.BaseStream.Position - startpos != StructureSize)
             throw new InvalidDataException($"StaticProp structuresize doesn't match reader position after read ({reader.BaseStream.Position - startpos} != {StructureSize})");
@@ -247,6 +255,13 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         // since v11
         if (ActualVersion >= StaticPropVersion.V11)
             writer.Write(prop.UniformScale);
+        if (ActualVersion >= StaticPropVersion.V13)
+        {
+            writer.Write(prop.UniformScale.X);
+            writer.Write(prop.UniformScale.Y);
+            writer.Write(prop.UniformScale.Z);
+        }
+
         if (writer.BaseStream.Position - startPos != StructureSize)
             throw new InvalidDataException($"StaticProp structuresize doesn't match writer position after write ({writer.BaseStream.Position - startPos} != {StructureSize})");
     }
