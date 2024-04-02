@@ -9,14 +9,14 @@ public class StaticPropLeafLump(BspFile parent) : FixedLump<GameLumpType, uint>(
 
     protected override void ReadItem(BinaryReader reader)
     {
-        if (Version == 12)
+        if (Version >= 12)
             Data.Add(reader.ReadUInt32());
         else
             Data.Add(reader.ReadUInt16());
     }
     protected override void WriteItem(BinaryWriter writer, int index)
     {
-        if (Version == 12)
+        if (Version >= 12)
             writer.Write(Data[index]);
         else
             writer.Write((ushort)Data[index]);
