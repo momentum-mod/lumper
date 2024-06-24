@@ -23,6 +23,7 @@ public class BspFile
     protected MemoryStream Stream { get; private set; } = null!;
 
     public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = [];
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // The nullability of all sorts of parts of this class and its members is based on the assumption
     // that an actual BSP has been loaded.
@@ -103,7 +104,7 @@ public class BspFile
             FileAccess.Write);
 
         ToJson(fileStream, sortLumps, sortProperties, ignoreOffset);
-        Console.WriteLine($"JSON file: {path}");
+        Logger.Info($"Dumped JSON to {path}");
     }
 
     public void ToJson(Stream stream, bool sortLumps, bool sortProperties, bool ignoreOffset)
