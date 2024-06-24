@@ -1,5 +1,8 @@
 namespace Lumper.Lib.BSP.Lumps.BspLumps;
+
 using System.IO;
+using Enum;
+using Lumps;
 
 public class TexDataStringTableLump(BspFile parent) : FixedLump<BspLumpType, int>(parent)
 {
