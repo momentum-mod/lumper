@@ -1,0 +1,165 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Lumper.UI.ViewModels"
+        xmlns:service="using:Lumper.UI.Services"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:logView="using:Lumper.UI.Views.LogViewer"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Lumper.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Closing="Window_OnClosing"
+        Title="{Binding BspService.FileName, StringFormat='Lumper - {0}', FallbackValue='Lumper', TargetNullValue='Lumper'}"
+        WindowStartupLocation="CenterScreen"
+        TransparencyLevelHint="AcrylicBlur"
+        ExtendClientAreaToDecorationsHint="True"
+        Background="Transparent">
+
+  <Panel>
+    <ExperimentalAcrylicBorder IsHitTestVisible="False" CornerRadius="8">
+      <ExperimentalAcrylicBorder.Material>
+        <ExperimentalAcrylicMaterial BackgroundSource="Digger" TintColor="Black" TintOpacity="1"
+                                     MaterialOpacity="0.9" />
+      </ExperimentalAcrylicBorder.Material>
+    </ExperimentalAcrylicBorder>
+    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, 3*, 1, 1*" ClipToBounds="True">
+      <DockPanel Grid.Column="0" HorizontalAlignment="Left" ClipToBounds="True">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4">
+          <TextBlock VerticalAlignment="Center" FontWeight="Bold"
+                     Text="{Binding BspService.FileName, StringFormat='Lumper - {0}', FallbackValue='Lumper', TargetNullValue='Lumper'}"
+                     Margin="16 0 12 0" />
+          <Menu>
+            <MenuItem Header="_File">
+              <MenuItem Header="_Open..." Command="{Binding OpenCommand}" HotKey="Ctrl+O"
+                        InputGesture="Ctrl+O" />
+              <Separator />
+
+              <MenuItem Header="_Save" Command="{Binding SaveCommand}" HotKey="Ctrl+S"
+                        InputGesture="Ctrl+S" />
+              <MenuItem Header="_Save As..." Command="{Binding SaveAsCommand}" HotKey="Ctrl+Alt+S"
+                        InputGesture="Ctrl+Alt+S" />
+              <!-- This thing is a bastard to right-align due to weird menu styling, don't bother -->
+              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding BspService.ShouldCompress}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">
+                  <TextBlock Text="Save Compressed" />
+                  <materialIcons:MaterialIcon Kind="QuestionMarkCircle">
+                    <ToolTip.Tip>
+                      <StackPanel>
+                        <TextBlock>Compresses every lump and Pakfile item on save using the same approach as bspzip.</TextBlock>
+                        <TextBlock>If the Pakfile has been modified, saving compressed can take several minutes or more.</TextBlock>
+                        <TextBlock>We recommend saving uncompressed whilst testing, then saving compressed before releasing the map.</TextBlock>
+                      </StackPanel>
+                    </ToolTip.Tip>
+                  </materialIcons:MaterialIcon>
+                </StackPanel>
+              </CheckBox>
+              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding BspService.MakeBackup}">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <TextBlock Text="Make Backup" />
+                  <materialIcons:MaterialIcon Kind="QuestionMarkCircle">
+                    <ToolTip.Tip>
+                      <StackPanel>
+                        <TextBlock>Copies the active BSP to a backup file if the BSP is being overwritten.</TextBlock>
+                        <TextBlock>Lumper may contain bugs, we can't guarantee we won't corrupt a BSP. Backing up your original BSP is highly recommended!</TextBlock>
+                      </StackPanel>
+                    </ToolTip.Tip>
+                  </materialIcons:MaterialIcon>
+                </StackPanel>
+              </CheckBox>
+              <Separator />
+              <MenuItem Header="_Export JSON Summary" Command="{Binding JsonDumpCommand}" />
+              <Separator />
+              <MenuItem Header="_Close" Command="{Binding CloseCommand}" IsVisible="{Binding BspService.HasLoadedBsp}" />
+              <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
+            </MenuItem>
+            <MenuItem Header="_View">
+              <MenuItem Header="_Entity Editor" Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.EntityEditor}"
+                        InputGesture="Ctrl+D1" />
+              <MenuItem Header="_Raw Entities" Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.RawEntities}" InputGesture="Ctrl+D2" />
+              <MenuItem Header="_Pakfile Explorer" Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.PakfileExplorer}"
+                        InputGesture="Ctrl+D3" />
+              <MenuItem Header="_Texture Browser" Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.VtfBrowser}" InputGesture="Ctrl+D4" />
+              <MenuItem Header="_Jobs" Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D5" />
+            </MenuItem>
+          </Menu>
+        </StackPanel>
+      </DockPanel>
+      <Border Grid.Row="1" HorizontalAlignment="Stretch" Background="#22000000" BorderThickness="0 1"
+              BorderBrush="#22FFFFFF">
+        <StackPanel Name="PageButtons" Orientation="Horizontal">
+          <StackPanel.Styles>
+            <Style Selector="ToggleButton">
+              <Setter Property="FontSize" Value="14" />
+              <Setter Property="Padding" Value="12 8" />
+              <Setter Property="CornerRadius" Value="0" />
+              <Setter Property="Background" Value="#0CFFFFFF" />
+              <Setter Property="BorderThickness" Value="0 0 1 0" />
+              <Setter Property="BorderBrush" Value="#22FFFFFF" />
+            </Style>
+            <Style Selector="ToggleButton StackPanel">
+              <Setter Property="Orientation" Value="Horizontal" />
+              <Setter Property="Spacing" Value="4" />
+            </Style>
+            <Style Selector="ToggleButton StackPanel TextBlock">
+              <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+          </StackPanel.Styles>
+
+          <ToggleButton Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.EntityEditor}"
+                                  HotKey="Ctrl+D1">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="Lightbulb" />
+              <TextBlock>Entity Editor</TextBlock>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.RawEntities}"
+                                  HotKey="Ctrl+D2">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="TextLong" />
+              <TextBlock>Raw Entities</TextBlock>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.PakfileExplorer}"
+                                  HotKey="Ctrl+D3">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="FolderZipOutline" />
+              <TextBlock>Pakfile Explorer</TextBlock>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.VtfBrowser}"
+                                  HotKey="Ctrl+D4">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="ImageMultiple" />
+              <TextBlock>Texture Browser</TextBlock>
+            </StackPanel>
+          </ToggleButton>
+          <ToggleButton Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.Jobs}"
+                                  HotKey="Ctrl+D5">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="FormatListChecks" />
+              <TextBlock>Jobs</TextBlock>
+            </StackPanel>
+          </ToggleButton>
+
+        </StackPanel>
+      </Border>
+      <ContentControl Grid.Column="0" Grid.Row="2" Content="{Binding PageService.ActivePageVm}" />
+      <GridSplitter Grid.Row="3" MinHeight="1" Height="1" ResizeDirection="Rows" />
+      <logView:LogViewerView DataContext="{Binding LogViewer}" Grid.Row="4" />
+    </Grid>
+  </Panel>
+</Window>
