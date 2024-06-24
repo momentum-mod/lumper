@@ -3,6 +3,7 @@ namespace Lumper.UI;
 using System;
 using System.Diagnostics;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
 using NLog;
 using ReactiveUI;
@@ -44,4 +45,20 @@ internal sealed class Program
             .UseReactiveUI();
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    private static IClassicDesktopStyleApplicationLifetime? _desktop;
+    public static IClassicDesktopStyleApplicationLifetime Desktop
+    {
+        get
+        {
+            if (_desktop is not null)
+                return _desktop;
+
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                throw new InvalidCastException(nameof(Application.Current.ApplicationLifetime));
+
+            _desktop = desktop;
+            return desktop;
+        }
+    }
 }
