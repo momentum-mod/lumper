@@ -1,4 +1,7 @@
 namespace Lumper.Lib.BSP.Struct;
+
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using Newtonsoft.Json;

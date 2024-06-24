@@ -1,5 +1,7 @@
 namespace Lumper.Lib.BSP.Lumps;
+
 using System.IO;
+using Enum;
 using JsonSubTypes;
 using Newtonsoft.Json;
 

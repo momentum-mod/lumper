@@ -1,10 +1,13 @@
 namespace Lumper.Lib.BSP.IO;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Lumper.Lib.BSP.Lumps;
+using Enum;
+using Lumps;
+using Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
 using SharpCompress.Compressors.LZMA;

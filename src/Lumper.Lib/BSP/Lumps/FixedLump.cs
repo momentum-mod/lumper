@@ -1,4 +1,5 @@
 namespace Lumper.Lib.BSP.Lumps;
+
 using System.Collections.Generic;
 using System.IO;
 
