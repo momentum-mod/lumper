@@ -1,12 +1,13 @@
-namespace Lumper.Lib.Tasks;
+namespace Lumper.Lib.Jobs;
+
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using Lumper.Lib.BSP.Lumps.BspLumps;
-using Lumper.Lib.BSP.Struct;
+using BSP.Lumps.BspLumps;
+using BSP.Struct;
 using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
-public partial class StripperTask
+public partial class StripperJob
 {
     protected abstract partial class Block
     {
@@ -18,30 +19,23 @@ public partial class StripperTask
         protected static Prop ParseProp(string line, int lineNr)
         {
             Match match = PairRegex().Match(line);
-            if (match.Success)
-            {
-                var pair = new Prop(
-                    match.Groups[1].Value,
-                    match.Groups[2].Value);
-                return pair;
-            }
-            else
-            {
-                throw new NotImplementedException($"Can't parse KeyValuePair '{line}' in line {lineNr}");
-            }
+            if (!match.Success)
+                throw new InvalidDataException($"Can't parse KeyValuePair '{line}' in line {lineNr}");
+
+            return new Prop(match.Groups[1].Value, match.Groups[2].Value);
         }
-        protected static void ParseBlock(StreamReader reader, bool blockOpen, ref int lineNr, Action<string, int> fun)
+
+        protected static void ParseBlock(StreamReader reader, bool blockOpen, ref int lineNr, Action<string, int> fn)
         {
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            while (reader.ReadLine() is { } line)
             {
                 lineNr++;
                 line = line.Trim();
+
                 if (string.IsNullOrEmpty(line))
-                {
                     continue;
-                }
-                else if (!blockOpen && line == "{")
+
+                if (!blockOpen && line == "{")
                 {
                     blockOpen = true;
                 }
@@ -49,12 +43,12 @@ public partial class StripperTask
                 {
                     if (line == "}")
                         break;
-                    else
-                        fun(line, lineNr);
+
+                    fn(line, lineNr);
                 }
                 else
                 {
-                    throw new NotImplementedException($"Can't get KeyValuePair from '{line}' line {lineNr}");
+                    throw new InvalidDataException($"Can't get KeyValuePair from '{line}' line {lineNr}");
                 }
             }
         }
@@ -81,9 +75,6 @@ public partial class StripperTask
                 }
             }
             return filterProp.Value == entityProp.ValueString;
-        }
-
-            return filterValue == entityProp.ValueString;
         }
     }
 }
