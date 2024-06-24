@@ -32,7 +32,7 @@ public class JsonContractResolver : DefaultContractResolver
             orderedProperties = orderedProperties.Where(
                 prop => prop.DeclaringType is not null &&
                         !(prop.DeclaringType.IsAssignableTo(typeof(IUnmanagedLump))
-                          && prop.PropertyName == nameof(IUnmanagedLump.Offset)) &&
+                          && prop.PropertyName == nameof(IUnmanagedLump.DataStreamOffset)) &&
                         !((prop.DeclaringType.IsAssignableFrom(typeof(LumpHeaderInfo))
                            || prop.DeclaringType.IsAssignableFrom(typeof(BspLumpHeader))
                            || prop.DeclaringType.IsAssignableFrom(typeof(GameLumpHeader)))

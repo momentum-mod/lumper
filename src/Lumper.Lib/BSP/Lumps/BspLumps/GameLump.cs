@@ -28,16 +28,25 @@ public class GameLump : ManagedLump<BspLumpType>
         }
         IEnumerable<KeyValuePair<GameLumpType, Lump>> tLumps = Lumps.Where(x => x.Value.GetType() == typeof(T));
         return (T)tLumps.Select(x => x.Value).First();
-    }
-    public override void Read(BinaryReader reader, long length)
+    public override bool IsCompressed
     {
-        Reader = new GameLumpReader(this, reader, length);
+        get => false;
+        set { } // Deliberately left empty
+    }
+
+    // Same as PakfileLump strategy, trying to avoid overly complex inheritance nonsense
+    public override void Read(BinaryReader reader, long length) => throw new NotImplementedException();
+    public override void Write(Stream stream) => throw new NotImplementedException();
+
+    public void Read(BinaryReader reader, long length, IoHandler handler)
+    {
+        Reader = new GameLumpReader(this, reader, length, handler);
         Reader.Load();
     }
 
-    public override void Write(Stream stream)
+    public void Write(Stream stream, IoHandler handler, DesiredCompression compression)
     {
-        var gameLumpWriter = new GameLumpWriter(this, stream);
+        var gameLumpWriter = new GameLumpWriter(this, stream, handler, compression);
         gameLumpWriter.Save();
     }
 

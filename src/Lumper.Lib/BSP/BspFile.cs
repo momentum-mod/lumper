@@ -9,24 +9,32 @@ using Bsp.Enum;
 using Enum;
 using IO;
 using Lumps;
+using Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
 
-public class BspFile
+public partial class BspFile
 {
     public const int HeaderLumps = 64;
+
     public const int HeaderSize = 1036;
+
     public const int MaxLumps = 128;
+
+    public string? Name { get; private set; }
 
     [JsonIgnore]
     public string? FilePath { get; private set; }
-    public string Name { get; private set; } = null!;
+
     public int Revision { get; set; }
+
     public int Version { get; set; }
 
-    protected MemoryStream Stream { get; private set; } = null!;
-
     public Dictionary<BspLumpType, Lump<BspLumpType>> Lumps { get; set; } = [];
+
+    [JsonIgnore]
+    public FileStream? FileStream { get; set; }
+
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // The nullability of all sorts of parts of this class and its members is based on the assumption
@@ -35,45 +43,238 @@ public class BspFile
     // creating a BspFile instance without loading an actual BSP.
     private BspFile() { }
 
-    public BspFile(string path) => Load(path);
+    public static BspFile? FromPath(IoHandler handler, string path)
+        => new BspFile { Name = Path.GetFileNameWithoutExtension(path) }
+            .Load(handler, path);
 
-    public void Load(string path)
+    public static BspFile? FromStream(IoHandler handler, Stream stream)
+        => new BspFile()
+            .Load(handler, stream);
+
+    public BspFile? Load(IoHandler handler, string path)
     {
-        // TODO: loads of error handling
         Name = Path.GetFileNameWithoutExtension(path);
-        var filePath = Uri.UnescapeDataString(Path.GetFullPath(path));
-        using FileStream stream = File.OpenRead(filePath);
-        Load(stream);
-        FilePath = filePath; // Set this at the end because Load(stream) resets it
+        FilePath = GetUnescapedFilePathString(path);
+        FileStream = File.OpenRead(FilePath);
+
+        using var reader = new BspFileReader(this, FileStream, handler);
+
+        // UI/CLI should track whether this gets cancelled and dispose of this class, it's in a useless
+        // half-loaded state and mustn't be used.
+        if (!reader.Load())
+        {
+            Logger.Info("Loading cancelled");
+            return null;
+        }
+
+        Logger.Info($"Loaded {Name}.bsp");
+        return this;
     }
 
-    public void Load(Stream stream)
+    public BspFile? Load(IoHandler handler, Stream stream)
     {
-        FilePath = null;
-        Stream.Dispose();
-        Stream = new MemoryStream();
-        stream.CopyTo(Stream);
-        var reader = new BspFileReader(this, Stream);
-        reader.Load();
+        using var reader = new BspFileReader(this, stream, handler);
+
+        if (!reader.Load())
+        {
+            Logger.Info("Loading cancelled");
+            return null;
+        }
+
+        Logger.Info("Loaded BSP from stream");
+        return this;
     }
 
-    public void Save(string path)
+    public void SaveToFile(
+        IoHandler handler,
+        string? path,
+        DesiredCompression compress,
+        bool makeBackup = true)
     {
-        if (path == FilePath)
-            throw new IOException("Can't write BSP to the same file");
-        using FileStream stream = File.Open(path, FileMode.Create);
-        Save(stream);
+        // If you add something here, also add it to the BspReader
+        if (path is null && FilePath is null)
+            throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
+
+        string outPath;
+        string? backupPath = null;
+        string? escapedPath;
+        if (path is not null &&
+            (escapedPath = GetUnescapedFilePathString(path)) != FilePath)
+        {
+            outPath = escapedPath;
+        }
+        else
+        {
+            outPath = FilePath!;
+
+            // Path is null so probably overwriting a file. If so, make a backup.
+            // This program isn't well-tested, don't want it mangling someones's BSP.
+            // Only do if overwriting existing file i.e. string != null
+            if (makeBackup && File.Exists(outPath))
+            {
+                backupPath = BspExtensionRegex().Replace(outPath, "") +
+                             $"_lumperbackup{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.bsp";
+                if (File.Exists(backupPath))
+                {
+                    // This should never happen since path depends on current
+                    // millisecond but whatever
+                    Logger.Error($"Backup path {backupPath} exists!");
+                    return;
+                }
+
+                try
+                {
+                    // TODO: go back to copy?
+                    if (FileStream is not null)
+                    {
+                        using FileStream backupStream = File.Open(backupPath, FileMode.Create);
+                        FileStream.Seek(0, SeekOrigin.Begin);
+                        FileStream.CopyTo(backupStream);
+                    }
+                    else
+                    {
+                        File.Copy(outPath, backupPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error(ex, "Failed to create backup file, not saving");
+                    return;
+                }
+
+                Logger.Info($"Created backup file {backupPath}");
+            }
+        }
+
+        Stream stream;
+        var overwritingOpenFile = false;
+        // Check if we're trying to write to the file we current have open.
+        // If so, saving will try to use data from that open filestream, so we
+        // can't write to it at the same time.
+        // Instead, write to a memory stream, then on success we'll close to
+        // open filestream, re-open it, and write the memory stream out to it.
+        if (File.Exists(outPath) && outPath == FilePath && FileStream is not null)
+        {
+            overwritingOpenFile = true;
+            stream = new MemoryStream();
+        }
+        else
+        {
+            // Overwrites file if exists
+            stream = File.Open(outPath, FileMode.Create);
+        }
+
+        var writer = new BspFileWriter(this, stream, handler, compress);
+        bool success;
+        try
+        {
+            success = writer.Save();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to write BSP file to stream");
+            success = false;
+        }
+
+        if (success)
+        {
+            if (overwritingOpenFile)
+            {
+                // Dispose of filestream we were just reading from
+                FileStream!.Dispose();
+
+                // Reopen, FileMode.Create overwrites
+                using FileStream fstream = File.Open(outPath, FileMode.Create);
+                stream.Seek(0, SeekOrigin.Begin);
+
+                // Copy memorystream we just wrote to over to new filestream, dispose
+                stream.CopyTo(fstream);
+                // Dispose of writer and underlying `stream`.
+                writer.Dispose();
+            }
+            else
+            {
+                // This is a filestream to a new file, just flush and close.
+                writer.Dispose();
+            }
+
+            // Update paths and name, and reopen the file we just wrote to, not reading anything.
+            // This means we keep an open stream to the file (stops other processes tampering), and
+            // can use it for unmanaged lump/pakfile (in some cases) when next saving, without
+            // actually loading anything into memory yet.
+            Name = Path.GetFileNameWithoutExtension(outPath);
+            FilePath = outPath;
+            FileStream = File.OpenRead(outPath);
+
+            Logger.Info($"Saved {outPath}");
+
+            // We just updated our filestream, and saving might've changed headers,
+            // so update the stream and headers for any lump which cares about a
+            // reference to the filestream (unmanaged lumps and the pakfile).
+            foreach ((BspLumpType bspLumpType, BspLumpHeader bspHeader) in writer.LumpHeaders)
+            {
+                Lump lump = GetLump(bspLumpType);
+
+                if (lump is GameLump gl)
+                {
+                    foreach ((Lump glLump, LumpHeaderInfo? glLumpHeader) in gl.Reader.Lumps)
+                    {
+                        if (glLump is not IFileBackedLump glfbLump)
+                            continue;
+
+                        glfbLump.DataStream = FileStream;
+                        glfbLump.DataStreamLength = glLumpHeader.Length;
+                        glfbLump.DataStreamOffset = glLumpHeader.Offset;
+                    }
+                }
+
+                if (lump is not IFileBackedLump fbLump)
+                    continue;
+
+                fbLump.DataStream = FileStream;
+                fbLump.DataStreamLength = bspHeader.Length;
+                fbLump.DataStreamOffset = bspHeader.Offset;
+            }
+
+            return;
+        }
+
+        // Save failed. Stream we were just writing to is useless, dispose.
+        // Save operation doesn't alter this BSP or underlying filestream if open.
+        writer.Dispose();
+
+        if (backupPath is null)
+            return;
+
+        // If we made a backup but save failed, that backup is the same file
+        // the currently loaded one.
+        try
+        {
+            File.Delete(outPath);
+            Logger.Info("Loaded BSP left unchanged, deleted identical backup file.");
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to restore backup!");
+        }
     }
 
-    public void Save(Stream stream)
+    public bool SaveToStream(IoHandler handler, Stream stream, DesiredCompression compress)
     {
-        using var writer = new BspFileWriter(this, stream);
-        writer.Save();
+        using var writer = new BspFileWriter(this, stream, handler, compress);
+        try
+        {
+            return writer.Save();
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex, "Failed to write BSP to stream");
+            return false;
+        }
     }
 
     public T GetLump<T>() where T : Lump<BspLumpType>
     {
-        // If you add something here, also add it to the BspReader
         Dictionary<Type, BspLumpType> typeMap = new()
         {
             { typeof(EntityLump), BspLumpType.Entities },
@@ -86,32 +287,30 @@ public class BspFile
         };
 
         if (typeMap.ContainsKey(typeof(T)))
-        {
             return (T)Lumps[typeMap[typeof(T)]];
-        }
+
         IEnumerable<KeyValuePair<BspLumpType, Lump<BspLumpType>>> tLumps = Lumps.Where(x => x.Value.GetType() == typeof(T));
         return (T)tLumps.Select(x => x.Value).First();
     }
 
     public Lump<BspLumpType> GetLump(BspLumpType lumpType) => Lumps[lumpType];
 
-    public void ToJson(bool sortLumps,
-        bool sortProperties,
-        bool ignoreOffset)
+    // I tried to refactor a bunch of code to use URIs everywhere but was a big hassle and Uri ctor apparently
+    // doesn't handle escaped stuff well... just sticking with strings
+    private static string GetUnescapedFilePathString(string path) => Uri.UnescapeDataString(Path.GetFullPath(path));
+
+    public void JsonDump(IoHandler handler, bool sortLumps, bool sortProperties, bool ignoreOffset)
     {
         var dir = Path.GetDirectoryName(FilePath) ?? ".";
         var name = Path.GetFileNameWithoutExtension(FilePath);
-        var path = $"{dir}/{name}.json";
-        using var fileStream = new FileStream(
-            path,
-            FileMode.Create,
-            FileAccess.Write);
+        var path = Path.Join(dir, name + ".json");
+        using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
 
-        ToJson(fileStream, sortLumps, sortProperties, ignoreOffset);
+        JsonDump(handler, fileStream, sortLumps, sortProperties, ignoreOffset);
         Logger.Info($"Dumped JSON to {path}");
     }
 
-    public void ToJson(Stream stream, bool sortLumps, bool sortProperties, bool ignoreOffset)
+    public void JsonDump(IoHandler handler, Stream stream, bool sortLumps, bool sortProperties, bool ignoreOffset)
     {
         if (sortLumps)
         {
@@ -121,7 +320,7 @@ public class BspFile
         }
 
         using var bspStream = new MemoryStream();
-        using var bspWriter = new BspFileWriter(this, bspStream);
+        using var bspWriter = new BspFileWriter(this, bspStream, handler, DesiredCompression.Unchanged);
         bspWriter.Save();
 
         var jsonSerializerSettings = new JsonSerializerSettings {
@@ -136,4 +335,7 @@ public class BspFile
         using var writer = new JsonTextWriter(sw);
         serializer.Serialize(writer, new { Bsp = this, Writer = bspWriter });
     }
+
+    [GeneratedRegex("\\.bsp$")]
+    public static partial Regex BspExtensionRegex();
 }

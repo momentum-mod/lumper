@@ -11,11 +11,12 @@ using Lumps.GameLumps;
 using Newtonsoft.Json;
 using NLog;
 
-public sealed class GameLumpReader(GameLump gamelump, Stream input, long length) : LumpReader(input)
+public sealed class GameLumpReader(GameLump gamelump, Stream input, long length, IoHandler handler) : LumpReader(input)
 {
     [JsonIgnore]
     private readonly GameLump _gameLump = gamelump;
-    private readonly long _length = length;
+
+    protected override IoHandler Handler { get; set; } = handler;
 
     [JsonProperty]
     public IReadOnlyDictionary<GameLumpType, LumpHeaderInfo> Headers
@@ -25,8 +26,8 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public GameLumpReader(GameLump gamelump, BinaryReader reader, long length)
-        : this(gamelump, reader.BaseStream, length)
+    public GameLumpReader(GameLump gamelump, BinaryReader reader, long length, IoHandler handler)
+        : this(gamelump, reader.BaseStream, length, handler)
     {
     }
 
@@ -66,12 +67,9 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
             {
                 var actualLength = header.Offset - prevHeader.Offset;
                 if (actualLength < 0)
-                    actualLength = _length - (prevHeader.Offset + prevHeader.Length - startPos);
+                    actualLength = length - (prevHeader.Offset + prevHeader.Length - startPos);
 
-                if (prevCompressed)
-                    prevHeader.CompressedLength = actualLength;
-                else
-                    prevHeader.CompressedLength = -1;
+                prevHeader.CompressedLength = prevCompressed ? actualLength : -1;
             }
 
             Lumps.Add(new Tuple<Lump, LumpHeaderInfo>(lump, header));
