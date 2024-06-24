@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Lumper.Lib.BSP.Lumps;
 using Newtonsoft.Json;
+using NLog;
 using SharpCompress.Compressors.LZMA;
 
 // Handles decompressing and fills lumps with data
@@ -14,6 +15,8 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
 {
     // Lump header information is only needed in the reader
     protected List<Tuple<Lump, LumpHeaderInfo>> Lumps { get; set; } = [];
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     protected abstract void ReadHeader();
 
@@ -102,7 +105,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Logger.Error(ex, "Failed to serialize to JSON");
         }
     }
 

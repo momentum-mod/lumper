@@ -7,6 +7,7 @@ using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps.GameLumps;
 using Newtonsoft.Json;
+using NLog;
 
 public sealed class GameLumpReader(GameLump gamelump, Stream input, long length) : LumpReader(input)
 {
@@ -19,6 +20,8 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
         => Lumps.ToDictionary(
             x => x.Item1 is Lump<GameLumpType> lump ? lump.Type : GameLumpType.Unknown,
             x => x.Item2);
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public GameLumpReader(GameLump gamelump, BinaryReader reader, long length)
         : this(gamelump, reader.BaseStream, length)
@@ -76,11 +79,11 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
             else
                 _gameLump.Lumps.Add(type, lump);
 
-            Console.WriteLine($"Gamelump " + _gameLump.Lumps.Count);
-            Console.WriteLine($"\tId: {type} {(int)type}");
-            Console.WriteLine($"\tFlags: {lump.Flags}");
-            Console.WriteLine($"\tFileofs: {header.Offset}");
-            Console.WriteLine($"\tFilelen: {header.UncompressedLength}");
+            Logger.Debug($"Read gamelump {_gameLump.Lumps.Count}  "
+                         + $"id: {type} {(int)type}".PadRight(48)
+                         + $"flags: {lump.Flags}".PadRight(24)
+                         + $"offset: {header.Offset}".PadRight(24)
+                         + $"length: {header.UncompressedLength}".PadRight(24));
 
             prevHeader = header;
             // lump is compressed if the last bit is 1

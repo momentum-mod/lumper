@@ -7,6 +7,7 @@ using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Lumps.GameLumps;
 using Newtonsoft.Json;
+using NLog;
 
 public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWriter(output)
 {
@@ -17,6 +18,8 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
     private long LumpDataStart { get; set; }
     private long LumpDataEnd { get; set; }
     public List<GameLumpHeader> LumpHeaders { get; set; } = [];
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public void Save()
     {
