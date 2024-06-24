@@ -30,6 +30,5 @@ public abstract class FixedLump<T, TData>(BspFile parent) : ManagedLump<T>(paren
             WriteItem(w, i);
     }
 
-    public override bool Empty() => Data.Count == 0;
-
+    public override bool Empty => Data.Count == 0;
 }

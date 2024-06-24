@@ -134,7 +134,7 @@ public class PakFileLump : ManagedLump<BspLumpType>
         }
     }
 
-    public override bool Empty() => Entries.Count == 0;
 
     public PakFileLump(BspFile parent) : base(parent) => Compress = false;
+    public override bool Empty => Entries.Count == 0;
 }
