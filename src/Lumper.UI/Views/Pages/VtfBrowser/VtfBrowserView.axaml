@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:Lumper.UI.Views.Pages.VtfBrowser"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.VtfBrowser"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="vm:VtfBrowserViewModel"
+             x:Class="Lumper.UI.Views.Pages.VtfBrowser.VtfBrowserView">
+
+  <Grid RowDefinitions="*, Auto">
+    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+      <ItemsControl HorizontalAlignment="Left" ItemsSource="{Binding FilteredItems}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" Margin="4" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border BorderBrush="#10FFFFFF" Background="#08FFFFFF" BorderThickness="1" Margin="4"
+                    CornerRadius="4" Cursor="Hand" DoubleTapped="Item_DoubleTapped">
+              <StackPanel
+                MinWidth="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}">
+                <Image
+                  Height="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
+                  Width="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
+                  Source="{Binding Image}"
+                  IsVisible="{Binding Loaded}" />
+                <TextBlock
+                  TextTrimming="CharacterEllipsis"
+                  MaxWidth="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Bottom"
+                  Text="{Binding Name}"
+                  Padding="4" />
+                <ToolTip.Tip>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Text="{Binding Key}" />
+                  </StackPanel>
+                </ToolTip.Tip>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <Border Grid.Row="1" BorderBrush="#10FFFFFF" Background="#20000000" Padding="4" BorderThickness="0 1 0 0">
+      <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, *, Auto, Auto">
+        <TextBox Grid.Column="0" Height="32" Width="164" Margin="8" Text="{Binding TextureSearch}"
+                 Watermark="Search" />
+        <CheckBox Grid.Column="1" Margin="4" VerticalAlignment="Center" HorizontalAlignment="Stretch"
+                  IsChecked="{Binding ShowCubemaps, Mode=TwoWay}">
+          Show Cubemaps
+        </CheckBox>
+        <Panel Grid.Column="2" Height="32" Width="1" Margin="8 0 12 0" Background="#10FFFFFF" />
+        <TextBlock Grid.Column="3" Foreground="LightGray" IsVisible="{Binding !IsEmpty}"
+                   VerticalAlignment="Center" FontFamily="{StaticResource Monospace}">
+          <TextBlock.Text>
+            <MultiBinding StringFormat="\{0\} / \{1\} textures">
+              <Binding Path="FilteredItems.Count" FallbackValue="" />
+              <Binding Path="TotalItems" FallbackValue="" />
+            </MultiBinding>
+          </TextBlock.Text>
+        </TextBlock>
+        <TextBlock Grid.Column="3" Foreground="LightGray" IsVisible="{Binding IsEmpty}"
+                   VerticalAlignment="Center" FontFamily="{StaticResource Monospace}">
+          No textures found
+        </TextBlock>
+        <TextBlock Grid.Column="5" VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
+                   FontSize="12" Text="{Binding Dimensions, StringFormat=N0}" />
+        <Slider Grid.Column="6" Width="200" Margin="8 0 16 0" Minimum="128" Maximum="512"
+                Value="{Binding Dimensions, Mode=TwoWay}" />
+      </Grid>
+    </Border>
+  </Grid>
+
+</UserControl>
