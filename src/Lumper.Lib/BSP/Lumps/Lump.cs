@@ -29,5 +29,6 @@ public abstract class Lump(BspFile parent)
     public abstract void Read(BinaryReader reader, long length);
 
     public abstract void Write(Stream stream);
-    public abstract bool Empty();
+
+    public abstract bool Empty { get; }
 }
