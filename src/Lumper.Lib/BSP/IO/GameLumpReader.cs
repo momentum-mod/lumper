@@ -76,10 +76,8 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
 
             Lumps.Add(new Tuple<Lump, LumpHeaderInfo>(lump, header));
 
-            if (_gameLump.Lumps.ContainsKey(type))
-                Console.WriteLine($"WARNING: key {type} already in gamelumps .. skipping");
-            else
-                _gameLump.Lumps.Add(type, lump);
+            if (!_gameLump.Lumps.TryAdd(type, lump))
+                Logger.Warn($"Key {type} already in gamelumps, skipping");
 
             Logger.Debug($"Read gamelump {_gameLump.Lumps.Count}  "
                          + $"id: {type} {(int)type}".PadRight(48)
