@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Shared.Pakfile"
+             xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Shared.Pakfile.PakfileEntryTextView"
+             x:DataType="vm:PakfileEntryTextViewModel">
+
+  <Panel>
+    <avaloniaEdit:TextEditor Name="TextEditor" ShowLineNumbers="True" IsVisible="{Binding IsContentLoaded}"
+                             FontFamily="{StaticResource Monospace}" />
+
+    <StackPanel IsVisible="{Binding !IsContentLoaded}" Orientation="Vertical" HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+      <Button Command="{Binding OpenExternal}" HorizontalAlignment="Center" Margin="0 8 0 0">
+        Open in External Program (read only)
+      </Button>
+      <Button Command="{Binding LoadContent}" HorizontalAlignment="Center" Margin="0 8 0 0">
+        Open in Text Editor
+      </Button>
+    </StackPanel>
+  </Panel>
+
+</UserControl>
