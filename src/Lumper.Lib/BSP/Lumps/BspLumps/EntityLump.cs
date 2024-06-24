@@ -12,16 +12,27 @@ using Struct;
 
 public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
-    public List<Entity> Data { get; set; } = [];
+    public HashSet<Entity> Data { get; set; } = [];
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
+        => Read(reader, length, false);
+
+    /// <summary>
+    /// Parse an entity lump using a BinaryReader on a stream.
+    ///
+    /// If `strict` is true, the reader will throw if it encounters an error.
+    /// Otherwise, it simply logs the error and tries to continue.
+    /// </summary>
+    public void Read(BinaryReader reader, long length, bool strict)
     {
-        while (ReadEntity(reader, reader.BaseStream.Position + length))
+        while (ReadEntity(reader, reader.BaseStream.Position + length, strict))
         {
         }
     }
 
-    private bool ReadEntity(BinaryReader reader, long endPos)
+    private bool ReadEntity(BinaryReader reader, long endPos, bool strict)
     {
         var stringBuilder = new StringBuilder(512);
         var keyValues = new List<KeyValuePair<string, string>>();
@@ -41,7 +52,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                             throw new InvalidDataException("Closed unopened section");
                         if (!inString)
                         {
-                            Data.Add(new Entity(keyValues));
+                            Data.Add(new Entity(keyValues) { EntityLumpVersion = Version });
                             return true;
                         }
 
@@ -73,8 +84,8 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
                                 if (key.Length == 0)
                                 {
-                                    Console.WriteLine(
-                                        "Entity parser skipped value \"{0}\" for empty key, how u do dis?", value);
+                                    Logger.Warn(
+                                        $"Entity parser skipped value \"{value}\" for empty key, how u do dis?");
                                 }
                                 else
                                 {
@@ -99,11 +110,13 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                 }
             }
         }
-        catch (InvalidDataException e)
+        catch (InvalidDataException ex)
         {
-            Console.WriteLine(
-                "WARNING: Failed to parse entity: {0}, {1} in list.\n Saving this BSP could cause data loss!",
-                e.Message, Data.Count);
+            if (strict)
+                throw;
+
+            Logger.Error(ex,
+                $"Failed to parse entity. Entity was {Data.Count} in list. Saving this BSP could cause data loss!");
 
             // Read to end of entity
             var foundEnd = false;
@@ -116,8 +129,9 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                     break;
                 }
             }
+
             if (!foundEnd)
-                Console.WriteLine("WARNING: End of entity not found!");
+                Logger.Error("End of entity not found! You have a seriously corrupted entity lump! Gosh!!");
         }
 
         return false;
