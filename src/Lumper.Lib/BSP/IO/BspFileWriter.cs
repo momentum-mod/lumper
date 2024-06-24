@@ -34,7 +34,7 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
     {
         Seek(0, SeekOrigin.Begin);
 
-        Write(Encoding.ASCII.GetBytes("VBSP"));
+        Write("VBSP"u8.ToArray());
         Write(_bsp.Version);
 
         foreach (BspLumpHeader? lump in LumpHeaders.OrderBy(x => x.Key).Select(x => x.Value))

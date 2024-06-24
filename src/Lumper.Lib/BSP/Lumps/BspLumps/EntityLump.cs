@@ -126,14 +126,17 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
     {
         foreach (Entity ent in Data)
         {
-            stream.Write(Encoding.ASCII.GetBytes("{\n"));
-            foreach (Entity.Property prop in ent.Properties)
+            stream.Write("{\n"u8);
+
+            foreach (Entity.EntityProperty prop in ent.Properties)
             {
-                stream.Write(Encoding.ASCII.GetBytes($"{prop}\n"));
+                stream.Write(Encoding.ASCII.GetBytes(prop.ToString() + '\n'));
             }
-            stream.Write(Encoding.ASCII.GetBytes("}\n"));
+
+            stream.Write("}\n"u8);
         }
-        stream.Write(Encoding.ASCII.GetBytes("\0"));
+
+        stream.Write("\0"u8);
     }
 
     public override bool Empty => Data.Count == 0;
