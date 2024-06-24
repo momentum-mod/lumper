@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Avalonia;
 using Avalonia.ReactiveUI;
 using NLog;
+using ReactiveUI;
 
 internal sealed class Program
 {
@@ -21,6 +22,8 @@ internal sealed class Program
         {
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
+
+            RxApp.DefaultExceptionHandler = new ObservableExceptionHandler();
 
             Desktop.ShutdownRequested += (_, _) => LogManager.Shutdown();
         }
