@@ -8,14 +8,13 @@
   </Application.DataTemplates>
 
   <Application.Resources>
+        <!-- To change these across the application, just whack static-weight TTFs in Assets/Fonts/ and update below. -->
+        <FontFamily x:Key="Sans">avares://Lumper.UI/Assets/Fonts/Roboto/#Roboto</FontFamily>
+        <FontFamily x:Key="Monospace">avares://Lumper.UI/Assets/Fonts/JetBrains_Mono/#JetBrains Mono</FontFamily>
     </Application.Resources>
 
   <Application.Styles>
-    <FluentTheme>
-            <FluentTheme.Palettes>
-                <ColorPaletteResources x:Key="Dark" Accent="DodgerBlue" RegionColor="DimGray" ErrorText="Yellow" />
-            </FluentTheme.Palettes>
-        </FluentTheme>
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+    <StyleInclude Source="Styles/Styles.axaml" />
+        <materialIcons:MaterialIconStyles />
   </Application.Styles>
 </Application>

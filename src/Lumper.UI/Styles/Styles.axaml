@@ -1,0 +1,199 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:aeInternal="https://github.com/avaloniaui/avaloniaedit"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia">
+
+  <FluentTheme>
+    <FluentTheme.Palettes>
+      <ColorPaletteResources x:Key="Light" Accent="#ffe04c26" AltHigh="White" AltLow="White" AltMedium="White"
+                                   AltMediumHigh="White" AltMediumLow="White" BaseHigh="Black" BaseLow="#ffd7d2d1"
+                                   BaseMedium="#ffa38888" BaseMediumHigh="#ff805658" BaseMediumLow="#ff916f70"
+                                   ChromeAltLow="#ff805658" ChromeBlackHigh="Black" ChromeBlackLow="#ffd7d2d1"
+                                   ChromeBlackMedium="#ff805658" ChromeBlackMediumLow="#ffa38888"
+                                   ChromeDisabledHigh="#ffd7d2d1" ChromeDisabledLow="#ffa38888" ChromeGray="#ff916f70"
+                                   ChromeHigh="#ffd7d2d1" ChromeLow="#fffeeaea" ChromeMedium="#fff6e5e5"
+                                   ChromeMediumLow="#fffeeaea" ChromeWhite="White" ListLow="#fff6e5e5"
+                                   ListMedium="#ffd7d2d1" RegionColor="#fffffbfa" />
+      <ColorPaletteResources x:Key="Dark" Accent="#ffe04c26" AltHigh="#22000000" AltLow="#22000000"
+                             AltMedium="#22000000" AltMediumHigh="#22000000" AltMediumLow="#22000000"
+                             BaseHigh="White" BaseLow="#ff373535" BaseMedium="#ff9c9b9b"
+                             BaseMediumHigh="#ffb5b4b4" BaseMediumLow="#ff696868" ChromeAltLow="#ffb5b4b4"
+                             ChromeBlackHigh="Black" ChromeBlackLow="#ffb5b4b4" ChromeBlackMedium="Black"
+                             ChromeBlackMediumLow="Black" ChromeDisabledHigh="#ff373535"
+                             ChromeDisabledLow="#ff9c9b9b" ChromeGray="#ff838181" ChromeHigh="#ff838181"
+                             ChromeLow="#ff171717" ChromeMedium="#ff1f1e1e" ChromeMediumLow="#ff2f2d2d"
+                             ChromeWhite="White" ListLow="#ff1f1e1e" ListMedium="#ff373535"
+                             RegionColor="#ff181717" />
+    </FluentTheme.Palettes>
+  </FluentTheme>
+
+  <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+  <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+  <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
+
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <MergeResourceInclude Source="ButtonSpinner.axaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+
+  <!-- Add additional padding when in fullscreen (haven't tested this on Linux/X11!)
+         https://github.com/AvaloniaUI/Avalonia/issues/5581#issuecomment-831549175 -->
+  <Style Selector="Window[WindowState=Maximized]">
+    <Setter Property="Padding" Value="8" />
+  </Style>
+
+  <!-- I would prefer to use system fonts if possible but vertical spacing of Segoe UI
+         is weird in Avalonia. Fluent theme seems to be designing around that (yikes).
+
+         Given the weird behavior between different fonts it seems worth using a consistent font everywhere.
+         https://github.com/AvaloniaUI/Avalonia/issues/10658 -->
+  <Style Selector="TextBlock, AccessText">
+    <Setter Property="FontFamily" Value="{StaticResource Sans}" />
+  </Style>
+
+  <Style Selector="GridSplitter">
+    <Setter Property="Background" Value="#555" />
+  </Style>
+
+  <Style Selector="ScrollViewer">
+    <!-- Auto hiding scrollbars have been super annoying to work with, decided to slim all scrollbars then disable
+             auto hiding. -->
+    <Setter Property="AllowAutoHide" Value="False" />
+    <Style Selector="^ /template/ ScrollBar#PART_VerticalScrollBar">
+      <Setter Property="Margin" Value="0 0 0 0" />
+      <Setter Property="MinWidth" Value="16" />
+      <Setter Property="Width" Value="16" />
+    </Style>
+  </Style>
+
+  <!-- We have a lot of scrolling containers so thinner bars are sometimes nice, but never use them on the far
+         RHS of the window, as they can be annoying to adjust when the window is resizable. -->
+  <Style
+    Selector=".ScrollThin /template/ ScrollViewer#PART_ScrollViewer /template/ ScrollBar#PART_VerticalScrollBar">
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="MinWidth" Value="8" />
+    <Setter Property="Width" Value="8" />
+    <Style Selector="^ /template/ RepeatButton">
+      <!-- This breaks scrolling when clicking on the outside of the track, can't be fucked with it rn-->
+      <Setter Property="Height" Value="0" />
+    </Style>
+  </Style>
+
+  <Style Selector="Button,ToggleButton">
+    <Setter Property="Border.Background" Value="#22AAAAAA" />
+    <Setter Property="Border.BorderBrush" Value="#11FFFFFF" />
+    <Setter Property="CornerRadius" Value="1" />
+  </Style>
+
+  <Style Selector="TextBox, NumericUpDown">
+    <Setter Property="Background" Value="#33000000" />
+    <Setter Property="BorderBrush" Value="#22FFFFFF" />
+    <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
+    <Style Selector="^:pointerover">
+      <Style Selector="^ /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#44000000" />
+        <Setter Property="BorderBrush" Value="#33FFFFFF" />
+      </Style>
+    </Style>
+    <Style Selector="^:focus">
+      <Style Selector="^ /template/ Border#PART_BorderElement">
+        <Setter Property="Background" Value="#55000000" />
+        <Setter Property="BorderBrush" Value="#33FFFFFF" />
+      </Style>
+    </Style>
+  </Style>
+
+  <Style Selector="TabItem">
+    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="Padding" Value="0" />
+    <Style Selector="^ TextBlock">
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="^ Button, ^ ToggleButton">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="^ > StackPanel">
+      <Setter Property="Spacing" Value="4" />
+    </Style>
+    <Style Selector="^ > StackPanel > TextBlock:nth-child(1)">
+      <Setter Property="Margin" Value="4 0 0 0" />
+    </Style>
+    <Style Selector="^ > StackPanel > Button:nth-last-child(1)">
+      <Setter Property="Margin" Value="0 0 4 0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+  </Style>
+
+  <Style Selector=".PageTopBar">
+    <Style Selector="^ > Border">
+      <Setter Property="DockPanel.Dock" Value="Top" />
+      <Setter Property="Padding" Value="4" />
+      <Setter Property="BorderBrush" Value="#20FFFFFF" />
+      <Setter Property="BorderThickness" Value="0 0 0 1" />
+      <Setter Property="Background" Value="#10000000" />
+      <Style Selector="^ StackPanel">
+        <Setter Property="Spacing" Value="4" />
+      </Style>
+      <Style Selector="^ Button">
+        <Setter Property="Padding" Value="4" />
+        <Style Selector="^ > StackPanel">
+          <Setter Property="Spacing" Value="4" />
+          <Setter Property="Orientation" Value="Horizontal" />
+          <Style Selector="^ > TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+          </Style>
+        </Style>
+        <Style Selector="^ > materialIcons|MaterialIcon">
+          <Setter Property="Width" Value="21" />
+          <Setter Property="Height" Value="21" />
+        </Style>
+      </Style>
+    </Style>
+  </Style>
+
+
+  <Style Selector="Border.JobDescription">
+    <Setter Property="Background" Value="#22000000" />
+    <Setter Property="BorderBrush" Value="#11FFFFFF" />
+    <Setter Property="BorderThickness" Value="0 0 0 1" />
+    <Setter Property="Padding" Value="16" />
+    <Style Selector="^ StackPanel">
+      <Setter Property="Spacing" Value="4" />
+    </Style>
+    <Style Selector="^ TextBlock">
+      <Setter Property="Foreground" Value="#EEE" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+  </Style>
+
+  <!-- Remove the line that AvaloniaEdit places to the right of line numbers. It just looks a bit crap! -->
+  <!-- Couldn't find a more specific selector that worked -->
+  <Style Selector="aeInternal|TextArea">
+    <Style Selector="^ Line">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^ aeInternal|LineNumberMargin">
+      <Setter Property="Margin" Value="0 0 12 0" />
+    </Style>
+  </Style>
+
+  <Style Selector="MenuItem">
+    <Setter Property="Padding" Value="12 6" />
+  </Style>
+
+  <Style Selector="ToolTip">
+    <Setter Property="MaxWidth" Value="700"/>
+    <Style Selector="^ TextBlock">
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Padding" Value="4" />
+    </Style>
+  </Style>
+</Styles>
