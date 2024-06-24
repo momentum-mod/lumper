@@ -1,41 +1,47 @@
-namespace Lumper.Lib.Tasks;
+namespace Lumper.Lib.Jobs;
+
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Lumper.Lib.BSP;
+using Bsp.Enum;
+using BSP;
+using BSP.IO;
+using NLog;
 
-public class RunExternalToolJob(
-    string? path,
-    string? args,
-    string? inputFile,
-    string? outputFile,
-    bool useStdOut = false)
-    : LumperTask
+public class RunExternalToolJob : Job, IJob
 {
-    public override string Type => "RunExternalToolTask";
-    public string? Path { get; set; } = path;
-    public string? Args { get; set; } = args;
-    // The current BSP will be saved to this and it should be the input for the command
-    // Null if you don't want to save and override all previous changes
-    public string? InputFile { get; set; } = inputFile;
-    public string? OutputFile { get; set; } = outputFile;
-    public bool UseStdOut { get; set; } = useStdOut;
+    public static string JobName => "Run External Tool";
+    public override string JobNameInternal => JobName;
+
+    public string? Path { get; set; }
+    public string? Args { get; set; }
+    public string? WorkingDir { get; set; }
+    public bool WritesToInputFile { get; set; }
+    public bool WritesToStdOut { get; set; }
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private sealed class Output : IDisposable
     {
-        public MemoryStream Mem;
+        public MemoryStream Mem { get; }
         private readonly BinaryWriter _writer;
         private readonly Stream _stream;
         private readonly byte[] _buffer;
+        private readonly Logger _logger;
+        private string _logString;
 
-        public Output(Stream stream)
+        public Output(Stream stream, string logName)
         {
             Mem = new MemoryStream();
             _writer = new BinaryWriter(Mem);
             _stream = stream;
             _buffer = new byte[80 * 1024];
+            _logger = LogManager.GetLogger(logName);
+            _logString = "";
         }
 
         public void Dispose()
@@ -51,104 +57,120 @@ public class RunExternalToolJob(
             {
                 var read = await _stream.ReadAsync(new Memory<byte>(_buffer));
                 if (read > 0)
+                {
                     _writer.Write(_buffer, 0, read);
+
+                    _logString += Encoding.UTF8.GetString(_buffer, 0, read);
+                    var fuckWindows = _logString.Contains("\r\n");
+                    var split = _logString.Split(fuckWindows ? "\r\n" : "\n");
+                    foreach ((var line, var index) in split.Select((x, i) => (x, i)))
+                    {
+                        if (index == split.Length - 1)
+                        {
+                            _logString = line;
+                            break;
+                        }
+
+                        _logger.Info(line.Replace("\n", ""));
+                    }
+                }
                 else
+                {
                     break;
+                }
             }
         }
     }
 
-    public override TaskResult Run(BspFile bsp)
+    public override bool Run(BspFile bsp)
     {
-        if (InputFile is not null)
+        if (WritesToStdOut && WritesToInputFile)
+            throw new InvalidDataException("Can't use both input file and stdout");
+
+        if (Path is null)
         {
-            bsp.Save(InputFile);
-            var fiIn = new FileInfo(InputFile);
-            // Guessing based on input file length
-            // Probably wrong but better than nothing (?)
-            Progress.Max = fiIn.Length;
-        }
-        else
-        {
-            Console.WriteLine($"Warning: Inputfile not set for external command '{Path} {Args}'");
+            Logger.Warn("Missing Path, ignoring job.");
+            return false;
         }
 
-        if (File.Exists(OutputFile))
-        {
-            // TODO: This is *probably* okay but maybe best to have a toggle button for this
-            // behaviour, just in case it nukes a file someone actual cares about.
-            Console.WriteLine("Warning: Output file exists, overwriting");
-            File.Delete(OutputFile);
-        }
+        // Don't have any sensible way of knowing how long process will take, just updating
+        // progress incrementally as we do IO-bound tasks.
+        Progress.Max = 100;
+        Progress.Count = 0;
 
+        var inputPath = System.IO.Path.GetTempFileName() + ".bsp";
+        var outputPath = WritesToStdOut || WritesToInputFile ? null : System.IO.Path.GetTempFileName() + ".bsp";
 
-        var startInfo = new ProcessStartInfo()
-        {
-            FileName = Path,
-            Arguments = Args,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
-        Output stdOut;
-        Output stdErr;
-        TaskResult ret;
+        // TODO: It'd be nice to do full task cancellation, in which case we'd be passing a CT into this method.
+        var handler = new IoHandler(new CancellationTokenSource());
+        bsp.Save(handler, inputPath, compress: DesiredCompression.Unchanged, makeBackup: false,
+            updateCurrentPath: false);
+        Progress.Count = 25;
+
+        Output stdOut, stdErr;
+        bool ret;
+        var args = Args;
         using (var process = new Process())
         {
-            process.StartInfo = startInfo;
-            process.Start();
-
-            stdOut = new Output(process.StandardOutput.BaseStream);
-            stdErr = new Output(process.StandardError.BaseStream);
-
-            Task taskStdOut = stdOut.Read();
-            Task taskStdErr = stdErr.Read();
-
-            while (!process.HasExited)
+            if (args is not null)
             {
-
-                if (UseStdOut)
-                {
-                    Progress.Count = stdOut.Mem.Length;
-                }
-                else
-                {
-                    var fiOut = new FileInfo(OutputFile);
-                    if (fiOut.Exists)
-                        Progress.Count = fiOut.Length;
-                }
-                Thread.Sleep(30);
+                args = args.Replace("%INPUT%", $"\"{inputPath}\"");
+                args = args.Replace("%DIR%", $"\"{WorkingDir}\"");
+                if (!WritesToStdOut && !WritesToStdOut)
+                    args = args.Replace("%OUTPUT%", $"\"{outputPath}\"");
             }
 
-            Task.WaitAll(taskStdOut, taskStdErr);
-            ret = process.ExitCode == 0
-                ? TaskResult.Success
-                : TaskResult.Failed;
+            process.StartInfo = new ProcessStartInfo {
+                FileName = Path,
+                Arguments = args,
+                WorkingDirectory = WorkingDir,
+                UseShellExecute = false,
+                CreateNoWindow = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+
+            var name = new FileInfo(Path).Name;
+            Logger.Info($"Running {name} with args {args}");
+            process.Start();
+
+            stdOut = new Output(process.StandardOutput.BaseStream, name);
+            stdErr = new Output(process.StandardError.BaseStream, name);
+
+            Task.WaitAll(stdOut.Read(), stdErr.Read());
+            ret = process.ExitCode == 0;
         }
 
+        Progress.Count = 75;
         stdOut.Mem.Seek(0, SeekOrigin.Begin);
         stdErr.Mem.Seek(0, SeekOrigin.Begin);
 
-        if (ret == TaskResult.Success)
+        handler = new IoHandler(new CancellationTokenSource());
+        if (ret)
         {
-            if (UseStdOut)
-                bsp.Load(stdOut.Mem);
+            if (WritesToStdOut)
+            {
+                bsp.Load(handler, stdOut.Mem);
+            }
+            else if (WritesToInputFile)
+            {
+                bsp.Load(handler, inputPath);
+            }
             else
-                bsp.Load(OutputFile);
-
-            Progress.Count = Progress.Max;
+            {
+                bsp.Load(handler, outputPath!);
+            }
         }
         else
         {
-            MemoryStream stream;
-            if (stdErr.Mem.Length > 0)
-                stream = stdErr.Mem;
-            else
-                stream = stdOut.Mem;
-            var r = new StreamReader(stream);
-            Console.WriteLine($"{System.IO.Path.GetFileName(Path)} ERROR: {r.ReadToEnd()}");
+            Logger.Error(
+                $"{System.IO.Path.GetFileName(Path)} executable returned non-zero exit code!" +
+                "\nstderr:" + new StreamReader(stdErr.Mem).ReadToEnd().Replace("\n", "\n       ")
+            );
         }
+
+        Progress.Count = Progress.Max;
+
         return ret;
     }
 }

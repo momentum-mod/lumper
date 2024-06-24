@@ -1,23 +1,20 @@
-namespace Lumper.Lib.Tasks;
-using System;
+namespace Lumper.Lib.Jobs;
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Lumper.Lib.BSP.Lumps.BspLumps;
-using Lumper.Lib.BSP.Struct;
-using Prop = System.Collections.Generic.KeyValuePair<string, string>;
+using BSP.Lumps.BspLumps;
+using BSP.Struct;
+using KvPair = System.Collections.Generic.KeyValuePair<string, string>;
 
 public partial class StripperJob
 {
     protected class Modify : Block
     {
-        public List<Prop> Match { get; set; } = [];
-        public List<Prop> Replace { get; set; } = [];
-        public List<Prop> Delete { get; set; } = [];
-        public List<Prop> Insert { get; set; } = [];
-
-        public Modify()
-        { }
+        private List<KvPair> Match { get; } = [];
+        private List<KvPair> Replace { get; } = [];
+        private List<KvPair> Delete { get; } = [];
+        private List<KvPair> Insert { get; } = [];
 
         public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr)
         {
@@ -25,7 +22,6 @@ public partial class StripperJob
             ParseBlock(reader, blockOpen, ref lineNr, (line, lNr) =>
             {
                 line = line.Trim();
-                List<Prop> props = null;
 
                 var blockOpenInner = false;
                 if (line == "{")
@@ -38,52 +34,62 @@ public partial class StripperJob
                     return;
                 }
 
-                props = line switch
-                {
+                List<KvPair> props = line switch {
                     "match:" => Match,
                     "replace:" => Replace,
                     "delete:" => Delete,
                     "insert:" => Insert,
-                    _ => throw new NotImplementedException($"Unknown title {line} in line {lNr}"),
+                    _ => throw new InvalidDataException($"Unknown title {line} in line {lNr}")
                 };
+
                 prevBlock = line;
 
-                ParseBlock(reader, blockOpenInner, ref lNr, (lineParam, lNrParam) => props.Add(ParseProp(lineParam, lNrParam)));
+                ParseBlock(reader, blockOpenInner, ref lNr,
+                    (lineParam, lNrParam) => props.Add(ParseProp(lineParam, lNrParam)));
             });
         }
 
         public override void Apply(EntityLump lump)
         {
-            foreach (Entity entity in lump.Data)
+            foreach (Entity entity in lump.Data
+                         .Where(entity => Match
+                             .All(filterProperty => entity.Properties
+                                 .Any(entityProperty => MatchKeyValue(filterProperty, entityProperty))))
+                         .ToList())
             {
-                if (Match.All(
-                    f => entity.Properties.Any(
-                        e => MatchKeyValue(f, e))))
+                foreach (KvPair replaceProp in Replace)
                 {
-                    foreach (Prop prop in Replace)
+                    foreach (Entity.EntityProperty prop in
+                             entity.Properties.Where(prop => prop.Key == replaceProp.Key).ToList())
                     {
-                        IEnumerable<Entity.Property> replaceEntProp = entity.Properties.Where(
-                            x => x.Key == prop.Key);
-                        foreach (Entity.Property? rep in replaceEntProp)
-                        {
-                            rep.ValueString = prop.Value;
-                        }
+                        var newProp = Entity.EntityProperty.Create(replaceProp.Key, replaceProp.Value);
+                        if (newProp is null)
+                            continue;
+
+                        entity.Properties[entity.Properties.IndexOf(prop)] = newProp;
+                        Logger.Info(
+                            $"Set value of {prop.Key} to {prop.ValueString} on entity {entity.PresentableName}");
                     }
-                    foreach (Prop prop in Delete)
-                    {
-                        var deleteEntProp = new List<Entity.Property>();
-                        foreach (Entity.Property del in entity.Properties)
-                        {
-                            if (MatchKeyValue(prop, del))
-                                deleteEntProp.Add(del);
-                        }
-                        foreach (Entity.Property del in deleteEntProp)
-                            entity.Properties.Remove(del);
-                    }
-                    foreach (Prop prop in Insert)
-                    {
-                        entity.Properties.Add(Entity.Property.CreateProperty(prop));
-                    }
+                }
+
+                foreach (Entity.EntityProperty toDelete in Delete.SelectMany(deleteProp => entity.Properties
+                             .Where(prop => MatchKeyValue(deleteProp, prop))
+                             .ToList()))
+                {
+                    entity.Properties.Remove(toDelete);
+                    Logger.Info(
+                        $"Removed property {toDelete} on entity {entity.PresentableName}");
+                }
+
+                foreach (KvPair insertProp in Insert)
+                {
+                    var newProp = Entity.EntityProperty.Create(insertProp);
+                    if (newProp is null)
+                        return;
+
+                    entity.Properties.Add(newProp);
+                    Logger.Info(
+                        $"Added property {newProp.Key}: {newProp.ValueString} to entity {entity.PresentableName}");
                 }
             }
         }
