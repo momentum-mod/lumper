@@ -11,45 +11,46 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
     public StaticPropLump StaticProps { get; set; } = null!;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     public override void Read(BinaryReader reader, long length)
     {
         var startPos = reader.BaseStream.Position;
 
         var dictEntries = reader.ReadInt32();
-        StaticPropsDict = new(Parent);
+        StaticPropsDict = new StaticPropDictLump(Parent);
         StaticPropsDict.Read(reader, dictEntries * StaticPropsDict.StructureSize);
 
         var leafEntries = reader.ReadInt32();
-        StaticPropsLeaf = new(Parent)
-        {
-            Version = Version
-        };
+        StaticPropsLeaf = new StaticPropLeafLump(Parent) { Version = Version };
         StaticPropsLeaf.Read(reader, leafEntries * StaticPropsLeaf.StructureSize);
 
         var entries = reader.ReadInt32();
-        StaticProps = new(Parent);
+
+        StaticProps = new StaticPropLump(Parent);
+        StaticProps.SetVersion(Version);
+
         var remainingLength = (int)(length - (reader.BaseStream.Position - startPos));
 
-        StaticProps.SetVersion(Version);
-        switch (StaticProps.ActualVersion)
         if (StaticProps.ActualVersion is StaticPropVersion.V7 or StaticPropVersion.V10)
         {
             if (remainingLength % StaticProps.StructureSize != 0)
             {
-                StaticProps.ActualVersion = StaticPropVersion.V7S;
+                StaticProps.ActualVersion = StaticPropVersion.V7s;
                 Logger.Warn($"Remaining length of staticprop lumpdoesn't fit version {Version}, trying V7s");
             }
         }
+
         if (StaticProps.ActualVersion != StaticPropVersion.Unknown)
         {
             var tmpLength = entries * StaticProps.StructureSize;
             if (tmpLength != remainingLength)
                 throw new InvalidDataException($"Funny staticprop length ({tmpLength} != {remainingLength})");
+
             StaticProps.Read(reader, tmpLength);
         }
         else
         {
-            throw new NotImplementedException($"Unknown staticprop version (Version: {StaticProps.Version})");
+            throw new InvalidDataException($"Unknown staticprop version (Version: {StaticProps.Version})");
         }
     }
 
