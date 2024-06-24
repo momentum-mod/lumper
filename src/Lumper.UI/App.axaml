@@ -1,11 +1,12 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:Lumper.UI"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="Lumper.UI.App">
 
-  <Application.DataTemplates>
-    <local:ViewLocator />
-  </Application.DataTemplates>
+    <Application.DataTemplates>
+        <local:ViewLocator />
+    </Application.DataTemplates>
 
   <Application.Resources>
         <!-- To change these across the application, just whack static-weight TTFs in Assets/Fonts/ and update below. -->
