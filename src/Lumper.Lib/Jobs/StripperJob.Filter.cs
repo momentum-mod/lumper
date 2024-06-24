@@ -1,9 +1,10 @@
-namespace Lumper.Lib.Tasks;
+namespace Lumper.Lib.Jobs;
+
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Lumper.Lib.BSP.Lumps.BspLumps;
-using Lumper.Lib.BSP.Struct;
+using BSP.Lumps.BspLumps;
+using BSP.Struct;
 using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
 public partial class StripperJob
@@ -12,28 +13,22 @@ public partial class StripperJob
     {
         public List<Prop> Properties { get; set; } = [];
 
-        public Filter()
-        { }
-
-        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr) => ParseBlock(reader, blockOpen, ref lineNr, (line, lNr) => Properties.Add(ParseProp(line, lNr)));
+        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr) =>
+            ParseBlock(
+                reader,
+                blockOpen,
+                ref lineNr,
+                (line, lNr) => Properties.Add(ParseProp(line, lNr)));
 
         public override void Apply(EntityLump lump)
         {
-            var del = new List<Entity>();
-
-            foreach (Entity entity in lump.Data)
-            {
-                if (Properties.All(
-                    f => entity.Properties.Any(
-                        e => MatchKeyValue(f, e))))
-                {
-                    del.Add(entity);
-                }
-            }
-
-            foreach (Entity entity in del)
+            foreach (Entity entity in lump.Data.Where(
+                         entity => Properties.All(
+                             filterProperty => entity.Properties.Any(
+                                 entityProperty => MatchKeyValue(filterProperty, entityProperty)))))
             {
                 lump.Data.Remove(entity);
+                Logger.Info($"Removed entity {entity.PresentableName}");
             }
         }
     }
