@@ -7,6 +7,7 @@ using System.Text;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
+using NLog;
 
 public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
 {
@@ -18,6 +19,8 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
         => Lumps.ToDictionary(
             x => x.Item1 is Lump<BspLumpType> lump ? lump.Type : BspLumpType.Unknown,
             x => x.Item2);
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public void Load()
     {
@@ -40,7 +43,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             throw new InvalidDataException("File doesn't look like a VBSP");
 
         _bsp.Version = ReadInt32();
-        Console.WriteLine($"BSP version: {_bsp.Version}");
+        Logger.Debug($"BSP version: {_bsp.Version}");
 
         for (var i = 0; i < BspFile.HeaderLumps; i++)
         {
@@ -75,11 +78,11 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                 lumpHeaderInfo.UncompressedLength = fourCc;
             }
 
-            Console.WriteLine($"Lump {type}({(int)type})"
-                              + $"\t\tOffset: {lumpHeader.Offset}"
-                              + $"\t\tLength: {length}"
-                              + $"\t\tVersion: {lump.Version}"
-                              + $"\t\tFourCc: {fourCc}");
+            Logger.Debug($"Read lump {type} ({(int)type})".PadRight(48)
+                         + $"offset: {lumpHeaderInfo.Offset}".PadRight(24)
+                         + $"length: {length}".PadRight(24)
+                         + $"version: {lump.Version}".PadRight(20)
+                         + $"fourCC: {fourCc}");
 
             _bsp.Lumps.Add(type, lump);
             Lumps.Add(new Tuple<Lump, LumpHeaderInfo>(lump, lumpHeaderInfo));
@@ -161,15 +164,16 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                 var prevEnd = prevHeader!.Offset + prevHeader.Length;
                 if (header.Offset < prevEnd)
                 {
-                    Console.WriteLine($"Lumps {prevLump!.Type} and {lump.Type} overlapping");
+                    Logger.Warn($"Lumps {prevLump!.Type} and {lump.Type} overlapping");
                     if (prevLump.Type == BspLumpType.GameLump)
-                        Console.WriteLine("but the previous lump was GAME_LUMP and the length is a lie");
+                        Logger.Warn("but the previous lump was GAME_LUMP and the length is a lie");
                     else
                         result = true;
                 }
                 else if (header.Offset > prevEnd)
                 {
-                    Console.WriteLine($"Space between lumps {prevLump!.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
+                    Logger.Debug(
+                        $"Space between lumps {prevLump!.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
                 }
 
                 if (header.Offset + header.Length >= prevEnd)
@@ -196,7 +200,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             if (end < 0)
             {
                 end = texDataStringDataLump.Data.Length;
-                Console.WriteLine("WARING: didn't find null at the end of texture string");
+                Logger.Warn($"Didn't find null at the end of texture string! ({texture.TexName})");
             }
 
             texture.TexName = end > 0

@@ -8,6 +8,7 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
     public StaticPropLeafLump StaticPropsLeaf { get; set; } = null!;
     public StaticPropLump StaticProps { get; set; } = null!;
 
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     public override void Read(BinaryReader reader, long length)
     {
         var startPos = reader.BaseStream.Position;
@@ -29,35 +30,13 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
 
         StaticProps.SetVersion(Version);
         switch (StaticProps.ActualVersion)
+        if (StaticProps.ActualVersion is StaticPropVersion.V7 or StaticPropVersion.V10)
         {
-            case StaticPropVersion.V7:
-            case StaticPropVersion.V10:
-                if (remainingLength % StaticProps.StructureSize != 0)
-                {
-                    StaticProps.ActualVersion = StaticPropVersion.V7s;
-                    Console.WriteLine($"Remaining length doesn't fit version {Version} .. trying V7*");
-                }
-                break;
-            case StaticPropVersion.Unknown:
-                break;
-            case StaticPropVersion.V4:
-                break;
-            case StaticPropVersion.V5:
-                break;
-            case StaticPropVersion.V6:
-                break;
-            case StaticPropVersion.V7s:
-                break;
-            case StaticPropVersion.V8:
-                break;
-            case StaticPropVersion.V9:
-                break;
-            case StaticPropVersion.V11:
-                break;
-            case StaticPropVersion.V12:
-                break;
-            default:
-                break;
+            if (remainingLength % StaticProps.StructureSize != 0)
+            {
+                StaticProps.ActualVersion = StaticPropVersion.V7S;
+                Logger.Warn($"Remaining length of staticprop lumpdoesn't fit version {Version}, trying V7s");
+            }
         }
         if (StaticProps.ActualVersion != StaticPropVersion.Unknown)
         {

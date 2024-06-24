@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using Lumper.Lib.BSP.Lumps;
 using Newtonsoft.Json;
+using NLog;
 using SharpCompress.Compressors.LZMA;
 
 // Handles compression and writes lump data to a stream
@@ -12,6 +13,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
     public static readonly int LzmaId = ('A' << 24) | ('M' << 16) | ('Z' << 8) | ('L');
 
     private long Compress(Stream uncompressedStream)
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     {
         long compressedLength;
 

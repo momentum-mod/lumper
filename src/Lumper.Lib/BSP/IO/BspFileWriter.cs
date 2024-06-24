@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
+using NLog;
 
 public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
 {
@@ -16,6 +17,8 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
     public Dictionary<BspLumpType, BspLumpHeader> LumpHeaders { get; set; } = [];
 
     public void Save()
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
     {
         ConstructTexDataLumps();
         WriteAllLumps();
