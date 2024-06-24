@@ -1,13 +1,19 @@
 namespace Lumper.Lib.BSP.Lumps.BspLumps;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Lumper.Lib.BSP.Struct;
+using Bsp.Enum;
+using Enum;
+using IO;
+using Lumps;
 using Newtonsoft.Json;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using SharpCompress.Writers.Zip;
+using Struct;
 
 //[JsonConverter(typeof(PakFileJsonConverter))]
 public class PakFileLump : ManagedLump<BspLumpType>

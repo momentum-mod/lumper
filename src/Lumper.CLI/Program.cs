@@ -1,6 +1,8 @@
 namespace Lumper.CLI;
+
 using CommandLine;
-using Lumper.Lib.BSP;
+using Lib.BSP;
+using Lib.BSP.IO;
 
 internal sealed class Program
 {

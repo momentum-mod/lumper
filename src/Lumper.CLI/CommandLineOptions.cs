@@ -1,4 +1,5 @@
 namespace Lumper.CLI;
+
 using CommandLine;
 
 public enum JsonOptions

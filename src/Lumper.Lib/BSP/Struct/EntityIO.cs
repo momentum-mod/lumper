@@ -1,6 +1,8 @@
-// ReSharper disable InconsistentNaming
 namespace Lumper.Lib.BSP.Struct;
+
+using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 public class EntityIO
 {

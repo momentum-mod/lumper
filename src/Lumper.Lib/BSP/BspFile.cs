@@ -1,12 +1,16 @@
 namespace Lumper.Lib.BSP;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Lumper.Lib.BSP.IO;
-using Lumper.Lib.BSP.Lumps;
-using Lumper.Lib.BSP.Lumps.BspLumps;
+using System.Text.RegularExpressions;
+using Bsp.Enum;
+using Enum;
+using IO;
+using Lumps;
 using Newtonsoft.Json;
+using NLog;
 
 public class BspFile
 {

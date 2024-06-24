@@ -1,9 +1,13 @@
 namespace Lumper.Lib.BSP.Lumps.BspLumps;
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Lumper.Lib.BSP.IO;
-using Lumper.Lib.BSP.Lumps.GameLumps;
+using Bsp.Enum;
+using Enum;
+using IO;
+using Lumps;
 
 public class GameLump : ManagedLump<BspLumpType>
 {
