@@ -5,91 +5,92 @@ using System.Collections.Generic;
 using System.Linq;
 using NLog;
 
-public class Entity
+public class Entity : ICloneable
 {
-    public abstract class EntityProperty(string key)
+    public Entity() : this(null) { }
+
+    public int EntityLumpVersion { get; init; }
+
+    public List<EntityProperty> Properties { get; set; }
+
+    public Entity(IEnumerable<KeyValuePair<string, string>>? kv)
+        => Properties = kv is not null
+            ? kv.Select(x => EntityProperty
+                .Create(x, EntityLumpVersion))
+                .OfType<EntityProperty>()
+                .ToList()
+            : [];
+
+    /// <summary>
+    /// Provides a user-friendly name for the entity. classnames aren't unique and hammerids
+    /// aren't always there, so can't consistently identify an entity without enumerating the
+    /// entirety of its properties.
+    /// </summary>
+    public string PresentableName
     {
-        public string Key { get; set; } = key;
-        public abstract string ValueString { get; set; }
+        get
+        {
+            var hammerid = Properties
+                .OfType<EntityProperty<string>>()
+                .FirstOrDefault(x => x.Key == "hammerid")?
+                .Value;
+
+            var className = Properties
+                .OfType<EntityProperty<string>>()
+                .FirstOrDefault(x => x.Key == "classname")?
+                .Value ?? "<missing classname>";
+
+            return hammerid is not null ? $"{className} [HammerID {hammerid}]" : className;
+        }
+    }
+
+    public object Clone()
+        => new Entity { Properties = Properties.Select(x => (EntityProperty)x.Clone()).ToList() };
+
+    public abstract class EntityProperty(string key) : ICloneable
+    {
+        public string Key { get; } = key;
+
+        public abstract string? ValueString { get; }
+
         public override string ToString() => $"\"{Key}\" \"{ValueString}\"";
 
-        public static EntityProperty? CreateProperty(KeyValuePair<string, string> kv) => CreateProperty(kv.Key, kv.Value);
-        public static EntityProperty? CreateProperty(string key, string value)
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+        public static EntityProperty? Create(KeyValuePair<string, string> kv, int elVersion = 0)
+            => Create(kv.Key, kv.Value, elVersion);
+
+        public static EntityProperty? Create(string key, string value, int elVersion = 0)
         {
-            if (EntityIO.IsIO(value))
+            if (!EntityIo.IsIo(value, elVersion))
+                return new EntityProperty<string>(key, value);
+
+            try
             {
-                var props = value.Split(',');
-
-                try
-                {
-                    var delay = float.Parse(props[3]);
-                    var timestofire = int.Parse(props[4]);
-
-                    return new EntityProperty<EntityIO>(key,
-                        new EntityIO
-                        {
-                            TargetEntityName = props[0],
-                            Input = props[1],
-                            Parameter = props[2],
-                            Delay = delay,
-                            TimesToFire = timestofire
-                        }
-                        );
-                }
-                catch (Exception e) when (e is IndexOutOfRangeException or FormatException)
-                {
-                    Console.WriteLine($"Failed to pass entity IO value '{key}' '{value}'!");
-                }
+                return new EntityProperty<EntityIo>(key, new EntityIo(value, elVersion));
             }
-            return new EntityProperty<string>(key, value);
-        }
-    }
-
-    public class EntityProperty<T>(string key, T value) : EntityProperty(key) where T : notnull
-    {
-        public T Value { get; set; } = value;
-        public override string ValueString
-        {
-            get => Value.ToString()!;
-            set => Value = (T)Convert.ChangeType(value, typeof(T));
-        }
-    }
-
-    private readonly EntityProperty<string>? _className;
-    public string ClassName
-    {
-        get => _className!.Value;
-        set => _className!.Value = value;
-    }
-
-    public List<EntityProperty> Properties { get; set; } = [];
-
-    public Entity(IEnumerable<KeyValuePair<string, string>> keyValues)
-    {
-        foreach (KeyValuePair<string, string> kv in keyValues)
-        {
-            if (kv.Key == "classname")
+            catch (Exception e) when (e is IndexOutOfRangeException or FormatException)
             {
-                if (_className is null)
-                {
-                    _className = new EntityProperty<string>(kv.Key, kv.Value);
-                    Properties.Add(_className);
-                    continue;
-                }
-
-                Console.WriteLine($"Found duplicate classname key, ignoring {kv}");
+                Logger.Error($"Failed to parse entity IO value '{key}' '{value}'!");
+                return null;
             }
-
-            var prop = EntityProperty.CreateProperty(kv);
-            if (prop is not null)
-                Properties.Add(prop);
         }
 
-        if (_className is null)
-        {
-            Console.WriteLine("Warning: Found entity with missing classname!");
-            // After this line _className and ClassName are safe to mark ClassName as non-null
-            ClassName = "<missing classname>";
-        }
+        public abstract object Clone();
+    }
+
+    /// <summary>
+    /// Either a <![CDATA[ EntityProperty<string> or EntityPropery<EntityIo> ]]>
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="value"></param>
+    /// <typeparam name="T"></typeparam>
+    public class EntityProperty<T>(string key, T? value) : EntityProperty(key)
+    {
+        public T? Value { get; set; } = value;
+
+        public override string? ValueString => Value?.ToString();
+
+        public override object Clone() => new EntityProperty<T>(Key, Value);
     }
 }
