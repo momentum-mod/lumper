@@ -81,19 +81,15 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
 
     private void ConstructTexDataLumps()
     {
-        // TODO: check obeys source limits
-        List<string> texStrings = [];
+        List<TexData> texData = _bsp.GetLump<TexDataLump>().Data;
+        TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
 
-        List<Struct.TexData> texData = _bsp.GetLump<TexDataLump>().Data;
+        // Ensure stringdata lump can fit everything we're about to stuff in
+        texDataStringDataLump.Resize(texData.Sum(x => Encoding.ASCII.GetByteCount(x.TexName) + 1));
 
         List<int> stringTable = [];
         var pos = 0;
-
-        // loop through every texture name
-        TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
-        var sum = texData.Sum(x => TexDataStringDataLump.TextureNameEncoding.GetByteCount(x.TexName) + 1);
-        Array.Resize(ref texDataStringDataLump.Data, sum);
-        foreach (Struct.TexData tex in texData)
+        foreach (TexData tex in texData)
         {
             // At start of texture string, put its loc in stringtable
             stringTable.Add(pos);
