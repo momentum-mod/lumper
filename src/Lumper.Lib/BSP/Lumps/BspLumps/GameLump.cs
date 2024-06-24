@@ -40,5 +40,5 @@ public class GameLump : ManagedLump<BspLumpType>
         gameLumpWriter.Save();
     }
 
-    public override bool Empty() => Lumps.Count == 0;
+    public override bool Empty => Lumps.Count == 0;
 }

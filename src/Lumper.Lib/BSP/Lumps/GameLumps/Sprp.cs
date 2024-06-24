@@ -67,7 +67,5 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
         StaticProps.Write(w.BaseStream);
     }
 
-    public override bool Empty() => StaticPropsDict.Empty()
-                                    && StaticPropsLeaf.Empty()
-                                    && StaticProps.Empty();
+    public override bool Empty => StaticProps.Empty && StaticPropsDict.Empty && StaticPropsLeaf.Empty;
 }

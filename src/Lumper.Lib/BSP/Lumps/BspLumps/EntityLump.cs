@@ -136,5 +136,5 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         stream.Write(Encoding.ASCII.GetBytes("\0"));
     }
 
-    public override bool Empty() => Data.Count == 0;
+    public override bool Empty => Data.Count == 0;
 }
