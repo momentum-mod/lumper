@@ -1,0 +1,77 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.PakfileExplorer"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.PakfileExplorer.PakfileExplorerView"
+             x:DataType="vm:PakfileExplorerViewModel">
+
+  <UserControl.Resources>
+    <converters:FileSizeConverter x:Key="fileSize" />
+  </UserControl.Resources>
+
+  <Grid ColumnDefinitions="*, 2, *">
+    <DockPanel Grid.Column="0" Classes="PageTopBar">
+      <Border>
+        <Grid ColumnDefinitions="Auto, 4, Auto, *, Auto, 4, Auto, 4, Auto">
+          <Button Grid.Column="0" Command="{Binding ExportContents}">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="Export" />
+              <TextBlock>Export Contents</TextBlock>
+            </StackPanel>
+          </Button>
+          <Button Grid.Column="2" Command="{Binding ReplaceContents}">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="Import" />
+              <TextBlock>Replace Contents</TextBlock>
+            </StackPanel>
+          </Button>
+          <Button Grid.Column="4" Command="{Binding Unsort}">
+            <StackPanel
+              ToolTip.Tip="Drag/drop moving isn't possible when columns are sorted. Also the up/down icons won't update when you unsort. Soz!">
+              <materialIcons:MaterialIcon Kind="SmileyDead" />
+              <TextBlock>Unsort</TextBlock>
+            </StackPanel>
+          </Button>
+          <Button Grid.Column="6" Command="{Binding ExpandAll}" ToolTip.Tip="Expand All" Padding="2">
+            <materialIcons:MaterialIcon Kind="UnfoldMoreHorizontal" />
+          </Button>
+          <Button Grid.Column="8" Command="{Binding CollapseAll}" ToolTip.Tip="Collapse All" Padding="2">
+            <materialIcons:MaterialIcon Kind="UnfoldLessHorizontal" />
+          </Button>
+        </Grid>
+      </Border>
+
+      <TreeDataGrid Name="Grid" Source="{Binding DataGridSource}"
+                    Classes="ScrollThin" ScrollViewer.AllowAutoHide="False" AutoDragDropRows="True"
+                    RowDragOver="Grid_OnRowDragOver" RowDrop="Grid_OnRowDrop" DragDrop.AllowDrop="True">
+        <TreeDataGrid.Resources>
+          <DataTemplate x:Key="EntryNameCell" DataType="vm:PakfileTreeNodeViewModel">
+            <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+          </DataTemplate>
+
+          <DataTemplate x:Key="EntrySizeCell" DataType="vm:PakfileTreeNodeViewModel">
+            <!-- StringFormat here is a stupid hack to add space between text and scrollbar. This thing is
+                             fucking annoying to style! -->
+            <TextBlock
+              Text="{Binding Size, Converter={StaticResource fileSize}, StringFormat='\{0\} '} "
+              VerticalAlignment="Center" HorizontalAlignment="Right" />
+          </DataTemplate>
+        </TreeDataGrid.Resources>
+        <TreeDataGrid.Styles>
+          <Style Selector="TreeDataGridRow:nth-child(2n)">
+            <Setter Property="Background" Value="#10808080" />
+          </Style>
+          <Style Selector="TreeDataGridRow TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
+          </Style>
+        </TreeDataGrid.Styles>
+      </TreeDataGrid>
+    </DockPanel>
+    <GridSplitter Grid.Column="1" Width="1" MinWidth="1" ResizeDirection="Columns" />
+    <ContentControl Grid.Column="2" Content="{Binding ActiveFile}" Margin="8" />
+  </Grid>
+</UserControl>

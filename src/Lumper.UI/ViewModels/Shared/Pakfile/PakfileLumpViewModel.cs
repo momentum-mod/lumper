@@ -45,9 +45,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     public PakfileEntryViewModel AddEntry(string key, Stream stream,
         ISourceUpdater<PakfileEntryViewModel, string>? updater = null)
     {
-        var entry = new PakfileEntry(key, stream) {
-            IsModified = true
-        };
+        var entry = new PakfileEntry(key, stream) { IsModified = true };
         _pakfile.Entries.Add(entry);
 
         PakfileEntryViewModel vm = CreateEntryViewModel(entry);
