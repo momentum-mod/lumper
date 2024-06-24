@@ -1,9 +1,14 @@
 namespace Lumper.UI;
+
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Lumper.UI.ViewModels;
+using ViewModels;
 
+/// <summary>
+/// Insane but simple ViewLocator implementation, derived from here:
+/// https://docs.avaloniaui.net/docs/tutorials/todo-list-app/locating-views
+/// </summary>
 public class ViewLocator : IDataTemplate
 {
     public Control Build(object? param)
@@ -17,8 +22,8 @@ public class ViewLocator : IDataTemplate
         if (type != null)
             return (Control)Activator.CreateInstance(type)!;
 
-        return new TextBlock { Text = $"Not Found: {name}" };
+        return new TextBlock { Text = $"View not found: {name}" };
     }
 
-    public bool Match(object? data) => data is ViewModelBase;
+    public bool Match(object? data) => data is ViewModel;
 }

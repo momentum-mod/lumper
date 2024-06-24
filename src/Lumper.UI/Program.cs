@@ -35,10 +35,13 @@ internal sealed class Program
             LogManager.GetCurrentClassLogger().Fatal(e);
         }
     }
+
     // Avalonia configuration, don't remove; also used by visual designer.
-    private static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
-        .UsePlatformDetect()
-        .LogToTrace()
-        .UseReactiveUI();
+    private static AppBuilder BuildAvaloniaApp()
+        => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .LogToTrace()
+            .UseReactiveUI();
+
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 }

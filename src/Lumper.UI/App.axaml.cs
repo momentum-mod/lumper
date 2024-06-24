@@ -1,9 +1,10 @@
 namespace Lumper.UI;
+
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Lumper.UI.ViewModels;
-using Lumper.UI.Views;
+using ViewModels;
+using Views;
 
 public class App : Application
 {
@@ -11,14 +12,8 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime
-            desktop)
-        {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel()
-            };
-        }
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
 
         base.OnFrameworkInitializationCompleted();
     }
