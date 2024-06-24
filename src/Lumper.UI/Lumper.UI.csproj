@@ -26,6 +26,7 @@
         <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1"/>
         <PackageReference Include="ReactiveUI" Version="20.1.1"/>
         <PackageReference Include="ReactiveUI.Fody" Version="19.5.41"/>
+        <PackageReference Include="Material.Icons.Avalonia" Version="2.1.9"/>
     </ItemGroup>
   <ItemGroup>
         <PackageReference Include="Glob" Version="1.2.0-alpha0037"/>
