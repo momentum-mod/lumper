@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.Jobs"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.Jobs.JobsView"
+             x:DataType="vm:JobsViewModel">
+
+  <UserControl.Resources>
+    <converters:JobStatusConverter x:Key="jobStatus" />
+    <converters:PercentConverter x:Key="percent" />
+  </UserControl.Resources>
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="*" MinWidth="230"/>
+      <ColumnDefinition Width="2" />
+      <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+    <Grid RowDefinitions="Auto, *, Auto" Grid.Row="0" Grid.Column="0" Classes="PageTopBar">
+      <Border Grid.Row="0">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*" MinWidth="4"/>
+            <ColumnDefinition Width="Auto"/>
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0" Spacing="4" Orientation="Horizontal">
+            <Button IsEnabled="{Binding !IsRunning}" ToolTip.Tip="Add" Padding="2">
+              <materialIcons:MaterialIcon Kind="Plus" />
+              <Button.Flyout>
+                <MenuFlyout ItemsSource="{Binding JobTypes}">
+                  <MenuFlyout.ItemContainerTheme>
+                    <ControlTheme TargetType="MenuItem" BasedOn="{StaticResource {x:Type MenuItem}}">
+                      <Setter Property="Header" Value="{ReflectionBinding Name}" />
+                      <Setter Property="Command" Value="{ReflectionBinding Create}" />
+                    </ControlTheme>
+                  </MenuFlyout.ItemContainerTheme>
+                </MenuFlyout>
+              </Button.Flyout>
+            </Button>
+            <Button IsEnabled="{Binding !IsRunning}" Command="{Binding ShowLoadJobsFileDialog}" Padding="2"
+                    ToolTip.Tip="Load Workflow">
+              <materialIcons:MaterialIcon Kind="FileImport" />
+            </Button>
+            <Button IsEnabled="{Binding !IsRunning}" Padding="2"
+                    Command="{Binding ShowSaveJobsFileDialog}"
+                    ToolTip.Tip="Save Workflow">
+              <materialIcons:MaterialIcon Kind="FileExport" />
+            </Button>
+          </StackPanel>
+
+          <StackPanel Grid.Column="2" Spacing="4" Orientation="Horizontal">
+            <Button Command="{Binding MoveSelectedUp}" Padding="2"
+                    ToolTip.Tip="Move Selected Up"
+                    IsEnabled="{Binding IsNotRunningAndHasSelection}">
+              <materialIcons:MaterialIcon Kind="ArrowUpBold" />
+            </Button>
+            <Button Command="{Binding MoveSelectedDown}" Padding="2"
+                    ToolTip.Tip="Move Selected Down" IsEnabled="{Binding IsNotRunningAndHasSelection}">
+              <materialIcons:MaterialIcon Kind="ArrowDownBold" />
+            </Button>
+            <Button Command="{Binding RemoveSelectedJob}" Padding="2"
+                    ToolTip.Tip="Remove Selected" IsEnabled="{Binding IsNotRunningAndHasSelection}">
+              <materialIcons:MaterialIcon Kind="Delete" />
+            </Button>
+            <Button Command="{Binding RemoveAll}" Padding="2" ToolTip.Tip="Remove All" IsEnabled="{Binding !IsRunning}">
+              <materialIcons:MaterialIcon Kind="Nuke" />
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+      <ListBox Grid.Row="1" ItemsSource="{Binding Jobs}" SelectedItem="{Binding SelectedJob}"
+               Background="#08FFFFFF">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Grid ColumnDefinitions="3*, 8, 1*, 8, 40, 8, 24">
+              <TextBlock HorizontalAlignment="Left" Grid.Column="0" Text="{Binding Job.JobNameInternal}" />
+              <ProgressBar MinWidth="0" Grid.Column="2" Value="{Binding ProgressPercent}" />
+              <TextBlock Grid.Column="4"
+                         Text="{Binding ProgressPercent, Converter={StaticResource percent}}"
+                         TextAlignment="Center" />
+              <materialIcons:MaterialIcon Grid.Column="6"
+                                          Kind="{Binding Status, Converter={StaticResource jobStatus}}" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <Border Grid.Row="2" HorizontalAlignment="Stretch" Background="#20000000" Padding="4">
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+          <Button Command="{Binding Run}" IsEnabled="{Binding !IsRunning}">Run</Button>
+        </StackPanel>
+      </Border>
+    </Grid>
+    <GridSplitter Grid.Column="1" Width="2" MinWidth="1" ResizeDirection="Columns" />
+    <ContentControl Grid.Column="2" Content="{Binding ActiveJobPage}" />
+  </Grid>
+</UserControl>
