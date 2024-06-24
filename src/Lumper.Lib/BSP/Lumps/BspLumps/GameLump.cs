@@ -9,30 +9,22 @@ using Enum;
 using IO;
 using Lumps;
 
-public class GameLump : ManagedLump<BspLumpType>
+public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
-    public T GetLump<T>() where T : Lump<GameLumpType>
-    {
-        Dictionary<System.Type, GameLumpType> typeMap = new()
-        {
-            { typeof(Sprp), GameLumpType.sprp }
-        };
     public GameLumpReader? Reader { get; private set; }
 
-    public GameLump(BspFile parent) : base(parent) => Compress = false;
-    public Dictionary<GameLumpType, Lump?> Lumps { get; } = [];
+    public Dictionary<GameLumpType, Lump<GameLumpType>?> Lumps { get; } = [];
 
-        if (typeMap.ContainsKey(typeof(T)))
-        {
-            return (T)Lumps[typeMap[typeof(T)]];
-        }
-        IEnumerable<KeyValuePair<GameLumpType, Lump>> tLumps = Lumps.Where(x => x.Value.GetType() == typeof(T));
-        return (T)tLumps.Select(x => x.Value).First();
     public override bool IsCompressed
     {
         get => false;
         set { } // Deliberately left empty
     }
+
+    public T? GetLump<T>() where T : Lump<GameLumpType>
+        => (T?)Lumps.Values.First(x => x?.GetType() == typeof(T));
+
+    public Lump<GameLumpType>? GetLump(GameLumpType lumpType) => Lumps[lumpType];
 
     // Same as PakfileLump strategy, trying to avoid overly complex inheritance nonsense
     public override void Read(BinaryReader reader, long length) => throw new NotImplementedException();
