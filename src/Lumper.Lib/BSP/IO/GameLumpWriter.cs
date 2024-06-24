@@ -25,9 +25,8 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
 
     public void Save()
     {
-        if (!_gameLump.Lumps.ContainsKey(0))
-            _gameLump.Lumps.Add(0, null);
         // The last gamelump header should be 0 so we add a empty lump at the end
+        _gameLump.Lumps.TryAdd(0, null);
 
         LumpDataStart = BaseStream.Position + 4 /* gamelump count 32bit int */ +
                         (_gameLump.Lumps.Count * GameLumpHeader.StructureSize);
