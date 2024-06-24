@@ -1,0 +1,68 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Lumper.UI.ViewModels.Pages.Jobs"
+             xmlns:views="clr-namespace:Lumper.UI.Views.Pages.Jobs"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.Jobs.ReplaceTextureJobView"
+             x:DataType="vm:ReplaceTextureJobViewModel">
+
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Classes="JobDescription">
+      <Panel>
+        <StackPanel>
+          <TextBlock>
+            Replaces every matching occurence of a texture with the given string.
+          </TextBlock>
+          <TextBlock>
+            This job only operates on the TexData lumps, and doesn't modify the Pakfile lump in any way.
+          </TextBlock>
+          <TextBlock FontStyle="Italic" FontWeight="Medium">
+            Example 1
+          </TextBlock>
+          <TextBlock FontFamily="{StaticResource Monospace}" xml:space="preserve"><Run
+              FontWeight="Medium">Match            ReplaceWith      Regex</Run>
+<Run>brick/wall_01    brick/wall_02    Off</Run></TextBlock>
+          <TextBlock FontStyle="Italic">
+            Matches exactly "brick/wall_01" and nothing else, replaces with "brick/wall_02".
+          </TextBlock>
+          <TextBlock FontStyle="Italic" FontWeight="Medium">
+            Example 2
+          </TextBlock>
+          <TextBlock FontFamily="{StaticResource Monospace}" xml:space="preserve"><Run
+              FontWeight="Medium">Match            ReplaceWith      Regex</Run>
+<Run>wall             chair            On</Run></TextBlock>
+          <TextBlock FontStyle="Italic">
+            Replaces any occurence of "wall" with chair, "brick/wall_01" would become "brick/chair_01". Uncomfortable!
+          </TextBlock>
+          <Button VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                  Command="{Binding Add}" Margin="0 8 0 0">
+            Add Replacer
+          </Button>
+        </StackPanel>
+
+      </Panel>
+    </Border>
+    <DataGrid ItemsSource="{Binding Replacers}" GridLinesVisibility="All" CanUserSortColumns="False"
+              CanUserReorderColumns="False" CanUserResizeColumns="True" IsReadOnly="False">
+      <DataGrid.Columns>
+        <DataGridTextColumn Width="*" Header="Match" Binding="{Binding Matcher}" IsReadOnly="False" />
+        <DataGridTextColumn Width="*" Header="Replace With" Binding="{Binding ReplaceWith}" IsReadOnly="False" />
+        <DataGridCheckBoxColumn Header="Regex" Binding="{Binding IsRegex}" IsReadOnly="False" />
+        <DataGridTemplateColumn Width="32">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <Button
+                Command="{Binding $parent[views:ReplaceTextureJobView].((vm:ReplaceTextureJobViewModel)DataContext).Delete, FallbackValue=''}"
+                Padding="6" CommandParameter="{Binding}" Height="32">
+                <materialIcons:MaterialIcon Kind="Delete" />
+              </Button>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

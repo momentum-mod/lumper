@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Lumper.UI.ViewModels.Pages.Jobs"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.Jobs.StripperJobView"
+             x:DataType="vm:StripperJobViewModel">
+
+  <StackPanel>
+    <Border Classes="JobDescription" Margin="0 0 0 8" Padding="8">
+      <Panel>
+        <TextBlock VerticalAlignment="Center">
+          Applies a Stripper:Source config file to the entity lump.
+        </TextBlock>
+        <HyperlinkButton HorizontalAlignment="Right"
+                         NavigateUri="https://www.bailopan.net/stripper/">
+          Stripper Config Reference
+        </HyperlinkButton>
+      </Panel>
+    </Border>
+    <Grid ColumnDefinitions="*, 4, Auto" RowDefinitions="Auto" Margin="8 0 8 8">
+      <TextBox Text="{Binding ConfigPath}" />
+      <Button Grid.Column="2" Command="{Binding ShowFilePickerDialog}">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <materialIcons:MaterialIcon Kind="FileDocumentOutline" />
+          <TextBlock VerticalAlignment="Center">Pick Config</TextBlock>
+        </StackPanel>
+      </Button>
+    </Grid>
+  </StackPanel>
+</UserControl>
