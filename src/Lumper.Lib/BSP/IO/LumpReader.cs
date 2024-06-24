@@ -12,12 +12,15 @@ using Newtonsoft.Json;
 using NLog;
 using SharpCompress.Compressors.LZMA;
 
-// Handles decompressing and fills lumps with data
+/// <summary>
+/// Handles decompressing and fills lumps with data
+/// </summary>
 [JsonObject(MemberSerialization.OptIn)]
-public abstract class LumpReader(Stream input) : BinaryReader(input)
+public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: Encoding.UTF8, leaveOpen: true)
 {
-    // Lump header information is only needed in the reader
-    protected List<Tuple<Lump, LumpHeaderInfo>> Lumps { get; set; } = [];
+    public List<Tuple<Lump, LumpHeaderInfo>> Lumps { get; set; } = [];
+
+    protected abstract IoHandler Handler { get; set; }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -25,37 +28,19 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
 
     protected virtual void LoadAll()
     {
-        foreach ((Lump lump, LumpHeader lumpHeader) in Lumps)
+        const float incr = (float)IoHandler.ReadProgressProportions.OtherLumps / BspFile.HeaderLumps;
+
+        foreach ((Lump lump, LumpHeaderInfo lumpHeader) in Lumps)
         {
+            if (Handler.Cancelled)
+                return;
+
+            if (this is BspFileReader)
+                Handler.UpdateProgress(incr, $"Reading {((Lump<BspLumpType>)lump).Type}");
+
             if (lumpHeader.Length > 0)
                 Read(lump, lumpHeader);
         }
-    }
-
-    private MemoryStream Decompress()
-    {
-        MemoryStream decompressedStream = new();
-
-        const string magic = "LZMA";
-        var id = ReadBytes(magic.Length);
-        if (Encoding.ASCII.GetString(id) != magic)
-            throw new InvalidDataException("Failed to decompress: Lump doesn't look like it was LZMA compressed");
-
-        var actualSize = ReadUInt32();
-        var lzmaSize = ReadUInt32();
-        var properties = new byte[5];
-
-        Read(properties, 0, 5);
-
-        var lzmaStream = new LzmaStream(properties,
-            BaseStream,
-            lzmaSize,
-            actualSize);
-        lzmaStream.CopyTo(decompressedStream);
-        decompressedStream.Flush();
-        decompressedStream.Seek(0, SeekOrigin.Begin);
-
-        return decompressedStream;
     }
 
     protected void Read(Lump lump, LumpHeaderInfo lhi)
@@ -65,15 +50,12 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
 
         BaseStream.Seek(lhi.Offset, SeekOrigin.Begin);
 
+        lump.IsCompressed = lump is not GameLump && lump is not PakfileLump && lhi.Compressed;
         if (lump is IUnmanagedLump unmanagedLump)
         {
-            unmanagedLump.Compressed = lumpHeader.Compressed;
-            unmanagedLump.UncompressedLength = lumpHeader.Compressed
-                ? lumpHeader.UncompressedLength
-                : -1;
-
-            lumpReader = this;
-            lumpStreamLength = lumpHeader.Length;
+            unmanagedLump.UncompressedLength = lhi.Compressed ? lhi.UncompressedLength : -1;
+            reader = this;
+            lumpStreamLength = lhi.Length;
         }
         else if (lhi.Compressed)
         {
@@ -87,8 +69,17 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
             lumpStreamLength = lhi.UncompressedLength;
         }
 
-        lump.Read(lumpReader, lumpStreamLength);
-        lumpReader.BaseStream.Seek(startPos, SeekOrigin.Begin);
+        var startPos = reader.BaseStream.Position;
+
+        // Pass handler to pakfile lump so can update progress
+        if (lump is PakfileLump pakfileLump)
+            pakfileLump.Read(reader, lumpStreamLength, Handler);
+        else if (lump is GameLump gameLump)
+            gameLump.Read(reader, lumpStreamLength, Handler);
+        else
+            lump.Read(reader, lumpStreamLength);
+
+        reader.BaseStream.Seek(startPos, SeekOrigin.Begin);
     }
 
     public void ToJson(Stream stream)
@@ -111,4 +102,25 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
         }
     }
 
+    private MemoryStream Decompress()
+    {
+        MemoryStream decompressedStream = new();
+
+        const string magic = "LZMA";
+        if (Encoding.ASCII.GetString(ReadBytes(magic.Length)) != magic)
+            throw new InvalidDataException("Failed to decompress: Lump doesn't look like it was LZMA compressed");
+
+        var actualSize = ReadUInt32();
+        var lzmaSize = ReadUInt32();
+        var properties = new byte[5];
+
+        _ = Read(properties, 0, 5);
+
+        var lzmaStream = new LzmaStream(properties, BaseStream, lzmaSize, actualSize);
+        lzmaStream.CopyTo(decompressedStream);
+        decompressedStream.Flush();
+        decompressedStream.Seek(0, SeekOrigin.Begin);
+
+        return decompressedStream;
+    }
 }
