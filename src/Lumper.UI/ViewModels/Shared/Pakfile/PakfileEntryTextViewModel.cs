@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 using Lib.BSP.Struct;
 using NLog;
 using ReactiveUI.Fody.Helpers;
+using Views.Shared.Pakfile;
 
-public class PakfileEntryTextViewModel(PakfileEntry entry) : PakfileEntryViewModel(entry)
+public class PakfileEntryTextViewModel : PakfileEntryViewModel
 {
     [Reactive]
     public string? Content { get; set; } = "";
@@ -20,6 +21,9 @@ public class PakfileEntryTextViewModel(PakfileEntry entry) : PakfileEntryViewMod
     private static readonly string[] KnownFileTypes = [".txt", ".vbsp", ".vmt"];
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    public PakfileEntryTextViewModel(PakfileEntry entry) : base(entry)
+        => RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
 
     public override void Load()
     {

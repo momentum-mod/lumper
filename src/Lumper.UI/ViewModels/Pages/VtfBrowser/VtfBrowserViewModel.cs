@@ -12,8 +12,9 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services;
 using Shared.Pakfile;
+using Views.Pages.VtfBrowser;
 
-public partial class VtfBrowserViewModel : ViewModel
+public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel, VtfBrowserView>
 {
     [ObservableAsProperty]
     public ReadOnlyCollection<PakfileEntryVtfViewModel>? FilteredItems { get; }

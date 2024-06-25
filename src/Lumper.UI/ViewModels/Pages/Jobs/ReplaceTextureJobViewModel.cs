@@ -7,6 +7,7 @@ using DynamicData;
 using Lib.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Views.Pages.Jobs;
 
 public sealed class ReplaceTextureJobViewModel : JobViewModel, IDisposable
 {
@@ -18,6 +19,8 @@ public sealed class ReplaceTextureJobViewModel : JobViewModel, IDisposable
 
     public ReplaceTextureJobViewModel(ReplaceTextureJob job) : base(job)
     {
+        RegisterView<ReplaceTextureJobViewModel, ReplaceTextureJobView>();
+
         Job = job;
 
         _source.Edit(_ =>

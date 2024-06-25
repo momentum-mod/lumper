@@ -7,8 +7,9 @@ using NLog;
 using ReactiveUI;
 using Services;
 using Shared.Entity;
+using Views.Pages.RawEntities;
 
-public sealed class RawEntitiesViewModel : ViewModel
+public sealed class RawEntitiesViewModel : ViewModelWithView<RawEntitiesViewModel, RawEntitiesView>
 {
     private TextEditor? _editor;
 
