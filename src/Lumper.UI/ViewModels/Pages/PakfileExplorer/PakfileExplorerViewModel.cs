@@ -19,9 +19,10 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services;
 using Shared.Pakfile;
+using Views.Pages.PakfileExplorer;
 using Node = PakfileTreeNodeViewModel;
 
-public sealed class PakfileExplorerViewModel : ViewModel
+public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorerViewModel, PakfileExplorerView>
 {
     private PakfileTreeViewModel? Tree { get; set; }
 

@@ -15,8 +15,9 @@ using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services;
+using Views.Pages.Jobs;
 
-public class JobsViewModel : ViewModel
+public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 {
     public JobsViewModel()
     {

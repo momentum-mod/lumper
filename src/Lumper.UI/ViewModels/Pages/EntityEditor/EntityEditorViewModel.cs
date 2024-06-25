@@ -11,11 +11,12 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services;
 using Shared.Entity;
+using Views.Pages.EntityEditor;
 
 /// <summary>
 /// ViewModel for the EntityEditor page
 /// </summary>
-public sealed class EntityEditorViewModel : ViewModel
+public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewModel, EntityEditorView>
 {
     [ObservableAsProperty]
     public EntityLumpViewModel? EntityLumpViewModel { get; }
