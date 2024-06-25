@@ -18,7 +18,7 @@ public class CompressionTask : LumperTask
     {
         if (!CompressLumps)
         {
-            //todo error message?
+            // TODO: log error
             return TaskResult.Failed;
         }
 
@@ -43,6 +43,7 @@ public class CompressionTask : LumperTask
 
             Progress.Count++;
         }
+
         return TaskResult.Success;
     }
 }

@@ -20,7 +20,9 @@ public class PakFileEntry
 
     [JsonIgnore]
     private readonly ZipArchiveEntry _entry;
+
     public string Key { get; set; }
+
     [JsonIgnore]
     public Stream? _dataStream = null;
     [JsonIgnore]

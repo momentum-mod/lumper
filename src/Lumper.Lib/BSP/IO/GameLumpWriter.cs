@@ -20,10 +20,10 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
 
     public void Save()
     {
-        //the last gamelump header should be 0 so we add a empty lump at the end
         if (!_gameLump.Lumps.ContainsKey(0))
             _gameLump.Lumps.Add(0, null);
         LumpdataStart = BaseStream.Position + 4 /*gamelump count 32bit int*/ + (_gameLump.Lumps.Count * GameLumpHeader.StructureSize);
+        // The last gamelump header should be 0 so we add a empty lump at the end
         WriteAllLumps();
         WriteHeader();
     }
@@ -42,7 +42,8 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
         }
         if (LumpHeaders.Count != 0 && BaseStream.Position != LumpdataStart)
             throw new NotImplementedException("Failed to write GameLump header: bad length");
-        BaseStream.Seek(LumpdataEnd, SeekOrigin.Begin);
+
+        BaseStream.Seek(LumpDataEnd, SeekOrigin.Begin);
     }
 
     private void WriteAllLumps()
@@ -63,6 +64,7 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
 
             LumpHeaders.Add(new GameLumpHeader(newHeader, (ushort)lump.Version, (int)entry.Key));
         }
+
         if (LumpHeaders.Count != 0 && LumpHeaders.Last().Id != 0)
             LumpHeaders.Add(new GameLumpHeader());
 
