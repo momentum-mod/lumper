@@ -12,6 +12,7 @@ using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.PixelFormats;
+using Views.Shared.Pakfile;
 using Vtf;
 using Lib.BSP.Struct;
 
@@ -49,6 +50,8 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
     public PakfileEntryVtfViewModel(PakfileEntry entry, BspNode parent) : base(entry, parent)
     {
+        RegisterView<PakfileEntryVtfViewModel, PakfileEntryVtfView>();
+
         // Ugly null handling, see
         // https://www.reactiveui.net/docs/handbook/when-any.html#null-propogation-inside-whenanyvalue
         this.WhenAnyValue(
