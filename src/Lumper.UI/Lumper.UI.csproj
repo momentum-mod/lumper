@@ -1,17 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
-    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
     <ApplicationIcon>Assets\Images\Lumper.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <OutputPath>../../build</OutputPath>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <!-- Disable trim warnings - these are prooooobably okay -->
+    <NoWarn>IL2026,IL2104</NoWarn>
+    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Mark Fluent theme as trimmable for when building in self-contained mode -->
     <TrimmableAssembly Include="Avalonia.Themes.Fluent"/>
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.1.0-rc1"/>
     <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6"/>
@@ -30,19 +43,24 @@
     <PackageReference Include="NLog" Version="5.3.2"/>
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4"/>
   </ItemGroup>
+
   <ItemGroup>
     <AvaloniaResource Include="Assets\**"/>
     <AvaloniaResource Remove="Assets\Lumper.ico"/>
   </ItemGroup>
+
   <ItemGroup>
     <None Remove=".gitignore"/>
   </ItemGroup>
+
   <ItemGroup>
     <None Update="NLog.config" CopyToOutputDirectory="Always"/>
     <None Update="RegisterLumperURLProtocol.ps1" CopyToOutputDirectory="Always"/>
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj"/>
     <ProjectReference Include="..\Dependencies\VTFLib.NET\VTFLib.NET\VTFLib.NET.csproj"/>
   </ItemGroup>
+
 </Project>
