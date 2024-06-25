@@ -111,44 +111,39 @@
             </Style>
           </StackPanel.Styles>
 
-          <ToggleButton Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.EntityEditor}"
-                                  HotKey="Ctrl+D1">
+          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                        CommandParameter="{x:Static service:Page.EntityEditor}" HotKey="Ctrl+D1">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="Lightbulb" />
               <TextBlock>Entity Editor</TextBlock>
             </StackPanel>
           </ToggleButton>
 
-          <ToggleButton Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.RawEntities}"
-                                  HotKey="Ctrl+D2">
+          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                        CommandParameter="{x:Static service:Page.RawEntities}" HotKey="Ctrl+D2">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="TextLong" />
               <TextBlock>Raw Entities</TextBlock>
             </StackPanel>
           </ToggleButton>
 
-          <ToggleButton Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.PakfileExplorer}"
-                                  HotKey="Ctrl+D3">
+          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                        CommandParameter="{x:Static service:Page.PakfileExplorer}" HotKey="Ctrl+D3">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="FolderZipOutline" />
               <TextBlock>Pakfile Explorer</TextBlock>
             </StackPanel>
           </ToggleButton>
 
-          <ToggleButton Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.VtfBrowser}"
-                                  HotKey="Ctrl+D4">
+          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                        CommandParameter="{x:Static service:Page.VtfBrowser}" HotKey="Ctrl+D4">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="ImageMultiple" />
               <TextBlock>Texture Browser</TextBlock>
             </StackPanel>
           </ToggleButton>
-          <ToggleButton Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.Jobs}"
-                                  HotKey="Ctrl+D5">
+          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                        CommandParameter="{x:Static service:Page.Jobs}" HotKey="Ctrl+D5">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="FormatListChecks" />
               <TextBlock>Jobs</TextBlock>
