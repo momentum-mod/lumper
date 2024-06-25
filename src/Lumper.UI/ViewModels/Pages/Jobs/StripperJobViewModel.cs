@@ -7,6 +7,7 @@ using Lumper.Lib.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services;
+using Views.Pages.Jobs;
 
 public class StripperJobViewModel : JobViewModel
 {
@@ -17,6 +18,8 @@ public class StripperJobViewModel : JobViewModel
 
     public StripperJobViewModel(StripperJob job) : base(job)
     {
+        RegisterView<StripperJobViewModel, StripperJobView>();
+
         Job = job;
         ConfigPath = job.ConfigPath;
         this.WhenAnyValue(x => x.ConfigPath).BindTo(this, x => x.Job.ConfigPath);

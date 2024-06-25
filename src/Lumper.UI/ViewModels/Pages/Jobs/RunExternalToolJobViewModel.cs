@@ -9,6 +9,7 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services;
 using Shared.Pakfile;
+using Views.Pages.Jobs;
 
 public class RunExternalToolJobViewModel : JobViewModel
 {
@@ -28,6 +29,8 @@ public class RunExternalToolJobViewModel : JobViewModel
 
     public RunExternalToolJobViewModel(RunExternalToolJob job) : base(job)
     {
+        RegisterView<RunExternalToolJobViewModel, RunExternalToolJobView>();
+
         Job = job;
         Path = job.Path;
         WorkingDir = job.WorkingDir;
