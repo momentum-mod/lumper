@@ -5,8 +5,9 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using NLog;
 using ViewModels;
+using Views.LogViewer;
 
-public sealed class LogViewerViewModel : ViewModel, IDisposable
+public sealed class LogViewerViewModel : ViewModelWithView<LogViewerViewModel, LogViewerView>, IDisposable
 {
     // Subject is an easy way to get reactive NLog output. Any thread can call AddLog, but the view listens to the
     // subject on the main thread. ReplaySubject is used because if someone loads a map with a launch arg, the loading

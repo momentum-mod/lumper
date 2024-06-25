@@ -54,6 +54,8 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
     public PakfileEntryVtfViewModel(PakfileEntry entry, BspNode parent) : base(entry, parent)
     {
+        RegisterView<PakfileEntryVtfViewModel, PakfileEntryVtfView>();
+
         // Ugly null handling, see
         // https://www.reactiveui.net/docs/handbook/when-any.html#null-propogation-inside-whenanyvalue
         this.WhenAnyValue(

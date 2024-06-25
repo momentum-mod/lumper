@@ -1,29 +1,36 @@
 namespace Lumper.UI;
 
 using System;
+using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using ReactiveUI;
 using ViewModels;
 
 /// <summary>
-/// Insane but simple ViewLocator implementation, derived from here:
-/// https://docs.avaloniaui.net/docs/tutorials/todo-list-app/locating-views
+/// Reflection-free ViewLocator implementation. ViewLocator using reflection breaks when using trimming.
+/// Based on https://github.com/AvaloniaUI/Avalonia/discussions/14511#discussioncomment-8379078
 /// </summary>
 public class ViewLocator : IDataTemplate
 {
+    private static readonly Dictionary<Type, Func<Control>> Registration = [];
+
+    public static void Register<TViewModel, TView>(Func<TView> factory)
+        where TViewModel : ViewModel
+        where TView : Control, IViewFor<TViewModel>
+        => Registration.TryAdd(typeof(TViewModel), factory);
+
     public Control Build(object? param)
     {
         if (param is null)
-            return new TextBlock { Text = "Null referenced object" };
+            return new TextBlock { Text = "No view provided" };
 
-        var name = param.GetType().FullName!.Replace("ViewModel", "View");
-        var type = Type.GetType(name);
-
-        if (type != null)
-            return (Control)Activator.CreateInstance(type)!;
-
-        return new TextBlock { Text = $"View not found: {name}" };
+        Type type = param.GetType();
+        return Registration.TryGetValue(type, out Func<Control>? factory)
+            ? factory()
+            : new TextBlock { Text = "Not Found: " + type };
     }
+
 
     public bool Match(object? data) => data is ViewModel;
 }
