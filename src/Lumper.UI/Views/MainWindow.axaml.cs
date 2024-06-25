@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using ReactiveUI;
 using Services;
@@ -42,5 +43,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             return;
 
         await MainWindowViewModel.OnClose(e);
+    }
+
+    private void PageButton_OnClick(object? _, RoutedEventArgs e)
+    {
+        // Hack to make this behave like a radio button; don't allow unchecking
+        var source = (ToggleButton?)e.Source;
+        if (source is not null && !source.IsChecked!.Value)
+            source.IsChecked = true;
     }
 }
