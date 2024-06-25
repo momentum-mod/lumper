@@ -4,20 +4,22 @@ using System.IO;
 using System.Security.Cryptography;
 using Newtonsoft.Json;
 
-// needed in the LumpReader/LumpWriter where we don't have the lumptype
+// Needed in the LumpReader/LumpWriter where we don't have the lump type
 public interface IUnmanagedLump
 {
     public bool Compressed { get; set; }
     public long UncompressedLength { get; set; }
     public long DataStreamOffset { get; set; }
-
 }
-// only points to the data in the inputstream and knows if it's compressed or not
-public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
-    where T : Enum
+
+/// <summary>
+/// Stores a buffer of some lump data we're not parsing for writing out on save
+/// </summary>
+public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump where T : Enum
 {
     public bool Compressed { get; set; }
     public long UncompressedLength { get; set; }
+
     [JsonIgnore]
     public Stream DataStream { get; set; }
 
@@ -37,6 +39,7 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
         DataStream.Read(buffer, 0, buffer.Length);
         HashMD5 = MD5.HashData(buffer);
     }
+
     public override void Write(Stream stream)
     {
         if (DataStream == null)
@@ -55,5 +58,6 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
         DataStream.Seek(startPos, SeekOrigin.Begin);
     }
 
-    public override bool Empty() => DataStreamLength <= 0;
+
+    public override bool Empty => _buffer is not { Length: > 0 };
 }

@@ -80,6 +80,7 @@ public class PakFileLump : ManagedLump<BspLumpType>
                     $"Paklump has multiple entries of the same key: " +
                     "{existing.Key}");
             }
+
             Stream stream = entry.DataStream;
             if (stream.CanSeek)
             {
@@ -116,7 +117,6 @@ public class PakFileLump : ManagedLump<BspLumpType>
     {
         try
         {
-
             UpdateZip(true);
             using Stream dataStream = SaveZip();
             dataStream.Seek(0, SeekOrigin.Begin);

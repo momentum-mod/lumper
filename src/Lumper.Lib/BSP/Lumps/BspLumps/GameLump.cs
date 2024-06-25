@@ -16,6 +16,8 @@ public class GameLump : ManagedLump<BspLumpType>
             { typeof(Sprp), GameLumpType.sprp }
         };
 
+    public GameLump(BspFile parent) : base(parent) => Compress = false;
+
         if (typeMap.ContainsKey(typeof(T)))
         {
             return (T)Lumps[typeMap[typeof(T)]];
@@ -36,6 +38,4 @@ public class GameLump : ManagedLump<BspLumpType>
     }
 
     public override bool Empty() => Lumps.Count == 0;
-
-    public GameLump(BspFile parent) : base(parent) => Compress = false;
 }

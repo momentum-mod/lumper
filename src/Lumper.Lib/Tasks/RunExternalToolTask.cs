@@ -44,14 +44,15 @@ public class RunExternalToolTask : LumperTask
         private readonly BinaryWriter _writer;
         private readonly Stream _stream;
         private readonly byte[] _buffer;
+
         public Output(Stream stream)
         {
-
             Mem = new MemoryStream();
             _writer = new BinaryWriter(Mem);
             _stream = stream;
             _buffer = new byte[80 * 1024];
         }
+
         public void Dispose()
         {
             Mem.Dispose();
@@ -77,8 +78,8 @@ public class RunExternalToolTask : LumperTask
         {
             map.Save(InputFile);
             var fiIn = new FileInfo(InputFile);
-            //guessing based on input file length 
-            //probably wrong but better than nothing (?)
+            // Guessing based on input file length
+            // Probably wrong but better than nothing (?)
             Progress.Max = fiIn.Length;
         }
         else
@@ -87,7 +88,12 @@ public class RunExternalToolTask : LumperTask
         }
 
         if (File.Exists(OutputFile))
+        {
+            // TODO: This is *probably* okay but maybe best to have a toggle button for this
+            // behaviour, just in case it nukes a file someone actual cares about.
+            Console.WriteLine("Warning: Output file exists, overwriting");
             File.Delete(OutputFile);
+        }
 
 
         var startInfo = new ProcessStartInfo()

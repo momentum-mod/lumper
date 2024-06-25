@@ -1,4 +1,5 @@
 namespace Lumper.Lib.BSP.Struct;
+
 public struct Angle
 {
     public float Pitch { get; set; }

@@ -22,6 +22,7 @@ public enum StaticPropVersion
     V12 = 120,
     V13 = 130
 }
+
 public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp>(parent)
 {
     [JsonConverter(typeof(StringEnumConverter))]
@@ -72,6 +73,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         StaticPropVersion.V13 => 13,
         _ => 0
     };
+
     protected override void ReadItem(BinaryReader reader)
     {
         var startPos = reader.BaseStream.Position;
@@ -107,6 +109,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             prop.MinDXLevel = reader.ReadUInt16();
             prop.MaxDXLevel = reader.ReadUInt16();
         }
+
         // v7* only
         if (ActualVersion == StaticPropVersion.V7s)
         {
@@ -114,6 +117,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             prop.LightmapResX = reader.ReadUInt16();
             prop.LightmapResY = reader.ReadUInt16();
         }
+
         // since v8
         if (ActualVersion >= StaticPropVersion.V8)
         {
@@ -122,6 +126,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             prop.MinGPULevel = reader.ReadByte();
             prop.MaxGPULevel = reader.ReadByte();
         }
+
         // since v7
         if (ActualVersion >= StaticPropVersion.V7)
         {
@@ -131,13 +136,16 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             var a = reader.ReadByte();
             prop.DiffuseModulation = Color.FromArgb(a, r, g, b);
         }
+
         // v9 and v10 only
         // and v11?
         if (ActualVersion >= StaticPropVersion.V9)
             prop.DisableX360 = reader.ReadInt32() > 0;
+
         // since v10
         if (ActualVersion >= StaticPropVersion.V10)
             prop.FlagsEx = reader.ReadUInt32();
+
         // since v11
         if (ActualVersion >= StaticPropVersion.V11)
         {
@@ -148,8 +156,12 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         }
 
         Data.Add(prop);
-        if (reader.BaseStream.Position - startpos != StructureSize)
-            throw new InvalidDataException($"StaticProp structuresize doesn't match reader position after read ({reader.BaseStream.Position - startpos} != {StructureSize})");
+
+        if (reader.BaseStream.Position - startPos != StructureSize)
+        {
+            throw new InvalidDataException($"StaticProp StructureSize doesn't match reader position after read "
+                                           + $"({reader.BaseStream.Position - startPos} != {StructureSize})");
+        }
     }
 
     protected override void WriteItem(BinaryWriter writer, int index)
@@ -168,8 +180,10 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         writer.Write(prop.FirstLeaf);
         writer.Write(prop.LeafCount);
         writer.Write(prop.Solid);
+
         // every version except v7*
         writer.Write(prop.Flags);
+
         // v4 still
         writer.Write(prop.Skin);
         writer.Write(prop.FadeMinDist);
@@ -177,17 +191,20 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         writer.Write(prop.LightingOrigin.X);
         writer.Write(prop.LightingOrigin.Y);
         writer.Write(prop.LightingOrigin.Z);
+
         // since v5
         if (ActualVersion >= StaticPropVersion.V5)
             writer.Write(prop.ForcedFadeScale);
         // v6, v7, and v7* only
-        if (ActualVersion is StaticPropVersion.V6 or
+        if (ActualVersion is
+            StaticPropVersion.V6 or
             StaticPropVersion.V7 or
             StaticPropVersion.V7s)
         {
             writer.Write(prop.MinDXLevel);
             writer.Write(prop.MaxDXLevel);
         }
+
         // v7* only
         if (ActualVersion == StaticPropVersion.V7s)
         {
@@ -195,6 +212,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             writer.Write(prop.LightmapResX);
             writer.Write(prop.LightmapResY);
         }
+
         // since v8
         if (ActualVersion >= StaticPropVersion.V8)
         {
@@ -203,6 +221,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             writer.Write(prop.MinGPULevel);
             writer.Write(prop.MaxGPULevel);
         }
+
         // since v7
         if (ActualVersion >= StaticPropVersion.V7)
         {
@@ -211,13 +230,15 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             writer.Write(prop.DiffuseModulation.B);
             writer.Write(prop.DiffuseModulation.A);
         }
+
         // v9 and v10 only
-        //and 10?
+        // and 10?
         if (ActualVersion >= StaticPropVersion.V9)
         {
             writer.Write(prop.DisableX360);
             writer.Write(new byte[3]);
         }
+
         // since v10
         if (ActualVersion >= StaticPropVersion.V10)
             writer.Write(prop.FlagsEx);
@@ -239,6 +260,9 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         }
 
         if (writer.BaseStream.Position - startPos != StructureSize)
-            throw new InvalidDataException($"StaticProp structuresize doesn't match writer position after write ({writer.BaseStream.Position - startPos} != {StructureSize})");
+        {
+            throw new InvalidDataException(
+                $"StaticProp StructureSize doesn't match writer position after write ({writer.BaseStream.Position - startPos} != {StructureSize})");
+        }
     }
 }

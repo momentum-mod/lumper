@@ -5,7 +5,7 @@ using Lumper.Lib.BSP.Lumps;
 using Newtonsoft.Json;
 using SharpCompress.Compressors.LZMA;
 
-// handles compression and writes lumpdata to a stream
+// Handles compression and writes lump data to a stream
 [JsonObject(MemberSerialization.OptIn)]
 public abstract class LumpWriter(Stream output) : BinaryWriter(output)
 {
@@ -33,9 +33,11 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
         var w = new BinaryWriter(mem);
         if (mem.Length > uncompressedStream.Length)
         {
-            Console.WriteLine("Compressed lump bigger .. skipping");
+            Console.WriteLine("Compressed lump larger than uncompressed, skipping");
+
             uncompressedStream.Seek(0, SeekOrigin.Begin);
             uncompressedStream.CopyTo(BaseStream);
+
             compressedLength = -1;
         }
         else
@@ -48,6 +50,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
             w.Write(lzmaStream.Properties);
             if (w.BaseStream.Position != headerSize)
                 throw new InvalidDataException("Failed to compress stream: bad LZMA header");
+
             mem.Seek(0, SeekOrigin.Begin);
             mem.CopyTo(BaseStream);
         }
@@ -58,10 +61,12 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
         var offset = BaseStream.Position;
         long uncompressedLength;
         long compressedLength;
+
         if (lump is IUnmanagedLump unmanagedLump && unmanagedLump.Compressed)
         {
             if (!lump.Compress)
-                Console.WriteLine("UnmanagedLump is compressed but was set to be written uncompressed .. writing compressed lump");
+                Console.WriteLine("UnmanagedLump is compressed but was set to be written uncompressed, writing compressed lump");
+
             lump.Write(BaseStream);
             uncompressedLength = unmanagedLump.UncompressedLength;
             compressedLength = BaseStream.Position - offset;
@@ -72,16 +77,19 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
             {
                 var uncompressedStream = new MemoryStream();
                 lump.Write(uncompressedStream);
+
                 uncompressedLength = uncompressedStream.Length;
                 compressedLength = Compress(uncompressedStream);
             }
             else
             {
                 lump.Write(BaseStream);
+
                 uncompressedLength = BaseStream.Position - offset;
                 compressedLength = -1;
             }
         }
+
         return new LumpHeader(
             offset,
             uncompressedLength,
