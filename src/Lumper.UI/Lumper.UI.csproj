@@ -1,75 +1,72 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0</TargetFramework>
-        <Nullable>enable</Nullable>
-        <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
-        <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
-        <ApplicationIcon>Assets\Images\Lumper.ico</ApplicationIcon>
-        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    </PropertyGroup>
-    <ItemGroup>
-        <!-- Mark Fluent theme as trimmable for when building in self-contained mode -->
-        <TrimmableAssembly Include="Avalonia.Themes.Fluent"/>
-    </ItemGroup>
-    <!-- Avalonia -->
-    <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.1.0-rc1"/>
-        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6"/>
-        <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.1.0-rc1"/>
-        <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.0.10"/>
-        <PackageReference Include="Avalonia.Desktop" Version="11.1.0-rc1"/>
-        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.0-rc1"/>
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.0-rc1"/>
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.0-rc1"/>
-        <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1"/>
-        <PackageReference Include="ReactiveUI" Version="20.1.1"/>
-        <PackageReference Include="ReactiveUI.Fody" Version="19.5.41"/>
-        <PackageReference Include="Material.Icons.Avalonia" Version="2.1.9"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+    <ApplicationIcon>Assets\Images\Lumper.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
   <ItemGroup>
-        <PackageReference Include="Glob" Version="1.2.0-alpha0037"/>
-        <PackageReference Include="NLog" Version="5.3.2"/>
-        <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4"/>
-    </ItemGroup>
-    <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
-        <AvaloniaResource Remove="Assets\Lumper.ico"/>
-    </ItemGroup>
-    <ItemGroup>
-        <None Remove=".gitignore" />
-    </ItemGroup>
-    <ItemGroup>
-        <None Update="nlog.config" CopyToOutputDirectory="Always"/>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj"/>
-    </ItemGroup>
-    <ItemGroup Condition="'$(IsWindows)'=='true'">
-      <Reference Include="VTFLib.NET">
-          <HintPath>Dependencies\Windows\VTFLib.NET.dll</HintPath>
-      </Reference>
-      <None Update="Dependencies\Windows\VTFLib.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <TargetPath>VTFLib.dll</TargetPath>
-      </None>
-      <None Update="Dependencies\Windows\VTFLib.NET.dll">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <TargetPath>VTFLib.NET.dll</TargetPath>
-      </None>
-    </ItemGroup>
-    <ItemGroup Condition="'$(IsLinux)'=='true'">
-        <Reference Include="VTFLib.NET">
-            <HintPath>Dependencies\Linux\VTFLib.NET.dll</HintPath>
-        </Reference>
-        <None Update="Dependencies\Linux\libvtflib.so">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <TargetPath>libvtflib.so</TargetPath>
-        </None>
-        <None Update="Dependencies\Linux\VTFLib.NET.dll">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <TargetPath>VTFLib.NET.dll</TargetPath>
-        </None>
-    </ItemGroup>
+    <!-- Mark Fluent theme as trimmable for when building in self-contained mode -->
+    <TrimmableAssembly Include="Avalonia.Themes.Fluent"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.1.0-rc1"/>
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.0.6"/>
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.1.0-rc1"/>
+    <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.0.10"/>
+    <PackageReference Include="Avalonia.Desktop" Version="11.1.0-rc1"/>
+    <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.1.0-rc1"/>
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.1.0-rc1"/>
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.1.0-rc1"/>
+    <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1"/>
+    <PackageReference Include="ReactiveUI" Version="20.1.1"/>
+    <PackageReference Include="ReactiveUI.Fody" Version="19.5.41"/>
+    <PackageReference Include="Material.Icons.Avalonia" Version="2.1.9"/>
+    <PackageReference Include="Glob" Version="1.2.0-alpha0037"/>
+    <PackageReference Include="NLog" Version="5.3.2"/>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.4"/>
+  </ItemGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**"/>
+    <AvaloniaResource Remove="Assets\Lumper.ico"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove=".gitignore"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="nlog.config" CopyToOutputDirectory="Always"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj"/>
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsWindows)'=='true'">
+    <Reference Include="VTFLib.NET">
+      <HintPath>Dependencies\Windows\VTFLib.NET.dll</HintPath>
+    </Reference>
+    <None Update="Dependencies\Windows\VTFLib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VTFLib.dll</TargetPath>
+    </None>
+    <None Update="Dependencies\Windows\VTFLib.NET.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VTFLib.NET.dll</TargetPath>
+    </None>
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsLinux)'=='true'">
+    <Reference Include="VTFLib.NET">
+      <HintPath>Dependencies\Linux\VTFLib.NET.dll</HintPath>
+    </Reference>
+    <None Update="Dependencies\Linux\libvtflib.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>libvtflib.so</TargetPath>
+    </None>
+    <None Update="Dependencies\Linux\VTFLib.NET.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>VTFLib.NET.dll</TargetPath>
+    </None>
+  </ItemGroup>
 </Project>
