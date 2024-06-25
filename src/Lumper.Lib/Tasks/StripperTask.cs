@@ -6,8 +6,8 @@ using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
 
-//change entities wth stripper config
 public partial class StripperTask : LumperTask
+// Change entities using stripper config
 {
     public override string Type { get; } = "StripperTask";
 
@@ -79,11 +79,13 @@ public partial class StripperTask : LumperTask
         Load(ConfigPath);
         Progress.Max = blocks.Count;
         EntityLump entityLump = map.GetLump<EntityLump>();
-        foreach (Block block in blocks)
+
+        foreach (Block block in Blocks)
         {
             block.Apply(entityLump);
             Progress.Count++;
         }
+
         return TaskResult.Success;
     }
 }

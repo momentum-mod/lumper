@@ -26,6 +26,6 @@ public class LumpHeader
     public long CompressedLength { get; set; }
 
     public bool Compressed => CompressedLength >= 0;
-    //the actual length
+    // The actual length
     public long Length => Compressed ? CompressedLength : UncompressedLength;
 }

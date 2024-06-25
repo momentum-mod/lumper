@@ -4,6 +4,7 @@ using Lumper.Lib.BSP;
 using Newtonsoft.Json;
 
 public enum TaskResult { Unknwon, Success, Failed }
+
 [JsonConverter(typeof(JsonSubtypes), "Type")]
 public abstract class LumperTask
 {

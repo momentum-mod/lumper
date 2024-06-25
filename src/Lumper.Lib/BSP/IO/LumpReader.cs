@@ -8,14 +8,15 @@ using Lumper.Lib.BSP.Lumps;
 using Newtonsoft.Json;
 using SharpCompress.Compressors.LZMA;
 
-// handles decompressing and fills lumps with data
+// Handles decompressing and fills lumps with data
 [JsonObject(MemberSerialization.OptIn)]
 public abstract class LumpReader(Stream input) : BinaryReader(input)
 {
-    // lumpheader information is only needed in the reader
     protected List<Tuple<Lump, LumpHeader>> Lumps = [];
+    // Lump header information is only needed in the reader
 
     protected abstract void ReadHeader();
+
     protected virtual void LoadAll()
     {
         foreach (Tuple<Lump, LumpHeader> l in Lumps)
@@ -26,6 +27,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
                 Read(lump, lumpHeader);
         }
     }
+
     private MemoryStream Decompress()
     {
         MemoryStream decompressedStream = new();
@@ -51,6 +53,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
 
         return decompressedStream;
     }
+
     protected void Read(Lump lump, LumpHeader lumpHeader)
     {
         BinaryReader lumpReader;
@@ -89,10 +92,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input)
     {
         try
         {
-            var serializer = new JsonSerializer()
-            {
-                Formatting = Formatting.Indented
-            };
+            var serializer = new JsonSerializer { Formatting = Formatting.Indented };
             using var sw = new StreamWriter(stream);
             using var writer = new JsonTextWriter(sw);
             serializer.Serialize(writer,

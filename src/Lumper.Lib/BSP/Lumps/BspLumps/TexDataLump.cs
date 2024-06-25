@@ -23,6 +23,7 @@ public class TexDataLump(BspFile parent) : FixedLump<BspLumpType, TexData>(paren
         };
         Data.Add(item);
     }
+
     protected override void WriteItem(BinaryWriter writer, int index)
     {
         writer.Write(Data[index].Reflectivity[0]);

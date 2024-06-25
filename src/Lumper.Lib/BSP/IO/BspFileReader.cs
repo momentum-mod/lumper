@@ -96,7 +96,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             throw new InvalidDataException("Some lumps are overlapping. Check logging for details.");
     }
 
-    //finding the real gamelump length by looking at the next lump
+    // Finding the real gamelump length by looking at the next lump
     private void UpdateGameLumpLength()
     {
         Lump gameLump = null;
@@ -115,7 +115,8 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                     break;
                 }
             }
-            else if (gameLump is not null && header.Offset != 0 && header.Offset != gameLumpHeader.Offset)
+            // Iteration where this is true will be the first non-empty lump after the gamelump
+            else if (gameLump is not null && header.Offset != 0 && header.Offset != gameLumpHeader!.Offset)
             {
                 gameLumpHeader.UncompressedLength = header.Offset - gameLumpHeader.Offset;
                 Console.WriteLine($"Changed gamelump length to {gameLumpHeader.Length}");
@@ -124,7 +125,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
         }
     }
 
-    //sort by offset so the output file looks more like the input
+    // Sort by offset so the output file looks more like the input
     private void SortLumps()
     {
         Dictionary<BspLumpType, Lump<BspLumpType>> newLumps = [];
@@ -140,12 +141,12 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
         _bsp.Lumps = newLumps;
     }
 
-    //for testing
+    // Test for overlapping offsets
     private bool CheckOverlapping()
     {
-        var ret = false;
         Lump<BspLumpType> prevLump = null;
         LumpHeader prevHeader = null;
+        var result = false;
         var first = true;
         foreach (Tuple<Lump, LumpHeader>? l in Lumps.OrderBy(x => x.Item2.Offset))
         {
@@ -166,7 +167,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                     if (prevLump.Type == BspLumpType.GameLump)
                         Console.WriteLine("but the previous lump was GAME_LUMP and the length is a lie");
                     else
-                        ret = true;
+                        result = true;
                 }
                 else if (header.Offset > prevEnd)
                 {
@@ -180,7 +181,8 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                 }
             }
         }
-        return ret;
+
+        return result;
     }
 
     private void ResolveTexNames()
@@ -199,6 +201,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                 end = texDataStringDataLump.Data.Length;
                 Console.WriteLine("WARING: didn't find null at the end of texture string");
             }
+
             texture.TexName = end > 0
                 ? TexDataStringDataLump.TextureNameEncoding.GetString(
                     texDataStringDataLump.Data,

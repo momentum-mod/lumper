@@ -14,7 +14,6 @@ public class BspFile
     public const int HeaderSize = 1036;
     public const int MaxLumps = 128;
 
-
     [JsonIgnore]
     public string FilePath { get; private set; }
     public string Name { get; private set; }
@@ -37,9 +36,9 @@ public class BspFile
         var filePath = Uri.UnescapeDataString(Path.GetFullPath(path));
         using FileStream stream = File.OpenRead(filePath);
         Load(stream);
-        //set this at the end because Load(stream) resets it
-        FilePath = filePath;
+        FilePath = filePath; // Set this at the end because Load(stream) resets it
     }
+
     public void Load(Stream stream)
     {
         FilePath = null;
@@ -66,7 +65,7 @@ public class BspFile
 
     public T GetLump<T>() where T : Lump<BspLumpType>
     {
-        // if you add something here, also add it to the BspReader
+        // If you add something here, also add it to the BspReader
         Dictionary<Type, BspLumpType> typeMap = new()
         {
             { typeof(EntityLump), BspLumpType.Entities },
@@ -101,13 +100,10 @@ public class BspFile
             FileAccess.Write);
 
         ToJson(fileStream, sortLumps, sortProperties, ignoreOffset);
-        Console.WriteLine("JSON file: " + path);
+        Console.WriteLine($"JSON file: {path}");
     }
 
-    public void ToJson(Stream stream,
-        bool sortLumps,
-        bool sortProperties,
-        bool ignoreOffset)
+    public void ToJson(Stream stream, bool sortLumps, bool sortProperties, bool ignoreOffset)
     {
         if (sortLumps)
         {
@@ -122,8 +118,7 @@ public class BspFile
 
         var jsonSerializerSettings = new JsonSerializerSettings
         {
-            ContractResolver =
-                new JsonContractResolver(sortProperties, ignoreOffset),
+            ContractResolver = new JsonContractResolver(sortProperties, ignoreOffset),
             Formatting = Formatting.Indented
         };
 
@@ -134,7 +129,7 @@ public class BspFile
             new
             {
                 Bsp = this,
-                Writer = bspWriter,
+                Writer = bspWriter
             });
     }
 }
