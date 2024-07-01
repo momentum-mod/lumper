@@ -5,41 +5,36 @@
 
   <FluentTheme>
     <FluentTheme.Palettes>
-      <ColorPaletteResources x:Key="Light" Accent="#ffe04c26" AltHigh="White" AltLow="White" AltMedium="White"
-                                   AltMediumHigh="White" AltMediumLow="White" BaseHigh="Black" BaseLow="#ffd7d2d1"
-                                   BaseMedium="#ffa38888" BaseMediumHigh="#ff805658" BaseMediumLow="#ff916f70"
-                                   ChromeAltLow="#ff805658" ChromeBlackHigh="Black" ChromeBlackLow="#ffd7d2d1"
-                                   ChromeBlackMedium="#ff805658" ChromeBlackMediumLow="#ffa38888"
-                                   ChromeDisabledHigh="#ffd7d2d1" ChromeDisabledLow="#ffa38888" ChromeGray="#ff916f70"
-                                   ChromeHigh="#ffd7d2d1" ChromeLow="#fffeeaea" ChromeMedium="#fff6e5e5"
-                                   ChromeMediumLow="#fffeeaea" ChromeWhite="White" ListLow="#fff6e5e5"
-                                   ListMedium="#ffd7d2d1" RegionColor="#fffffbfa" />
       <ColorPaletteResources x:Key="Dark" Accent="#ffe04c26" AltHigh="#22000000" AltLow="#22000000"
-                             AltMedium="#22000000" AltMediumHigh="#22000000" AltMediumLow="#22000000"
-                             BaseHigh="White" BaseLow="#ff373535" BaseMedium="#ff9c9b9b"
-                             BaseMediumHigh="#ffb5b4b4" BaseMediumLow="#ff696868" ChromeAltLow="#ffb5b4b4"
-                             ChromeBlackHigh="Black" ChromeBlackLow="#ffb5b4b4" ChromeBlackMedium="Black"
-                             ChromeBlackMediumLow="Black" ChromeDisabledHigh="#ff373535"
-                             ChromeDisabledLow="#ff9c9b9b" ChromeGray="#ff838181" ChromeHigh="#ff838181"
-                             ChromeLow="#ff171717" ChromeMedium="#ff1f1e1e" ChromeMediumLow="#ff2f2d2d"
-                             ChromeWhite="White" ListLow="#ff1f1e1e" ListMedium="#ff373535"
-                             RegionColor="#ff181717" />
-    </FluentTheme.Palettes>
-  </FluentTheme>
+                                   AltMedium="#22000000" AltMediumHigh="#22000000" AltMediumLow="#22000000"
+                                   BaseHigh="White" BaseLow="#ff373535" BaseMedium="#ff9c9b9b"
+                                   BaseMediumHigh="#ffb5b4b4" BaseMediumLow="#ff696868" ChromeAltLow="#ffb5b4b4"
+                                   ChromeBlackHigh="Black" ChromeBlackLow="#ffb5b4b4" ChromeBlackMedium="Black"
+                                   ChromeBlackMediumLow="Black" ChromeDisabledHigh="#ff373535"
+                                   ChromeDisabledLow="#ff9c9b9b" ChromeGray="#ff838181" ChromeHigh="#ff838181"
+                                   ChromeLow="#ff171717" ChromeMedium="#ff1f1e1e" ChromeMediumLow="#ff2f2d2d"
+                                   ChromeWhite="White" ListLow="#ff1f1e1e" ListMedium="#ff373535"
+                                   RegionColor="#ff181717" />
+        </FluentTheme.Palettes>
+    </FluentTheme>
+    <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+    <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
+    <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <MergeResourceInclude Source="ButtonSpinner.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
 
-  <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
-  <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
-  <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
+  <!-- Force dark mode everywhere. Everything is designed with dark mode in mind,
+         too much work to do a -->
+    <Style Selector="Window">
+        <Setter Property="RequestedThemeVariant" Value="Dark"/>
+    </Style>
 
-  <Styles.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <MergeResourceInclude Source="ButtonSpinner.axaml" />
-      </ResourceDictionary.MergedDictionaries>
-    </ResourceDictionary>
-  </Styles.Resources>
-
-  <!-- Add additional padding when in fullscreen (haven't tested this on Linux/X11!)
+    <!-- Add additional padding when in fullscreen (haven't tested this on Linux/X11!)
          https://github.com/AvaloniaUI/Avalonia/issues/5581#issuecomment-831549175 -->
   <Style Selector="Window[WindowState=Maximized]">
     <Setter Property="Padding" Value="8" />
