@@ -271,7 +271,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         await ShowMessageBox(msBox);
 
         var name = msBox.InputValue ?? "new file";
-        if (name.ToLower().EndsWith(".vtf"))
+        if (name.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase))
         {
             Logger.Error("Creating empty VTFs is not supported, please import one.");
             return;
