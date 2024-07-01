@@ -19,11 +19,13 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length,
 
     protected override IoHandler? Handler { get; set; } = handler;
 
+    // Using a list instead of dict because some maps (e.g. Valve TF2 maps) can have multiple entries
+    // with GameLumpType.Unknown.
     [JsonProperty]
-    public IReadOnlyDictionary<GameLumpType, LumpHeaderInfo> Headers
-        => Lumps.ToDictionary(
-            x => x.Item1 is Lump<GameLumpType> lump ? lump.Type : GameLumpType.Unknown,
-            x => x.Item2);
+    public List<(GameLumpType, LumpHeaderInfo)> Headers
+        => Lumps
+            .Select(x => (x.Item1 is Lump<GameLumpType> lump ? lump.Type : GameLumpType.Unknown, x.Item2))
+            .ToList();
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
