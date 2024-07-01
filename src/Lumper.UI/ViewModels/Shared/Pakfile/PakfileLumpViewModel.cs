@@ -38,7 +38,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
         });
 
     private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry)
-        => entry.Key.ToLower().EndsWith(".vtf")
+        => entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
             ? new PakfileEntryVtfViewModel(entry, this)
             : new PakfileEntryTextViewModel(entry, this);
 
@@ -121,19 +121,18 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     continue;
 
                 var propValue = sProp.Value;
-
-                if (!propValue.EndsWith(opNoPrefix))
+                if (!propValue.EndsWith(opNoPrefix, cmp))
                     // Definitely not a match
                     continue;
 
                 var updatedOp = oldPath;
                 var updatedNp = newPath;
                 // Split this check from above for perf - vast majority of values are misses, move on ASAP.
-                if (directoryMatch is not null && !propValue.StartsWith(directoryMatch))
+                if (directoryMatch is not null && !propValue.StartsWith(directoryMatch, cmp))
                 {
                     // This is case where something moves from sound/foo/bar.mp3 to materials/bar.mp3 and the matching
                     // property with foo/bar.mp3 - they are almost certainly going to break something.
-                    if (newPath.Split('/')[0] != directoryMatch)
+                    if (newPath.Split('/')[0].Equals(directoryMatch, cmp))
                     {
                         Logger.Warn(
                             $"Could move {prop.Key} property of {entity.PresentableName} from {oldPath} " +
@@ -145,7 +144,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     updatedOp = string.Join("/", oldPath.Split('/')[1..]);
                     updatedNp = string.Join("/", newPath.Split('/')[1..]);
                 }
-                else if (propValue != oldPath)
+                else if (!propValue.Equals(oldPath, cmp))
                 {
                     // Didn't match with basedirectory removed from front,
                     // and wasn't an exact match: not actually a match.
@@ -158,12 +157,13 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             }
         }
 
+
         // Pakfiles. Lot of same logic as above, but horrible to combine.
         foreach (PakfileEntryTextViewModel entry in
                  Entries.Items
                      .OfType<PakfileEntryTextViewModel>()
                      .Where(item => RefactorablePakfileTypes
-                         .Any(type => item.Key.ToLower().EndsWith(type))))
+                         .Any(type => item.Key.EndsWith(type, cmp))))
         {
             if (!entry.IsContentLoaded)
                 entry.LoadContent();
