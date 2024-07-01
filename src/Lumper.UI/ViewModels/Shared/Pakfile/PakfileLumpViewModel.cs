@@ -1,6 +1,7 @@
 namespace Lumper.UI.ViewModels.Shared.Pakfile;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DynamicData;
@@ -96,12 +97,24 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     // so we're quite conservative with what we check, could add more in future.
     private static readonly string[] RefactorablePakfileTypes = ["txt", "vmt", "cfg"];
 
+    // Dict of file types for which the given extensions can be omitted.
+    // Honestly, not even sure this safe: when an extension can be omitted might
+    // depends on a specific KV1 property. I thiiiink it's okay.
+    private static readonly Dictionary<string, string[]> IgnorableExtensions =
+        new() {
+            { ".vmt", [".vtf"] }
+        };
+
     /// <summary>
     /// Update references to a path when a file moves, scanning the entity lump and
     /// text parts of pakfile lump. Could do texdata in future maybe?
     /// </summary>
     public void UpdatePathReferences(string newPath, string oldPath)
     {
+        // Source does case-insensitive comparisons for filenames practically everywhere.
+        // Probably because Windows filenames are treated case-insensitively.
+        const StringComparison cmp = StringComparison.OrdinalIgnoreCase;
+
         // For testing this code I use bhop_lego2 which has sound files referenced in both
         // ambient_generics (entlump) and soundscapes (paklump)
 
@@ -175,17 +188,42 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             var updatedNp = newPath;
             var matchIndex = -1;
             var changes = 0;
-            while ((matchIndex =
-                       entry.Content.IndexOf(
-                           opNoPrefix,
-                           startIndex: matchIndex + 1,
-                           StringComparison.Ordinal))
-                   != -1)
+
+            var tryWithoutExtension = IgnorableExtensions.TryGetValue(Path.GetExtension(entry.Key), out var opNoExtension);
+            while (true)
             {
+                var match = entry.Content.IndexOf(opNoPrefix, startIndex: matchIndex + 1, cmp);
+
+                var sliceFromEnd = 0;
+                if (match == -1 && tryWithoutExtension)
+                {
+                    foreach (var ext in opNoExtension!)
+                    {
+                        if (!opNoPrefix.EndsWith(ext, cmp))
+                            continue;
+
+                        match = entry.Content.IndexOf(
+                            opNoPrefix[..^ext.Length],
+                            startIndex: matchIndex + 1,
+                            comparisonType: cmp);
+
+                        if (match != -1)
+                        {
+                            sliceFromEnd = ext.Length;
+                            break;
+                        }
+                    }
+                }
+
+                if (match == -1)
+                    break;
+
+                matchIndex = match;
+
                 if (directoryMatch is not null)
                 {
-                    updatedOp = string.Join("/", oldPath.Split('/')[1..]);
-                    updatedNp = string.Join("/", newPath.Split('/')[1..]);
+                    updatedOp = string.Join("/", oldPath.Split('/')[1..])[..^sliceFromEnd];
+                    updatedNp = string.Join("/", newPath.Split('/')[1..])[..^sliceFromEnd];
                     entry.Content = entry.Content[..matchIndex] + updatedNp +
                                     entry.Content[(matchIndex + updatedOp.Length)..];
                     changes++;
@@ -194,12 +232,18 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 {
                     var wholeMatchIndex = matchIndex - opPrefix.Length - 1;
 
-                    if (entry.Content[wholeMatchIndex..oldPath.Length] != oldPath)
+                    if (!entry.Content[wholeMatchIndex..(oldPath.Length - sliceFromEnd)]
+                            .Equals(oldPath[..^sliceFromEnd], cmp))
+                    {
                         continue;
+                    }
+
                     updatedOp = oldPath;
                     updatedNp = newPath;
-                    entry.Content = entry.Content[..wholeMatchIndex] + updatedNp +
-                                    entry.Content[(wholeMatchIndex + updatedOp.Length)..];
+                    entry.Content =
+                        entry.Content[..wholeMatchIndex] + updatedNp +
+                        entry.Content[(wholeMatchIndex + updatedOp.Length)..];
+
                     changes++;
                 }
             }
