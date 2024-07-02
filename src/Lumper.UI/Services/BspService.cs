@@ -289,6 +289,12 @@ public sealed class BspService : ReactiveObject
             if (handler.Cancelled)
                 return false;
         }
+        catch (FileLoadException)
+        {
+            Logger.Warn("Failed to load new file, doing a full UI file load");
+            await Observable.Start(() => Load(outFile?.Path.LocalPath ?? FilePath!),
+                RxApp.TaskpoolScheduler);
+        }
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to save file!");

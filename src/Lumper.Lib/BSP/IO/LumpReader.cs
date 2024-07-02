@@ -50,7 +50,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
 
         BaseStream.Seek(lhi.Offset, SeekOrigin.Begin);
 
-        lump.IsCompressed = lump is not GameLump or PakfileLump && lhi.Compressed;
+        lump.IsCompressed = lump is not GameLump and not PakfileLump && lhi.Compressed;
         if (lump is IUnmanagedLump unmanagedLump)
         {
             unmanagedLump.UncompressedLength = lhi.Compressed ? lhi.UncompressedLength : -1;

@@ -133,6 +133,8 @@ public class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(parent), IFi
             dataStream.Seek(0, SeekOrigin.Begin);
             dataStream.CopyTo(stream);
 
+            IsCompressed = false;
+
             return;
         }
 
@@ -164,6 +166,8 @@ public class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(parent), IFi
 
         outStream.Seek(0, SeekOrigin.Begin);
         outStream.CopyTo(stream);
+
+        IsCompressed = true;
     }
 
     /// <summary>
