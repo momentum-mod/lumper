@@ -43,31 +43,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj"/>
-  </ItemGroup>
-  <ItemGroup Condition="'$(IsWindows)'=='true'">
-    <Reference Include="VTFLib.NET">
-      <HintPath>Dependencies\Windows\VTFLib.NET.dll</HintPath>
-    </Reference>
-    <None Update="Dependencies\Windows\VTFLib.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>VTFLib.dll</TargetPath>
-    </None>
-    <None Update="Dependencies\Windows\VTFLib.NET.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>VTFLib.NET.dll</TargetPath>
-    </None>
-  </ItemGroup>
-  <ItemGroup Condition="'$(IsLinux)'=='true'">
-    <Reference Include="VTFLib.NET">
-      <HintPath>Dependencies\Linux\VTFLib.NET.dll</HintPath>
-    </Reference>
-    <None Update="Dependencies\Linux\libvtflib.so">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>libvtflib.so</TargetPath>
-    </None>
-    <None Update="Dependencies\Linux\VTFLib.NET.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <TargetPath>VTFLib.NET.dll</TargetPath>
-    </None>
+    <ProjectReference Include="..\Dependencies\VTFLib.NET\VTFLib.NET\VTFLib.NET.csproj"/>
   </ItemGroup>
 </Project>
