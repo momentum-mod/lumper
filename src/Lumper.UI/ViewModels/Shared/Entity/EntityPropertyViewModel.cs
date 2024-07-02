@@ -25,6 +25,8 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
         }
     }
 
+    public override void UpdateModel() => EntityProperty.Key = Key;
+
     public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
 }
 
@@ -44,7 +46,11 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
         }
     }
 
-    public override void UpdateModel() => entityProperty.Value = Value;
+    public override void UpdateModel()
+    {
+        base.UpdateModel();
+        entityProperty.Value = Value;
+    }
 
     public override bool Match(Matcher matcher) => matcher.Match(Value);
 }
@@ -89,6 +95,8 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
 
     public override void UpdateModel()
     {
+        base.UpdateModel();
+
         if (entityProperty.Value is null)
             return;
 
