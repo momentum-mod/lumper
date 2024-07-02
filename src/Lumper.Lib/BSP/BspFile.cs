@@ -294,7 +294,6 @@ public sealed partial class BspFile : IDisposable
 
                 // It was a hack to expose this at all, but need to know these headers.
                 // We could probably structure all of this better but just don't have time.
-                gl.LastWriter.Dispose();
                 gl.LastWriter = null;
 
                 continue;
