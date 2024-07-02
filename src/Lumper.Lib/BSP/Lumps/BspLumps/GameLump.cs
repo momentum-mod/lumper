@@ -8,10 +8,12 @@ using Bsp.Enum;
 using Enum;
 using IO;
 using Lumps;
+using Newtonsoft.Json;
 
 public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
-    public GameLumpReader? Reader { get; private set; }
+    [JsonIgnore]
+    public GameLumpReader Reader { get; private set; } = null!;
 
     public Dictionary<GameLumpType, Lump<GameLumpType>?> Lumps { get; } = [];
 
