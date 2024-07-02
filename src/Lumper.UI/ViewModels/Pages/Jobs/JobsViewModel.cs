@@ -22,9 +22,9 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
     public JobsViewModel()
     {
         JobTypes = [
-            new JobMenuItem<ReplaceTextureJob>(this),
-            new JobMenuItem<StripperJob>(this),
-            new JobMenuItem<RunExternalToolJob>(this)
+            new JobMenuItem<ReplaceTextureJob>(this, () => new ReplaceTextureJob()),
+            new JobMenuItem<StripperJob>(this, () => new StripperJob()),
+            new JobMenuItem<RunExternalToolJob>(this, () => new RunExternalToolJob())
         ];
 
         this.WhenAnyValue(x => x.SelectedJob)
