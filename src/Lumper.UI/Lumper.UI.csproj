@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="nlog.config" CopyToOutputDirectory="Always"/>
+    <None Update="RegisterLumperURLProtocol.ps1" CopyToOutputDirectory="Always"/>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj"/>
