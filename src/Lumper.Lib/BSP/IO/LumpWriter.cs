@@ -124,7 +124,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
             if (uncompressedLength > 0)
             {
                 Logger.Debug("Compressed lump larger than uncompressed, skipping. " +
-                             $"(compressed: {mem.Length}, uncompressed: {uncompressedLength}");
+                             $"(compressed: {mem.Length}, uncompressed: {uncompressedLength})");
             }
 
             uncompressedStream.Seek(0, SeekOrigin.Begin);
