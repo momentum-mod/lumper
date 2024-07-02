@@ -4,7 +4,7 @@ using JsonSubTypes;
 using Newtonsoft.Json;
 
 /// <summary>
-/// Helper record for saving lump offset and length data
+/// Helper record for loading/saving lump offset and length data
 ///
 /// Provide -1 for CompressedLength to mark the lump as uncompressed.
 /// </summary>
