@@ -234,7 +234,7 @@ public sealed partial class BspFile : IDisposable
                 // the currently loaded one.
                 try
                 {
-                    File.Delete(outPath);
+                    File.Delete(backupPath);
                     Logger.Info("Loaded BSP left unchanged, deleted identical backup file.");
                 }
                 catch (Exception ex)
