@@ -3,6 +3,7 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using Bsp.Enum;
 using Enum;
 using IO;
@@ -10,8 +11,6 @@ using Lumps;
 
 public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
-    public GameLumpReader? Reader { get; private set; }
-
     public Dictionary<GameLumpType, Lump<GameLumpType>?> Lumps { get; } = [];
 
     public override bool IsCompressed
@@ -27,14 +26,18 @@ public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
     public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {
-        Reader = new GameLumpReader(this, reader, length, handler);
-        Reader.Load();
+        using var glReader = new GameLumpReader(this, reader, length, handler);
+        glReader.Load();
     }
+
+    // This is a hack so we can access the writer used on last save in BspFile.SaveToFile :(
+    [JsonIgnore]
+    public GameLumpWriter? LastWriter { get; set; }
 
     public override void Write(Stream stream, IoHandler? handler = null, DesiredCompression? compression = null)
     {
-        var gameLumpWriter = new GameLumpWriter(this, stream, handler, compression ?? DesiredCompression.Unchanged);
-        gameLumpWriter.Save();
+        LastWriter = new GameLumpWriter(this, stream, handler, compression ?? DesiredCompression.Unchanged);
+        LastWriter.Save();
     }
 
     public override bool Empty => Lumps.Count == 0;
