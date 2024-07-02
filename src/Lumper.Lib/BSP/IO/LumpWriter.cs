@@ -1,6 +1,7 @@
 namespace Lumper.Lib.BSP.IO;
 
 using System.IO;
+using System.Text;
 using Bsp.Enum;
 using Lumps;
 using Lumps.BspLumps;
@@ -12,7 +13,7 @@ using SharpCompress.Compressors.LZMA;
 /// Handles compression and writes lump data to a stream
 /// </summary>
 [JsonObject(MemberSerialization.OptIn)]
-public abstract class LumpWriter(Stream output) : BinaryWriter(output)
+public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.UTF8, leaveOpen: true)
 {
     protected abstract IoHandler Handler { get; set; }
 
@@ -112,7 +113,6 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output)
 
         var lzmaStream = new LzmaStream(new LzmaEncoderProperties(), false, mem);
         uncompressedStream.CopyTo(lzmaStream);
-        lzmaStream.Flush();
         lzmaStream.Dispose();
 
         mem.Seek(0, SeekOrigin.Begin);

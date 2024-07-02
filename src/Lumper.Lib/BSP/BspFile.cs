@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 using NLog;
 using Struct;
 
-public partial class BspFile
+public sealed partial class BspFile : IDisposable
 {
     public const int HeaderLumps = 64;
 
@@ -195,15 +195,21 @@ public partial class BspFile
                 using FileStream fstream = File.Open(outPath, FileMode.Create);
                 stream.Seek(0, SeekOrigin.Begin);
 
-                // Copy memorystream we just wrote to over to new filestream, dispose
+                // Copy memorystream we just wrote to over to new filestream
                 stream.CopyTo(fstream);
-                // Dispose of writer and underlying `stream`.
+
+                // Dispose of writer and underlying stream. We also have a GameLumpWriter
+                // on the same stream at play, so LumpWriter is set to not dispose of
+                // underlying stream on dispose; be sure to clean up this stream in all
+                // below code paths.
                 writer.Dispose();
+                stream.Dispose();
             }
             else
             {
                 // This is a filestream to a new file, just flush and close.
                 writer.Dispose();
+                stream.Dispose();
             }
 
             // Update paths and name, and reopen the file we just wrote to, not reading anything.
@@ -225,6 +231,7 @@ public partial class BspFile
         // Save failed. Stream we were just writing to is useless, dispose.
         // Save operation doesn't alter this BSP or underlying filestream if open.
         writer.Dispose();
+        stream.Dispose();
 
         if (backupPath is null)
             return;
@@ -375,4 +382,6 @@ public partial class BspFile
 
     [GeneratedRegex("\\.bsp$")]
     public static partial Regex BspExtensionRegex();
+
+    public void Dispose() => FileStream?.Dispose();
 }
