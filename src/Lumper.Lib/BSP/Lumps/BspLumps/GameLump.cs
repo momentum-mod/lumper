@@ -12,9 +12,6 @@ using Newtonsoft.Json;
 
 public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
-    [JsonIgnore]
-    public GameLumpReader Reader { get; private set; } = null!;
-
     public Dictionary<GameLumpType, Lump<GameLumpType>?> Lumps { get; } = [];
 
     public override bool IsCompressed
@@ -34,14 +31,18 @@ public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
     public void Read(BinaryReader reader, long length, IoHandler handler)
     {
-        Reader = new GameLumpReader(this, reader, length, handler);
-        Reader.Load();
+        using var glReader = new GameLumpReader(this, reader, length, handler);
+        glReader.Load();
     }
+
+    // This is a hack so we can access the writer used on last save in BspFile.SaveToFile :(
+    [JsonIgnore]
+    public GameLumpWriter? LastWriter { get; set; }
 
     public void Write(Stream stream, IoHandler handler, DesiredCompression compression)
     {
-        var gameLumpWriter = new GameLumpWriter(this, stream, handler, compression);
-        gameLumpWriter.Save();
+        LastWriter = new GameLumpWriter(this, stream, handler, compression);
+        LastWriter.Save();
     }
 
     public override bool Empty => Lumps.Count == 0;
