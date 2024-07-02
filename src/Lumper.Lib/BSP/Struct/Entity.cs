@@ -49,7 +49,7 @@ public class Entity : ICloneable
 
     public abstract class EntityProperty(string key) : ICloneable
     {
-        public string Key { get; } = key;
+        public string Key { get; set; } = key;
 
         public abstract string? ValueString { get; }
 
