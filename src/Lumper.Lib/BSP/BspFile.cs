@@ -124,7 +124,6 @@ public partial class BspFile
 
                 try
                 {
-                    // TODO: go back to copy?
                     if (FileStream is not null)
                     {
                         using FileStream backupStream = File.Open(backupPath, FileMode.Create);
@@ -250,7 +249,7 @@ public partial class BspFile
         // the currently loaded one.
         try
         {
-            File.Delete(outPath);
+            File.Delete(backupPath);
             Logger.Info("Loaded BSP left unchanged, deleted identical backup file.");
         }
         catch (Exception ex)
