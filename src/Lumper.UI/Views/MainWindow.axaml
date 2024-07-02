@@ -33,12 +33,14 @@
             <MenuItem Header="_File">
               <MenuItem Header="_Open..." Command="{Binding OpenCommand}" HotKey="Ctrl+O"
                         InputGesture="Ctrl+O" />
+              <MenuItem Header="_Open from URL..." Command="{Binding OpenUrlCommand}"
+                        HotKey="Ctrl+Shift+O"
+                        InputGesture="Ctrl+Shift+O" />
               <Separator />
-
               <MenuItem Header="_Save" Command="{Binding SaveCommand}" HotKey="Ctrl+S"
                         InputGesture="Ctrl+S" />
-              <MenuItem Header="_Save As..." Command="{Binding SaveAsCommand}" HotKey="Ctrl+Alt+S"
-                        InputGesture="Ctrl+Alt+S" />
+              <MenuItem Header="_Save As..." Command="{Binding SaveAsCommand}" HotKey="Ctrl+Shift+S"
+                        InputGesture="Ctrl+Shift+S" />
               <!-- This thing is a bastard to right-align due to weird menu styling, don't bother -->
               <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding BspService.ShouldCompress}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">

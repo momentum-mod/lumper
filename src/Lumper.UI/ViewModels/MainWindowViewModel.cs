@@ -8,7 +8,10 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using LogViewer;
 using MsBox.Avalonia;
+using MsBox.Avalonia.Base;
+using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
+using MsBox.Avalonia.Models;
 using NLog;
 using ReactiveUI;
 using Services;
@@ -51,6 +54,32 @@ public class MainWindowViewModel : ViewModel
 
         await BspService.Instance.Load(result[0]);
     }
+
+    public async Task OpenUrlCommand()
+    {
+        if (Program.Desktop.MainWindow is null)
+            return;
+
+        IMsBox<string>? msBox = MessageBoxManager
+            .GetMessageBoxCustom(new MessageBoxCustomParams {
+                ContentTitle = "Load from URL",
+                ShowInCenter = true,
+                Width = 400,
+                InputParams = new InputParams(),
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                ButtonDefinitions = new[] {
+                    new ButtonDefinition { Name = "Load", IsDefault = true },
+                    new ButtonDefinition { Name = "Cancel", IsCancel = true }
+                }
+            });
+
+        var result = await msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
+        var url = msBox.InputValue;
+
+        if (result == "Cancel" || !url.StartsWith("http"))
+            return;
+
+        await BspService.Load(url);
     }
 
     public async Task SaveCommand()

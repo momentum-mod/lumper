@@ -1,10 +1,13 @@
 namespace Lumper.UI.Services;
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Reactive.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
@@ -112,14 +115,17 @@ public sealed class BspService : ReactiveObject
     /// <summary>
     /// Load a BSP file from an absolute system path
     /// </summary>
-    public async Task<bool> Load(string path)
+    public async Task<bool> Load(string pathOrUrl)
     {
+        pathOrUrl = new Regex("^lumper://").Replace(pathOrUrl, "");
+
         if (HasLoadedBsp)
             Close();
 
-        IsLoading = true;
-
         IoProgressWindow? progressWindow = null;
+        IsLoading = true;
+        Stream? outStream = pathOrUrl.StartsWith("http") ? await HttpDownload(pathOrUrl) : null;
+
         try
         {
             var cts = new CancellationTokenSource();
@@ -128,15 +134,15 @@ public sealed class BspService : ReactiveObject
             if (Program.Desktop.MainWindow is not null)
             {
                 progressWindow = new IoProgressWindow {
-                    Title = $"Loading {Path.GetFileName(path)}",
+                    Title = $"Loading {Path.GetFileName(pathOrUrl)}",
                     Handler = handler
                 };
                 _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
             }
 
-            BspFile = await Observable.Start(() => BspFile.FromPath(handler, path), RxApp.TaskpoolScheduler);
-
-            progressWindow?.Close();
+            BspFile = outStream is not null
+                ? await Observable.Start(() => BspFile.FromStream(handler, outStream), RxApp.TaskpoolScheduler)
+                : await Observable.Start(() => BspFile.FromPath(handler, pathOrUrl), RxApp.TaskpoolScheduler);
 
             if (handler.Cancelled)
             {
@@ -152,11 +158,82 @@ public sealed class BspService : ReactiveObject
             Logger.Error(ex, "Failed to load BSP file!");
             return false;
         }
+        finally
+        {
+            progressWindow?.Close();
+            IsLoading = false;
+        }
 
-        progressWindow?.Close();
-        IsLoading = false;
         IsModified = false;
         return true;
+    }
+
+    private static async Task<Stream?> HttpDownload(string url)
+    {
+        IoProgressWindow? progressWindow = null;
+        var buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+        var cts = new CancellationTokenSource();
+        var handler = new IoHandler(cts);
+        var stream = new MemoryStream();
+        try
+        {
+            if (Program.Desktop.MainWindow is not null)
+            {
+                progressWindow = new IoProgressWindow {
+                    Title = $"Downloading {url}",
+                    Handler = handler
+                };
+                _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
+            }
+
+            using var httpClient = new HttpClient();
+            using HttpResponseMessage response =
+                await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+
+            await using Stream downloadStream = await response.Content.ReadAsStreamAsync(cts.Token);
+
+            if (response.Content.Headers.ContentLength is null)
+            {
+                handler.UpdateProgress(0, "Downloading (unknown length)");
+                await downloadStream.CopyToAsync(stream, cts.Token);
+            }
+            else
+            {
+                int read;
+                var length = (int)response.Content.Headers.ContentLength.Value;
+                var remaining = length;
+                while (!handler.Cancelled &&
+                       (read = await downloadStream.ReadAsync(
+                           buffer.AsMemory(0, int.Min(buffer.Length, remaining)),
+                           cts.Token)) >
+                       0)
+                {
+                    var prog = (float)read / length * 100;
+                    handler.UpdateProgress(prog, $"{float.Floor((1 - ((float)remaining / length)) * 100)}%");
+                    await stream.WriteAsync(buffer.AsMemory(0, read), cts.Token);
+                    remaining -= read;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is TaskCanceledException)
+                Logger.Info("Download cancelled by user");
+            else
+                Logger.Error(ex, "Failed to download map!");
+
+            await stream.DisposeAsync();
+            return null;
+        }
+        finally
+        {
+            progressWindow?.Close();
+        }
+
+        if (handler.Cancelled)
+            return null;
+
+        return stream;
     }
 
     /// <summary>
@@ -172,14 +249,17 @@ public sealed class BspService : ReactiveObject
         if (BspFile is null)
             return false;
 
+        if (outFile is null && FilePath is null)
+            return false;
+
         IsLoading = true;
 
         foreach (ILumpViewModel? vm in Lumps)
             vm?.UpdateModel(); // Null propagation means we do nothing for unloaded lumps VMs
 
+        IoProgressWindow? progressWindow = null;
         try
         {
-            IoProgressWindow? progressWindow = null;
             var cts = new CancellationTokenSource();
             var handler = new IoHandler(cts);
 
@@ -206,8 +286,6 @@ public sealed class BspService : ReactiveObject
                     makeBackup: MakeBackup),
                 RxApp.TaskpoolScheduler);
 
-            progressWindow?.Close();
-
             if (handler.Cancelled)
                 return false;
         }
@@ -220,12 +298,15 @@ public sealed class BspService : ReactiveObject
         catch (Exception ex)
         {
             Logger.Error(ex, "Failed to save file!");
-            IsLoading = false;
             return false;
+        }
+        finally
+        {
+            progressWindow?.Close();
+            IsLoading = false;
         }
 
         UpdateBspProperties();
-        IsLoading = false;
         IsModified = false;
         return true;
     }
