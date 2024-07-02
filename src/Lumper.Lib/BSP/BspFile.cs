@@ -12,6 +12,7 @@ using Lumps;
 using Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
+using Struct;
 
 public sealed partial class BspFile : IDisposable
 {
@@ -86,13 +87,21 @@ public sealed partial class BspFile : IDisposable
         return this;
     }
 
+    /// <summary>
+    /// Save a BSP out to file, handling backups and updating the underlying
+    /// file stream to use the new file.
+    /// </summary>
+    /// <exception cref="ArgumentException">Bad input args</exception>
+    /// <exception cref="FileLoadException">
+    /// When save successful but failed to update active file stream to the new file.
+    /// The UI/CLI should do a full load of that file in that case.
+    /// </exception>
     public void SaveToFile(
         string? path,
         DesiredCompression compress,
         IoHandler? handler,
         bool makeBackup)
     {
-        // If you add something here, also add it to the BspReader
         if (path is null && FilePath is null)
             throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
 
@@ -211,6 +220,9 @@ public sealed partial class BspFile : IDisposable
             FileStream = File.OpenRead(outPath);
 
             Logger.Info($"Saved {outPath}");
+
+            if (!UpdateActiveBspFileSource(writer))
+                throw new FileLoadException();
         }
         else
         {
@@ -234,6 +246,79 @@ public sealed partial class BspFile : IDisposable
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// When we save out to a new file, we update the active file stream to point to that file.
+    /// But saving usually updates a bunch of headers, compression state, etc., so lumps that
+    /// care about the active file stream need to be updated.
+    ///
+    /// This is really ugly, and would be nice to just completely reload the active BSP,
+    /// but that'd either require a reset of most of the UI, or hackily updating a bunch
+    /// of viewmodel -> model references.
+    /// </summary>
+    private bool UpdateActiveBspFileSource(BspFileWriter writer)
+    {
+        if (FileStream is null)
+            return false;
+
+        foreach ((BspLumpType bspLumpType, BspLumpHeader bspHeader) in writer.LumpHeaders)
+        {
+            Lump lump = GetLump(bspLumpType);
+
+            if (lump is not GameLump and not PakfileLump)
+                lump.IsCompressed = bspHeader.FourCc > 0;
+
+            if (lump is GameLump gl)
+            {
+                if (gl.LastWriter is null)
+                {
+                    Logger.Error("Can't find writer we just used, unable to update active BSP instance.");
+                    return false;
+                }
+
+                foreach ((Lump glLump, LumpHeaderInfo? glLumpHeader) in gl.LastWriter.HeaderInfo)
+                {
+                    glLump.IsCompressed = glLumpHeader.Compressed;
+
+                    if (glLump is not IFileBackedLump glfbLump)
+                        continue;
+
+                    glfbLump.DataStream = FileStream;
+                    glfbLump.DataStreamLength = glLumpHeader.Length;
+                    glfbLump.DataStreamOffset = glLumpHeader.Offset;
+
+                    if (glLump is IUnmanagedLump uGlLump)
+                        uGlLump.UncompressedLength = glLumpHeader.Compressed ? glLumpHeader.UncompressedLength : -1;
+                }
+
+                // It was a hack to expose this at all, but need to know these headers.
+                // We could probably structure all of this better but just don't have time.
+                gl.LastWriter.Dispose();
+                gl.LastWriter = null;
+
+                continue;
+            }
+
+            if (lump is not IFileBackedLump fbLump)
+                continue;
+
+            fbLump.DataStream = FileStream;
+            fbLump.DataStreamLength = bspHeader.Length;
+            fbLump.DataStreamOffset = bspHeader.Offset;
+
+            if (lump is IUnmanagedLump uLump)
+            {
+                uLump.UncompressedLength = bspHeader.FourCc > 0 ? bspHeader.FourCc : -1;
+            }
+            else if (lump is PakfileLump paklump)
+            {
+                foreach (PakfileEntry entry in paklump.Entries)
+                    entry.IsModified = false;
+            }
+        }
+
+        return true;
     }
 
     public bool SaveToStream(IoHandler handler, Stream stream, DesiredCompression compress)

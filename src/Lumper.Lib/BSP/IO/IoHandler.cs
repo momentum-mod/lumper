@@ -29,6 +29,12 @@ public class IoHandler(CancellationTokenSource cts)
         Progress?.Invoke(this, new IoProgressEventArgs { ProgressPercent = ProgressPercent, Message = message });
     }
 
+    public void UpdateAbsProgress(float absProgress)
+    {
+        ProgressPercent = absProgress;
+        Progress?.Invoke(this, new IoProgressEventArgs { ProgressPercent = absProgress, Message = null });
+    }
+
     public enum ReadProgressProportions
     {
         Header = 5,

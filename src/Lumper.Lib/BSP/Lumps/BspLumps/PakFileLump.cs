@@ -125,13 +125,15 @@ public class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(parent), IFi
             Zip.SaveTo(dataStream, new WriterOptions(CompressionType.None));
             dataStream.Seek(0, SeekOrigin.Begin);
             dataStream.CopyTo(stream);
+
+            IsCompressed = false;
         }
         else
         {
             // BASTARD slow path, have to reconstruct the zip every time. Might be possible to avoid but having
             // fought with SharpCompress for hours I can't figure it out.
             using var outStream = new MemoryStream();
-            using var zipWriter =
+            var zipWriter =
                 (ZipWriter)WriterFactory.Open(outStream,
                     ArchiveType.Zip,
                     new ZipWriterOptions(CompressionType.None));
@@ -155,8 +157,12 @@ public class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(parent), IFi
                 entry.GetReadOnlyStream().CopyTo(zipStream);
             }
 
+            zipWriter.Dispose();
+
             outStream.Seek(0, SeekOrigin.Begin);
             outStream.CopyTo(stream);
+
+            IsCompressed = true;
         }
     }
 
