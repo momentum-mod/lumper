@@ -1,9 +1,11 @@
 namespace Lumper.Lib.BSP.Lumps.GameLumps;
+
 using System.Drawing;
 using System.IO;
-using Lumper.Lib.BSP.Struct;
+using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Struct;
 
 public enum StaticPropVersion
 {
@@ -67,76 +69,43 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         StaticPropVersion.V10 => 10,
         StaticPropVersion.V11 => 11,
         StaticPropVersion.V12 => 12,
+        StaticPropVersion.V13 => 13,
         _ => 0
     };
     protected override void ReadItem(BinaryReader reader)
     {
-        var startpos = reader.BaseStream.Position;
-        StaticProp prop = new()
-        {
+        var startPos = reader.BaseStream.Position;
+
+        StaticProp prop = new() {
             // v4
-            Origin = new Vector()
-            {
-                X = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Y = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Z = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            },
-            Angle = new Angle()
-            {
-                Pitch = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Yaw = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Roll = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            },
+            Origin = new Vector3 { X = reader.ReadSingle(), Y = reader.ReadSingle(), Z = reader.ReadSingle() },
+            Angle = new Angle { Pitch = reader.ReadSingle(), Yaw = reader.ReadSingle(), Roll = reader.ReadSingle() },
 
             // v4
             PropType = reader.ReadUInt16(),
             FirstLeaf = reader.ReadUInt16(),
             LeafCount = reader.ReadUInt16(),
             Solid = reader.ReadByte(),
-            // every version except v7*
-            //if (Version != StaticPropVersion.V7s)
+
+            // Every version except v7*
             Flags = reader.ReadByte(),
+
             // v4 still
             Skin = reader.ReadInt32(),
-            FadeMinDist = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            FadeMaxDist = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            LightingOrigin = new Vector()
-            {
-                X = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Y = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-                Z = System.BitConverter.ToSingle(reader.ReadBytes(4)),
-            }
+            FadeMinDist = reader.ReadSingle(),
+            FadeMaxDist = reader.ReadSingle(),
+            LightingOrigin = new Vector3 { X = reader.ReadSingle(), Y = reader.ReadSingle(), Z = reader.ReadSingle() }
         };
+
         // since v5
         if (ActualVersion >= StaticPropVersion.V5)
-            prop.ForcedFadeScale = System.BitConverter.ToSingle(reader.ReadBytes(4));
+            prop.ForcedFadeScale = reader.ReadSingle();
+
         // v6, v7, and v7* only
-        switch (ActualVersion)
+        if (ActualVersion is StaticPropVersion.V6 or StaticPropVersion.V7 or StaticPropVersion.V7s)
         {
-            case StaticPropVersion.V6:
-            case StaticPropVersion.V7:
-            case StaticPropVersion.V7s:
-                prop.MinDXLevel = reader.ReadUInt16();
-                prop.MaxDXLevel = reader.ReadUInt16();
-                break;
-            case StaticPropVersion.Unknown:
-                break;
-            case StaticPropVersion.V4:
-                break;
-            case StaticPropVersion.V5:
-                break;
-            case StaticPropVersion.V8:
-                break;
-            case StaticPropVersion.V9:
-                break;
-            case StaticPropVersion.V10:
-                break;
-            case StaticPropVersion.V11:
-                break;
-            case StaticPropVersion.V12:
-                break;
-            default:
-                break;
+            prop.MinDXLevel = reader.ReadUInt16();
+            prop.MaxDXLevel = reader.ReadUInt16();
         }
         // v7* only
         if (ActualVersion == StaticPropVersion.V7s)
@@ -177,6 +146,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
                 ? new Vector3 { X = x, Y = x, Z = x }
                 : new Vector3 { X = x, Y = reader.ReadSingle(), Z = reader.ReadSingle() };
         }
+
         Data.Add(prop);
         if (reader.BaseStream.Position - startpos != StructureSize)
             throw new InvalidDataException($"StaticProp structuresize doesn't match reader position after read ({reader.BaseStream.Position - startpos} != {StructureSize})");
@@ -252,9 +222,16 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         // since v10
         if (ActualVersion >= StaticPropVersion.V10)
             writer.Write(prop.FlagsEx);
-        // since v11
-        if (ActualVersion >= StaticPropVersion.V11)
-            writer.Write(prop.UniformScale);
+
+        // v11/v12
+        if (ActualVersion is StaticPropVersion.V11 or StaticPropVersion.V12)
+        {
+            if (prop.UniformScale.X == prop.UniformScale.Y)
+                writer.Write(prop.UniformScale.X);
+            else
+                throw new InvalidDataException("UniformScale only supports one value in version 11/12");
+        }
+
         if (ActualVersion >= StaticPropVersion.V13)
         {
             writer.Write(prop.UniformScale.X);

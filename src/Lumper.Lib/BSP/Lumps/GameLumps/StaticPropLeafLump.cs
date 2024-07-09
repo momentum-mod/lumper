@@ -3,9 +3,7 @@ using System.IO;
 
 public class StaticPropLeafLump(BspFile parent) : FixedLump<GameLumpType, uint>(parent)
 {
-    public override int StructureSize => (Version == 12)
-        ? 4
-        : 2;
+    public override int StructureSize => Version == 12 ? 4 : 2;
 
     protected override void ReadItem(BinaryReader reader)
     {
@@ -14,6 +12,7 @@ public class StaticPropLeafLump(BspFile parent) : FixedLump<GameLumpType, uint>(
         else
             Data.Add(reader.ReadUInt16());
     }
+
     protected override void WriteItem(BinaryWriter writer, int index)
     {
         if (Version >= 12)
