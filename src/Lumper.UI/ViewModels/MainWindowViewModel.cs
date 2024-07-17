@@ -34,7 +34,35 @@ public class MainWindowViewModel : ViewModel
                 RxApp.MainThreadScheduler);
         }
     }
+    /// <summary>
+    /// Event called when 'check for updates' is pressed in the File menu that triggers checking for and installing updates
+    /// </summary>
+    public async ValueTask UpdateCommand()
+    {
+        var (success, updateNumber)  = await Updater.Updater.CheckForUpdate();
+        if (success)
+        {
+            ButtonResult result = await MessageBoxManager
+                .GetMessageBoxStandard(
+                    "Update Available",
+                    $"An update is available ({updateNumber}), do you want to download and restart?", ButtonEnum.OkCancel)
+                .ShowWindowDialogAsync(Program.Desktop.MainWindow);
 
+            if (result != ButtonResult.Ok)
+                return;
+        }
+        else
+        {
+            ButtonResult result = await MessageBoxManager
+                .GetMessageBoxStandard(
+                    "No updates available",
+                    "No updates available", ButtonEnum.Ok)
+                .ShowWindowDialogAsync(Program.Desktop.MainWindow);
+
+            return;
+        }
+        await Lumper.UI.Updater.Updater.Update();
+    }
     public async Task OpenCommand()
     {
         if (Program.Desktop.MainWindow is null)

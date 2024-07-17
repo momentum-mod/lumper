@@ -89,6 +89,9 @@
               <MenuItem Header="_Jobs" Command="{Binding PageService.ViewPage}"
                         CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D5" />
             </MenuItem>
+            <MenuItem Header="_About">
+              <MenuItem Header="Check for updates" Command="{Binding UpdateCommand}" />
+            </MenuItem>
           </Menu>
         </StackPanel>
       </DockPanel>
