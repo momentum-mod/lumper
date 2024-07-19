@@ -238,7 +238,8 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         foreach (Struct.TexInfo texInfo in texInfoLump.Data)
         {
             TexDataLump texDataLump = _bsp.GetLump<TexDataLump>();
-            texInfo.TexData = texDataLump.Data[texInfo.TexDataPointer];
+            if (texInfo.TexDataPointer >= 0)
+                texInfo.TexData = texDataLump.Data[texInfo.TexDataPointer];
         }
     }
 }
