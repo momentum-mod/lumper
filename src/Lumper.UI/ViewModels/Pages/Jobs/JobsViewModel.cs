@@ -22,6 +22,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
     public JobsViewModel()
     {
         JobTypes = [
+            new JobMenuItem<RemoveAssetJob>(this, () => new RemoveAssetJob()),
             new JobMenuItem<ReplaceTextureJob>(this, () => new ReplaceTextureJob()),
             new JobMenuItem<StripperJob>(this, () => new StripperJob()),
             new JobMenuItem<RunExternalToolJob>(this, () => new RunExternalToolJob())
@@ -60,6 +61,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         StripperJob stripper => new StripperJobViewModel(stripper),
         RunExternalToolJob runExternal => new RunExternalToolJobViewModel(runExternal),
         ReplaceTextureJob changeTexture => new ReplaceTextureJobViewModel(changeTexture),
+        RemoveAssetJob removeAsset => new RemoveAssetJobViewModel(removeAsset),
         _ => throw new ArgumentException("Invalid job")
     };
 

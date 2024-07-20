@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:views="clr-namespace:Lumper.UI.Views.Pages.VtfBrowser"
              xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.VtfBrowser"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -21,27 +22,65 @@
           <DataTemplate>
             <Border BorderBrush="#10FFFFFF" Background="#08FFFFFF" BorderThickness="1" Margin="4"
                     CornerRadius="4" Cursor="Hand" DoubleTapped="Item_DoubleTapped">
-              <StackPanel
-                MinWidth="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}">
-                <Image
-                  Height="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
-                  Width="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
-                  Source="{Binding Image}"
-                  IsVisible="{Binding Loaded}" />
-                <TextBlock
-                  TextTrimming="CharacterEllipsis"
-                  MaxWidth="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
-                  HorizontalAlignment="Center"
-                  VerticalAlignment="Bottom"
-                  Text="{Binding Name}"
-                  Padding="4" />
-                <ToolTip.Tip>
-                  <StackPanel>
-                    <TextBlock Text="{Binding Name}" />
-                    <TextBlock Text="{Binding Key}" />
-                  </StackPanel>
-                </ToolTip.Tip>
-              </StackPanel>
+              <Panel>
+                <StackPanel ZIndex="10" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                            Orientation="Horizontal" IsVisible="{Binding MatchesOfficialAsset}"
+                            Background="#88000000">
+                  <ToolTip.Tip>
+                    <StackPanel Spacing="8">
+                      <TextBlock Text="This texture is present in a Valve game" />
+                      <ItemsControl ItemsSource="{Binding OfficialAssets}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock TextWrapping="NoWrap" FontFamily="{StaticResource Monospace}">
+                              <Run FontWeight="Bold">Game </Run>
+                              <Run Text="{Binding GameName, FallbackValue='?'}" />
+                              <LineBreak />
+                              <Run FontWeight="Bold">Path </Run>
+                              <Run Text="{Binding FileName, FallbackValue='?'}" />
+                            </TextBlock>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </ToolTip.Tip>
+                  <DataGrid></DataGrid>
+
+                  <ItemsControl ItemsSource="{Binding OfficialAssets}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock FontWeight="Medium" VerticalAlignment="Center" FontSize="14" Margin="8 4 0 4"
+                                   FontFamily="{StaticResource Monospace}" Text="{Binding GameName, FallbackValue='?'}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <materialIcons:MaterialIcon Width="20" Height="20" Kind="AlertCircleOutline" Foreground="Red"
+                                              Margin="4 3 6 4" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel
+                  MinWidth="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}">
+                  <Image
+                    Height="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
+                    Width="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
+                    Source="{Binding Image}"
+                    IsVisible="{Binding Loaded}">
+                  </Image>
+                  <TextBlock
+                    TextTrimming="CharacterEllipsis"
+                    MaxWidth="{Binding $parent[views:VtfBrowserView].((vm:VtfBrowserViewModel)DataContext).Dimensions, FallbackValue=64}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Text="{Binding Name}"
+                    Padding="4">
+                    <ToolTip.Tip>
+                      <StackPanel Width="600">
+                        <TextBlock Text="{Binding Name}" />
+                        <TextBlock Text="{Binding Key}" />
+                      </StackPanel>
+                    </ToolTip.Tip>
+                  </TextBlock>
+                </StackPanel>
+              </Panel>
             </Border>
           </DataTemplate>
         </ItemsControl.ItemTemplate>

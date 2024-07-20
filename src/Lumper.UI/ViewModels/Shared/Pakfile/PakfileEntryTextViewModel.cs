@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lib.BSP.Struct;
 using NLog;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Views.Shared.Pakfile;
 
@@ -23,7 +24,11 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public PakfileEntryTextViewModel(PakfileEntry entry, BspNode parent) : base(entry, parent)
-        => RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+    {
+        RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+
+        this.WhenAnyValue(x => x.Content).Subscribe(x => UpdateHash(x ?? string.Empty));
+    }
 
     public override void Load()
     {
@@ -71,8 +76,9 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
         if (!IsModified)
             return;
 
-        var stream = new MemoryStream();
-        var writer = new StreamWriter(stream, Encoding.ASCII) { AutoFlush = true };
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream, Encoding.ASCII);
+        writer.AutoFlush = true;
         writer.Write(Content);
         stream.Seek(0, SeekOrigin.Begin);
         DataStream = stream;

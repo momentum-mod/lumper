@@ -172,8 +172,9 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         }
 
         using var mem = new MemoryStream();
-        // Would love to avoid a copy here but can't figure it out, don't want
-        // to expose byte array from PakfileLump and couldn't get ReadonlyMemory<byte> to work.
+        // Impossible to safely access the underlying buffer of this pakfileEntry; it's possible
+        // to expose a ReadOnlySpan, but not allowed to pass that to ImageLoadLump, since no guarantee
+        // that a method taking a byte[] won't modify it.
         pakfileEntry.GetReadOnlyStream().CopyTo(mem);
         var vtfBuffer = mem.GetBuffer();
 

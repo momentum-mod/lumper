@@ -243,7 +243,7 @@ public sealed partial class BspFile : IDisposable
                 }
             }
         }
-    }
+    } // TODO: THROWING ON DISPSOE!!!!!
 
     /// <summary>
     /// When we save out to a new file, we update the active file stream to point to that file.

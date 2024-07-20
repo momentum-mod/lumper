@@ -216,6 +216,7 @@ dotnet_diagnostic.CA1311.severity = none
 
 # "Do Not Use Broken Cryptographic Algorithms"
 # We use these for hash comparisons, not cryptography.
+dotnet_diagnostic.CA5350.severity = none
 dotnet_diagnostic.CA5351.severity = none
 
 # "Add missing cases to switch expression" and "Add missing cases to switch statement"

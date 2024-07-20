@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Lib.Util;
 using LogViewer;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
@@ -33,6 +34,10 @@ public class MainWindowViewModel : ViewModel
                 () => BspService.Instance.Load(Program.Desktop.Args[0]),
                 RxApp.MainThreadScheduler);
         }
+
+        // Start loading asset manifest in background. Takes around a half second on my machine, but we're
+        // doing in the background and use it frequently, so may as well get it done with immediately.
+        Observable.Start(() => _ = AssetManifest.Manifest, RxApp.TaskpoolScheduler);
     }
 
     public async Task OpenCommand()
@@ -116,7 +121,8 @@ public class MainWindowViewModel : ViewModel
             ButtonResult result = await MessageBoxManager
                 .GetMessageBoxStandard(
                     "Unsaved changes",
-                    "Do you want to discard your changes?", ButtonEnum.OkCancel)
+                    "Do you want to discard your changes?",
+                    ButtonEnum.OkCancel)
                 .ShowWindowDialogAsync(Program.Desktop.MainWindow);
 
             if (result != ButtonResult.Ok)

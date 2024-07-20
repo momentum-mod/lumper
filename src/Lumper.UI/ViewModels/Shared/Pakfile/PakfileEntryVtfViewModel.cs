@@ -91,9 +91,8 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         _inited = true;
 
         VtfFile ??= new VtfFileViewModel(BaseEntry);
-        _ = FetchImage();
+        _ = FetchImage().ContinueWith(_ => UpdateHash());
     }
-
 
     private async Task FetchImage()
     {
@@ -129,6 +128,11 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
             await VtfFile.SetImageData(image, Frame, Face, Slice, MipmapLevel);
 
         MarkAsModified();
+
+        // SetNewImage/SetImageData updates the pakfileentry stream,
+        // so this is sufficent to update the hash
+        UpdateHash();
+
         await FetchImage();
     }
 

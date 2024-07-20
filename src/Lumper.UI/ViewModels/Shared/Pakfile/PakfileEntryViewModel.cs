@@ -1,9 +1,13 @@
 namespace Lumper.UI.ViewModels.Shared.Pakfile;
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Lib.BSP.Struct;
+using Lib.Util;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -31,6 +35,15 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     [ObservableAsProperty]
     public string Extension { get; } = null!;
 
+    [Reactive]
+    public string? Hash { get; private set; }
+
+    [Reactive]
+    public bool MatchesOfficialAsset { get; private set; }
+
+    [Reactive]
+    public List<AssetManifest.Asset>? OfficialAssets { get; private set; }
+
     public long? CompressedSize => BaseEntry.CompressedSize;
 
     protected PakfileEntryViewModel(PakfileEntry baseEntry, BspNode parent) : base(parent)
@@ -50,5 +63,31 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     {
         base.MarkAsModified();
         BaseEntry.IsModified = true;
+    }
+
+    protected void UpdateHash()
+    {
+        Hash = BaseEntry.HashSHA1;
+        UpdateHashProperties();
+    }
+
+    protected void UpdateHash(string value)
+    {
+        Hash = BitConverter.ToString(SHA1.HashData(Encoding.UTF8.GetBytes(value))).Replace("-", string.Empty);
+        UpdateHashProperties();
+    }
+
+    private void UpdateHashProperties()
+    {
+        if (AssetManifest.Manifest.TryGetValue(Hash!, out List<AssetManifest.Asset>? assets))
+        {
+            MatchesOfficialAsset = true;
+            OfficialAssets = assets;
+        }
+        else
+        {
+            MatchesOfficialAsset = false;
+            OfficialAssets = null;
+        }
     }
 }

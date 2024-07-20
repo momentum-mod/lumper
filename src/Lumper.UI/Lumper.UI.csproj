@@ -53,14 +53,26 @@
     <None Remove=".gitignore"/>
   </ItemGroup>
 
+
   <ItemGroup>
-    <None Update="nlog.config" CopyToOutputDirectory="Always"/>
+    <None Update="asset.cache" CopyToOutputDirectory="Always"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="NLog.config" CopyToOutputDirectory="Always"/>
     <None Update="RegisterLumperURLProtocol.ps1" CopyToOutputDirectory="Always"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Lumper.Lib\Lumper.Lib.csproj"/>
     <ProjectReference Include="..\Dependencies\VTFLib.NET\VTFLib.NET\VTFLib.NET.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\Pages\Jobs\RemoveAssetJobView.axaml.cs">
+      <DependentUpon>ReplaceTextureJobView.axaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 
 </Project>
