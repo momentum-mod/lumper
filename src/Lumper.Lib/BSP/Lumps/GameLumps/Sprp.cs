@@ -1,7 +1,9 @@
 namespace Lumper.Lib.BSP.Lumps.GameLumps;
 
 using System.IO;
+using Bsp.Enum;
 using Enum;
+using IO;
 using NLog;
 
 public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
@@ -11,7 +13,7 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
     public StaticPropLump StaticProps { get; set; } = null!;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-    public override void Read(BinaryReader reader, long length)
+    public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {
         var startPos = reader.BaseStream.Position;
 
@@ -45,7 +47,7 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
             var tmpLength = entries * StaticProps.StructureSize;
             if (tmpLength != remainingLength)
                 throw new InvalidDataException($"Funny staticprop length ({tmpLength} != {remainingLength})");
-            StaticProps.Read(reader, tmpLength);
+            StaticProps.Read(reader, tmpLength, handler);
         }
         else
         {
@@ -53,7 +55,7 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
         }
     }
 
-    public override void Write(Stream stream)
+    public override void Write(Stream stream, IoHandler? handler = null, DesiredCompression? compression = null)
     {
         var w = new BinaryWriter(stream);
 

@@ -11,15 +11,25 @@ using Lumps.GameLumps;
 using Newtonsoft.Json;
 using NLog;
 
-public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWriter(output)
+public sealed class GameLumpWriter(GameLump gameLump, Stream output, IoHandler? handler, DesiredCompression compression)
+    : LumpWriter(output)
 {
     [JsonIgnore]
     private readonly GameLump _gameLump = gameLump;
 
-    private readonly long _startPos = output.Position;
-    private long LumpDataStart { get; set; }
-    private long LumpDataEnd { get; set; }
     public List<GameLumpHeader> LumpHeaders { get; set; } = [];
+
+    [JsonIgnore]
+    protected override IoHandler? Handler { get; set; } = handler;
+
+    [JsonIgnore]
+    protected override DesiredCompression Compression { get; set; } = compression;
+
+    private long LumpDataStart { get; set; }
+
+    private long LumpDataEnd { get; set; }
+
+    private readonly long _startPos = output.Position;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -46,9 +56,9 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
             Write(header.FileOfs);
             Write(header.FileLen);
         }
-            throw new NotImplementedException("Failed to write GameLump header: bad length");
 
         if (LumpHeaders.Count != 0 && BaseStream.Position != LumpDataStart)
+            throw new InvalidDataException("Failed to write GameLump header: bad length");
 
         BaseStream.Seek(LumpDataEnd, SeekOrigin.Begin);
     }
@@ -69,6 +79,10 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output) : LumpWrite
                 : (ushort)lump.Version;
 
             LumpHeaders.Add(new GameLumpHeader(newHeaderInfo, (ushort)lump.Version, (int)key));
+
+            Logger.Debug($"Wrote gamelump {key} {(int)key}".PadRight(48) +
+                         $"offset: {newHeaderInfo.Offset}".PadRight(24) +
+                         $"length: {newHeaderInfo.UncompressedLength}".PadRight(24));
         }
 
         if (LumpHeaders.Count != 0 && LumpHeaders.Last().Id != 0)

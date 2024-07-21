@@ -13,7 +13,8 @@ using Newtonsoft.Json;
 using NLog;
 using Struct;
 
-public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
+public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handler, DesiredCompression compression)
+    : LumpWriter(output)
 {
     [JsonIgnore]
     private readonly BspFile _bsp = file;
@@ -21,13 +22,29 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
     [JsonProperty]
     public Dictionary<BspLumpType, BspLumpHeader> LumpHeaders { get; set; } = [];
 
-    public void Save()
+    [JsonIgnore]
+    protected override IoHandler? Handler { get; set; } = handler;
+
+    [JsonIgnore]
+    protected override DesiredCompression Compression { get; set; } = compression;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+    public bool Save()
     {
         ConstructTexDataLumps();
+
+        if (Handler?.Cancelled ?? false)
+            return false;
+        Handler?.UpdateProgress(0, "Writing lumps");
         WriteAllLumps();
+
+        if (Handler?.Cancelled ?? false)
+            return false;
+        Handler?.UpdateProgress((float)IoHandler.WriteProgressProportions.Header, "Generating header");
         WriteHeader();
+
+        return true;
     }
 
     private void WriteHeader()
@@ -53,11 +70,17 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
         // Seek past the header
         BaseStream.Seek(BspFile.HeaderSize, SeekOrigin.Begin);
 
-        var lumpTypes = _bsp.Lumps.Select(x => x.Key).ToList();
-        foreach (BspLumpType lumpType in lumpTypes)
+        const float incr = (float)IoHandler.WriteProgressProportions.OtherLumps / BspFile.HeaderLumps;
+
+        foreach (BspLumpType lumpType in _bsp.Lumps.Select(x => x.Key))
         {
-            Lumps.Lump<BspLumpType> lump = _bsp.Lumps[lumpType];
-            if (!lump.Empty())
+            if (Handler?.Cancelled ?? false)
+                return;
+
+            Handler?.UpdateProgress(incr, $"Writing {lumpType}");
+
+            Lump<BspLumpType> lump = _bsp.Lumps[lumpType];
+            if (!lump.Empty)
             {
                 // Lump offsets (and their corresponding data lumps) are always rounded
                 // up to the nearest 4-byte boundary, though the lump length may not be.
@@ -67,15 +90,12 @@ public class BspFileWriter(BspFile file, Stream output) : LumpWriter(output)
                     Write(pad);
             }
 
-            if (lump is GameLump or PakFileLump && lump.Compress)
-            {
-                Console.WriteLine($"Let's not compress {lump.GetType().Name} .. it's a silly place");
-                lump.Compress = false;
-            }
             LumpHeaderInfo newHeaderInfo = Write(lump);
             LumpHeaders[lumpType] = new BspLumpHeader(newHeaderInfo, lump.Version);
 
-            Console.WriteLine($"Lump {lumpType}({(int)lumpType})\n\t{newHeader.Offset}\n\t{newHeader.Length}");
+            Logger.Debug($"Wrote {lumpType} ({(int)lumpType})".PadRight(48)
+                         + $"offset: {newHeaderInfo.Offset}".PadRight(24)
+                         + $"length: {newHeaderInfo.Length}");
         }
     }
 

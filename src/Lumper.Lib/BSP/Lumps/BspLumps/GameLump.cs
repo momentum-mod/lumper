@@ -8,35 +8,32 @@ using Enum;
 using IO;
 using Lumps;
 
-public class GameLump : ManagedLump<BspLumpType>
+public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
-    public T GetLump<T>() where T : Lump<GameLumpType>
-    {
-        Dictionary<System.Type, GameLumpType> typeMap = new()
-        {
-            { typeof(Sprp), GameLumpType.sprp }
-        };
     public GameLumpReader? Reader { get; private set; }
 
-    public GameLump(BspFile parent) : base(parent) => Compress = false;
-    public Dictionary<GameLumpType, Lump?> Lumps { get; } = [];
+    public Dictionary<GameLumpType, Lump<GameLumpType>?> Lumps { get; } = [];
 
-        if (typeMap.ContainsKey(typeof(T)))
-        {
-            return (T)Lumps[typeMap[typeof(T)]];
-        }
-        IEnumerable<KeyValuePair<GameLumpType, Lump>> tLumps = Lumps.Where(x => x.Value.GetType() == typeof(T));
-        return (T)tLumps.Select(x => x.Value).First();
-    }
-    public override void Read(BinaryReader reader, long length)
+    public override bool IsCompressed
     {
-        Reader = new GameLumpReader(this, reader, length);
+        get => false;
+        set { } // Deliberately left empty
+    }
+
+    public T? GetLump<T>() where T : Lump<GameLumpType>
+        => (T?)Lumps.Values.First(x => x?.GetType() == typeof(T));
+
+    public Lump<GameLumpType>? GetLump(GameLumpType lumpType) => Lumps[lumpType];
+
+    public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
+    {
+        Reader = new GameLumpReader(this, reader, length, handler);
         Reader.Load();
     }
 
-    public override void Write(Stream stream)
+    public override void Write(Stream stream, IoHandler? handler = null, DesiredCompression? compression = null)
     {
-        var gameLumpWriter = new GameLumpWriter(this, stream);
+        var gameLumpWriter = new GameLumpWriter(this, stream, handler, compression ?? DesiredCompression.Unchanged);
         gameLumpWriter.Save();
     }
 

@@ -11,11 +11,13 @@ using Lumps.GameLumps;
 using Newtonsoft.Json;
 using NLog;
 
-public sealed class GameLumpReader(GameLump gamelump, Stream input, long length) : LumpReader(input)
+public sealed class GameLumpReader(GameLump gamelump, Stream input, long length, IoHandler? handler = null)
+    : LumpReader(input)
 {
     [JsonIgnore]
     private readonly GameLump _gameLump = gamelump;
-    private readonly long _length = length;
+
+    protected override IoHandler? Handler { get; set; } = handler;
 
     [JsonProperty]
     public IReadOnlyDictionary<GameLumpType, LumpHeaderInfo> Headers
@@ -25,8 +27,8 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public GameLumpReader(GameLump gamelump, BinaryReader reader, long length)
-        : this(gamelump, reader.BaseStream, length)
+    public GameLumpReader(GameLump gamelump, BinaryReader reader, long length, IoHandler? handler = null)
+        : this(gamelump, reader.BaseStream, length, handler)
     {
     }
 
@@ -66,12 +68,9 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
             {
                 var actualLength = header.Offset - prevHeader.Offset;
                 if (actualLength < 0)
-                    actualLength = _length - (prevHeader.Offset + prevHeader.Length - startPos);
+                    actualLength = length - (prevHeader.Offset + prevHeader.Length - startPos);
 
-                if (prevCompressed)
-                    prevHeader.CompressedLength = actualLength;
-                else
-                    prevHeader.CompressedLength = -1;
+                prevHeader.CompressedLength = prevCompressed ? actualLength : -1;
             }
 
             Lumps.Add(new Tuple<Lump, LumpHeaderInfo>(lump, header));
@@ -79,11 +78,11 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length)
             if (!_gameLump.Lumps.TryAdd(type, lump))
                 Logger.Warn($"Key {type} already in gamelumps, skipping");
 
-            Logger.Debug($"Read gamelump {_gameLump.Lumps.Count}  "
-                         + $"id: {type} {(int)type}".PadRight(48)
-                         + $"flags: {lump.Flags}".PadRight(24)
-                         + $"offset: {header.Offset}".PadRight(24)
-                         + $"length: {header.UncompressedLength}".PadRight(24));
+            Logger.Debug($"Read gamelump {_gameLump.Lumps.Count}  " +
+                         $"id: {type} {(int)type}".PadRight(48) +
+                         $"flags: {lump.Flags}".PadRight(24) +
+                         $"offset: {header.Offset}".PadRight(24) +
+                         $"length: {header.UncompressedLength}".PadRight(24));
 
             prevHeader = header;
             // lump is compressed if the last bit is 1
