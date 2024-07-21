@@ -36,7 +36,6 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
     {
         var stringBuilder = new StringBuilder(512);
         var keyValues = new List<KeyValuePair<string, string>>();
-
         try
         {
             string? key = null;
@@ -88,15 +87,12 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                             {
                                 var value = stringBuilder.ToString();
 
-                                if (key.Length == 0)
+                                if (key.Length == 0 && !EntityIo.TryParse(value, out _))
                                 {
-                                    Logger.Warn(
-                                        $"Entity parser skipped value \"{value}\" for empty key, how u do dis?");
+                                    Logger.Warn($"Parsed entity with value \"{value}\" with an empty key!");
                                 }
-                                else
-                                {
-                                    keyValues.Add(new KeyValuePair<string, string>(key, value));
-                                }
+
+                                keyValues.Add(new KeyValuePair<string, string>(key, value));
 
                                 key = null;
                             }
