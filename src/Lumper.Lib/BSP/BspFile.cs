@@ -71,27 +71,15 @@ public class BspFile
         writer.Save();
     }
 
-    public T GetLump<T>() where T : Lump<BspLumpType>
     {
         // If you add something here, also add it to the BspReader
-        Dictionary<Type, BspLumpType> typeMap = new()
         {
-            { typeof(EntityLump), BspLumpType.Entities },
-            { typeof(TexInfoLump), BspLumpType.Texinfo },
-            { typeof(TexDataLump), BspLumpType.Texdata },
-            { typeof(TexDataStringTableLump), BspLumpType.TexdataStringTable },
-            { typeof(TexDataStringDataLump), BspLumpType.TexdataStringData },
-            { typeof(PakFileLump), BspLumpType.Pakfile },
-            { typeof(GameLump), BspLumpType.GameLump }
-        };
 
-        if (typeMap.ContainsKey(typeof(T)))
         {
-            return (T)Lumps[typeMap[typeof(T)]];
         }
-        IEnumerable<KeyValuePair<BspLumpType, Lump<BspLumpType>>> tLumps = Lumps.Where(x => x.Value.GetType() == typeof(T));
-        return (T)tLumps.Select(x => x.Value).First();
     }
+
+    public T GetLump<T>() where T : Lump<BspLumpType> => Lumps.Values.OfType<T>().First();
 
     public Lump<BspLumpType> GetLump(BspLumpType lumpType) => Lumps[lumpType];
 
