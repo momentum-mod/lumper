@@ -54,6 +54,10 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                             Data.Add(new Entity(keyValues) { EntityLumpVersion = Version });
                             return true;
                         }
+                        else
+                        {
+                            stringBuilder.Append(x);
+                        }
 
                         break;
 
@@ -63,6 +67,8 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
                         if (!inString)
                             inSection = true;
+                        else
+                            stringBuilder.Append(x);
 
                         break;
 
