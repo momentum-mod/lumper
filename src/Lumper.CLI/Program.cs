@@ -2,7 +2,6 @@ namespace Lumper.CLI;
 
 using CommandLine;
 using Lib.BSP;
-using Lib.BSP.IO;
 
 internal sealed class Program
 {
@@ -24,7 +23,7 @@ internal sealed class Program
 
         if (parserResult.Value.Json != null && parserResult.Value.Json.Any())
         {
-            var bspFile = new BspFile(path);
+            var bspFile = BspFile.FromPath(path, null);
 
             var sortLumps = parserResult.Value.Json.Any(
                 x => x == JsonOptions.SortLumps);
@@ -32,7 +31,7 @@ internal sealed class Program
                 x => x == JsonOptions.SortProperties);
             var ignoreOffset = parserResult.Value.Json.Any(
                 x => x == JsonOptions.IgnoreOffset);
-            bspFile.ToJson(sortLumps, sortProperties, ignoreOffset);
+            bspFile?.JsonDump((string?)null, null, sortLumps, sortProperties, ignoreOffset);
         }
     }
 }

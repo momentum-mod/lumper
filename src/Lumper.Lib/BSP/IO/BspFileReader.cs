@@ -11,7 +11,7 @@ using Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
 
-public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
+public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler) : LumpReader(input)
 {
     [JsonIgnore]
     private readonly BspFile _bsp = file;
@@ -22,16 +22,34 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             x => x.Item1 is Lump<BspLumpType> lump ? lump.Type : BspLumpType.Unknown,
             x => x.Item2);
 
+    protected override IoHandler? Handler { get; set; } = handler;
+
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public void Load()
+    public bool Load()
     {
+        if (Handler?.Cancelled ?? false)
+            return false;
         Lumps.Clear();
         _bsp.Lumps.Clear();
+
+        if (Handler?.Cancelled ?? false)
+            return false;
+        Handler?.UpdateProgress(0, "Parsing header");
         ReadHeader();
+
+        if (Handler?.Cancelled ?? false)
+            return false;
+        Handler?.UpdateProgress((float)IoHandler.ReadProgressProportions.Header, "Loading lumps");
         LoadAll();
+
+        // Not doing progress updates for last stuff, runs instantly compared to IO work.
+        if (Handler?.Cancelled ?? false)
+            return false;
         ResolveTexNames();
         ResolveTexData();
+
+        return true;
     }
 
     protected override void ReadHeader()
@@ -113,7 +131,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
                 gameLumpHeader = header;
                 if (gameLumpHeader is { Length: 0, Offset: 0 })
                 {
-                    Console.WriteLine("GameLump length and offset 0 .. won't set new length");
+                    Logger.Warn("GameLump length and offset 0 .. won't set new length");
                     break;
                 }
             }
@@ -121,7 +139,7 @@ public class BspFileReader(BspFile file, Stream input) : LumpReader(input)
             else if (gameLump is not null && header.Offset != 0 && header.Offset != gameLumpHeader!.Offset)
             {
                 gameLumpHeader.UncompressedLength = header.Offset - gameLumpHeader.Offset;
-                Console.WriteLine($"Changed gamelump length to {gameLumpHeader.Length}");
+                Logger.Debug($"Changed gamelump length to {gameLumpHeader.Length}");
                 break;
             }
         }

@@ -103,8 +103,16 @@ public class RunExternalToolJob : Job, IJob
 
         // TODO: It'd be nice to do full task cancellation, in which case we'd be passing a CT into this method.
         var handler = new IoHandler(new CancellationTokenSource());
-        bsp.Save(handler, inputPath, compress: DesiredCompression.Unchanged, makeBackup: false,
-            updateCurrentPath: false);
+
+        using (FileStream fileStream = File.Open(inputPath, FileMode.Create))
+        {
+            if (!bsp.SaveToStream(handler, fileStream, DesiredCompression.Unchanged))
+            {
+                Logger.Error("Failed to save BSP to temporary file, exiting");
+                return false;
+            }
+        }
+
         Progress.Count = 25;
 
         Output stdOut, stdErr;
@@ -150,15 +158,15 @@ public class RunExternalToolJob : Job, IJob
         {
             if (WritesToStdOut)
             {
-                bsp.Load(handler, stdOut.Mem);
+                bsp.Load(stdOut.Mem, handler);
             }
             else if (WritesToInputFile)
             {
-                bsp.Load(handler, inputPath);
+                bsp.Load(inputPath, handler);
             }
             else
             {
-                bsp.Load(handler, outputPath!);
+                bsp.Load(outputPath!, handler);
             }
         }
         else

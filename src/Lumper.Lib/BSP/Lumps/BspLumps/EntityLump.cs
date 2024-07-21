@@ -3,7 +3,9 @@ namespace Lumper.Lib.BSP.Lumps.BspLumps;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Bsp.Enum;
 using Enum;
+using IO;
 using Lumps;
 using NLog;
 using Struct;
@@ -12,7 +14,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
     public List<Entity> Data { get; set; } = [];
 
-    public override void Read(BinaryReader reader, long length)
+    public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {
         while (ReadEntity(reader, reader.BaseStream.Position + length))
         {
@@ -30,8 +32,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
             var inSection = false;
             var inString = false;
             char x;
-            while (reader.BaseStream.Position < reader.BaseStream.Length
-                   && (x = reader.ReadChar()) != '\0')
+            while (reader.BaseStream.Position < reader.BaseStream.Length && (x = reader.ReadChar()) != '\0')
             {
                 switch (x)
                 {
@@ -122,7 +123,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         return false;
     }
 
-    public override void Write(Stream stream)
+    public override void Write(Stream stream, IoHandler? handler = null, DesiredCompression? compression = null)
     {
         foreach (Entity ent in Data)
         {
@@ -131,8 +132,10 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
             {
                 stream.Write(Encoding.ASCII.GetBytes($"{prop}\n"));
             }
+
             stream.Write(Encoding.ASCII.GetBytes("}\n"));
         }
+
         stream.Write(Encoding.ASCII.GetBytes("\0"));
     }
 
