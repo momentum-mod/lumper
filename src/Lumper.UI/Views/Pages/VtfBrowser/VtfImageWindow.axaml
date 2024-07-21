@@ -1,0 +1,14 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Shared.Pakfile"
+        xmlns:pakfileViews="clr-namespace:Lumper.UI.Views.Shared.Pakfile"
+        mc:Ignorable="d" d:DesignWidth="512" d:DesignHeight="512"
+        x:Class="Lumper.UI.Views.Pages.VtfBrowser.VtfImageWindow"
+        x:DataType="vm:PakfileEntryVtfViewModel"
+        Title="{Binding Name}">
+
+  <pakfileViews:PakfileEntryVtfView />
+
+</Window>
