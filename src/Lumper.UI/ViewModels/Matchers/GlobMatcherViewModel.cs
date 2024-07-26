@@ -1,18 +1,11 @@
-using Lumper.UI.Models;
-using Lumper.UI.Models.Matchers;
-using Lumper.UI.ViewModels.Bsp;
-
 namespace Lumper.UI.ViewModels.Matchers;
 
-/// <summary>
-///     ViewModel for <see cref="GlobMatcher" /> without start and end checks.
-/// </summary>
-public class GlobMatcherViewModel : MatcherBase
+using Lumper.UI.Models.Matchers;
+
+public class GlobMatcherViewModel : MatcherViewModel
 {
     public override string Name => "Glob";
 
     public override Matcher ConstructMatcher(string pattern)
-    {
-        return new GlobMatcher($"*{pattern}*", string.IsNullOrEmpty(pattern), true);
-    }
+        => new GlobMatcher($"*{pattern}*", string.IsNullOrEmpty(pattern), true);
 }
