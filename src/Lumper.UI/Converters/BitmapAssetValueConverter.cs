@@ -1,98 +1,72 @@
+namespace Lumper.UI.Converters;
+
 using System;
-using System.IO;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
-using Avalonia;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Bmp;
-
-namespace Lumper.UI.Converters;
+using SixLabors.ImageSharp.PixelFormats;
 
 /// <summary>
-///     <para>
-///         Converts a string path to a bitmap asset.
-///     </para>
-///     <para>
-///         The asset must be in the same assembly as the program. If it isn't,
-///         specify "avares://Lumper.UI/" in front of the path to the asset.
-///     </para>
+/// Converts a string path to a bitmap asset.
+/// The asset must be in the same assembly as the program. If it isn't,
+/// specify "avares://Lumper.UI/" in front of the path to the asset.
+///
+/// NOTE: Unused currently as it's more performant to just convert VTFs to bitmaps immediately.
+/// Didn't want to delete entirely, could be useful in future, eh.
 /// </summary>
 public class BitmapAssetValueConverter : IValueConverter
 {
-    public static BitmapAssetValueConverter Instance
-    {
-        get;
-    } = new();
-
-    public object Convert(object? value, Type targetType, object? parameter,
-        CultureInfo culture)
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         switch (value)
         {
-            case null:
-                return new BindingNotification(
-                    new ArgumentNullException(nameof(value)),
-                    BindingErrorType.DataValidationError);
             case string rawUri when targetType.IsAssignableFrom(typeof(Bitmap)):
+            {
+                Uri uri;
+
+                // Allow for assembly overrides
+                if (rawUri.StartsWith("avares://"))
                 {
-                    Uri uri;
-
-                    // Allow for assembly overrides
-                    if (rawUri.StartsWith("avares://"))
+                    uri = new Uri(rawUri);
+                }
+                else
+                {
+                    var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
+                    if (assemblyName is null)
                     {
-                        uri = new Uri(rawUri);
-                    }
-                    else
-                    {
-                        string? assemblyName =
-                            Assembly.GetEntryAssembly()?.GetName().Name;
-                        if (assemblyName is null)
-                            return new BindingNotification(
-                                new ArgumentNullException(nameof(assemblyName)),
-                                BindingErrorType.DataValidationError);
-
-                        uri = new Uri($"avares://{assemblyName}{rawUri}");
-                    }
-
-                    var assets = AvaloniaLocator.Current.GetService<IAssetLoader>();
-                    if (assets is null)
-                        return new BindingNotification(
-                            new ArgumentNullException(nameof(assets)),
+                        return new BindingNotification(new ArgumentNullException(nameof(value)),
                             BindingErrorType.DataValidationError);
+                    }
 
-                    var asset = assets.Open(uri);
-                    return new Bitmap(asset);
+                    uri = new Uri($"avares://{assemblyName}{rawUri}");
                 }
-            case Image img when targetType.IsAssignableFrom(typeof(Bitmap)):
-                {
-                    using var mem = new MemoryStream();
-                    var encoder = new BmpEncoder()
-                    {
-                        SupportTransparency = true,
-                        BitsPerPixel = BmpBitsPerPixel.Pixel32,
-                        SkipMetadata = false,
-                    };
-                    img.SaveAsBmp(mem, encoder);
-                    mem.Seek(0, SeekOrigin.Begin);
-                    return new Bitmap(mem);
 
-                }
+                return new Bitmap(AssetLoader.Open(uri));
+            }
+            case Image<Rgba32> img when targetType.IsAssignableFrom(typeof(Bitmap)):
+            {
+                using var mem = new MemoryStream();
+                var encoder = new BmpEncoder {
+                    SupportTransparency = true, BitsPerPixel = BmpBitsPerPixel.Pixel32, SkipMetadata = false
+                };
+                img.SaveAsBmp(mem, encoder);
+                mem.Seek(0, SeekOrigin.Begin);
+                return new Bitmap(mem);
+            }
             default:
-                return new BindingNotification(
-                    new ArgumentOutOfRangeException(nameof(value)),
-                    BindingErrorType.DataValidationError);
+                // Return null so FallbackValue can handle? Not sure this is right, could do a dedicated image.
+                return null!;
         }
     }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter,
-        CultureInfo culture)
-    {
-        return new BindingNotification(
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        new BindingNotification(
             new ArgumentOutOfRangeException(nameof(value)),
             BindingErrorType.DataValidationError);
-    }
 }

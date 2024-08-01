@@ -1,0 +1,166 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:Lumper.UI.Views.Pages.EntityEditor"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.EntityEditor"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:entity="clr-namespace:Lumper.UI.ViewModels.Shared.Entity"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.EntityEditor.EntityEditorView"
+             x:DataType="vm:EntityEditorViewModel">
+
+  <Grid RowDefinitions="Auto, *" Margin="8">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="320" MinWidth="200" />
+      <ColumnDefinition Width="2" />
+      <ColumnDefinition Width="*" MinWidth="400" />
+    </Grid.ColumnDefinitions>
+    <TextBox Grid.Column="0" Grid.Row="0" Margin="0, 0, 0, 8" Text="{Binding SearchPattern}" />
+    <Border Grid.Column="0" Grid.Row="1" CornerRadius="4">
+      <DockPanel>
+        <Panel DockPanel.Dock="Bottom" Margin="0 8 0 0">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Margin="4 0 0 0" FontStyle="Italic" Foreground="LightGray"
+                       VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
+                       IsVisible="{Binding IsFiltered}">
+              <TextBlock.Text>
+                <MultiBinding StringFormat="\{0\} / \{1\} entities">
+                  <Binding Path="FilteredCount" FallbackValue="" />
+                  <Binding Path="EntityLumpViewModel.EntityCount" FallbackValue="" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+            <TextBlock Margin="4 0 0 0" FontStyle="Italic" Foreground="LightGray"
+                       VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
+                       IsVisible="{Binding !IsFiltered}"
+                       Text="{Binding EntityLumpViewModel.EntityCount,
+                                                  StringFormat='\{0\} entities', FallbackValue=''}" />
+          </StackPanel>
+          <Button Command="{Binding EntityLumpViewModel.AddEmptyEntity}" HorizontalAlignment="Right"
+                  IsEnabled="{Binding BspService.HasLoadedBsp}" Padding="0" ToolTip.Tip="Add entity">
+            <materialIcons:MaterialIcon Kind="Plus" Width="24" Height="24" />
+          </Button>
+        </Panel>
+        <ListBox Name="EntityList" ItemsSource="{Binding FilteredEntities}"
+                 SelectionChanged="EntityList_OnSelectionChanged"
+                 SelectionMode="Single" Background="#08FFFFFF" CornerRadius="4" Classes="ScrollThin"
+                 ScrollViewer.AllowAutoHide="False">
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="Padding" Value="8 4 8 4" />
+            </Style>
+          </ListBox.Styles>
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <Grid ColumnDefinitions="Auto, 4, Auto, *, Auto">
+                <Grid.Styles>
+                  <Style Selector="TextBlock">
+                    <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
+                  </Style>
+                </Grid.Styles>
+                <TextBlock Grid.Column="0" Text="{Binding Name}" />
+                <TextBlock Grid.Column="2" Text="*" IsVisible="{Binding IsModified}" />
+                <Button Grid.Column="4"
+                        Command="{Binding ViewModel.EntityLumpViewModel.RemoveEntity, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
+                        CommandParameter="{Binding}"
+                        HorizontalAlignment="Right"
+                        Background="Transparent" BorderBrush="Transparent" Padding="0">
+                  <materialIcons:MaterialIcon Kind="Close" />
+                </Button>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+    <GridSplitter Grid.Column="1" Margin="8, 0" Grid.Row="0" Grid.RowSpan="2" MinWidth="1" Width="1"
+                  ResizeDirection="Columns" />
+    <TabControl Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Padding="0" ItemsSource="{Binding Tabs}"
+                SelectedItem="{Binding SelectedTab}">
+      <TabControl.Styles>
+        <Style Selector="TabItem">
+          <Setter Property="Margin" Value="0 -2 0 4" />
+        </Style>
+      </TabControl.Styles>
+      <TabControl.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <TextBlock Text="{Binding ((entity:EntityViewModel)Entity).Name}" />
+            <Panel IsVisible="{Binding Entity.IsModified}" ToolTip.Tip="Modified, BSP needs saving!">
+              <materialIcons:MaterialIcon Kind="ContentSaveAlert" />
+            </Panel>
+            <ToggleButton
+              Command="{Binding ViewModel.TogglePinnedTab, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
+              IsChecked="{Binding IsPinned}" CommandParameter="{Binding}" BorderThickness="0"
+              ToolTip.Tip="Pin tab">
+              <materialIcons:MaterialIcon Kind="Pin" />
+            </ToggleButton>
+            <Button
+              Command="{Binding ViewModel.CloseTab, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
+              CommandParameter="{Binding}" BorderThickness="0">
+              <materialIcons:MaterialIcon Kind="Close" />
+            </Button>
+          </StackPanel>
+        </DataTemplate>
+      </TabControl.ItemTemplate>
+      <TabControl.DataTemplates>
+        <DataTemplate DataType="vm:EntityEditorTabViewModel">
+          <ScrollViewer AllowAutoHide="False" VerticalScrollBarVisibility="Visible" Padding="0 0 4 0">
+            <StackPanel Orientation="Vertical" Spacing="4">
+              <ItemsControl ItemsSource="{Binding Entity.Properties}">
+                <ItemsControl.DataTemplates>
+                  <DataTemplate DataType="entity:EntityPropertyStringViewModel">
+                    <Grid ColumnDefinitions="*, 4, 3*, 4, 32" Height="32" Margin="0 0 0 4">
+                      <TextBox Text="{Binding Key}" />
+                      <TextBox Text="{Binding Value}" Grid.Column="2" />
+                      <Button Command="{Binding Delete}" Grid.Column="4" Height="32">
+                        <materialIcons:MaterialIcon Kind="CloseThick" />
+                      </Button>
+                    </Grid>
+                  </DataTemplate>
+                  <DataTemplate DataType="entity:EntityPropertyIoViewModel">
+                    <Grid RowDefinitions="32, 4, 32, 4, 32, 4, 32, 4, 32, 4, 32, 4"
+                          ColumnDefinitions="*, 4, 32, 4, 3* ">
+                      <Grid.Styles>
+                        <Style Selector="TextBlock">
+                          <Setter Property="VerticalAlignment" Value="Center" />
+                          <Setter Property="FontFamily"
+                                  Value="{StaticResource Monospace}" />
+                        </Style>
+                      </Grid.Styles>
+                      <TextBox Text="{Binding Key}" Grid.Row="0" Grid.Column="0" />
+                      <Button Command="{Binding Delete}" Grid.Row="0" Grid.Column="2" Height="32">
+                        <materialIcons:MaterialIcon Kind="CloseThick" />
+                      </Button>
+                      <TextBlock Text="Target Entity Name" Grid.Row="2" Grid.Column="0" />
+                      <TextBox Text="{Binding TargetEntityName}" Grid.Row="2" Grid.Column="2"
+                               Grid.ColumnSpan="3" />
+                      <TextBlock Text="Input" Grid.Row="4" Grid.Column="0" />
+                      <TextBox Text="{Binding Input}" Grid.Row="4" Grid.Column="2"
+                               Grid.ColumnSpan="3" />
+                      <TextBlock Text="Parameter" Grid.Row="6" Grid.Column="0" />
+                      <TextBox Text="{Binding Parameter}" Grid.Row="6" Grid.Column="2"
+                               Grid.ColumnSpan="3" />
+                      <TextBlock Text="Delay" Grid.Row="8" Grid.Column="0" />
+                      <NumericUpDown Value="{Binding Delay}" Grid.Row="8" Grid.Column="2"
+                                     Grid.ColumnSpan="3" />
+                      <TextBlock Text="TimesToFire" Grid.Row="10" Grid.Column="0" />
+                      <NumericUpDown Value="{Binding TimesToFire}" Grid.Row="10" Grid.Column="2"
+                                     Grid.ColumnSpan="3" />
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.DataTemplates>
+              </ItemsControl>
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <Button Command="{Binding Entity.AddString}">Add KeyValue</Button>
+                <Button Command="{Binding Entity.AddIo}">Add IO</Button>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </DataTemplate>
+      </TabControl.DataTemplates>
+    </TabControl>
+    <Button Grid.Column="0" Grid.Row="0" IsVisible="false" Command="{Binding CloseSelectedTab}" HotKey="Ctrl+W" />
+  </Grid>
+</UserControl>
