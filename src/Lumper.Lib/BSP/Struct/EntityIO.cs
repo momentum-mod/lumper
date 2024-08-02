@@ -25,7 +25,16 @@ public partial class EntityIo : ICloneable
         Input = props[1];
         Parameter = props[2];
         Delay = float.Parse(props[3]);
-        TimesToFire = int.Parse(props[4]);
+        if (int.TryParse(props[4], out int timesToFire))
+        {
+            TimesToFire = timesToFire;
+        }
+        else
+        {
+            //edge case, some files can contain extra outputs with comma-separated values
+            var fixedProps = props[4].Split(',');
+            TimesToFire = int.Parse(fixedProps[0]);
+        }
     }
 
     // Since VScript, \u001b (ESC) has been used as a separator.
