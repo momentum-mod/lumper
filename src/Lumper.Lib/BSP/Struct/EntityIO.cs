@@ -1,6 +1,7 @@
 namespace Lumper.Lib.BSP.Struct;
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -25,7 +26,22 @@ public partial class EntityIo : ICloneable
         Input = props[1];
         Parameter = props[2];
         Delay = float.Parse(props[3]);
-        TimesToFire = int.Parse(props[4]);
+        if (int.TryParse(props[4], out var timesToFire))
+        {
+            TimesToFire = timesToFire;
+        }
+        else if (int.TryParse(props[4].Split(',')[0], out var timesToFire2))
+        {
+            // Edge case, occasionally tools that don't recognise ESC separators will put default comma-separated
+            // values on the end of the ent IO string.
+            // Source will still load be able to load the entity, since it parses using `atoi` which will ignore
+            // everything after the first integer.
+            TimesToFire = timesToFire2;
+        }
+        else
+        {
+            throw new InvalidDataException($"Failed to parse entity IO for string {value}");
+        }
     }
 
     // Since VScript, \u001b (ESC) has been used as a separator.
