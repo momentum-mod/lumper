@@ -1,0 +1,17 @@
+﻿<!--
+  Fody is used to modify the IL of the Lumper.UI assembly at compile-time, similar to macros.
+  https://github.com/Fody/Home/blob/master/pages/usage.md
+-->
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <!--
+  When a [Reactive] attribute is used, generates IL code in form of:
+
+  private string _foo = "";
+  public string Foo
+  {
+      get => _foo;
+      set => this.RaiseAndSetIfChanged(ref _foo, value);
+  }
+  -->
+  <ReactiveUI/>
+</Weavers>

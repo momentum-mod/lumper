@@ -1,0 +1,170 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Shared.Pakfile"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+             x:Class="Lumper.UI.Views.Shared.Pakfile.PakfileEntryVtfView"
+             x:DataType="vm:PakfileEntryVtfViewModel">
+
+  <UserControl.Resources>
+    <converters:FileSizeConverter x:Key="FileSize" />
+  </UserControl.Resources>
+
+  <ScrollViewer Classes="ScrollThin">
+    <Grid ColumnDefinitions="*, 8, 256" RowDefinitions="Auto">
+      <Border Grid.Row="0" Grid.Column="0" PointerPressed="Image_OnPointerPressed">
+        <Image Stretch="Uniform" Source="{Binding Image}" />
+        <Border.Background>
+          <ImageBrush Opacity="0.1" Source="/Assets/Images/TransparentBackground.png" TileMode="Tile"
+                      Stretch="None" DestinationRect="0 0 16 16" />
+        </Border.Background>
+      </Border>
+      <Border Grid.Row="0" Grid.Column="2" Background="#22000000" Padding="12" VerticalAlignment="Stretch">
+        <StackPanel Orientation="Vertical" Spacing="4">
+          <StackPanel.Styles>
+            <Style Selector="TextBlock.Name, TextBlock.Value">
+              <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
+              <Setter Property="FontSize" Value="14" />
+            </Style>
+            <Style Selector="TextBlock.Name">
+              <Setter Property="FontWeight" Value="Light" />
+              <Setter Property="Foreground" Value="#EEE" />
+              <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+            <Style Selector="TextBlock.Value">
+              <Setter Property="Foreground" Value="#FFF" />
+            </Style>
+            <Style Selector="NumericUpDown">
+              <Setter Property="MinHeight" Value="14" />
+              <Setter Property="HorizontalAlignment" Value="Left" />
+              <Setter Property="Padding" Value="8 0" />
+              <Setter Property="Margin" Value="0 0 0 4" />
+
+              <Style Selector="^ /template/ ButtonSpinner">
+                <Setter Property="MinHeight" Value="0" />
+                <Style Selector="^ /template/ RepeatButton">
+                  <Setter Property="MinWidth" Value="0" />
+                  <Setter Property="Padding" Value="2 0" />
+                </Style>
+              </Style>
+              <Style Selector="^ PathIcon">
+                <Setter Property="Width" Value="12" />
+                <Setter Property="Height" Value="4" />
+              </Style>
+              <Style Selector="^ /template/ TextBox">
+                <Setter Property="MinHeight" Value="0" />
+                <Style Selector="^ /template/ Border">
+                  <Setter Property="Margin" Value="0" />
+                </Style>
+              </Style>
+            </Style>
+          </StackPanel.Styles>
+          <Grid ColumnDefinitions="Auto, 16, *"
+                RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto">
+            <TextBlock Classes="Name" Grid.Row="0" Grid.Column="0" Text="Version" />
+            <TextBlock Classes="Value" Grid.Row="0" Grid.Column="2">
+              <TextBlock.Text>
+                <MultiBinding StringFormat="\{0:0\}.\{1:0\}">
+                  <Binding Path="VtfFile.MajorVersion" FallbackValue="?" />
+                  <Binding Path="VtfFile.MinorVersion" FallbackValue="?" />
+                </MultiBinding>
+              </TextBlock.Text>
+            </TextBlock>
+            <TextBlock Classes="Name" Grid.Row="1" Grid.Column="0" Text="Size" />
+            <TextBlock Classes="Value" Grid.Row="1" Grid.Column="2"
+                       Text="{Binding VtfFile.ImageSize, FallbackValue='?', Converter={StaticResource FileSize}}" />
+            <TextBlock Classes="Name" Grid.Row="2" Grid.Column="0" Text="Format" Margin="0 0 0 8" />
+            <TextBlock Classes="Value" Grid.Row="2" Grid.Column="2"
+                       Text="{Binding VtfFile.ImageFormatString, FallbackValue='?'}" />
+
+            <TextBlock Classes="Name" Grid.Row="3" Grid.Column="0" Text="Width" />
+            <TextBlock Classes="Value" Grid.Row="3" Grid.Column="2"
+                       Text="{Binding VtfFile.ImageWidth, StringFormat='\{0\}px', FallbackValue='?'}" />
+            <TextBlock Classes="Name" Grid.Row="4" Grid.Column="0" Text="Height" Margin="0 0 0 8" />
+            <TextBlock Classes="Value" Grid.Row="4" Grid.Column="2"
+                       Text="{Binding VtfFile.ImageHeight, StringFormat='\{0\}px', FallbackValue='?'}" />
+
+            <TextBlock Classes="Name" Grid.Row="5" Grid.Column="0" Text="Flags" VerticalAlignment="Top"
+                       Margin="0 0 0 8" />
+            <ItemsControl Grid.Row="5" Grid.Column="2"
+                          ItemsSource="{Binding VtfFile.FlagList, FallbackValue=[]}"
+                          Margin="0 0 0 8">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Classes="Value" FontSize="12" Text="{Binding }" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Classes="Name" Grid.Row="6" Grid.Column="0" Text="Frames" />
+            <TextBlock Classes="Value" Grid.Row="6" Grid.Column="2"
+                       Text="{Binding VtfFile.FrameCount, FallbackValue='?'}" />
+            <TextBlock Classes="Name" Grid.Row="7" Grid.Column="0" Text="Faces" />
+            <TextBlock Classes="Value" Grid.Row="7" Grid.Column="2"
+                       Text="{Binding VtfFile.FaceCount, FallbackValue='?'}" />
+            <TextBlock Classes="Name" Grid.Row="8" Grid.Column="0" Text="Mipmaps" />
+            <TextBlock Classes="Value" Grid.Row="8" Grid.Column="2"
+                       Text="{Binding VtfFile.MipmapCount, FallbackValue='?'}" />
+            <TextBlock Classes="Name" Grid.Row="9" Grid.Column="0" Text="Depth" Margin="0 0 0 8" />
+            <TextBlock Classes="Value" Grid.Row="9" Grid.Column="2"
+                       Text="{Binding VtfFile.Depth, FallbackValue='?'}" />
+
+            <TextBlock Classes="Name" Grid.Row="10" Grid.Column="0" Text="Reflectivity" FontSize="12" />
+            <TextBlock Classes="Name" Grid.Row="11" Grid.Column="0" Text="R" />
+            <TextBlock Classes="Value" Grid.Row="11" Grid.Column="2"
+                       Text="{Binding VtfFile.Reflectivity[0], FallbackValue='?'}" />
+            <TextBlock Classes="Name" Grid.Row="12" Grid.Column="0" Text="G" />
+            <TextBlock Classes="Value" Grid.Row="12" Grid.Column="2"
+                       Text="{Binding VtfFile.Reflectivity[1], FallbackValue='?'}" />
+            <TextBlock Classes="Name" Grid.Row="13" Grid.Column="0" Text="B" Margin="0 0 0 8" />
+            <TextBlock Classes="Value" Grid.Row="13" Grid.Column="2"
+                       Text="{Binding VtfFile.Reflectivity[2], FallbackValue='?'}" />
+
+            <TextBlock Classes="Name" Grid.Row="14" Grid.Column="0" Text="Frame" />
+            <NumericUpDown Classes="Value" Grid.Row="14" Grid.Column="2" Value="{Binding Frame}"
+                           Increment="1"
+                           Minimum="0" Maximum="{Binding FrameMax}" />
+
+            <TextBlock Classes="Name" Grid.Row="15" Grid.Column="0" Text="Face" />
+            <NumericUpDown Classes="Value" Grid.Row="15" Grid.Column="2" Value="{Binding Face}"
+                           Increment="1"
+                           Minimum="0"
+                           Maximum="{Binding FaceMax}" />
+
+            <TextBlock Classes="Name" Grid.Row="16" Grid.Column="0" Text="Slice" />
+            <NumericUpDown Classes="Value" Grid.Row="16" Grid.Column="2" Value="{Binding Slice}"
+                           Increment="1"
+                           Minimum="0" />
+
+            <TextBlock Classes="Name" Grid.Row="17" Grid.Column="0" Text="MipmapLevel" />
+            <NumericUpDown Classes="Value" Grid.Row="17" Grid.Column="2"
+                           Value="{Binding MipmapLevel}"
+                           Increment="1"
+                           Minimum="0" Maximum="{Binding MipmapMax}" />
+          </Grid>
+
+          <Button Command="{Binding SetImage}" CommandParameter="true">Replace Image</Button>
+          <Button Command="{Binding SetImage}" CommandParameter="false"
+                  ToolTip.Tip="Replace only the current Frame, Face, Slice and Mipmap">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="Replace Current" Margin="0 0 4 0" />
+              <Border VerticalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" />
+              </Border>
+            </StackPanel>
+          </Button>
+          <TextBlock Margin="0 8 0 0" Foreground="#EEE" TextWrapping="Wrap" LineHeight="16">
+            <Run FontWeight="Bold" Text="Warning!" />
+            Importing an image that VTFLib doesn't like will crash the entire program.
+          </TextBlock>
+          <TextBlock Foreground="#EEE" TextWrapping="Wrap" LineHeight="16">
+            Make sure the image you use is sized in nice powers of 2!
+          </TextBlock>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>
