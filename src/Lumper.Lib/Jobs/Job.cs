@@ -11,7 +11,7 @@ public abstract class LumperTask
     public abstract string Type { get; }
 
     [JsonIgnore]
-    public TaskProgress Progress { get; protected set; } = new();
+    public JobProgress Progress { get; protected set; } = new();
 
     public abstract TaskResult Run(BspFile bsp);
 }

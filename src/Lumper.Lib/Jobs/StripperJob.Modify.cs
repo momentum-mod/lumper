@@ -7,7 +7,7 @@ using Lumper.Lib.BSP.Lumps.BspLumps;
 using Lumper.Lib.BSP.Struct;
 using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
-public partial class StripperTask
+public partial class StripperJob
 {
     protected class Modify : Block
     {

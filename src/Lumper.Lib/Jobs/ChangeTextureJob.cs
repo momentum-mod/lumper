@@ -5,10 +5,10 @@ using System.Text.RegularExpressions;
 using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
-public class ChangeTextureTask : LumperTask
+public class ChangeTextureJob : LumperTask
 {
     public override string Type { get; } = "ChangeTextureTask";
-    public ChangeTextureTask()
+    public ChangeTextureJob()
     { }
     public Dictionary<string, string> Replace { get; set; } = [];
     public List<KeyValuePair<Regex, string>> ReplaceRegex { get; set; } = [];
