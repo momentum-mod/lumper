@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.BSP;
 
-public class RunExternalToolTask(
+public class RunExternalToolJob(
     string? path,
     string? args,
     string? inputFile,

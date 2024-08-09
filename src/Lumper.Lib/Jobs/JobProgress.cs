@@ -1,6 +1,6 @@
 namespace Lumper.Lib.Tasks;
 
-public class TaskProgress
+public class JobProgress
 {
     public double Percent { get; private set; }
 
@@ -29,7 +29,7 @@ public class TaskProgress
     public delegate void PercentChangedHandler(object source, double newPercent);
     public event PercentChangedHandler? OnPercentChanged;
 
-    public TaskProgress(long max = -1) => Max = max;
+    public JobProgress(long max = -1) => Max = max;
 
     private void UpdatePercent()
     {

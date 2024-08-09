@@ -4,17 +4,17 @@ using Lumper.Lib.BSP;
 using Lumper.Lib.BSP.Lumps;
 using Lumper.Lib.BSP.Lumps.BspLumps;
 
-public class CompressionTask(bool compressLumps) : LumperTask
+public class CompressionJob(bool compressLumps) : LumperTask
 {
     public override string Type { get; } = "CompressionTask";
     public bool CompressLumps { get; set; }
     public bool CompressLumps { get; set; } = compressLumps;
     public bool CompressPakFile { get; set; }
 
-    public CompressionTask()
+    public CompressionJob()
     { }
 
-    public CompressionTask(bool compressLumps) => CompressLumps = compressLumps;
+    public CompressionJob(bool compressLumps) => CompressLumps = compressLumps;
 
     public override TaskResult Run(BspFile bsp)
     {

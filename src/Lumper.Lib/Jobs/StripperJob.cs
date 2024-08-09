@@ -7,7 +7,7 @@ using Lumper.Lib.BSP.Lumps.BspLumps;
 using Newtonsoft.Json;
 
 // Change entities using stripper config
-public partial class StripperTask(string? configPath) : LumperTask
+public partial class StripperJob(string? configPath) : LumperTask
 {
     public override string Type { get; } = "StripperTask";
 
