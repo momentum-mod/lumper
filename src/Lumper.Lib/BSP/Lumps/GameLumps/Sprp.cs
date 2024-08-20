@@ -16,22 +16,22 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
 
     public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {
-        var startPos = reader.BaseStream.Position;
+        long startPos = reader.BaseStream.Position;
 
-        var dictEntries = reader.ReadInt32();
+        int dictEntries = reader.ReadInt32();
         StaticPropsDict = new StaticPropDictLump(Parent);
         StaticPropsDict.Read(reader, dictEntries * StaticPropsDict.StructureSize);
 
-        var leafEntries = reader.ReadInt32();
+        int leafEntries = reader.ReadInt32();
         StaticPropsLeaf = new StaticPropLeafLump(Parent) { Version = Version };
         StaticPropsLeaf.Read(reader, leafEntries * StaticPropsLeaf.StructureSize);
 
-        var entries = reader.ReadInt32();
+        int entries = reader.ReadInt32();
 
         StaticProps = new StaticPropLump(Parent);
         StaticProps.SetVersion(Version);
 
-        var remainingLength = (int)(length - (reader.BaseStream.Position - startPos));
+        int remainingLength = (int)(length - (reader.BaseStream.Position - startPos));
 
         if (StaticProps.ActualVersion is StaticPropVersion.V7 or StaticPropVersion.V10)
         {
@@ -44,7 +44,7 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
 
         if (StaticProps.ActualVersion != StaticPropVersion.Unknown)
         {
-            var tmpLength = entries * StaticProps.StructureSize;
+            int tmpLength = entries * StaticProps.StructureSize;
             if (tmpLength != remainingLength)
                 throw new InvalidDataException($"Funny staticprop length ({tmpLength} != {remainingLength})");
 

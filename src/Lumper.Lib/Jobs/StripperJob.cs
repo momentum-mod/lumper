@@ -36,8 +36,8 @@ public partial class StripperJob(string? configPath = null) : Job, IJob
     private void Parse(Stream stream)
     {
         var reader = new StreamReader(stream);
-        var lineNr = 0;
-        var prevBlock = "";
+        int lineNr = 0;
+        string prevBlock = "";
         while (reader.ReadLine() is { } line)
         {
             lineNr++;
@@ -46,7 +46,7 @@ public partial class StripperJob(string? configPath = null) : Job, IJob
             if (string.IsNullOrEmpty(line))
                 continue;
 
-            var blockOpen = false;
+            bool blockOpen = false;
             if (line == "{")
             {
                 line = prevBlock;

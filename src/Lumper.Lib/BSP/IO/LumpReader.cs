@@ -69,7 +69,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
             lumpStreamLength = lumpHeader.UncompressedLength;
         }
 
-        var startPos = reader.BaseStream.Position;
+        long startPos = reader.BaseStream.Position;
 
         // Pass handler to pakfile lump so can update progress
         if (lump is PakfileLump pakfileLump)
@@ -105,9 +105,9 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
         if (Encoding.ASCII.GetString(ReadBytes(magic.Length)) != magic)
             throw new InvalidDataException("Failed to decompress: Lump doesn't look like it was LZMA compressed");
 
-        var actualSize = ReadUInt32();
-        var lzmaSize = ReadUInt32();
-        var properties = new byte[5];
+        uint actualSize = ReadUInt32();
+        uint lzmaSize = ReadUInt32();
+        byte[] properties = new byte[5];
 
         _ = Read(properties, 0, 5);
 

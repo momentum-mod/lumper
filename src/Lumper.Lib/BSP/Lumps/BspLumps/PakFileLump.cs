@@ -50,8 +50,8 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     /// </summary>
     public void UpdatePathReferences(string newPath, string oldPath, string? limitExtension = null)
     {
-        var opSplit = oldPath.Split('/');
-        var npSplit = newPath.Split('/');
+        string[] opSplit = oldPath.Split('/');
+        string[] npSplit = newPath.Split('/');
 
         // VMTs can reference VTFs ignoring the root directory and without the extension
         oldPath = string.Join('/', opSplit[1..]);
@@ -64,8 +64,8 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             if (limitExtension is null || !entry.Key.EndsWith(limitExtension))
                 continue;
 
-            var entryString = Encoding.Default.GetString(entry.GetReadOnlyStream().ToArray());
-            var newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
+            string entryString = Encoding.Default.GetString(entry.GetReadOnlyStream().ToArray());
+            string newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
 
             if (newString != entryString)
                 entry.UpdateData(Encoding.Default.GetBytes(newString));
@@ -87,7 +87,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             Match match = CubemapRegex().Match(entry.Key);
             if (match.Success)
             {
-                var cubemapName = match.Groups[1].Value;
+                string cubemapName = match.Groups[1].Value;
                 entriesModified.Add(entry.Key, entry.Key.Replace(cubemapName, baseFilename));
             }
         }
@@ -114,9 +114,9 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 matched = true;
 
                 // Add the old key so we can update the UI later
-                var oldString = entry.Key;
+                string oldString = entry.Key;
 
-                var cubemapName = match.Groups[1].Value;
+                string cubemapName = match.Groups[1].Value;
                 entry.Key = entry.Key.Replace(cubemapName, baseFilename);
                 entry.IsModified = true;
 
@@ -143,11 +143,11 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
         var dataStream = new MemoryStream();
         int read;
         const int bufferSize = 80 * 1024;
-        var incr = (float)bufferSize / length * (int)IoHandler.ReadProgressProportions.Paklump;
-        var buffer = new byte[bufferSize];
+        float incr = (float)bufferSize / length * (int)IoHandler.ReadProgressProportions.Paklump;
+        byte[] buffer = new byte[bufferSize];
 
         handler?.UpdateProgress(0, "Reading pakfile");
-        var remaining = (int)length;
+        int remaining = (int)length;
         while ((read = stream.Read(buffer, 0, int.Min(bufferSize, remaining))) > 0)
         {
             if (handler?.Cancelled ?? false)
@@ -190,11 +190,11 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
             DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
 
-            var buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
             try
             {
                 int read;
-                var remaining = DataStreamLength;
+                long remaining = DataStreamLength;
                 while ((read = DataStream.Read(buffer, 0, int.Min(buffer.Length, (int)remaining))) > 0)
                 {
                     stream.Write(buffer, 0, read);
@@ -236,10 +236,10 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             var zipWriter = (ZipWriter)
                 WriterFactory.Open(outStream, ArchiveType.Zip, new ZipWriterOptions(CompressionType.None));
 
-            var numEntries = Entries.Count;
-            var incr = (float)IoHandler.WriteProgressProportions.Paklump / numEntries;
+            int numEntries = Entries.Count;
+            float incr = (float)IoHandler.WriteProgressProportions.Paklump / numEntries;
             // No need to update zip, we're reconstructing from scratch.
-            foreach ((PakfileEntry entry, var index) in Entries.Select((x, i) => (x, i)))
+            foreach ((PakfileEntry entry, int index) in Entries.Select((x, i) => (x, i)))
             {
                 if (handler?.Cancelled ?? false)
                     return;

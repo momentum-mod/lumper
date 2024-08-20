@@ -84,7 +84,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         uint mipmapLevel
     )
     {
-        var data = await VtfLibQueue.Run<byte[]>(
+        byte[]? data = await VtfLibQueue.Run<byte[]>(
             () =>
             {
                 Prepare();
@@ -92,10 +92,10 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
                 if (VTFFile.ImageGetHasImage() == 0)
                     return null!;
 
-                var imageData = VTFFile.ImageGetData(frame, face, slice, mipmapLevel);
-                var imageSize = (int)VTFFile.ImageComputeImageSize(ImageWidth, ImageHeight, 1, 1, ImageFormat);
+                nint imageData = VTFFile.ImageGetData(frame, face, slice, mipmapLevel);
+                int imageSize = (int)VTFFile.ImageComputeImageSize(ImageWidth, ImageHeight, 1, 1, ImageFormat);
 
-                var data = new byte[imageSize];
+                byte[] data = new byte[imageSize];
                 Marshal.Copy(imageData, data, 0, imageSize);
 
                 if (imageSize <= 0)
@@ -112,12 +112,12 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         if (data is null)
             return null;
 
-        var dest = new byte[ImageWidth * ImageHeight * 4];
+        byte[] dest = new byte[ImageWidth * ImageHeight * 4];
         VTFFile.ImageConvertToRGBA8888(data, dest, ImageWidth, ImageHeight, ImageFormat);
 
         var rgba = new Rgba32[ImageWidth * ImageHeight];
-        var j = 0;
-        for (var i = 0; i < dest.Length; i += 4)
+        int j = 0;
+        for (int i = 0; i < dest.Length; i += 4)
         {
             rgba[j++] = new Rgba32(dest[i], dest[i + 1], dest[i + 2], dest[i + 3]);
         }
@@ -133,10 +133,10 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         {
             Prepare();
 
-            var imageRgbaData = GetRgba8888FromImage(image, out _);
+            byte[] imageRgbaData = GetRgba8888FromImage(image, out _);
 
-            var size = (int)VTFFile.ImageComputeImageSize((uint)image.Width, (uint)image.Height, 1, 1, ImageFormat);
-            var vtfImageData = new byte[size];
+            int size = (int)VTFFile.ImageComputeImageSize((uint)image.Width, (uint)image.Height, 1, 1, ImageFormat);
+            byte[] vtfImageData = new byte[size];
 
             VTFFile.ImageConvertFromRGBA8888(
                 imageRgbaData,
@@ -155,7 +155,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         {
             Prepare();
 
-            var buffer = GetRgba8888FromImage(image, out var hasAlpha);
+            byte[] buffer = GetRgba8888FromImage(image, out bool hasAlpha);
             var createOptions = new SVTFCreateOptions();
             VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
 
@@ -165,7 +165,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
             {
                 try
                 {
-                    var err = VTFAPI.GetLastError();
+                    string err = VTFAPI.GetLastError();
                     Logger.Warn($"Error updating VTF ${pakfileEntry.Key}: ${err}");
                 }
                 catch (Win32Exception ex)
@@ -190,7 +190,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         // to expose a ReadOnlySpan, but not allowed to pass that to ImageLoadLump, since no guarantee
         // that a method taking a byte[] won't modify it.
         pakfileEntry.GetReadOnlyStream().CopyTo(mem);
-        var vtfBuffer = mem.GetBuffer();
+        byte[] vtfBuffer = mem.GetBuffer();
 
         VTFFile.CreateImage(ref _imageIndex);
         VTFFile.BindImage(_imageIndex);
@@ -203,13 +203,13 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
     private void SaveVtf()
     {
         VTFFile.BindImage(_imageIndex);
-        var size = VTFFile.ImageGetSize();
+        uint size = VTFFile.ImageGetSize();
 
-        var vtfBuffer = new byte[size];
+        byte[] vtfBuffer = new byte[size];
         uint uiSize = 0;
         if (!VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize))
         {
-            var err = VTFAPI.GetLastError();
+            string err = VTFAPI.GetLastError();
             Logger.Error($"Error saving VTF ${pakfileEntry.Key}: ${err}");
         }
 
@@ -242,14 +242,14 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
 
     private static byte[] GetRgba8888FromImage(Image<Rgba32> image, out bool hasAlpha)
     {
-        var size = image.Width * image.Height * 4;
+        int size = image.Width * image.Height * 4;
         using var mem = new MemoryStream();
-        var buffer = new byte[size];
-        var i = 0;
+        byte[] buffer = new byte[size];
+        int i = 0;
         hasAlpha = false;
-        for (var y = 0; y < image.Height; y++)
+        for (int y = 0; y < image.Height; y++)
         {
-            for (var x = 0; x < image.Width; x++)
+            for (int x = 0; x < image.Width; x++)
             {
                 Rgba32 pixel = image[x, y];
                 buffer[i++] = pixel.R;
@@ -321,7 +321,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
                     continue;
                 }
 
-                var result = fn();
+                object result = fn();
                 Output.OnNext((fn, result));
             }
 

@@ -33,10 +33,10 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
 
     public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {
-        var originalOffset = reader.BaseStream.Position;
+        long originalOffset = reader.BaseStream.Position;
         DataStreamLength = length;
 
-        var buffer = new byte[length];
+        byte[] buffer = new byte[length];
         reader.BaseStream.ReadExactly(buffer, 0, (int)length);
         HashSha1 = SHA1.HashData(buffer);
 
@@ -55,11 +55,11 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
     {
         DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
 
-        var buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
         try
         {
             int read;
-            var remaining = (int)DataStreamLength;
+            int remaining = (int)DataStreamLength;
             while ((read = DataStream.Read(buffer, 0, int.Min(buffer.Length, remaining))) > 0)
             {
                 stream.Write(buffer, 0, read);

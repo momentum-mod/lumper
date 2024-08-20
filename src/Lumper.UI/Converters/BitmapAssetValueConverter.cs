@@ -37,7 +37,7 @@ public class BitmapAssetValueConverter : IValueConverter
                 }
                 else
                 {
-                    var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
+                    string? assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
                     if (assemblyName is null)
                     {
                         return new BindingNotification(

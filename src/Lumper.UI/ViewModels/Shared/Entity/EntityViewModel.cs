@@ -73,7 +73,7 @@ public class EntityViewModel : MatchableBspNode
     {
         get
         {
-            var hammerid = Properties
+            string? hammerid = Properties
                 .OfType<EntityPropertyStringViewModel>()
                 .FirstOrDefault(x => x.Key == "hammerid")
                 ?.Value;

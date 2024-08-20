@@ -27,10 +27,10 @@ public class ReplaceTextureJob : Job, IJob
         foreach (Replacer replacer in Replacers)
             replacer.Prepare();
 
-        var counter = 0;
+        int counter = 0;
         foreach (TexData texture in texDataLump.Data)
         {
-            var name = texture.TexName;
+            string name = texture.TexName;
             if (Replacers.Any(replacer => replacer.TryReplace(texture)))
             {
                 Logger.Info($"Replaced {name} with {texture.TexName}");
@@ -74,7 +74,7 @@ public class ReplaceTextureJob : Job, IJob
                 if (_regexMatcher is null)
                     return false;
 
-                var newName = _regexMatcher.Replace(texture.TexName, ReplaceWith);
+                string newName = _regexMatcher.Replace(texture.TexName, ReplaceWith);
                 if (texture.TexName == newName)
                     return false;
 

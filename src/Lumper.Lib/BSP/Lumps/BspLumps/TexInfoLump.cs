@@ -13,17 +13,17 @@ public class TexInfoLump(BspFile parent) : FixedLump<BspLumpType, TexInfo>(paren
     {
         var item = new TexInfo { TextureVectors = new float[2, 4], LightmapVectors = new float[2, 4] };
 
-        for (var i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
-            for (var j = 0; j < 4; j++)
+            for (int j = 0; j < 4; j++)
             {
                 item.TextureVectors[i, j] = reader.ReadSingle();
             }
         }
 
-        for (var i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
-            for (var j = 0; j < 4; j++)
+            for (int j = 0; j < 4; j++)
             {
                 item.LightmapVectors[i, j] = reader.ReadSingle();
             }
@@ -38,17 +38,17 @@ public class TexInfoLump(BspFile parent) : FixedLump<BspLumpType, TexInfo>(paren
     protected override void WriteItem(BinaryWriter writer, int index)
     {
         TexInfo texInfo = Data[index];
-        for (var i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
-            for (var j = 0; j < 4; j++)
+            for (int j = 0; j < 4; j++)
             {
                 writer.Write(texInfo.TextureVectors[i, j]);
             }
         }
 
-        for (var i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
-            for (var j = 0; j < 4; j++)
+            for (int j = 0; j < 4; j++)
             {
                 writer.Write(texInfo.LightmapVectors[i, j]);
             }

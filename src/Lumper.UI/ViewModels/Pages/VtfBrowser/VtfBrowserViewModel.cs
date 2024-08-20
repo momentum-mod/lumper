@@ -60,7 +60,7 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
             .CombineLatest(vtfs.Connect())
             .Select(x =>
             {
-                var ((search, showCubemaps), _) = x;
+                ((string search, bool showCubemaps), IChangeSet<PakfileEntryVtfViewModel, string> _) = x;
                 GlobMatcher matcher =
                     search.Contains('*') || search.Contains('?')
                         ? new GlobMatcher(search, false, true)

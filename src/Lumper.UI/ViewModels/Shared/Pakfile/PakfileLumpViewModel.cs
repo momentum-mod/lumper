@@ -140,10 +140,10 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 
         // Source sometimes let you omit the topmost directory of a file path, e.g. sound/foo/bar.mp3
         // can be used as just foo/bar.mp3. Quite a lot of faff to handle both cases, with and without prefix.
-        var opSplit = oldPath.Split('/');
-        var opPrefix = opSplit[0];
-        var opNoPrefix = string.Join("/", opSplit[1..]);
-        var directoryMatch = SourceRootDirectories.FirstOrDefault(s => s == opPrefix);
+        string[] opSplit = oldPath.Split('/');
+        string opPrefix = opSplit[0];
+        string opNoPrefix = string.Join("/", opSplit[1..]);
+        string? directoryMatch = SourceRootDirectories.FirstOrDefault(s => s == opPrefix);
 
         // Entities
         foreach (EntityViewModel entity in BspService.Instance.EntityLumpViewModel?.Entities.Items ?? [])
@@ -153,13 +153,13 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 if (prop is not EntityPropertyStringViewModel { Value: not null } sProp)
                     continue;
 
-                var propValue = sProp.Value;
+                string propValue = sProp.Value;
                 if (!propValue.EndsWith(opNoPrefix, cmp))
                     // Definitely not a match
                     continue;
 
-                var updatedOp = oldPath;
-                var updatedNp = newPath;
+                string updatedOp = oldPath;
+                string updatedNp = newPath;
                 // Split this check from above for perf - vast majority of values are misses, move on ASAP.
                 if (directoryMatch is not null && !propValue.StartsWith(directoryMatch, cmp))
                 {
@@ -204,23 +204,23 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             if (entry.Content is null)
                 return;
 
-            var updatedOp = oldPath;
-            var updatedNp = newPath;
-            var matchIndex = -1;
-            var changes = 0;
+            string updatedOp = oldPath;
+            string updatedNp = newPath;
+            int matchIndex = -1;
+            int changes = 0;
 
-            var tryWithoutExtension = IgnorableExtensions.TryGetValue(
+            bool tryWithoutExtension = IgnorableExtensions.TryGetValue(
                 Path.GetExtension(entry.Key),
-                out var opNoExtension
+                out string[]? opNoExtension
             );
             while (true)
             {
-                var match = entry.Content.IndexOf(opNoPrefix, startIndex: matchIndex + 1, cmp);
+                int match = entry.Content.IndexOf(opNoPrefix, startIndex: matchIndex + 1, cmp);
 
-                var sliceFromEnd = 0;
+                int sliceFromEnd = 0;
                 if (match == -1 && tryWithoutExtension)
                 {
-                    foreach (var ext in opNoExtension!)
+                    foreach (string ext in opNoExtension!)
                     {
                         if (!opNoPrefix.EndsWith(ext, cmp))
                             continue;
@@ -255,7 +255,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 }
                 else
                 {
-                    var wholeMatchIndex = matchIndex - opPrefix.Length - 1;
+                    int wholeMatchIndex = matchIndex - opPrefix.Length - 1;
 
                     if (
                         !entry
