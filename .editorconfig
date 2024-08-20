@@ -322,6 +322,8 @@ csharp_style_namespace_declarations = file_scoped:warning
 dotnet_diagnostic.CA1716.severity = none
 # Identifiers should not have incorrect suffix - not that important, not worth refactoring naming
 dotnet_diagnostic.CA1711.severity = suggestion
+# Yells at use for underscores in enums. Piss off
+dotnet_diagnostic.CA1707.severity = none
 
 ##########################################
 # Styles
