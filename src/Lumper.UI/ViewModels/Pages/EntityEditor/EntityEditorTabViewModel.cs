@@ -1,6 +1,6 @@
 namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 
-using Shared.Entity;
+using Lumper.UI.ViewModels.Shared.Entity;
 
 public class EntityEditorTabViewModel(EntityViewModel entity)
 {

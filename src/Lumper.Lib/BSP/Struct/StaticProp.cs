@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Struct;
+namespace Lumper.Lib.Bsp.Struct;
 
 using System.Drawing;
 using System.Numerics;

@@ -12,9 +12,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Selection;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
+using Lumper.UI.ViewModels.Pages.PakfileExplorer;
 using NLog;
 using ReactiveUI;
-using ViewModels.Pages.PakfileExplorer;
 
 public partial class PakfileExplorerView : ReactiveUserControl<PakfileExplorerViewModel>
 {

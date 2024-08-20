@@ -1,10 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps;
+namespace Lumper.Lib.Bsp.Lumps;
 
 using System.IO;
-using Bsp.Enum;
-using Enum;
-using IO;
 using JsonSubTypes;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
 using Newtonsoft.Json;
 
 /// <summary>

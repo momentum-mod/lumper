@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using Matchers;
-using Models.Matchers;
+using Lumper.UI.Models.Matchers;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Matchers;
+using Lumper.UI.ViewModels.Shared.Entity;
+using Lumper.UI.Views.Pages.EntityEditor;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
-using Shared.Entity;
-using Views.Pages.EntityEditor;
 
 /// <summary>
 /// ViewModel for the EntityEditor page

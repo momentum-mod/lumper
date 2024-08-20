@@ -9,9 +9,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using AvaloniaEdit;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Pages.RawEntities;
 using ReactiveUI;
-using Services;
-using ViewModels.Pages.RawEntities;
 
 public partial class RawEntitiesView : ReactiveUserControl<RawEntitiesViewModel>
 {

@@ -7,14 +7,14 @@ using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Kernel;
-using Lib.BSP;
-using Lib.BSP.Lumps.BspLumps;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Pages.RawEntities;
 using NLog;
-using Pages.RawEntities;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
 
 public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
 {

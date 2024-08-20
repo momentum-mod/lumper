@@ -1,7 +1,7 @@
 namespace Lumper.UI.ViewModels.Pages.Jobs;
 
 using System;
-using Lib.Jobs;
+using Lumper.Lib.Jobs;
 
 public interface IJobMenuItem<out T>; // Interface for covariance
 

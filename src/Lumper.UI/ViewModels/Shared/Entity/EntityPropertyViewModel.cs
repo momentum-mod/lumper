@@ -1,7 +1,7 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
-using Lib.BSP.Struct;
-using Models.Matchers;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Models.Matchers;
 
 public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProperty, BspNode bspNode)
     : MatchableBspNode(bspNode)

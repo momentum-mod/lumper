@@ -1,10 +1,10 @@
-namespace Lumper.Lib.BSP;
+namespace Lumper.Lib.Bsp;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using IO;
-using Lumps;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 

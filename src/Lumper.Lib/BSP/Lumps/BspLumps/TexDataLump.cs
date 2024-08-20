@@ -1,9 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps.BspLumps;
+namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System.IO;
-using Enum;
-using Lumps;
-using Struct;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Struct;
 
 public class TexDataLump(BspFile parent) : FixedLump<BspLumpType, TexData>(parent)
 {

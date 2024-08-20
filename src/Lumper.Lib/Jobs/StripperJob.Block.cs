@@ -3,8 +3,8 @@ namespace Lumper.Lib.Jobs;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using BSP.Lumps.BspLumps;
-using BSP.Struct;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
 using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
 public partial class StripperJob

@@ -1,6 +1,6 @@
 namespace Lumper.UI.ViewModels.Matchers;
 
-using Models.Matchers;
+using Lumper.UI.Models.Matchers;
 
 public abstract class MatcherViewModel : ViewModel
 {

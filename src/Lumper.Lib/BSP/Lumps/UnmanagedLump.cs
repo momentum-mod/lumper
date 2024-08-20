@@ -1,11 +1,11 @@
-namespace Lumper.Lib.BSP.Lumps;
+namespace Lumper.Lib.Bsp.Lumps;
 
 using System;
 using System.Buffers;
 using System.IO;
 using System.Security.Cryptography;
-using Bsp.Enum;
-using IO;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
 using Newtonsoft.Json;
 
 // Needed in the LumpReader/LumpWriter where we don't have the lump type

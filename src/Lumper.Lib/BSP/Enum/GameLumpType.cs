@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Enum;
+namespace Lumper.Lib.Bsp.Enum;
 
 // Gamelump ID is a 4 byte int with the value being the ASCII code
 // So the names are just the hex value here,

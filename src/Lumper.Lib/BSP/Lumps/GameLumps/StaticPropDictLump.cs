@@ -1,9 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps.GameLumps;
+namespace Lumper.Lib.Bsp.Lumps.GameLumps;
 
 using System;
 using System.IO;
 using System.Text;
-using Enum;
+using Lumper.Lib.Bsp.Enum;
 using NLog;
 
 public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string>(parent)

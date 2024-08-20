@@ -5,9 +5,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
-using Lib.BSP.IO;
+using Lumper.Lib.Bsp.IO;
+using Lumper.UI.ViewModels;
 using ReactiveUI;
-using ViewModels;
 
 public partial class IoProgressWindow : ReactiveWindow<ViewModel>
 {

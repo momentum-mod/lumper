@@ -1,11 +1,11 @@
 namespace Lumper.UI.ViewModels.Shared;
 
 using System.Runtime.CompilerServices;
-using Entity;
-using Models.Matchers;
+using Lumper.UI.Models.Matchers;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Entity;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
 
 /// <summary>
 /// Very generic data structure for viewmodel representing properties on the BSP.

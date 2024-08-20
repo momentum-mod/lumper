@@ -7,9 +7,9 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels;
 using ReactiveUI;
-using Services;
-using ViewModels;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {

@@ -1,10 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps.GameLumps;
+namespace Lumper.Lib.Bsp.Lumps.GameLumps;
 
 using System;
 using System.IO;
-using Bsp.Enum;
-using Enum;
-using IO;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
 using NLog;
 
 public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)

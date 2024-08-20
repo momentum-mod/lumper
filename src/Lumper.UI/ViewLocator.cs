@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Lumper.UI.ViewModels;
 using ReactiveUI;
-using ViewModels;
 
 /// <summary>
 /// Reflection-free ViewLocator implementation. ViewLocator using reflection breaks when using trimming.

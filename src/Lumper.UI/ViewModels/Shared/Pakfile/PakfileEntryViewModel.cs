@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp.Struct;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 

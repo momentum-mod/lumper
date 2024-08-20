@@ -3,8 +3,8 @@ namespace Lumper.UI.ViewModels.Shared.Entity;
 using System;
 using System.Linq;
 using DynamicData.Binding;
-using Lib.BSP.Struct;
-using Models.Matchers;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Models.Matchers;
 using ReactiveUI;
 
 public class EntityViewModel : MatchableBspNode

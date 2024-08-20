@@ -8,14 +8,14 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
-using Lib.BSP;
+using Lumper.Lib.Bsp;
 using Lumper.Lib.Jobs;
+using Lumper.UI.Services;
+using Lumper.UI.Views.Pages.Jobs;
 using Newtonsoft.Json;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
-using Views.Pages.Jobs;
 
 public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 {
