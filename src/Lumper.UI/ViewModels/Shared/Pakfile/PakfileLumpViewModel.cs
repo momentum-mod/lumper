@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DynamicData;
-using Entity;
-using Lib.BSP;
-using Lib.BSP.Lumps.BspLumps;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Entity;
 using NLog;
-using Services;
 
 public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 {

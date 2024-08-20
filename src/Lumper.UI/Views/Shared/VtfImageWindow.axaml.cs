@@ -1,7 +1,7 @@
 namespace Lumper.UI.Views.Shared;
 
 using Avalonia.ReactiveUI;
-using ViewModels.Shared.Pakfile;
+using Lumper.UI.ViewModels.Shared.Pakfile;
 
 public partial class VtfImageWindow : ReactiveWindow<PakfileEntryVtfViewModel>
 {

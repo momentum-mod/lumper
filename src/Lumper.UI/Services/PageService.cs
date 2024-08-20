@@ -3,15 +3,15 @@ namespace Lumper.UI.Services;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using Lumper.UI.ViewModels;
+using Lumper.UI.ViewModels.Pages.EntityEditor;
+using Lumper.UI.ViewModels.Pages.Jobs;
+using Lumper.UI.ViewModels.Pages.PakfileExplorer;
+using Lumper.UI.ViewModels.Pages.RawEntities;
+using Lumper.UI.ViewModels.Pages.VtfBrowser;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ViewModels;
-using ViewModels.Pages.EntityEditor;
-using ViewModels.Pages.Jobs;
-using ViewModels.Pages.PakfileExplorer;
-using ViewModels.Pages.RawEntities;
-using ViewModels.Pages.VtfBrowser;
 
 // This would live in PageService but then Avalonia x:Static can't access it.
 // https://github.com/AvaloniaUI/Avalonia/issues/13452

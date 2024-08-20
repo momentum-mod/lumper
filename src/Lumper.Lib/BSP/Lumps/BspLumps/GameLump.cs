@@ -1,12 +1,11 @@
-namespace Lumper.Lib.BSP.Lumps.BspLumps;
+namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Bsp.Enum;
-using Enum;
-using IO;
-using Lumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
 using Newtonsoft.Json;
 
 public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)

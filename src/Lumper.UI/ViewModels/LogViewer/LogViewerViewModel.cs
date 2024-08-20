@@ -3,9 +3,9 @@ namespace Lumper.UI.ViewModels.LogViewer;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Lumper.UI.ViewModels;
+using Lumper.UI.Views.LogViewer;
 using NLog;
-using ViewModels;
-using Views.LogViewer;
 
 public sealed class LogViewerViewModel : ViewModelWithView<LogViewerViewModel, LogViewerView>, IDisposable
 {

@@ -1,7 +1,7 @@
 namespace Lumper.UI.Views.Pages.Jobs;
 
 using Avalonia.ReactiveUI;
-using ViewModels.Pages.Jobs;
+using Lumper.UI.ViewModels.Pages.Jobs;
 
 public partial class RunExternalToolJobView : ReactiveUserControl<RunExternalToolJobViewModel>
 {

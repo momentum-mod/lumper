@@ -9,9 +9,9 @@ using Avalonia.Controls.Documents;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
+using Lumper.UI.ViewModels.LogViewer;
 using NLog;
 using ReactiveUI;
-using ViewModels.LogViewer;
 
 public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 {

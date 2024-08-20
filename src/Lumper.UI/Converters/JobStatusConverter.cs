@@ -4,8 +4,8 @@ using System;
 using System.Globalization;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
+using Lumper.UI.ViewModels.Pages.Jobs;
 using Material.Icons;
-using ViewModels.Pages.Jobs;
 
 public class JobStatusConverter : IValueConverter
 {

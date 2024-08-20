@@ -1,18 +1,17 @@
-namespace Lumper.Lib.BSP;
+namespace Lumper.Lib.Bsp;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Bsp.Enum;
-using Enum;
-using IO;
-using Lumps;
-using Lumps.BspLumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
 using Newtonsoft.Json;
 using NLog;
-using Struct;
 
 public sealed partial class BspFile : IDisposable
 {

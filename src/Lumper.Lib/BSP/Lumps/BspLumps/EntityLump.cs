@@ -1,14 +1,13 @@
-namespace Lumper.Lib.BSP.Lumps.BspLumps;
+namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Bsp.Enum;
-using Enum;
-using IO;
-using Lumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Struct;
 using NLog;
-using Struct;
 
 public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {

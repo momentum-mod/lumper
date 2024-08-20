@@ -1,6 +1,6 @@
-namespace Lumper.Lib.BSP.Struct;
+namespace Lumper.Lib.Bsp.Struct;
 
-using Enum;
+using Lumper.Lib.Bsp.Enum;
 
 public class TexInfo
 {

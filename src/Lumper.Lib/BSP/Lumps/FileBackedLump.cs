@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Lumps;
+namespace Lumper.Lib.Bsp.Lumps;
 
 using System.IO;
 

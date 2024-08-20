@@ -11,17 +11,17 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
-using Lib.BSP;
-using Lib.Bsp.Enum;
-using Lib.BSP.IO;
-using Lumper.Lib.BSP.Lumps.BspLumps;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.UI.ViewModels.Shared;
+using Lumper.UI.ViewModels.Shared.Entity;
+using Lumper.UI.ViewModels.Shared.Pakfile;
+using Lumper.UI.Views;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ViewModels.Shared;
-using ViewModels.Shared.Entity;
-using ViewModels.Shared.Pakfile;
-using Views;
 
 /// <summary>
 /// Singleton service handling the currently loaded BSP file.

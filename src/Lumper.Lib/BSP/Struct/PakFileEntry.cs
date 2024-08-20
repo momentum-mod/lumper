@@ -1,10 +1,10 @@
-namespace Lumper.Lib.BSP.Struct;
+namespace Lumper.Lib.Bsp.Struct;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
-using Lumps.BspLumps;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Newtonsoft.Json;
 using SharpCompress.Archives.Zip;
 

@@ -1,12 +1,12 @@
-namespace Lumper.Lib.BSP.Lumps.GameLumps;
+namespace Lumper.Lib.Bsp.Lumps.GameLumps;
 
 using System.Drawing;
 using System.IO;
 using System.Numerics;
-using Enum;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Struct;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Struct;
 
 public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp>(parent)
 {

@@ -8,15 +8,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.ViewModels.Shared.Vtf;
+using Lumper.UI.Views.Shared;
+using Lumper.UI.Views.Shared.Pakfile;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.PixelFormats;
-using Views.Shared;
-using Views.Shared.Pakfile;
-using Vtf;
 
 public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 {

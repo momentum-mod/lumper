@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Views.Shared.Pakfile;
 using NLog;
 using ReactiveUI.Fody.Helpers;
-using Views.Shared.Pakfile;
 
 public class PakfileEntryTextViewModel : PakfileEntryViewModel
 {

@@ -2,8 +2,8 @@ namespace Lumper.Lib.Jobs;
 
 using System.Collections.Generic;
 using System.IO;
-using BSP.Lumps.BspLumps;
-using BSP.Struct;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
 using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
 public partial class StripperJob

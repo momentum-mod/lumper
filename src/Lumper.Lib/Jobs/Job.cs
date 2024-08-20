@@ -1,8 +1,8 @@
 namespace Lumper.Lib.Jobs;
 
 using System;
-using BSP;
 using JsonSubTypes;
+using Lumper.Lib.Bsp;
 using Newtonsoft.Json;
 
 // Interface so we can use static virtual (new C# 12 thing) - need a static version of JobName for use in UI menus.

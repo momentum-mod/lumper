@@ -1,6 +1,6 @@
 namespace Lumper.UI.ViewModels.Pages.Jobs;
 
-using Lib.BSP;
+using Lumper.Lib.Bsp;
 using Lumper.Lib.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;

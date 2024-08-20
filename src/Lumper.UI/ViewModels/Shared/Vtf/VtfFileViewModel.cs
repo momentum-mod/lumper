@@ -11,13 +11,13 @@ using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.ViewModels;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
-using ViewModels;
 using VTFLib;
 
 /// <summary>

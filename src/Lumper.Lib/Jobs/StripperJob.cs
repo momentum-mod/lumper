@@ -3,8 +3,8 @@ namespace Lumper.Lib.Jobs;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BSP;
-using BSP.Lumps.BspLumps;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
 

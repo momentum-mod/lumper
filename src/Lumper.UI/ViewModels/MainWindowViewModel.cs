@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using LogViewer;
+using Lumper.UI.Services;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
 using MsBox.Avalonia.Dto;
@@ -14,7 +15,6 @@ using MsBox.Avalonia.Enums;
 using MsBox.Avalonia.Models;
 using NLog;
 using ReactiveUI;
-using Services;
 
 public class MainWindowViewModel : ViewModel
 {
@@ -141,7 +141,9 @@ public class MainWindowViewModel : ViewModel
             !BspService.Instance.HasLoadedBsp
             || !await ShowUnsavedChangesDialog("Do you want to discard your current changes?")
         )
+        {
             return;
+        }
 
         BspService.Instance.CloseCurrentBsp();
     }

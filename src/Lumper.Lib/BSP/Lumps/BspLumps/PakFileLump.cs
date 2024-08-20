@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Lumps.BspLumps;
+namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System;
 using System.Buffers;
@@ -7,17 +7,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Bsp.Enum;
-using Enum;
-using IO;
-using Lumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Struct;
 using Newtonsoft.Json;
 using NLog;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
 using SharpCompress.Writers.Zip;
-using Struct;
 
 /// <summary>
 /// The pakfile lump (aka paklump) is just a zip archive for storing assets in the BSP.

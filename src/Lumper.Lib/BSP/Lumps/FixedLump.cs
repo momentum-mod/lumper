@@ -1,9 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps;
+namespace Lumper.Lib.Bsp.Lumps;
 
 using System.Collections.Generic;
 using System.IO;
-using Bsp.Enum;
-using IO;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
 
 // Lumps which contain a list/array of data U with fixed length
 public abstract class FixedLump<T, TData>(BspFile parent) : ManagedLump<T>(parent)

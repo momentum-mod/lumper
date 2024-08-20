@@ -8,8 +8,8 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using Lumper.UI.ViewModels.Shared.Pakfile;
 using ReactiveUI;
-using ViewModels.Shared.Pakfile;
 
 public partial class PakfileEntryTextView : ReactiveUserControl<PakfileEntryTextViewModel>
 {
