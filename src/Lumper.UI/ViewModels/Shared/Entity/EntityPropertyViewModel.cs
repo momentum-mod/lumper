@@ -15,7 +15,7 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
         get => _key;
         set
         {
-            var wasClassname = _key == "classname";
+            bool wasClassname = _key == "classname";
             if (!UpdateField(ref _key, value) || this is not EntityPropertyStringViewModel vm)
                 return;
 

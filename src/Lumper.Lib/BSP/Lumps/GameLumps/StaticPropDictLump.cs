@@ -16,9 +16,9 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
 
     protected override void WriteItem(BinaryWriter writer, int index)
     {
-        var b = new byte[StructureSize];
-        var value = Encoding.ASCII.GetBytes(Data[index]);
-        var count = value.Length;
+        byte[] b = new byte[StructureSize];
+        byte[] value = Encoding.ASCII.GetBytes(Data[index]);
+        int count = value.Length;
         if (count > StructureSize)
         {
             Logger.Warn($"{GetType().Name} string to long!");

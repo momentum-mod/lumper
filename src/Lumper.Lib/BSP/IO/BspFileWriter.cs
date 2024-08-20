@@ -83,8 +83,8 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
             {
                 // Lump offsets (and their corresponding data lumps) are always rounded
                 // up to the nearest 4-byte boundary, though the lump length may not be.
-                var padTo = lumpType == BspLumpType.Physlevel ? 16 : 4;
-                var pad = new byte[padTo - (BaseStream.Position % padTo)];
+                int padTo = lumpType == BspLumpType.Physlevel ? 16 : 4;
+                byte[] pad = new byte[padTo - (BaseStream.Position % padTo)];
                 if (pad.Length != padTo)
                     Write(pad);
             }
@@ -109,7 +109,7 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
         texDataStringDataLump.Resize(texData.Sum(x => Encoding.ASCII.GetByteCount(x.TexName) + 1));
 
         List<int> stringTable = [];
-        var pos = 0;
+        int pos = 0;
         foreach (TexData tex in texData)
         {
             // At start of texture string, put its loc in stringtable
@@ -117,7 +117,7 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
 
             tex.StringTablePointer = stringTable.Count - 1;
 
-            var bytes = Encoding.ASCII.GetBytes(tex.TexName);
+            byte[] bytes = Encoding.ASCII.GetBytes(tex.TexName);
             Array.Copy(bytes, 0, texDataStringDataLump.Data, pos, bytes.Length);
             pos += bytes.Length;
             texDataStringDataLump.Data[pos] = 0;

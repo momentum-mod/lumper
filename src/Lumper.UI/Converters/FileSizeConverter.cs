@@ -20,7 +20,7 @@ public class FileSizeConverter : IValueConverter
         if (value is null)
             return string.Empty;
 
-        var convertedSize = System.Convert.ToDouble(value);
+        double convertedSize = System.Convert.ToDouble(value);
 
         return $"{Math.Ceiling(convertedSize / 1024 * 10) / 10:N1} KB";
     }

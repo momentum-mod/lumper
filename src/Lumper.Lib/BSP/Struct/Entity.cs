@@ -33,7 +33,7 @@ public class Entity : ICloneable
                 .FirstOrDefault(x => x.Key == "hammerid")
                 ?.Value;
 
-            var className =
+            string className =
                 Properties.OfType<EntityProperty<string>>().FirstOrDefault(x => x.Key == "classname")?.Value
                 ?? "<missing classname>";
 

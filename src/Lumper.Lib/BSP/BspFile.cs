@@ -109,7 +109,7 @@ public sealed partial class BspFile : IDisposable
         string outPath;
         string? backupPath = null;
 
-        var escapedPath = path is null ? null : GetUnescapedFilePathString(path);
+        string? escapedPath = path is null ? null : GetUnescapedFilePathString(path);
         if (escapedPath is null || escapedPath == FilePath)
         {
             outPath = FilePath!;
@@ -159,7 +159,7 @@ public sealed partial class BspFile : IDisposable
         // This stream needs to be closed at precise times so no using/try-finally; be careful
         // to dispose of it in all code paths.
         Stream stream;
-        var overwritingOpenFile = false;
+        bool overwritingOpenFile = false;
         // Check if we're trying to write to the file we current have open.
         // If so, saving will try to use data from that open filestream, so we
         // can't write to it at the same time.
@@ -349,8 +349,8 @@ public sealed partial class BspFile : IDisposable
     {
         if (path is null)
         {
-            var dir = Path.GetDirectoryName(FilePath) ?? ".";
-            var name = Path.GetFileNameWithoutExtension(FilePath);
+            string dir = Path.GetDirectoryName(FilePath) ?? ".";
+            string? name = Path.GetFileNameWithoutExtension(FilePath);
             path = Path.Join(dir, name + ".json");
         }
 

@@ -51,7 +51,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
                 if (Compression == DesiredCompression.Uncompressed)
                     Logger.Debug("Saving uncompressed but an unmanaged lump is compressed, leaving it as-is.");
 
-                var offset = BaseStream.Position;
+                long offset = BaseStream.Position;
 
                 lump.Write(BaseStream, Handler);
 
@@ -82,7 +82,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
 
     private LumpHeaderInfo WriteUncompressed(Lump lump)
     {
-        var offset = BaseStream.Position;
+        long offset = BaseStream.Position;
 
         if (lump is PakfileLump pakfileLump)
             pakfileLump.Write(BaseStream, Handler, Compression);
@@ -101,11 +101,11 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
 
     private LumpHeaderInfo WriteCompressed(Lump lump)
     {
-        var offset = BaseStream.Position;
+        long offset = BaseStream.Position;
 
         using var uncompressedStream = new MemoryStream();
         lump.Write(uncompressedStream, Handler);
-        var uncompressedLength = uncompressedStream.Length;
+        long uncompressedLength = uncompressedStream.Length;
 
         long compressedLength;
         uncompressedStream.Seek(0, SeekOrigin.Begin);

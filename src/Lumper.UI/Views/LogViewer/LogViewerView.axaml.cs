@@ -80,7 +80,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 new Run(logMessage.Level.ToString().PadRight(8)) { Foreground = LogLevelColors[logMessage.Level] }
             );
 
-            var origin = logMessage.Origin;
+            string origin = logMessage.Origin;
             // Don't split off front stuff if not a lumper thing (e.g. a RunExternalToolTask)
             origin = origin.StartsWith("Lumper") ? origin.Split('.')[^1] : origin;
             Logs.Inlines.Add(

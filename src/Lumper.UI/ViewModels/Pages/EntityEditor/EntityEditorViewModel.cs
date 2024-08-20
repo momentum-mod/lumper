@@ -65,7 +65,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             // Combine latest of each seach pattern and selected matcher type into a Matcher
             .Select(tuple =>
             {
-                (var pattern, MatcherViewModel? matcher) = tuple;
+                (string? pattern, MatcherViewModel? matcher) = tuple;
                 return matcher is not null && !string.IsNullOrWhiteSpace(pattern)
                     ? matcher.ConstructMatcher(pattern)
                     : null;
@@ -153,7 +153,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         if (tab is null)
             return;
 
-        var tabIndex = Tabs.IndexOf(tab);
+        int tabIndex = Tabs.IndexOf(tab);
         if (tabIndex == -1)
             return;
 

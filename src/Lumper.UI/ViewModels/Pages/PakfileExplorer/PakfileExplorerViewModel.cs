@@ -176,13 +176,13 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
         PakfileTreeViewModel.FixParentsRecursive(Tree.Root);
 
-        var queriedUser = false;
-        var moveReferences = false;
+        bool queriedUser = false;
+        bool moveReferences = false;
         foreach (Node node in Tree.EnumerateLeaves())
         {
             // GetPathString() is computed on call, if parent (directory) name changed,
             // all children will update here.
-            var newKey = node.PathString;
+            string newKey = node.PathString;
             if (newKey == node.Leaf!.Key)
                 continue;
 
@@ -222,7 +222,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         (string, Stream)[] streams = await Task.WhenAll(files.Select(async x => (x.Name, await x.OpenReadAsync())));
         _pakfileLump.Entries.Edit(updater =>
         {
-            foreach ((var name, Stream stream) in streams)
+            foreach ((string? name, Stream stream) in streams)
             {
                 _pakfileLump!.AddEntry(string.Join("/", [.. branchPath, name]), stream, updater);
                 stream.Dispose();
@@ -240,10 +240,10 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (folder is null || _pakfileLump is null)
             return;
 
-        var rootPath = folder.Path.LocalPath;
+        string rootPath = folder.Path.LocalPath;
         _pakfileLump.Entries.Edit(updater =>
         {
-            foreach (var path in Directory.EnumerateFiles(folder.Path.LocalPath, "*.*", SearchOption.AllDirectories))
+            foreach (string path in Directory.EnumerateFiles(folder.Path.LocalPath, "*.*", SearchOption.AllDirectories))
             {
                 FileStream stream = File.OpenRead(path);
                 _pakfileLump!.AddEntry(
@@ -265,7 +265,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         IMsBox<string> msBox = CreateMessageBox("Create Directory", "Directory Name", "Create");
         await ShowMessageBox(msBox);
 
-        var name = msBox.InputValue;
+        string? name = msBox.InputValue;
         if (name is null)
             return;
 
@@ -283,7 +283,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         IMsBox<string> msBox = CreateMessageBox("Create File", "File Name", "Create");
         await ShowMessageBox(msBox);
 
-        var name = msBox.InputValue ?? "new file";
+        string name = msBox.InputValue ?? "new file";
         if (name.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase))
         {
             Logger.Error("Creating empty VTFs is not supported, please import one.");
@@ -291,7 +291,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         }
 
         List<string> pathList = [.. branchPath, name];
-        var path = string.Join("/", pathList);
+        string path = string.Join("/", pathList);
 
         using var stream = new MemoryStream();
         var entry = (PakfileEntryTextViewModel)_pakfileLump.AddEntry(string.Join("/", path), stream);
@@ -307,15 +307,15 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             return;
 
         Node item = items[0];
-        var type = item.IsDirectory ? "directory" : "file";
+        string type = item.IsDirectory ? "directory" : "file";
 
         IMsBox<string> msBox = CreateMessageBox($"Rename {type}", "Rename", "Rename", item.Name);
 
-        var result = await ShowMessageBox(msBox);
+        string result = await ShowMessageBox(msBox);
         if (result == "Cancel")
             return;
 
-        var name = msBox.InputValue;
+        string? name = msBox.InputValue;
         if (name is null)
             return;
 
@@ -339,7 +339,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (folder is null || _pakfileLump is null)
             return;
 
-        var rootPath = folder.Path.LocalPath;
+        string rootPath = folder.Path.LocalPath;
 
         var importDir = new DirectoryInfo(rootPath);
         if (!importDir.Exists)
@@ -349,12 +349,12 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         {
             updater.Clear();
 
-            foreach (var path in Directory.EnumerateFiles(importDir.FullName, "*.*", SearchOption.AllDirectories))
+            foreach (string path in Directory.EnumerateFiles(importDir.FullName, "*.*", SearchOption.AllDirectories))
             {
                 var stream = new MemoryStream();
                 new FileStream(path, FileMode.Open).CopyTo(stream);
 
-                var entryPath = Path.GetRelativePath(rootPath, path).Replace('\\', '/');
+                string entryPath = Path.GetRelativePath(rootPath, path).Replace('\\', '/');
                 _pakfileLump.AddEntry(entryPath, stream, updater);
             }
         });
@@ -366,7 +366,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (folder is null || _pakfileLump is null)
             return;
 
-        var rootPath = folder.Path.LocalPath;
+        string rootPath = folder.Path.LocalPath;
         var exportDir = new DirectoryInfo(rootPath);
         if (!exportDir.Exists)
             throw new DirectoryNotFoundException(rootPath);
@@ -382,7 +382,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                     continue;
                 }
 
-                var dirName = fi.Directory?.FullName;
+                string? dirName = fi.Directory?.FullName;
                 if (string.IsNullOrWhiteSpace(dirName) || string.IsNullOrWhiteSpace(entry.Key))
                     continue;
 
@@ -408,12 +408,12 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (folder is null || _pakfileLump is null)
             return;
 
-        var rootPath = folder.Path.AbsolutePath;
+        string rootPath = folder.Path.AbsolutePath;
         var exportDir = new DirectoryInfo(rootPath);
         if (!exportDir.Exists)
             throw new DirectoryNotFoundException(rootPath);
 
-        var commonParentPath = Node.FindCommonAncestor(nodes).PathString + '/';
+        string commonParentPath = Node.FindCommonAncestor(nodes).PathString + '/';
         try
         {
             foreach (
@@ -430,7 +430,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                     continue;
                 }
 
-                var dirName = fi.Directory?.FullName;
+                string? dirName = fi.Directory?.FullName;
                 if (string.IsNullOrWhiteSpace(dirName) || string.IsNullOrWhiteSpace(entry.Key))
                     continue;
 

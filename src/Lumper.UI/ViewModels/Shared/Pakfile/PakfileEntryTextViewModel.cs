@@ -51,7 +51,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
 
     public async Task OpenExternal()
     {
-        var fileName = Path.Combine(Path.GetTempPath(), $"{Name}-{Guid.NewGuid()}{Extension}");
+        string fileName = Path.Combine(Path.GetTempPath(), $"{Name}-{Guid.NewGuid()}{Extension}");
 
         try
         {

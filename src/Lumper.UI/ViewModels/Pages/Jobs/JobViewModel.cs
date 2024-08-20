@@ -35,7 +35,7 @@ public abstract class JobViewModel : ViewModel
     {
         Status = JobStatus.Running;
 
-        var status = Job.Run(bsp);
+        bool status = Job.Run(bsp);
 
         if (status)
         {

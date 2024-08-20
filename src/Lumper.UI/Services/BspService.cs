@@ -175,7 +175,7 @@ public sealed class BspService : ReactiveObject
     private static async Task<Stream?> HttpDownload(string url)
     {
         IoProgressWindow? progressWindow = null;
-        var buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
         var cts = new CancellationTokenSource();
         var handler = new IoHandler(cts);
         var stream = new MemoryStream();
@@ -204,8 +204,8 @@ public sealed class BspService : ReactiveObject
             else
             {
                 int read;
-                var length = (int)response.Content.Headers.ContentLength.Value;
-                var remaining = length;
+                int length = (int)response.Content.Headers.ContentLength.Value;
+                int remaining = length;
                 while (
                     !handler.Cancelled
                     && (
@@ -216,7 +216,7 @@ public sealed class BspService : ReactiveObject
                     ) > 0
                 )
                 {
-                    var prog = (float)read / length * 100;
+                    float prog = (float)read / length * 100;
                     handler.UpdateProgress(prog, $"{float.Floor((1 - ((float)remaining / length)) * 100)}%");
                     await stream.WriteAsync(buffer.AsMemory(0, read), cts.Token);
                     remaining -= read;
@@ -273,9 +273,9 @@ public sealed class BspService : ReactiveObject
             DesiredCompression compress = ShouldCompress
                 ? DesiredCompression.Compressed
                 : DesiredCompression.Uncompressed;
-            var compressString = compress == DesiredCompression.Compressed ? "compressed" : "uncompressed";
+            string compressString = compress == DesiredCompression.Compressed ? "compressed" : "uncompressed";
 
-            var outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName;
+            string? outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName;
 
             if (Program.Desktop.MainWindow is not null)
             {
@@ -415,8 +415,8 @@ public sealed class BspService : ReactiveObject
             return;
 
         CloseCurrentBsp();
-        var source = string.Join(' ', Path.GetFileNameWithoutExtension(callerFile), callerMember);
-        var message = $"{source} is requesting a loaded BSP when it shouldn't!";
+        string source = string.Join(' ', Path.GetFileNameWithoutExtension(callerFile), callerMember);
+        string message = $"{source} is requesting a loaded BSP when it shouldn't!";
         Logger.Error(message); // Log this since this error message tends to get lost
         throw new InvalidOperationException(message);
     }

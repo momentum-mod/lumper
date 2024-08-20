@@ -40,11 +40,11 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length,
 
     protected override void ReadHeader()
     {
-        var startPos = BaseStream.Position;
-        var count = ReadInt32();
+        long startPos = BaseStream.Position;
+        int count = ReadInt32();
         LumpHeaderInfo? prevHeader = null;
-        var prevCompressed = false;
-        for (var i = 0; i < count; i++)
+        bool prevCompressed = false;
+        for (int i = 0; i < count; i++)
         {
             var type = (GameLumpType)ReadInt32();
 
@@ -62,7 +62,7 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length,
 
             if (prevHeader != null)
             {
-                var actualLength = header.Offset - prevHeader.Offset;
+                long actualLength = header.Offset - prevHeader.Offset;
                 if (actualLength < 0)
                     actualLength = length - (prevHeader.Offset + prevHeader.Length - startPos);
 

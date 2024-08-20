@@ -65,7 +65,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
 
     protected override void ReadItem(BinaryReader reader)
     {
-        var startPos = reader.BaseStream.Position;
+        long startPos = reader.BaseStream.Position;
 
         StaticProp prop = new()
         {
@@ -135,10 +135,10 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         // since v7
         if (ActualVersion >= StaticPropVersion.V7)
         {
-            var r = reader.ReadByte();
-            var g = reader.ReadByte();
-            var b = reader.ReadByte();
-            var a = reader.ReadByte();
+            byte r = reader.ReadByte();
+            byte g = reader.ReadByte();
+            byte b = reader.ReadByte();
+            byte a = reader.ReadByte();
             prop.DiffuseModulation = Color.FromArgb(a, r, g, b);
         }
 
@@ -154,7 +154,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
         // since v11
         if (ActualVersion >= StaticPropVersion.V11)
         {
-            var x = reader.ReadSingle();
+            float x = reader.ReadSingle();
             prop.UniformScale =
                 ActualVersion < StaticPropVersion.V13
                     ? new Vector3
@@ -184,7 +184,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
 
     protected override void WriteItem(BinaryWriter writer, int index)
     {
-        var startPos = writer.BaseStream.Position;
+        long startPos = writer.BaseStream.Position;
         StaticProp prop = Data[index];
         writer.Write(prop.Origin.X);
         writer.Write(prop.Origin.Y);

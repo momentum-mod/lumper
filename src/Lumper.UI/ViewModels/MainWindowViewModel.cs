@@ -78,8 +78,8 @@ public class MainWindowViewModel : ViewModel
             }
         );
 
-        var result = await msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
-        var url = msBox.InputValue;
+        string result = await msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
+        string url = msBox.InputValue;
 
         if (result == "Cancel" || !url.StartsWith("http"))
             return;

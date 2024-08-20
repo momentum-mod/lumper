@@ -55,15 +55,15 @@ public class RunExternalToolJob : Job, IJob
         {
             while (_stream.CanRead)
             {
-                var read = await _stream.ReadAsync(new Memory<byte>(_buffer));
+                int read = await _stream.ReadAsync(new Memory<byte>(_buffer));
                 if (read > 0)
                 {
                     _writer.Write(_buffer, 0, read);
 
                     _logString += Encoding.UTF8.GetString(_buffer, 0, read);
-                    var fuckWindows = _logString.Contains("\r\n");
-                    var split = _logString.Split(fuckWindows ? "\r\n" : "\n");
-                    foreach ((var line, var index) in split.Select((x, i) => (x, i)))
+                    bool fuckWindows = _logString.Contains("\r\n");
+                    string[] split = _logString.Split(fuckWindows ? "\r\n" : "\n");
+                    foreach ((string? line, int index) in split.Select((x, i) => (x, i)))
                     {
                         if (index == split.Length - 1)
                         {
@@ -98,8 +98,8 @@ public class RunExternalToolJob : Job, IJob
         Progress.Max = 100;
         Progress.Count = 0;
 
-        var inputPath = System.IO.Path.GetTempFileName() + ".bsp";
-        var outputPath = WritesToStdOut || WritesToInputFile ? null : System.IO.Path.GetTempFileName() + ".bsp";
+        string inputPath = System.IO.Path.GetTempFileName() + ".bsp";
+        string? outputPath = WritesToStdOut || WritesToInputFile ? null : System.IO.Path.GetTempFileName() + ".bsp";
 
         // TODO: It'd be nice to do full task cancellation, in which case we'd be passing a CT into this method.
         var handler = new IoHandler(new CancellationTokenSource());
@@ -118,7 +118,7 @@ public class RunExternalToolJob : Job, IJob
         Output stdOut,
             stdErr;
         bool ret;
-        var args = Args;
+        string? args = Args;
         using (var process = new Process())
         {
             if (args is not null)
@@ -140,7 +140,7 @@ public class RunExternalToolJob : Job, IJob
                 RedirectStandardError = true,
             };
 
-            var name = new FileInfo(Path).Name;
+            string name = new FileInfo(Path).Name;
             Logger.Info($"Running {name} with args {args}");
             process.Start();
 

@@ -55,7 +55,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         if (BaseStream.Position != 0)
             BaseStream.Seek(0, SeekOrigin.Begin);
 
-        var ident = ReadBytes(4);
+        byte[] ident = ReadBytes(4);
 
         if (Encoding.ASCII.GetString(ident) != "VBSP")
             throw new InvalidDataException("File doesn't look like a VBSP");
@@ -63,7 +63,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         _bsp.Version = ReadInt32();
         Logger.Debug($"BSP version: {_bsp.Version}");
 
-        for (var i = 0; i < BspFile.HeaderLumps; i++)
+        for (int i = 0; i < BspFile.HeaderLumps; i++)
         {
             var type = (BspLumpType)i;
 
@@ -83,9 +83,9 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
 
             lump.Type = type;
             lumpHeaderInfo.Offset = ReadInt32();
-            var length = ReadInt32();
+            int length = ReadInt32();
             lump.Version = ReadInt32();
-            var fourCc = ReadInt32();
+            int fourCc = ReadInt32();
             if (fourCc == 0)
             {
                 lumpHeaderInfo.CompressedLength = -1;
@@ -165,12 +165,12 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
     // Test for overlapping offsets
     private bool CheckOverlapping()
     {
-        var result = false;
+        bool result = false;
 
         Lump<BspLumpType>? prevLump = null;
         LumpHeaderInfo? prevHeader = null;
 
-        var first = true;
+        bool first = true;
         foreach ((Lump? tmpLump, LumpHeaderInfo? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
             var lump = (Lump<BspLumpType>)tmpLump;
@@ -182,7 +182,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
             }
             else if (header.Length > 0)
             {
-                var prevEnd = prevHeader!.Offset + prevHeader.Length;
+                long prevEnd = prevHeader!.Offset + prevHeader.Length;
                 if (header.Offset < prevEnd)
                 {
                     Logger.Warn($"Lumps {prevLump!.Type} and {lump.Type} overlapping");
@@ -215,10 +215,10 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         foreach (Struct.TexData texture in texDataLump.Data)
         {
             TexDataStringTableLump texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
-            var stringTableOffset = texDataStringTableLump.Data[texture.StringTablePointer];
+            int stringTableOffset = texDataStringTableLump.Data[texture.StringTablePointer];
             TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
 
-            var end = Array.FindIndex(texDataStringDataLump.Data, stringTableOffset, x => x == 0);
+            int end = Array.FindIndex(texDataStringDataLump.Data, stringTableOffset, x => x == 0);
             if (end < 0)
             {
                 end = texDataStringDataLump.Data.Length;

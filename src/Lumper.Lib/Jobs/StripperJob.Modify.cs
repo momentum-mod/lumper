@@ -18,7 +18,7 @@ public partial class StripperJob
 
         public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr)
         {
-            var prevBlock = "";
+            string prevBlock = "";
             ParseBlock(
                 reader,
                 blockOpen,
@@ -27,7 +27,7 @@ public partial class StripperJob
                 {
                     line = line.Trim();
 
-                    var blockOpenInner = false;
+                    bool blockOpenInner = false;
                     if (line == "{")
                     {
                         line = prevBlock;

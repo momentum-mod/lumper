@@ -122,9 +122,9 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         if (SelectedJob is null || Jobs.Count <= 1)
             return;
 
-        var offset = (int)dir;
-        var idx = Jobs.IndexOf(SelectedJob);
-        var newIdx = idx + offset;
+        int offset = (int)dir;
+        int idx = Jobs.IndexOf(SelectedJob);
+        int newIdx = idx + offset;
 
         if (newIdx < 0)
             newIdx = Jobs.Count + offset;

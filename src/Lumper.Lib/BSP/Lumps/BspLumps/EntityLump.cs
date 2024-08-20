@@ -36,8 +36,8 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         try
         {
             string? key = null;
-            var inSection = false;
-            var inString = false;
+            bool inSection = false;
+            bool inString = false;
             char x;
             while (reader.BaseStream.Position < reader.BaseStream.Length && (x = (char)reader.ReadByte()) != '\0')
             {
@@ -82,7 +82,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
                             }
                             else
                             {
-                                var value = stringBuilder.ToString();
+                                string value = stringBuilder.ToString();
 
                                 if (key.Length == 0 && !EntityIo.TryParse(value, out _))
                                 {
@@ -120,10 +120,10 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
             );
 
             // Read to end of entity
-            var foundEnd = false;
+            bool foundEnd = false;
             while (reader.BaseStream.Position < endPos)
             {
-                var c = reader.ReadChar();
+                char c = reader.ReadChar();
                 if (c is '\0' or '}')
                 {
                     foundEnd = true;
