@@ -14,6 +14,7 @@ using Avalonia.Platform.Storage;
 using Lib.Bsp.Enum;
 using Lib.BSP;
 using Lib.BSP.IO;
+using Lumper.Lib.BSP.Lumps.BspLumps;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -257,7 +258,6 @@ public sealed class BspService : ReactiveObject
             return false;
 
         IsLoading = true;
-
         foreach (ILumpViewModel? vm in Lumps)
             vm?.UpdateModel(); // Null propagation means we do nothing for unloaded lumps VMs
 
@@ -272,16 +272,19 @@ public sealed class BspService : ReactiveObject
                 : DesiredCompression.Uncompressed;
             var compressString = compress == DesiredCompression.Compressed ? "compressed" : "uncompressed";
 
+            var outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName;
+
             if (Program.Desktop.MainWindow is not null)
             {
-                var outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName;
+
                 progressWindow = new IoProgressWindow {
                     Title = $"Saving {outName} ({compressString})",
                     Handler = handler
                 };
                 _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
             }
-
+            // get the cubemaps that will be changed
+            Dictionary<string, string> modified = BspFile.GetLump<PakfileLump>().GetCubemapsToChange(outName);
             await Observable.Start(
                 () => BspFile.SaveToFile(
                     outFile?.Path.LocalPath,
@@ -289,6 +292,21 @@ public sealed class BspService : ReactiveObject
                     handler,
                     makeBackup: MakeBackup),
                 RxApp.TaskpoolScheduler);
+
+            if (outName != FileName)
+            {
+                PakfileLumpViewModel?.UpdateEntries(false);
+
+                // clean up old outdated keys
+                foreach (KeyValuePair<string, string> entry in modified)
+                {
+                    foreach (PakfileEntryViewModel pk in PakfileLumpViewModel?.Entries?.Items)
+                    {
+                        if (pk.Key == entry.Key)
+                            PakfileLumpViewModel.DeleteEntry(pk);
+                    }
+                }
+            }
 
             if (handler.Cancelled)
                 return false;

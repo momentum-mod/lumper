@@ -30,13 +30,18 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 
         InitEntries();
     }
-
-    private void InitEntries()
-        => Entries.Edit(updater =>
+    public void UpdateEntries(bool checkIfModified)
+    => Entries.Edit(updater =>
+    {
+        foreach (PakfileEntry entry in _pakfile.Entries.OrderBy(x => new FileInfo(x.Key).Name))
         {
-            foreach (PakfileEntry entry in _pakfile.Entries.OrderBy(x => new FileInfo(x.Key).Name))
+            if (entry.IsModified || !checkIfModified)
                 updater.AddOrUpdate(CreateEntryViewModel(entry));
-        });
+        }
+    });
+
+    private void InitEntries() =>
+        UpdateEntries(false);
 
     private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry)
         => entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
@@ -241,6 +246,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     entry.Content = entry.Content[..matchIndex] + updatedNp +
                                     entry.Content[(matchIndex + updatedOp.Length)..];
                     changes++;
+                    entry.IsModified = true;
                 }
                 else
                 {
@@ -259,6 +265,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                         entry.Content[(wholeMatchIndex + updatedOp.Length)..];
 
                     changes++;
+                    entry.IsModified = true;
                 }
             }
 

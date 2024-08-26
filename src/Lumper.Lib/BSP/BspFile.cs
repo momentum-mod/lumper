@@ -105,6 +105,15 @@ public sealed partial class BspFile : IDisposable
         if (path is null && FilePath is null)
             throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
 
+        if (path != null && Path.GetFileName(path) != FilePath)
+        {
+            PakfileLump pakfile = GetLump<PakfileLump>();
+
+            Dictionary<string, string> modified = pakfile.RenameCubemapsPath(Path.GetFileName(path));
+            foreach (KeyValuePair<string,string> modifiedPath in modified)
+                pakfile.UpdatePathReferences(modifiedPath.Value, modifiedPath.Key);
+        }
+
         string outPath;
         string? backupPath = null;
 
