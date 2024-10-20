@@ -1,0 +1,97 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set version name  # ref_name but replace slashes and spaces with dashes
+      id: version
+      run: echo "ref-name=$(echo $GITHUB_REF_NAME | sed 's/\//-/g' | sed 's/ /-/g')" >> $GITHUB_OUTPUT
+    
+    - name: checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+            
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+#    - name: Test
+#      run: dotnet test --no-build --verbosity normal
+
+    - name: Make dirs
+      run: mkdir out_linux out_windows
+
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build Windows
+      run: | 
+        dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_windows/ src/Lumper.CLI && \
+        dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_windows/ src/Lumper.UI
+
+    - name: Build Linux
+      run: | 
+        dotnet publish -c Release --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_linux/ src/Lumper.CLI && \
+        dotnet publish -c Release --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_linux/ src/Lumper.UI
+
+
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4.4.3
+      with:
+        name: Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip
+        path: out_windows/
+
+    - name: Upload Linux artifacts
+      uses: actions/upload-artifact@v4.4.3
+      with:
+        name: Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip
+        path: out_linux/
+
+
+    - name: Package Windows
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        cd out_windows && zip -r Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip \
+        \
+        Lumper.CLI.exe \
+        Lumper.UI.exe \
+        NLog.config \
+        RegisterLumperURLProtocol.ps1 \
+        \
+        && cd ..
+
+    - name: Package Linux
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        cd out_linux && zip -r Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip \
+        \
+        Lumper.CLI \
+        Lumper.UI \
+        NLog.config \
+        \
+        && cd ..
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        generate_release_notes: true
+        files: |
+          out_windows/Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip
+          out_linux/Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip
+
