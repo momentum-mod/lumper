@@ -257,7 +257,7 @@ public sealed class BspService : ReactiveObject
         if (BspFile is null)
             return false;
 
-        if (outFile is null && FilePath is null)
+        if (outFile is null && (FilePath is null || FileName is null))
             return false;
 
         IsLoading = true;
@@ -275,7 +275,7 @@ public sealed class BspService : ReactiveObject
                 : DesiredCompression.Uncompressed;
             string compressString = compress == DesiredCompression.Compressed ? "compressed" : "uncompressed";
 
-            string? outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName;
+            string outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName!;
 
             if (Program.Desktop.MainWindow is not null)
             {
@@ -286,21 +286,23 @@ public sealed class BspService : ReactiveObject
                 };
                 _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
             }
+
             // get the cubemaps that will be changed
+
             Dictionary<string, string> modified = BspFile.GetLump<PakfileLump>().GetCubemapsToChange(outName);
             await Observable.Start(
                 () => BspFile.SaveToFile(outFile?.Path.LocalPath, compress: compress, handler, makeBackup: MakeBackup),
                 RxApp.TaskpoolScheduler
             );
 
-            if (outName != FileName)
+            if (outName != FileName && PakfileLumpViewModel is not null)
             {
-                PakfileLumpViewModel?.UpdateEntries(false);
+                PakfileLumpViewModel.UpdateEntries(false);
 
                 // clean up old outdated keys
                 foreach (KeyValuePair<string, string> entry in modified)
                 {
-                    foreach (PakfileEntryViewModel pk in PakfileLumpViewModel?.Entries?.Items)
+                    foreach (PakfileEntryViewModel pk in PakfileLumpViewModel.Entries.Items)
                     {
                         if (pk.Key == entry.Key)
                             PakfileLumpViewModel.DeleteEntry(pk);
