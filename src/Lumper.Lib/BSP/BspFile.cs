@@ -111,7 +111,7 @@ public sealed partial class BspFile : IDisposable
 
             Dictionary<string, string> modified = pakfile.RenameCubemapsPath(Path.GetFileName(path));
             foreach (KeyValuePair<string,string> modifiedPath in modified)
-                pakfile.UpdatePathReferences(modifiedPath.Value, modifiedPath.Key);
+                pakfile.UpdatePathReferences(modifiedPath.Value, modifiedPath.Key, ".vmt");
         }
 
         string outPath;
