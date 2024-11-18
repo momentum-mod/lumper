@@ -42,7 +42,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // As per https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/utils/vbsp/cubemap.cpp
-    [GeneratedRegex(@"materials\/maps\/(.+)/?(?:(?:c-?\d+_-?\d+_-?\d+)|(?:cubemapdefault)(?:\.hdr)?\.vtf)")]
+    [GeneratedRegex(@"materials\/maps\/(.+)?/(?:(?:c-?\d+_-?\d+_-?\d+)|(?:cubemapdefault)(?:\.hdr)?\.vtf)")]
     private static partial Regex CubemapRegex();
 
     /// <summary>
