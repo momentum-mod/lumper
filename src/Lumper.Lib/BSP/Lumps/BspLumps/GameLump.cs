@@ -1,13 +1,12 @@
-namespace Lumper.Lib.BSP.Lumps.BspLumps;
+namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
 using Newtonsoft.Json;
-using Bsp.Enum;
-using Enum;
-using IO;
-using Lumps;
 
 public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 {
@@ -19,8 +18,8 @@ public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         set { } // Deliberately left empty
     }
 
-    public T? GetLump<T>() where T : Lump<GameLumpType>
-        => (T?)Lumps.Values.First(x => x?.GetType() == typeof(T));
+    public T? GetLump<T>()
+        where T : Lump<GameLumpType> => (T?)Lumps.Values.First(x => x?.GetType() == typeof(T));
 
     public Lump<GameLumpType>? GetLump(GameLumpType lumpType) => Lumps[lumpType];
 

@@ -3,8 +3,8 @@ namespace Lumper.Lib.Jobs;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using BSP.Lumps.BspLumps;
-using BSP.Struct;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
 using Prop = System.Collections.Generic.KeyValuePair<string, string>;
 
 public partial class StripperJob
@@ -60,8 +60,12 @@ public partial class StripperJob
             if (filterProp.Key != entityProp.Key)
                 return false;
 
-            if (filterProp.Value.Length > 2 && filterProp.Value.StartsWith('/') && filterProp.Value.EndsWith('/') &&
-                entityProp.ValueString is not null)
+            if (
+                filterProp.Value.Length > 2
+                && filterProp.Value.StartsWith('/')
+                && filterProp.Value.EndsWith('/')
+                && entityProp.ValueString is not null
+            )
             {
                 try
                 {
@@ -71,7 +75,8 @@ public partial class StripperJob
                 catch (Exception _) when (_ is ArgumentException or ArgumentNullException)
                 {
                     Logger.Warn(
-                        $"Error: Invalid regex {filterProp.Value}. Stripper uses Perl-style regexes, Lumper uses .NET; your regex may need adjusting.");
+                        $"Error: Invalid regex {filterProp.Value}. Stripper uses Perl-style regexes, Lumper uses .NET; your regex may need adjusting."
+                    );
                 }
             }
             return filterProp.Value == entityProp.ValueString;

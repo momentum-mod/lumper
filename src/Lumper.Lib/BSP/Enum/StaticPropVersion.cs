@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Enum;
+namespace Lumper.Lib.Bsp.Enum;
 
 public enum StaticPropVersion
 {
@@ -13,5 +13,5 @@ public enum StaticPropVersion
     V10 = 100,
     V11 = 110,
     V12 = 120,
-    V13 = 130
+    V13 = 130,
 }

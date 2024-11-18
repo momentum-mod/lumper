@@ -1,13 +1,13 @@
-namespace Lumper.Lib.BSP.IO;
+namespace Lumper.Lib.Bsp.IO;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Enum;
-using Lumps;
-using Lumps.BspLumps;
-using Lumps.GameLumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Lumps.GameLumps;
 using Newtonsoft.Json;
 using NLog;
 
@@ -22,17 +22,13 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length,
     // Using a list instead of dict because some maps (e.g. Valve TF2 maps) can have multiple entries
     // with GameLumpType.Unknown.
     [JsonProperty]
-    public List<(GameLumpType, LumpHeaderInfo)> Headers
-        => Lumps
-            .Select(x => (x.Item1 is Lump<GameLumpType> lump ? lump.Type : GameLumpType.Unknown, x.Item2))
-            .ToList();
+    public List<(GameLumpType, LumpHeaderInfo)> Headers =>
+        Lumps.Select(x => (x.Item1 is Lump<GameLumpType> lump ? lump.Type : GameLumpType.Unknown, x.Item2)).ToList();
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public GameLumpReader(GameLump gamelump, BinaryReader reader, long length, IoHandler? handler = null)
-        : this(gamelump, reader.BaseStream, length, handler)
-    {
-    }
+        : this(gamelump, reader.BaseStream, length, handler) { }
 
     public void Load()
     {
@@ -44,31 +40,29 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length,
 
     protected override void ReadHeader()
     {
-        var startPos = BaseStream.Position;
-        var count = ReadInt32();
+        long startPos = BaseStream.Position;
+        int count = ReadInt32();
         LumpHeaderInfo? prevHeader = null;
-        var prevCompressed = false;
-        for (var i = 0; i < count; i++)
+        bool prevCompressed = false;
+        for (int i = 0; i < count; i++)
         {
             var type = (GameLumpType)ReadInt32();
 
-            Lump<GameLumpType> lump = type switch {
+            Lump<GameLumpType> lump = type switch
+            {
                 GameLumpType.sprp => new Sprp(_gameLump.Parent),
-                _ => new UnmanagedLump<GameLumpType>(_gameLump.Parent)
+                _ => new UnmanagedLump<GameLumpType>(_gameLump.Parent),
             };
 
             lump.Type = type;
             lump.Flags = ReadUInt16();
             lump.Version = ReadUInt16();
 
-            var header = new LumpHeaderInfo {
-                Offset = ReadInt32(),
-                UncompressedLength = ReadInt32()
-            };
+            var header = new LumpHeaderInfo { Offset = ReadInt32(), UncompressedLength = ReadInt32() };
 
             if (prevHeader != null)
             {
-                var actualLength = header.Offset - prevHeader.Offset;
+                long actualLength = header.Offset - prevHeader.Offset;
                 if (actualLength < 0)
                     actualLength = length - (prevHeader.Offset + prevHeader.Length - startPos);
 
@@ -80,11 +74,13 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length,
             if (!_gameLump.Lumps.TryAdd(type, lump))
                 Logger.Warn($"Key {type} already in gamelumps, skipping");
 
-            Logger.Debug($"Read gamelump {_gameLump.Lumps.Count}  " +
-                         $"id: {type} {(int)type}".PadRight(48) +
-                         $"flags: {lump.Flags}".PadRight(24) +
-                         $"offset: {header.Offset}".PadRight(24) +
-                         $"length: {header.UncompressedLength}".PadRight(24));
+            Logger.Debug(
+                $"Read gamelump {_gameLump.Lumps.Count}  "
+                    + $"id: {type} {(int)type}".PadRight(48)
+                    + $"flags: {lump.Flags}".PadRight(24)
+                    + $"offset: {header.Offset}".PadRight(24)
+                    + $"length: {header.UncompressedLength}".PadRight(24)
+            );
 
             prevHeader = header;
             // lump is compressed if the last bit is 1

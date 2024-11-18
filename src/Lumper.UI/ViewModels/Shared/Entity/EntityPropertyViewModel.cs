@@ -1,7 +1,7 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
-using Lib.BSP.Struct;
-using Models.Matchers;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Models.Matchers;
 
 public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProperty, BspNode bspNode)
     : MatchableBspNode(bspNode)
@@ -15,13 +15,12 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
         get => _key;
         set
         {
-            var wasClassname = _key == "classname";
+            bool wasClassname = _key == "classname";
             if (!UpdateField(ref _key, value) || this is not EntityPropertyStringViewModel vm)
                 return;
 
             if (wasClassname)
                 ((EntityViewModel)Parent).ResetClassName();
-
             else if (value == "classname")
                 ((EntityViewModel)Parent).Name = vm.Value!;
         }
@@ -116,17 +115,17 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
     }
 
     // Not bothering with IEquatable cus it's extra faff
-    public bool Equals(EntityPropertyIoViewModel other)
-        => other.TargetEntityName == TargetEntityName &&
-           other.Input == Input &&
-           other.Parameter == Parameter &&
-           other.Delay == Delay &&
-           other.TimesToFire == TimesToFire;
+    public bool Equals(EntityPropertyIoViewModel other) =>
+        other.TargetEntityName == TargetEntityName
+        && other.Input == Input
+        && other.Parameter == Parameter
+        && other.Delay == Delay
+        && other.TimesToFire == TimesToFire;
 
     public override bool Match(Matcher matcher) =>
-        matcher.Match(TargetEntityName) ||
-        matcher.Match(Input) ||
-        matcher.Match(Parameter) ||
-        matcher.Match(Delay.ToString()) ||
-        matcher.Match(TimesToFire.ToString());
+        matcher.Match(TargetEntityName)
+        || matcher.Match(Input)
+        || matcher.Match(Parameter)
+        || matcher.Match(Delay.ToString())
+        || matcher.Match(TimesToFire.ToString());
 }

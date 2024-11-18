@@ -1,11 +1,11 @@
 namespace Lumper.UI.ViewModels.Shared;
 
 using System.Runtime.CompilerServices;
-using Entity;
-using Models.Matchers;
+using Lumper.UI.Models.Matchers;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Entity;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
 
 /// <summary>
 /// Very generic data structure for viewmodel representing properties on the BSP.
@@ -40,10 +40,7 @@ public abstract class BspNode : ViewModel
     /// <param name="backingField">Field to update</param>
     /// <param name="newValue">New value</param>
     /// <param name="propertyName"></param>
-    protected bool UpdateField<T>(
-        ref T backingField,
-        T newValue,
-        [CallerMemberName] string? propertyName = null)
+    protected bool UpdateField<T>(ref T backingField, T newValue, [CallerMemberName] string? propertyName = null)
     {
         if ((backingField is null && newValue is null) || (backingField is not null && backingField.Equals(newValue)))
             return false;

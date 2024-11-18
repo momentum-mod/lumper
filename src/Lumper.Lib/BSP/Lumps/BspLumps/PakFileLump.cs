@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Lumps.BspLumps;
+namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System;
 using System.Buffers;
@@ -7,17 +7,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Bsp.Enum;
-using Enum;
-using IO;
-using Lumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Struct;
 using Newtonsoft.Json;
 using NLog;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
 using SharpCompress.Writers.Zip;
-using Struct;
 
 /// <summary>
 /// The pakfile lump (aka paklump) is just a zip archive for storing assets in the BSP.
@@ -51,8 +50,8 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     /// </summary>
     public void UpdatePathReferences(string newPath, string oldPath, string? limitExtension = null)
     {
-        var opSplit = oldPath.Split('/');
-        var npSplit = newPath.Split('/');
+        string[] opSplit = oldPath.Split('/');
+        string[] npSplit = newPath.Split('/');
 
         // VMTs can reference VTFs ignoring the root directory and without the extension
         oldPath = string.Join('/', opSplit[1..]);
@@ -65,13 +64,14 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             if (limitExtension is null || !entry.Key.EndsWith(limitExtension))
                 continue;
 
-            var entryString = Encoding.Default.GetString(entry.GetReadOnlyStream().ToArray());
-            var newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
+            string entryString = Encoding.Default.GetString(entry.GetReadOnlyStream().ToArray());
+            string newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
 
             if (newString != entryString)
                 entry.UpdateData(Encoding.Default.GetBytes(newString));
         }
     }
+
     /// <summary>
     /// Gets the default cubemap path as Source uses the filename when searching.
     /// Returns a dictionary with the key as the old string
@@ -87,7 +87,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             Match match = CubemapRegex().Match(entry.Key);
             if (match.Success)
             {
-                var cubemapName = match.Groups[1].Value;
+                string cubemapName = match.Groups[1].Value;
                 entriesModified.Add(entry.Key, entry.Key.Replace(cubemapName, baseFilename));
             }
         }
@@ -100,7 +100,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     /// Returns a dictionary with the key as the old string
     /// and the value as the new string
     /// </summary>
-    public Dictionary<string,string> RenameCubemapsPath(string newFileName)
+    public Dictionary<string, string> RenameCubemapsPath(string newFileName)
     {
         string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
         var entriesModified = new Dictionary<string, string>();
@@ -114,9 +114,9 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 matched = true;
 
                 // Add the old key so we can update the UI later
-                var oldString = entry.Key;
+                string oldString = entry.Key;
 
-                var cubemapName = match.Groups[1].Value;
+                string cubemapName = match.Groups[1].Value;
                 entry.Key = entry.Key.Replace(cubemapName, baseFilename);
                 entry.IsModified = true;
 
@@ -143,11 +143,11 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
         var dataStream = new MemoryStream();
         int read;
         const int bufferSize = 80 * 1024;
-        var incr = (float)bufferSize / length * (int)IoHandler.ReadProgressProportions.Paklump;
-        var buffer = new byte[bufferSize];
+        float incr = (float)bufferSize / length * (int)IoHandler.ReadProgressProportions.Paklump;
+        byte[] buffer = new byte[bufferSize];
 
         handler?.UpdateProgress(0, "Reading pakfile");
-        var remaining = (int)length;
+        int remaining = (int)length;
         while ((read = stream.Read(buffer, 0, int.Min(bufferSize, remaining))) > 0)
         {
             if (handler?.Cancelled ?? false)
@@ -172,24 +172,29 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     {
         // If we have open filestream, pakfile isn't modified, and compression isn't
         // changing (or already already compressed), we can just read straight from filestream and write out again.
-        if (!IsModified &&
-            (compression == DesiredCompression.Unchanged ||
-             IsCompressed ||
-             (!IsCompressed && compression == DesiredCompression.Uncompressed)))
+        if (
+            !IsModified
+            && (
+                compression == DesiredCompression.Unchanged
+                || IsCompressed
+                || (!IsCompressed && compression == DesiredCompression.Uncompressed)
+            )
+        )
         {
             if (IsCompressed && compression == DesiredCompression.Uncompressed)
             {
                 Logger.Debug(
-                    "Saving uncompressed but the pakfile lump is unmodified and already compressed, leaving as-is.");
+                    "Saving uncompressed but the pakfile lump is unmodified and already compressed, leaving as-is."
+                );
             }
 
             DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
 
-            var buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
             try
             {
                 int read;
-                var remaining = DataStreamLength;
+                long remaining = DataStreamLength;
                 while ((read = DataStream.Read(buffer, 0, int.Min(buffer.Length, (int)remaining))) > 0)
                 {
                     stream.Write(buffer, 0, read);
@@ -228,26 +233,27 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             // BASTARD slow path, have to reconstruct the zip every time. Might be possible to avoid but having
             // fought with SharpCompress for hours I can't figure it out.
             using var outStream = new MemoryStream();
-            var zipWriter =
-                (ZipWriter)WriterFactory.Open(outStream,
-                    ArchiveType.Zip,
-                    new ZipWriterOptions(CompressionType.None));
+            var zipWriter = (ZipWriter)
+                WriterFactory.Open(outStream, ArchiveType.Zip, new ZipWriterOptions(CompressionType.None));
 
-            var numEntries = Entries.Count;
-            var incr = (float)IoHandler.WriteProgressProportions.Paklump / numEntries;
+            int numEntries = Entries.Count;
+            float incr = (float)IoHandler.WriteProgressProportions.Paklump / numEntries;
             // No need to update zip, we're reconstructing from scratch.
-            foreach ((PakfileEntry entry, var index) in Entries.Select((x, i) => (x, i)))
+            foreach ((PakfileEntry entry, int index) in Entries.Select((x, i) => (x, i)))
             {
                 if (handler?.Cancelled ?? false)
                     return;
 
                 handler?.UpdateProgress(incr, $"Packing {entry.Key} ({index + 1}/{numEntries})");
 
-                using Stream zipStream = zipWriter.WriteToStream(entry.Key,
-                    new ZipWriterEntryOptions {
+                using Stream zipStream = zipWriter.WriteToStream(
+                    entry.Key,
+                    new ZipWriterEntryOptions
+                    {
                         CompressionType = CompressionType.LZMA,
-                        ModificationDateTime = entry.ZipEntry?.LastModifiedTime
-                    });
+                        ModificationDateTime = entry.ZipEntry?.LastModifiedTime,
+                    }
+                );
 
                 entry.GetReadOnlyStream().CopyTo(zipStream);
             }
@@ -273,9 +279,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     private void UpdateZip()
     {
         // Delete every item from the zip that's not in the PakLump entries (was completely deleted by user)
-        foreach (ZipArchiveEntry entry in Zip.Entries
-                     .Where(entry => Entries.All(x => x.ZipEntry != entry))
-                     .ToList())
+        foreach (ZipArchiveEntry entry in Zip.Entries.Where(entry => Entries.All(x => x.ZipEntry != entry)).ToList())
         {
             Zip.RemoveEntry(entry);
         }

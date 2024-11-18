@@ -1,11 +1,12 @@
 namespace Lumper.UI.ViewModels.Pages.Jobs;
 
 using System;
-using Lib.Jobs;
+using Lumper.Lib.Jobs;
 
 public interface IJobMenuItem<out T>; // Interface for covariance
 
-public class JobMenuItem<T>(JobsViewModel jobsVm, Func<T> factory) : IJobMenuItem<T> where T : IJob
+public class JobMenuItem<T>(JobsViewModel jobsVm, Func<T> factory) : IJobMenuItem<T>
+    where T : IJob
 {
     public string Name => T.JobName;
 

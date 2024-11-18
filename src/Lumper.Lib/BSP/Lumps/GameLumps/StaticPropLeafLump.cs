@@ -1,7 +1,7 @@
-namespace Lumper.Lib.BSP.Lumps.GameLumps;
+namespace Lumper.Lib.Bsp.Lumps.GameLumps;
 
 using System.IO;
-using Enum;
+using Lumper.Lib.Bsp.Enum;
 
 public class StaticPropLeafLump(BspFile parent) : FixedLump<GameLumpType, uint>(parent)
 {

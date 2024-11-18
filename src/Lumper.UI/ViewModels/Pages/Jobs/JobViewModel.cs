@@ -1,6 +1,6 @@
 namespace Lumper.UI.ViewModels.Pages.Jobs;
 
-using Lib.BSP;
+using Lumper.Lib.Bsp;
 using Lumper.Lib.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -10,7 +10,7 @@ public enum JobStatus
     Success,
     Waiting,
     Running,
-    Failed
+    Failed,
 }
 
 public abstract class JobViewModel : ViewModel
@@ -35,7 +35,7 @@ public abstract class JobViewModel : ViewModel
     {
         Status = JobStatus.Running;
 
-        var status = Job.Run(bsp);
+        bool status = Job.Run(bsp);
 
         if (status)
         {

@@ -3,8 +3,8 @@ namespace Lumper.Lib.Jobs;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using BSP;
-using BSP.Lumps.BspLumps;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
 
@@ -20,7 +20,8 @@ public partial class StripperJob(string? configPath = null) : Job, IJob
 
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
-    public StripperJob() : this(null) { }
+    public StripperJob()
+        : this(null) { }
 
     private void Load(string configPath)
     {
@@ -30,16 +31,13 @@ public partial class StripperJob(string? configPath = null) : Job, IJob
 
     // Expects trimmed string
     private static bool IsComment(string line) =>
-        line.StartsWith(';') ||
-        line.StartsWith("//", StringComparison.Ordinal) ||
-        line.StartsWith('#') ||
-        line == "";
+        line.StartsWith(';') || line.StartsWith("//", StringComparison.Ordinal) || line.StartsWith('#') || line == "";
 
     private void Parse(Stream stream)
     {
         var reader = new StreamReader(stream);
-        var lineNr = 0;
-        var prevBlock = "";
+        int lineNr = 0;
+        string prevBlock = "";
         while (reader.ReadLine() is { } line)
         {
             lineNr++;
@@ -48,7 +46,7 @@ public partial class StripperJob(string? configPath = null) : Job, IJob
             if (string.IsNullOrEmpty(line))
                 continue;
 
-            var blockOpen = false;
+            bool blockOpen = false;
             if (line == "{")
             {
                 line = prevBlock;
@@ -59,11 +57,12 @@ public partial class StripperJob(string? configPath = null) : Job, IJob
                 continue;
             }
 
-            Block block = line switch {
+            Block block = line switch
+            {
                 "filter:" or "remove:" => new Filter(),
                 "add:" => new Add(),
                 "modify:" => new Modify(),
-                _ => throw new NotImplementedException($"Unknown title '{line}' in line {lineNr}")
+                _ => throw new NotImplementedException($"Unknown title '{line}' in line {lineNr}"),
             };
             prevBlock = line;
 

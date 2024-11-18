@@ -3,8 +3,8 @@ namespace Lumper.UI.ViewModels.Shared.Entity;
 using System;
 using System.Linq;
 using DynamicData.Binding;
-using Lib.BSP.Struct;
-using Models.Matchers;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Models.Matchers;
 using ReactiveUI;
 
 public class EntityViewModel : MatchableBspNode
@@ -19,7 +19,8 @@ public class EntityViewModel : MatchableBspNode
         set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
-    public EntityViewModel(Entity entity, BspNode parent) : base(parent)
+    public EntityViewModel(Entity entity, BspNode parent)
+        : base(parent)
     {
         Entity = entity;
 
@@ -31,10 +32,11 @@ public class EntityViewModel : MatchableBspNode
 
     public EntityPropertyViewModel AddPropertyViewModel(Entity.EntityProperty entityProperty)
     {
-        EntityPropertyViewModel newProp = entityProperty switch {
+        EntityPropertyViewModel newProp = entityProperty switch
+        {
             Entity.EntityProperty<string> sp => new EntityPropertyStringViewModel(sp, this),
             Entity.EntityProperty<EntityIo> sio => new EntityPropertyIoViewModel(sio, this),
-            _ => throw new ArgumentOutOfRangeException(nameof(entityProperty))
+            _ => throw new ArgumentOutOfRangeException(nameof(entityProperty)),
         };
         Properties.Add(newProp);
         return newProp;
@@ -64,20 +66,17 @@ public class EntityViewModel : MatchableBspNode
             prop.UpdateModel();
     }
 
-    public void ResetClassName()
-        => Name = Properties
-            .OfType<EntityPropertyStringViewModel>()
-            .FirstOrDefault(x => x.Key == "classname")?
-            .Value!;
+    public void ResetClassName() =>
+        Name = Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == "classname")?.Value!;
 
     public string PresentableName
     {
         get
         {
-            var hammerid = Properties
+            string? hammerid = Properties
                 .OfType<EntityPropertyStringViewModel>()
-                .FirstOrDefault(x => x.Key == "hammerid")?
-                .Value;
+                .FirstOrDefault(x => x.Key == "hammerid")
+                ?.Value;
             return $"{Name} (HammerID {hammerid})";
         }
     }

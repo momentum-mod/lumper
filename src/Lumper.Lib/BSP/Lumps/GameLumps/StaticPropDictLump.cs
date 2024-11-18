@@ -1,9 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps.GameLumps;
+namespace Lumper.Lib.Bsp.Lumps.GameLumps;
 
 using System;
 using System.IO;
 using System.Text;
-using Enum;
+using Lumper.Lib.Bsp.Enum;
 using NLog;
 
 public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string>(parent)
@@ -12,14 +12,13 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    protected override void ReadItem(BinaryReader reader)
-        => Data.Add(new string(reader.ReadChars(StructureSize)));
+    protected override void ReadItem(BinaryReader reader) => Data.Add(new string(reader.ReadChars(StructureSize)));
 
     protected override void WriteItem(BinaryWriter writer, int index)
     {
-        var b = new byte[StructureSize];
-        var value = Encoding.ASCII.GetBytes(Data[index]);
-        var count = value.Length;
+        byte[] b = new byte[StructureSize];
+        byte[] value = Encoding.ASCII.GetBytes(Data[index]);
+        int count = value.Length;
         if (count > StructureSize)
         {
             Logger.Warn($"{GetType().Name} string to long!");

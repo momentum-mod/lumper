@@ -11,17 +11,17 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
-using Lib.Bsp.Enum;
-using Lib.BSP;
-using Lib.BSP.IO;
-using Lumper.Lib.BSP.Lumps.BspLumps;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.UI.ViewModels.Shared;
+using Lumper.UI.ViewModels.Shared.Entity;
+using Lumper.UI.ViewModels.Shared.Pakfile;
+using Lumper.UI.Views;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using ViewModels.Shared;
-using ViewModels.Shared.Entity;
-using ViewModels.Shared.Pakfile;
-using Views;
 
 /// <summary>
 /// Singleton service handling the currently loaded BSP file.
@@ -78,21 +78,19 @@ public sealed class BspService : ReactiveObject
 
     private EntityLumpViewModel? _entityLumpViewModel;
 
-    public EntityLumpViewModel? EntityLumpViewModel
-        => LazyLoadLump(ref _entityLumpViewModel, () => new EntityLumpViewModel(BspFile!));
+    public EntityLumpViewModel? EntityLumpViewModel =>
+        LazyLoadLump(ref _entityLumpViewModel, () => new EntityLumpViewModel(BspFile!));
 
     private PakfileLumpViewModel? _pakfileLumpViewModel;
 
-    public PakfileLumpViewModel? PakfileLumpViewModel
-        => LazyLoadLump(ref _pakfileLumpViewModel, () => new PakfileLumpViewModel(BspFile!));
+    public PakfileLumpViewModel? PakfileLumpViewModel =>
+        LazyLoadLump(ref _pakfileLumpViewModel, () => new PakfileLumpViewModel(BspFile!));
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private List<ILumpViewModel?> Lumps => [_entityLumpViewModel, _pakfileLumpViewModel];
 
-    private BspService() =>
-        this.WhenAnyValue(x => x.BspFile)
-            .Subscribe(_ => UpdateBspProperties());
+    private BspService() => this.WhenAnyValue(x => x.BspFile).Subscribe(_ => UpdateBspProperties());
 
     private void UpdateBspProperties()
     {
@@ -136,9 +134,10 @@ public sealed class BspService : ReactiveObject
 
             if (Program.Desktop.MainWindow is not null)
             {
-                progressWindow = new IoProgressWindow {
+                progressWindow = new IoProgressWindow
+                {
                     Title = $"Loading {Path.GetFileName(pathOrUrl)}",
-                    Handler = handler
+                    Handler = handler,
                 };
                 _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
             }
@@ -176,7 +175,7 @@ public sealed class BspService : ReactiveObject
     private static async Task<Stream?> HttpDownload(string url)
     {
         IoProgressWindow? progressWindow = null;
-        var buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
         var cts = new CancellationTokenSource();
         var handler = new IoHandler(cts);
         var stream = new MemoryStream();
@@ -184,16 +183,16 @@ public sealed class BspService : ReactiveObject
         {
             if (Program.Desktop.MainWindow is not null)
             {
-                progressWindow = new IoProgressWindow {
-                    Title = $"Downloading {url}",
-                    Handler = handler
-                };
+                progressWindow = new IoProgressWindow { Title = $"Downloading {url}", Handler = handler };
                 _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
             }
 
             using var httpClient = new HttpClient();
-            using HttpResponseMessage response =
-                await httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+            using HttpResponseMessage response = await httpClient.GetAsync(
+                url,
+                HttpCompletionOption.ResponseHeadersRead,
+                cts.Token
+            );
 
             await using Stream downloadStream = await response.Content.ReadAsStreamAsync(cts.Token);
 
@@ -205,15 +204,19 @@ public sealed class BspService : ReactiveObject
             else
             {
                 int read;
-                var length = (int)response.Content.Headers.ContentLength.Value;
-                var remaining = length;
-                while (!handler.Cancelled &&
-                       (read = await downloadStream.ReadAsync(
-                           buffer.AsMemory(0, int.Min(buffer.Length, remaining)),
-                           cts.Token)) >
-                       0)
+                int length = (int)response.Content.Headers.ContentLength.Value;
+                int remaining = length;
+                while (
+                    !handler.Cancelled
+                    && (
+                        read = await downloadStream.ReadAsync(
+                            buffer.AsMemory(0, int.Min(buffer.Length, remaining)),
+                            cts.Token
+                        )
+                    ) > 0
+                )
                 {
-                    var prog = (float)read / length * 100;
+                    float prog = (float)read / length * 100;
                     handler.UpdateProgress(prog, $"{float.Floor((1 - ((float)remaining / length)) * 100)}%");
                     await stream.WriteAsync(buffer.AsMemory(0, read), cts.Token);
                     remaining -= read;
@@ -254,7 +257,7 @@ public sealed class BspService : ReactiveObject
         if (BspFile is null)
             return false;
 
-        if (outFile is null && FilePath is null)
+        if (outFile is null && (FilePath is null || FileName is null))
             return false;
 
         IsLoading = true;
@@ -270,37 +273,36 @@ public sealed class BspService : ReactiveObject
             DesiredCompression compress = ShouldCompress
                 ? DesiredCompression.Compressed
                 : DesiredCompression.Uncompressed;
-            var compressString = compress == DesiredCompression.Compressed ? "compressed" : "uncompressed";
+            string compressString = compress == DesiredCompression.Compressed ? "compressed" : "uncompressed";
 
-            var outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName;
+            string outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName!;
 
             if (Program.Desktop.MainWindow is not null)
             {
-
-                progressWindow = new IoProgressWindow {
+                progressWindow = new IoProgressWindow
+                {
                     Title = $"Saving {outName} ({compressString})",
-                    Handler = handler
+                    Handler = handler,
                 };
                 _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
             }
+
             // get the cubemaps that will be changed
+
             Dictionary<string, string> modified = BspFile.GetLump<PakfileLump>().GetCubemapsToChange(outName);
             await Observable.Start(
-                () => BspFile.SaveToFile(
-                    outFile?.Path.LocalPath,
-                    compress: compress,
-                    handler,
-                    makeBackup: MakeBackup),
-                RxApp.TaskpoolScheduler);
+                () => BspFile.SaveToFile(outFile?.Path.LocalPath, compress: compress, handler, makeBackup: MakeBackup),
+                RxApp.TaskpoolScheduler
+            );
 
-            if (outName != FileName)
+            if (outName != FileName && PakfileLumpViewModel is not null)
             {
-                PakfileLumpViewModel?.UpdateEntries(false);
+                PakfileLumpViewModel.UpdateEntries(false);
 
                 // clean up old outdated keys
                 foreach (KeyValuePair<string, string> entry in modified)
                 {
-                    foreach (PakfileEntryViewModel pk in PakfileLumpViewModel?.Entries?.Items)
+                    foreach (PakfileEntryViewModel pk in PakfileLumpViewModel.Entries.Items)
                     {
                         if (pk.Key == entry.Key)
                             PakfileLumpViewModel.DeleteEntry(pk);
@@ -314,8 +316,7 @@ public sealed class BspService : ReactiveObject
         catch (FileLoadException)
         {
             Logger.Warn("Failed to load new file, doing a full UI file load");
-            await Observable.Start(() => Load(outFile?.Path.LocalPath ?? FilePath!),
-                RxApp.TaskpoolScheduler);
+            await Observable.Start(() => Load(outFile?.Path.LocalPath ?? FilePath!), RxApp.TaskpoolScheduler);
         }
         catch (Exception ex)
         {
@@ -349,13 +350,18 @@ public sealed class BspService : ReactiveObject
     /// <summary>
     /// Writes a JSON summary of the file out to {filename}.json
     /// </summary>
-    public void JsonDump(IStorageFile file) => Observable.Start(
-        () => BspFile?.JsonDump(file.Path.LocalPath,
-            null,
-            sortLumps: false,
-            sortProperties: false,
-            ignoreOffset: false),
-        RxApp.TaskpoolScheduler);
+    public void JsonDump(IStorageFile file) =>
+        Observable.Start(
+            () =>
+                BspFile?.JsonDump(
+                    file.Path.LocalPath,
+                    null,
+                    sortLumps: false,
+                    sortProperties: false,
+                    ignoreOffset: false
+                ),
+            RxApp.TaskpoolScheduler
+        );
 
     /// <summary>
     /// Mark the currently loaded BSP file as modified
@@ -404,19 +410,21 @@ public sealed class BspService : ReactiveObject
     /// <exception cref="InvalidOperationException"/>
     public void ThrowIfNoLoadedBsp(
         [CallerFilePath] string? callerFile = null,
-        [CallerMemberName] string? callerMember = null)
+        [CallerMemberName] string? callerMember = null
+    )
     {
         if (HasLoadedBsp)
             return;
 
         CloseCurrentBsp();
-        var source = string.Join(' ', Path.GetFileNameWithoutExtension(callerFile), callerMember);
-        var message = $"{source} is requesting a loaded BSP when it shouldn't!";
+        string source = string.Join(' ', Path.GetFileNameWithoutExtension(callerFile), callerMember);
+        string message = $"{source} is requesting a loaded BSP when it shouldn't!";
         Logger.Error(message); // Log this since this error message tends to get lost
         throw new InvalidOperationException(message);
     }
 
-    private T? LazyLoadLump<T>(ref T? backingField, Func<T> newFn) where T : class?, new()
+    private T? LazyLoadLump<T>(ref T? backingField, Func<T> newFn)
+        where T : class?, new()
     {
         if (BspFile is null)
             return null;

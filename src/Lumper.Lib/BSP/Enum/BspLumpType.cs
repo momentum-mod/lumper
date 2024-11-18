@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Enum;
+namespace Lumper.Lib.Bsp.Enum;
 
 public enum BspLumpType
 {
@@ -66,5 +66,5 @@ public enum BspLumpType
     OverlayFades = 60,
     OverlaySystemLevels = 61,
     Physlevel = 62,
-    DispMultiblend = 63
+    DispMultiblend = 63,
 }

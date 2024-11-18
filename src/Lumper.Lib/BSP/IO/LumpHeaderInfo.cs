@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.IO;
+namespace Lumper.Lib.Bsp.IO;
 
 using JsonSubTypes;
 using Newtonsoft.Json;

@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using BSP;
-using BSP.Lumps.BspLumps;
-using BSP.Struct;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
 using NLog;
 
 public class ReplaceTextureJob : Job, IJob
@@ -27,10 +27,10 @@ public class ReplaceTextureJob : Job, IJob
         foreach (Replacer replacer in Replacers)
             replacer.Prepare();
 
-        var counter = 0;
+        int counter = 0;
         foreach (TexData texture in texDataLump.Data)
         {
-            var name = texture.TexName;
+            string name = texture.TexName;
             if (Replacers.Any(replacer => replacer.TryReplace(texture)))
             {
                 Logger.Info($"Replaced {name} with {texture.TexName}");
@@ -60,11 +60,12 @@ public class ReplaceTextureJob : Job, IJob
             // Compiled because we use this regex a ton of times, explicit capture since we
             // don't care about capture groups.
             // Fine if this throws, job will just fail.
-            _regexMatcher = new Regex(Matcher,
+            _regexMatcher = new Regex(
+                Matcher,
                 RegexOptions.Compiled | RegexOptions.ExplicitCapture,
-                TimeSpan.FromSeconds(1));
+                TimeSpan.FromSeconds(1)
+            );
         }
-
 
         public bool TryReplace(TexData texture)
         {
@@ -73,7 +74,7 @@ public class ReplaceTextureJob : Job, IJob
                 if (_regexMatcher is null)
                     return false;
 
-                var newName = _regexMatcher.Replace(texture.TexName, ReplaceWith);
+                string newName = _regexMatcher.Replace(texture.TexName, ReplaceWith);
                 if (texture.TexName == newName)
                     return false;
 

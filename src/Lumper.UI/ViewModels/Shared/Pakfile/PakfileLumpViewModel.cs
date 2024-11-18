@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DynamicData;
-using Entity;
-using Lib.BSP;
-using Lib.BSP.Lumps.BspLumps;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Entity;
 using NLog;
-using Services;
 
 public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 {
@@ -30,26 +30,29 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 
         InitEntries();
     }
-    public void UpdateEntries(bool checkIfModified)
-    => Entries.Edit(updater =>
-    {
-        foreach (PakfileEntry entry in _pakfile.Entries.OrderBy(x => new FileInfo(x.Key).Name))
+
+    public void UpdateEntries(bool checkIfModified) =>
+        Entries.Edit(updater =>
         {
-            if (entry.IsModified || !checkIfModified)
-                updater.AddOrUpdate(CreateEntryViewModel(entry));
-        }
-    });
+            foreach (PakfileEntry entry in _pakfile.Entries.OrderBy(x => new FileInfo(x.Key).Name))
+            {
+                if (entry.IsModified || !checkIfModified)
+                    updater.AddOrUpdate(CreateEntryViewModel(entry));
+            }
+        });
 
-    private void InitEntries() =>
-        UpdateEntries(false);
+    private void InitEntries() => UpdateEntries(false);
 
-    private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry)
-        => entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
+    private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry) =>
+        entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
             ? new PakfileEntryVtfViewModel(entry, this)
             : new PakfileEntryTextViewModel(entry, this);
 
-    public PakfileEntryViewModel AddEntry(string key, Stream stream,
-        ISourceUpdater<PakfileEntryViewModel, string>? updater = null)
+    public PakfileEntryViewModel AddEntry(
+        string key,
+        Stream stream,
+        ISourceUpdater<PakfileEntryViewModel, string>? updater = null
+    )
     {
         var entry = new PakfileEntry(_pakfile, key, stream) { IsModified = true };
         _pakfile.Entries.Add(entry);
@@ -89,14 +92,15 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     // Directories in Source that are sometimes omitted from a property, e.g. an
     // ambient_generic's "message" (sound file) doesn't need sound/ on the front,
     // for a sound file in sound/foo/bar, foo/bar/ is valid.
-    private static readonly string[] SourceRootDirectories = [
+    private static readonly string[] SourceRootDirectories =
+    [
         "materials",
         "scripts",
         "sound",
         "particles",
         "cfg",
         "models",
-        "resource"
+        "resource",
     ];
 
     // Lots of stuff in paklump isn't text and it's expensive to read and parse,
@@ -119,10 +123,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     // havent't spent much time looking. When adding new entries be *very* careful -
     // it make be that for some files, the cases where the extensions can be omitted
     // depend on specific KV1 keys.
-    private static readonly Dictionary<string, string[]> IgnorableExtensions =
-        new() {
-            { ".vmt", [".vtf"] }
-        };
+    private static readonly Dictionary<string, string[]> IgnorableExtensions = new() { { ".vmt", [".vtf"] } };
 
     /// <summary>
     /// Update references to a path when a file moves, scanning the entity lump and
@@ -139,10 +140,10 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 
         // Source sometimes let you omit the topmost directory of a file path, e.g. sound/foo/bar.mp3
         // can be used as just foo/bar.mp3. Quite a lot of faff to handle both cases, with and without prefix.
-        var opSplit = oldPath.Split('/');
-        var opPrefix = opSplit[0];
-        var opNoPrefix = string.Join("/", opSplit[1..]);
-        var directoryMatch = SourceRootDirectories.FirstOrDefault(s => s == opPrefix);
+        string[] opSplit = oldPath.Split('/');
+        string opPrefix = opSplit[0];
+        string opNoPrefix = string.Join("/", opSplit[1..]);
+        string? directoryMatch = SourceRootDirectories.FirstOrDefault(s => s == opPrefix);
 
         // Entities
         foreach (EntityViewModel entity in BspService.Instance.EntityLumpViewModel?.Entities.Items ?? [])
@@ -152,13 +153,13 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 if (prop is not EntityPropertyStringViewModel { Value: not null } sProp)
                     continue;
 
-                var propValue = sProp.Value;
+                string propValue = sProp.Value;
                 if (!propValue.EndsWith(opNoPrefix, cmp))
                     // Definitely not a match
                     continue;
 
-                var updatedOp = oldPath;
-                var updatedNp = newPath;
+                string updatedOp = oldPath;
+                string updatedNp = newPath;
                 // Split this check from above for perf - vast majority of values are misses, move on ASAP.
                 if (directoryMatch is not null && !propValue.StartsWith(directoryMatch, cmp))
                 {
@@ -167,8 +168,9 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     if (!newPath.Split('/')[0].Equals(directoryMatch, cmp))
                     {
                         Logger.Warn(
-                            $"Could move {prop.Key} property of {entity.PresentableName} from {oldPath} " +
-                            $"to {newPath} but looks like it would create an invalid path!");
+                            $"Could move {prop.Key} property of {entity.PresentableName} from {oldPath} "
+                                + $"to {newPath} but looks like it would create an invalid path!"
+                        );
                         continue;
                     }
 
@@ -189,13 +191,12 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             }
         }
 
-
         // Pakfiles. Lot of same logic as above, but horrible to combine.
-        foreach (PakfileEntryTextViewModel entry in
-                 Entries.Items
-                     .OfType<PakfileEntryTextViewModel>()
-                     .Where(item => RefactorablePakfileTypes
-                         .Any(type => item.Key.EndsWith(type, cmp))))
+        foreach (
+            PakfileEntryTextViewModel entry in Entries
+                .Items.OfType<PakfileEntryTextViewModel>()
+                .Where(item => RefactorablePakfileTypes.Any(type => item.Key.EndsWith(type, cmp)))
+        )
         {
             if (!entry.IsContentLoaded)
                 entry.LoadContent();
@@ -203,20 +204,23 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             if (entry.Content is null)
                 return;
 
-            var updatedOp = oldPath;
-            var updatedNp = newPath;
-            var matchIndex = -1;
-            var changes = 0;
+            string updatedOp = oldPath;
+            string updatedNp = newPath;
+            int matchIndex = -1;
+            int changes = 0;
 
-            var tryWithoutExtension = IgnorableExtensions.TryGetValue(Path.GetExtension(entry.Key), out var opNoExtension);
+            bool tryWithoutExtension = IgnorableExtensions.TryGetValue(
+                Path.GetExtension(entry.Key),
+                out string[]? opNoExtension
+            );
             while (true)
             {
-                var match = entry.Content.IndexOf(opNoPrefix, startIndex: matchIndex + 1, cmp);
+                int match = entry.Content.IndexOf(opNoPrefix, startIndex: matchIndex + 1, cmp);
 
-                var sliceFromEnd = 0;
+                int sliceFromEnd = 0;
                 if (match == -1 && tryWithoutExtension)
                 {
-                    foreach (var ext in opNoExtension!)
+                    foreach (string ext in opNoExtension!)
                     {
                         if (!opNoPrefix.EndsWith(ext, cmp))
                             continue;
@@ -224,7 +228,8 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                         match = entry.Content.IndexOf(
                             opNoPrefix[..^ext.Length],
                             startIndex: matchIndex + 1,
-                            comparisonType: cmp);
+                            comparisonType: cmp
+                        );
 
                         if (match != -1)
                         {
@@ -243,17 +248,20 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 {
                     updatedOp = string.Join("/", oldPath.Split('/')[1..])[..^sliceFromEnd];
                     updatedNp = string.Join("/", newPath.Split('/')[1..])[..^sliceFromEnd];
-                    entry.Content = entry.Content[..matchIndex] + updatedNp +
-                                    entry.Content[(matchIndex + updatedOp.Length)..];
+                    entry.Content =
+                        entry.Content[..matchIndex] + updatedNp + entry.Content[(matchIndex + updatedOp.Length)..];
                     changes++;
                     entry.IsModified = true;
                 }
                 else
                 {
-                    var wholeMatchIndex = matchIndex - opPrefix.Length - 1;
+                    int wholeMatchIndex = matchIndex - opPrefix.Length - 1;
 
-                    if (!entry.Content[wholeMatchIndex..(oldPath.Length - sliceFromEnd)]
-                            .Equals(oldPath[..^sliceFromEnd], cmp))
+                    if (
+                        !entry
+                            .Content[wholeMatchIndex..(oldPath.Length - sliceFromEnd)]
+                            .Equals(oldPath[..^sliceFromEnd], cmp)
+                    )
                     {
                         continue;
                     }
@@ -261,8 +269,9 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     updatedOp = oldPath;
                     updatedNp = newPath;
                     entry.Content =
-                        entry.Content[..wholeMatchIndex] + updatedNp +
-                        entry.Content[(wholeMatchIndex + updatedOp.Length)..];
+                        entry.Content[..wholeMatchIndex]
+                        + updatedNp
+                        + entry.Content[(wholeMatchIndex + updatedOp.Length)..];
 
                     changes++;
                     entry.IsModified = true;

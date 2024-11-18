@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
+using Lumper.UI.ViewModels;
 using ReactiveUI;
-using ViewModels;
 
 /// <summary>
 /// Reflection-free ViewLocator implementation. ViewLocator using reflection breaks when using trimming.
@@ -17,8 +17,7 @@ public class ViewLocator : IDataTemplate
 
     public static void Register<TViewModel, TView>(Func<TView> factory)
         where TViewModel : ViewModel
-        where TView : Control, IViewFor<TViewModel>
-        => Registration.TryAdd(typeof(TViewModel), factory);
+        where TView : Control, IViewFor<TViewModel> => Registration.TryAdd(typeof(TViewModel), factory);
 
     public Control Build(object? param)
     {
@@ -30,7 +29,6 @@ public class ViewLocator : IDataTemplate
             ? factory()
             : new TextBlock { Text = "Not Found: " + type };
     }
-
 
     public bool Match(object? data) => data is ViewModel;
 }

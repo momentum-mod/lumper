@@ -1,9 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps.BspLumps;
+namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System.IO;
-using Enum;
-using Lumps;
-using Struct;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Struct;
 
 public class TexDataLump(BspFile parent) : FixedLump<BspLumpType, TexData>(parent)
 {
@@ -11,13 +11,14 @@ public class TexDataLump(BspFile parent) : FixedLump<BspLumpType, TexData>(paren
 
     protected override void ReadItem(BinaryReader reader)
     {
-        var item = new TexData {
+        var item = new TexData
+        {
             Reflectivity = [reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle()],
             StringTablePointer = reader.ReadInt32(),
             Width = reader.ReadInt32(),
             Height = reader.ReadInt32(),
             ViewWidth = reader.ReadInt32(),
-            ViewHeight = reader.ReadInt32()
+            ViewHeight = reader.ReadInt32(),
         };
         Data.Add(item);
     }

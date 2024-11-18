@@ -1,13 +1,13 @@
-namespace Lumper.Lib.BSP.IO;
+namespace Lumper.Lib.Bsp.IO;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Enum;
-using Lumps;
-using Lumps.BspLumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
 
@@ -17,10 +17,8 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
     private readonly BspFile _bsp = file;
 
     [JsonProperty]
-    public IReadOnlyDictionary<BspLumpType, LumpHeaderInfo> Headers
-        => Lumps.ToDictionary(
-            x => x.Item1 is Lump<BspLumpType> lump ? lump.Type : BspLumpType.Unknown,
-            x => x.Item2);
+    public IReadOnlyDictionary<BspLumpType, LumpHeaderInfo> Headers =>
+        Lumps.ToDictionary(x => x.Item1 is Lump<BspLumpType> lump ? lump.Type : BspLumpType.Unknown, x => x.Item2);
 
     protected override IoHandler? Handler { get; set; } = handler;
 
@@ -57,7 +55,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         if (BaseStream.Position != 0)
             BaseStream.Seek(0, SeekOrigin.Begin);
 
-        var ident = ReadBytes(4);
+        byte[] ident = ReadBytes(4);
 
         if (Encoding.ASCII.GetString(ident) != "VBSP")
             throw new InvalidDataException("File doesn't look like a VBSP");
@@ -65,11 +63,12 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         _bsp.Version = ReadInt32();
         Logger.Debug($"BSP version: {_bsp.Version}");
 
-        for (var i = 0; i < BspFile.HeaderLumps; i++)
+        for (int i = 0; i < BspFile.HeaderLumps; i++)
         {
             var type = (BspLumpType)i;
 
-            Lump<BspLumpType> lump = type switch {
+            Lump<BspLumpType> lump = type switch
+            {
                 BspLumpType.Entities => new EntityLump(_bsp),
                 BspLumpType.Texinfo => new TexInfoLump(_bsp),
                 BspLumpType.Texdata => new TexDataLump(_bsp),
@@ -77,16 +76,16 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 BspLumpType.TexdataStringData => new TexDataStringDataLump(_bsp),
                 BspLumpType.Pakfile => new PakfileLump(_bsp),
                 BspLumpType.GameLump => new GameLump(_bsp),
-                _ => new UnmanagedLump<BspLumpType>(_bsp)
+                _ => new UnmanagedLump<BspLumpType>(_bsp),
             };
 
             LumpHeaderInfo lumpHeaderInfo = new();
 
             lump.Type = type;
             lumpHeaderInfo.Offset = ReadInt32();
-            var length = ReadInt32();
+            int length = ReadInt32();
             lump.Version = ReadInt32();
-            var fourCc = ReadInt32();
+            int fourCc = ReadInt32();
             if (fourCc == 0)
             {
                 lumpHeaderInfo.CompressedLength = -1;
@@ -98,11 +97,13 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 lumpHeaderInfo.UncompressedLength = fourCc;
             }
 
-            Logger.Debug($"Read lump {type} ({(int)type})".PadRight(48)
-                         + $"offset: {lumpHeaderInfo.Offset}".PadRight(24)
-                         + $"length: {length}".PadRight(24)
-                         + $"version: {lump.Version}".PadRight(20)
-                         + $"fourCC: {fourCc}");
+            Logger.Debug(
+                $"Read lump {type} ({(int)type})".PadRight(48)
+                    + $"offset: {lumpHeaderInfo.Offset}".PadRight(24)
+                    + $"length: {length}".PadRight(24)
+                    + $"version: {lump.Version}".PadRight(20)
+                    + $"fourCC: {fourCc}"
+            );
 
             _bsp.Lumps.Add(type, lump);
             Lumps.Add(new Tuple<Lump, LumpHeaderInfo>(lump, lumpHeaderInfo));
@@ -164,12 +165,12 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
     // Test for overlapping offsets
     private bool CheckOverlapping()
     {
-        var result = false;
+        bool result = false;
 
         Lump<BspLumpType>? prevLump = null;
         LumpHeaderInfo? prevHeader = null;
 
-        var first = true;
+        bool first = true;
         foreach ((Lump? tmpLump, LumpHeaderInfo? header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
             var lump = (Lump<BspLumpType>)tmpLump;
@@ -181,7 +182,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
             }
             else if (header.Length > 0)
             {
-                var prevEnd = prevHeader!.Offset + prevHeader.Length;
+                long prevEnd = prevHeader!.Offset + prevHeader.Length;
                 if (header.Offset < prevEnd)
                 {
                     Logger.Warn($"Lumps {prevLump!.Type} and {lump.Type} overlapping");
@@ -193,7 +194,8 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 else if (header.Offset > prevEnd)
                 {
                     Logger.Debug(
-                        $"Space between lumps {prevLump!.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
+                        $"Space between lumps {prevLump!.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}"
+                    );
                 }
 
                 if (header.Offset + header.Length >= prevEnd)
@@ -213,22 +215,20 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         foreach (Struct.TexData texture in texDataLump.Data)
         {
             TexDataStringTableLump texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
-            var stringTableOffset = texDataStringTableLump.Data[texture.StringTablePointer];
+            int stringTableOffset = texDataStringTableLump.Data[texture.StringTablePointer];
             TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
 
-            var end = Array.FindIndex(texDataStringDataLump.Data, stringTableOffset, x => x == 0);
+            int end = Array.FindIndex(texDataStringDataLump.Data, stringTableOffset, x => x == 0);
             if (end < 0)
             {
                 end = texDataStringDataLump.Data.Length;
                 Logger.Warn($"Didn't find null at the end of texture string! ({texture.TexName})");
             }
 
-            texture.TexName = end > 0
-                ? Encoding.ASCII.GetString(
-                    texDataStringDataLump.Data,
-                    stringTableOffset,
-                    end - stringTableOffset)
-                : "";
+            texture.TexName =
+                end > 0
+                    ? Encoding.ASCII.GetString(texDataStringDataLump.Data, stringTableOffset, end - stringTableOffset)
+                    : "";
         }
     }
 

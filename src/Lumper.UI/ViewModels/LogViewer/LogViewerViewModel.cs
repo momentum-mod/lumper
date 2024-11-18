@@ -3,9 +3,9 @@ namespace Lumper.UI.ViewModels.LogViewer;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Lumper.UI.ViewModels;
+using Lumper.UI.Views.LogViewer;
 using NLog;
-using ViewModels;
-using Views.LogViewer;
 
 public sealed class LogViewerViewModel : ViewModelWithView<LogViewerViewModel, LogViewerView>, IDisposable
 {
@@ -16,20 +16,21 @@ public sealed class LogViewerViewModel : ViewModelWithView<LogViewerViewModel, L
     private readonly ReplaySubject<LogMessage> _messageSubject = new();
     public IObservable<LogMessage> Messages => _messageSubject.AsObservable();
 
-    public LogViewerViewModel()
-        => LogManager
+    public LogViewerViewModel() =>
+        LogManager
             .Setup()
-            .LoadConfiguration(builder => builder
-                .ForLogger()
-                .WriteToMethodCall((logEvent, _) => AddLog(logEvent)));
+            .LoadConfiguration(builder => builder.ForLogger().WriteToMethodCall((logEvent, _) => AddLog(logEvent)));
 
     private void AddLog(LogEventInfo e) =>
-        _messageSubject.OnNext(new LogMessage {
-            Level = e.Level,
-            Message = e.Message,
-            Origin = e.LoggerName ?? "Unknown Origin",
-            Exception = e.Exception
-        });
+        _messageSubject.OnNext(
+            new LogMessage
+            {
+                Level = e.Level,
+                Message = e.Message,
+                Origin = e.LoggerName ?? "Unknown Origin",
+                Exception = e.Exception,
+            }
+        );
 
     public void Dispose() => _messageSubject.Dispose();
 }

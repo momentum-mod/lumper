@@ -1,13 +1,13 @@
-namespace Lumper.Lib.BSP.IO;
+namespace Lumper.Lib.Bsp.IO;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Enum;
-using Lumps;
-using Lumps.BspLumps;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Lumps;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Newtonsoft.Json;
 using NLog;
 using SharpCompress.Compressors.LZMA;
@@ -69,7 +69,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
             lumpStreamLength = lumpHeader.UncompressedLength;
         }
 
-        var startPos = reader.BaseStream.Position;
+        long startPos = reader.BaseStream.Position;
 
         // Pass handler to pakfile lump so can update progress
         if (lump is PakfileLump pakfileLump)
@@ -89,11 +89,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
             var serializer = new JsonSerializer { Formatting = Formatting.Indented };
             using var sw = new StreamWriter(stream);
             using var writer = new JsonTextWriter(sw);
-            serializer.Serialize(writer,
-                Lumps.Select(x => new {
-                    Header = x.Item2,
-                    Lump = x.Item1
-                }));
+            serializer.Serialize(writer, Lumps.Select(x => new { Header = x.Item2, Lump = x.Item1 }));
         }
         catch (Exception ex)
         {
@@ -109,9 +105,9 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
         if (Encoding.ASCII.GetString(ReadBytes(magic.Length)) != magic)
             throw new InvalidDataException("Failed to decompress: Lump doesn't look like it was LZMA compressed");
 
-        var actualSize = ReadUInt32();
-        var lzmaSize = ReadUInt32();
-        var properties = new byte[5];
+        uint actualSize = ReadUInt32();
+        uint lzmaSize = ReadUInt32();
+        byte[] properties = new byte[5];
 
         _ = Read(properties, 0, 5);
 

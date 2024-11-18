@@ -20,11 +20,11 @@ public class FileSizeConverter : IValueConverter
         if (value is null)
             return string.Empty;
 
-        var convertedSize = System.Convert.ToDouble(value);
+        double convertedSize = System.Convert.ToDouble(value);
 
         return $"{Math.Ceiling(convertedSize / 1024 * 10) / 10:N1} KB";
     }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotSupportedException();
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
 }

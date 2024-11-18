@@ -1,9 +1,9 @@
-namespace Lumper.Lib.BSP.Lumps;
+namespace Lumper.Lib.Bsp.Lumps;
 
 using System.Collections.Generic;
 using System.IO;
-using Bsp.Enum;
-using IO;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
 
 // Lumps which contain a list/array of data U with fixed length
 public abstract class FixedLump<T, TData>(BspFile parent) : ManagedLump<T>(parent)
@@ -22,7 +22,7 @@ public abstract class FixedLump<T, TData>(BspFile parent) : ManagedLump<T>(paren
         if (length % StructureSize != 0)
             throw new InvalidDataException($"{GetType().Name}: funny lump size ({length} / {StructureSize})");
 
-        for (var i = 0; i < length / StructureSize; i++)
+        for (int i = 0; i < length / StructureSize; i++)
         {
             if (handler?.Cancelled ?? false)
                 return;
@@ -34,7 +34,7 @@ public abstract class FixedLump<T, TData>(BspFile parent) : ManagedLump<T>(paren
     public override void Write(Stream stream, IoHandler? handler = null, DesiredCompression? compression = null)
     {
         var w = new BinaryWriter(stream);
-        for (var i = 0; i < Data.Count; i++)
+        for (int i = 0; i < Data.Count; i++)
         {
             if (handler?.Cancelled ?? false)
                 return;

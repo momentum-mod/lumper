@@ -2,8 +2,8 @@ namespace Lumper.UI.Views.Pages.EntityEditor;
 
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
-using ViewModels.Pages.EntityEditor;
-using ViewModels.Shared.Entity;
+using Lumper.UI.ViewModels.Pages.EntityEditor;
+using Lumper.UI.ViewModels.Shared.Entity;
 
 public partial class EntityEditorView : ReactiveUserControl<EntityEditorViewModel>
 {

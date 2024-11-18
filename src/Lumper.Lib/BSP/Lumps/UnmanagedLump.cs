@@ -1,11 +1,11 @@
-namespace Lumper.Lib.BSP.Lumps;
+namespace Lumper.Lib.Bsp.Lumps;
 
 using System;
 using System.Buffers;
 using System.IO;
 using System.Security.Cryptography;
-using Bsp.Enum;
-using IO;
+using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.IO;
 using Newtonsoft.Json;
 
 // Needed in the LumpReader/LumpWriter where we don't have the lump type
@@ -17,7 +17,8 @@ public interface IUnmanagedLump : IFileBackedLump
 /// <summary>
 /// Stores a buffer of some lump data we're not parsing for writing out on save
 /// </summary>
-public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump where T : Enum
+public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
+    where T : Enum
 {
     [JsonIgnore]
     public Stream DataStream { get; set; } = null!;
@@ -32,10 +33,10 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump 
 
     public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {
-        var originalOffset = reader.BaseStream.Position;
+        long originalOffset = reader.BaseStream.Position;
         DataStreamLength = length;
 
-        var buffer = new byte[length];
+        byte[] buffer = new byte[length];
         reader.BaseStream.ReadExactly(buffer, 0, (int)length);
         HashSha1 = SHA1.HashData(buffer);
 
@@ -54,11 +55,11 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump 
     {
         DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
 
-        var buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
         try
         {
             int read;
-            var remaining = (int)DataStreamLength;
+            int remaining = (int)DataStreamLength;
             while ((read = DataStream.Read(buffer, 0, int.Min(buffer.Length, remaining))) > 0)
             {
                 stream.Write(buffer, 0, read);

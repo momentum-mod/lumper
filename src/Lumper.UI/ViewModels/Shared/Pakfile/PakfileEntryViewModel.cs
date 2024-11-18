@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp.Struct;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
@@ -34,7 +34,8 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public long? CompressedSize => BaseEntry.CompressedSize;
 
-    protected PakfileEntryViewModel(PakfileEntry baseEntry, BspNode parent) : base(parent)
+    protected PakfileEntryViewModel(PakfileEntry baseEntry, BspNode parent)
+        : base(parent)
     {
         BaseEntry = baseEntry;
         Key = BaseEntry.Key;

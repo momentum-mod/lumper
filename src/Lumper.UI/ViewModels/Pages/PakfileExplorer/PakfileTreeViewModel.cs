@@ -39,7 +39,7 @@ public class PakfileTreeViewModel
     public Node? Find(PathList path)
     {
         Node? node = Root;
-        foreach (var p in path)
+        foreach (string p in path)
         {
             node = node.Children?.FirstOrDefault(x => x.Name == p);
 
@@ -121,7 +121,7 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     private void AddInternal(PakfileEntryViewModel? value, PathList path)
     {
-        var size = value?.CompressedSize ?? 0;
+        long size = value?.CompressedSize ?? 0;
 
         // Processing directory paths of the path, recursing down the tree and creating new nodes where needed
         if (path.Count > 1)
@@ -143,7 +143,12 @@ public class PakfileTreeNodeViewModel : ViewModel
         // Okay, actually the filename, create the node
         // `value` being null here is fine, just means we're creating a directory. Those don't actually get saved out
         // (zips can't have empty directories), but UI uses them.
-        var newNode = new Node(this, root: false) { Name = path[0], Leaf = value, Size = size };
+        var newNode = new Node(this, root: false)
+        {
+            Name = path[0],
+            Leaf = value,
+            Size = size,
+        };
         if (value is null)
             newNode.Children = [];
         (Children ??= []).Add(newNode);
@@ -213,7 +218,7 @@ public class PakfileTreeNodeViewModel : ViewModel
             .ToList();
 
         Node? previous = null;
-        for (var i = 1; i <= descendants[0].Count; i++)
+        for (int i = 1; i <= descendants[0].Count; i++)
         {
             Node curr = descendants[0][^i];
             if (descendants[1..].Any(list => list[^i] != curr))
@@ -226,8 +231,8 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public void RecalculateSize() => Size = Children?.Sum(child => child.Size) ?? 0;
 
-    public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector)
-        => (x, y) =>
+    public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector) =>
+        (x, y) =>
         {
             if (x is null && y is null)
                 return 0;
@@ -238,8 +243,8 @@ public class PakfileTreeNodeViewModel : ViewModel
             return Comparer<T>.Default.Compare(selector(x), selector(y));
         };
 
-    public static Comparison<Node?> SortDescending<T>(Func<Node, T> selector)
-        => (x, y) =>
+    public static Comparison<Node?> SortDescending<T>(Func<Node, T> selector) =>
+        (x, y) =>
         {
             if (x is null && y is null)
                 return 0;

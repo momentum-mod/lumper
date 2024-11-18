@@ -3,8 +3,8 @@ namespace Lumper.UI;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using ViewModels;
-using Views;
+using Lumper.UI.ViewModels;
+using Lumper.UI.Views;
 
 public class App : Application
 {

@@ -16,6 +16,7 @@
     <TrimMode>partial</TrimMode>
     <NoWarn>IL2026,IL2104</NoWarn>
     <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 

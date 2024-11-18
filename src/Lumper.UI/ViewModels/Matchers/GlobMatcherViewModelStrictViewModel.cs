@@ -6,6 +6,6 @@ public class GlobMatcherViewModelStrictViewModel : MatcherViewModel
 {
     public override string Name => "Glob (Strict)";
 
-    public override Matcher ConstructMatcher(string pattern)
-        => new GlobMatcher($"{pattern}", string.IsNullOrEmpty(pattern));
+    public override Matcher ConstructMatcher(string pattern) =>
+        new GlobMatcher($"{pattern}", string.IsNullOrEmpty(pattern));
 }

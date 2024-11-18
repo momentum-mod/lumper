@@ -6,10 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Lib.BSP.Struct;
+using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Views.Shared.Pakfile;
 using NLog;
 using ReactiveUI.Fody.Helpers;
-using Views.Shared.Pakfile;
 
 public class PakfileEntryTextViewModel : PakfileEntryViewModel
 {
@@ -23,8 +23,8 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public PakfileEntryTextViewModel(PakfileEntry entry, BspNode parent) : base(entry, parent)
-        => RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+    public PakfileEntryTextViewModel(PakfileEntry entry, BspNode parent)
+        : base(entry, parent) => RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
 
     public override void Load(CancellationTokenSource? cts = null)
     {
@@ -51,7 +51,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
 
     public async Task OpenExternal()
     {
-        var fileName = Path.Combine(Path.GetTempPath(), $"{Name}-{Guid.NewGuid()}{Extension}");
+        string fileName = Path.Combine(Path.GetTempPath(), $"{Name}-{Guid.NewGuid()}{Extension}");
 
         try
         {

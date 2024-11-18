@@ -5,9 +5,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
-using Lib.BSP.IO;
+using Lumper.Lib.Bsp.IO;
+using Lumper.UI.ViewModels;
 using ReactiveUI;
-using ViewModels;
 
 public partial class IoProgressWindow : ReactiveWindow<ViewModel>
 {
@@ -23,9 +23,8 @@ public partial class IoProgressWindow : ReactiveWindow<ViewModel>
             TitleDisplay.Text = Title;
 
             // Throws if not on UI thread. Need to use events since this IoProgress stuff is part of Lumper.Lib.
-            Observable.FromEventPattern<IoProgressEventArgs>(
-                    h => Handler.Progress += h,
-                    h => Handler.Progress -= h)
+            Observable
+                .FromEventPattern<IoProgressEventArgs>(h => Handler.Progress += h, h => Handler.Progress -= h)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Select(x => x.EventArgs)
                 .Subscribe(args =>

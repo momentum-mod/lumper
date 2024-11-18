@@ -1,4 +1,4 @@
-namespace Lumper.Lib.BSP.Struct;
+namespace Lumper.Lib.Bsp.Struct;
 
 using System;
 using System.IO;
@@ -20,17 +20,17 @@ public partial class EntityIo : ICloneable
     public EntityIo(string value, char separator)
     {
         _separator = separator;
-        var props = value.Split(separator);
+        string[] props = value.Split(separator);
 
         TargetEntityName = props[0];
         Input = props[1];
         Parameter = props[2];
         Delay = float.Parse(props[3]);
-        if (int.TryParse(props[4], out var timesToFire))
+        if (int.TryParse(props[4], out int timesToFire))
         {
             TimesToFire = timesToFire;
         }
-        else if (int.TryParse(props[4].Split(',')[0], out var timesToFire2))
+        else if (int.TryParse(props[4].Split(',')[0], out int timesToFire2))
         {
             // Edge case, occasionally tools that don't recognise ESC separators will put default comma-separated
             // values on the end of the ent IO string.
@@ -88,24 +88,12 @@ public partial class EntityIo : ICloneable
         }
     }
 
-    public override string ToString()
-        => TargetEntityName +
-           _separator +
-           Input +
-           _separator +
-           Parameter +
-           _separator +
-           Delay +
-           _separator +
-           TimesToFire;
+    public override string ToString() =>
+        TargetEntityName + _separator + Input + _separator + Parameter + _separator + Delay + _separator + TimesToFire;
 
     public object Clone() => MemberwiseClone();
 
     // Match string,string,string,number,number where numbers can be decimals, negative, -.xxx
-    [GeneratedRegex(
-        @"^[^,]*," +
-        @"[^,]*," +
-        @"[^,]*" +
-        @"(,(-?\d*\.?\d+)?){2}$")]
+    [GeneratedRegex(@"^[^,]*," + @"[^,]*," + @"[^,]*" + @"(,(-?\d*\.?\d+)?){2}$")]
     private static partial Regex EntityIoRegex();
 }

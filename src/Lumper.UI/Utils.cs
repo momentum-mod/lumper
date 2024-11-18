@@ -13,9 +13,10 @@ public static class Utils
     /// <summary>
     /// Expand flags/bitfields of T to IEnumerable&lt;T&gt;
     /// </summary>
-    public static IEnumerable<T> ExpandBitfield<T>(T flags) where T : Enum
+    public static IEnumerable<T> ExpandBitfield<T>(T flags)
+        where T : Enum
     {
-        var flagInt = (int)Convert.ChangeType(flags, typeof(int));
+        int flagInt = (int)Convert.ChangeType(flags, typeof(int));
         return Enum.GetValues(typeof(T))
             .Cast<uint>()
             .Where(f => (f & flagInt) != 0)
