@@ -9,6 +9,9 @@
 # See http://EditorConfig.org for more information about .editorconfig files.
 # @formatter:off
 
+[src/Dependencies/**/*.cs]
+generated_code = true
+
 ##########################################
 # Common Settings
 ##########################################
