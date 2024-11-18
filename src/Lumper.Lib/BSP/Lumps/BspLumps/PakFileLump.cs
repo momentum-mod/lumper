@@ -105,11 +105,14 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
         string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
         var entriesModified = new Dictionary<string, string>();
 
+        bool matched = false;
         foreach (PakfileEntry entry in Entries)
         {
             Match match = CubemapRegex().Match(entry.Key);
             if (match.Success)
             {
+                matched = true;
+
                 // Add the old key so we can update the UI later
                 var oldString = entry.Key;
 
@@ -120,8 +123,13 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 entriesModified.Add(oldString, entry.Key);
             }
         }
-        IsModified = true;
-        UpdateZip();
+
+        if (matched)
+        {
+            IsModified = true;
+            UpdateZip();
+        }
+
         return entriesModified;
     }
 
