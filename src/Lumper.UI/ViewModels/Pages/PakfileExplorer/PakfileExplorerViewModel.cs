@@ -36,69 +36,81 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public PakfileExplorerViewModel() => BspService.Instance
-        .WhenAnyValue(x => x.PakfileLumpViewModel)
-        .Subscribe(pakfile =>
-        {
-            if (pakfile is null)
+    public PakfileExplorerViewModel() =>
+        BspService
+            .Instance.WhenAnyValue(x => x.PakfileLumpViewModel)
+            .Subscribe(pakfile =>
             {
-                Tree = null;
-                DataGridSource = null;
-                SetActiveFile(null);
-                return;
-            }
+                if (pakfile is null)
+                {
+                    Tree = null;
+                    DataGridSource = null;
+                    SetActiveFile(null);
+                    return;
+                }
 
-            _pakfileLump = pakfile;
-            Tree = new PakfileTreeViewModel(pakfile.Entries);
+                _pakfileLump = pakfile;
+                Tree = new PakfileTreeViewModel(pakfile.Entries);
 
-            DataGridSource = new HierarchicalTreeDataGridSource<Node>(Tree.Root.Children ?? []) {
-                Columns = {
-                    new HierarchicalExpanderColumn<Node>(
+                DataGridSource = new HierarchicalTreeDataGridSource<Node>(Tree.Root.Children ?? [])
+                {
+                    Columns =
+                    {
+                        new HierarchicalExpanderColumn<Node>(
+                            new TemplateColumn<Node>(
+                                "Name",
+                                "EntryNameCell",
+                                null, // No edit cell, doesn't work well, we use dialog window instead
+                                new GridLength(4, GridUnitType.Star),
+                                new TemplateColumnOptions<Node>
+                                {
+                                    CompareAscending = Node.SortAscending(x => x.Name),
+                                    CompareDescending = Node.SortDescending(x => x.Name),
+                                    IsTextSearchEnabled = true,
+                                    TextSearchValueSelector = x => x.Name,
+                                    BeginEditGestures = BeginEditGestures.None,
+                                }
+                            ),
+                            x => x.Children,
+                            x => x.IsDirectory,
+                            x => x.IsExpanded
+                        ),
+                        new TextColumn<Node, string?>(
+                            "Extension",
+                            x => x.Extension,
+                            new GridLength(1, GridUnitType.Star),
+                            options: new TextColumnOptions<Node>
+                            {
+                                CompareAscending = Node.SortAscending(x => x.Extension),
+                                CompareDescending = Node.SortDescending(x => x.Extension),
+                            }
+                        ),
                         new TemplateColumn<Node>(
-                            "Name",
-                            "EntryNameCell",
-                            null, // No edit cell, doesn't work well, we use dialog window instead
-                            new GridLength(4, GridUnitType.Star),
-                            new TemplateColumnOptions<Node> {
-                                CompareAscending = Node.SortAscending(x => x.Name),
-                                CompareDescending = Node.SortDescending(x => x.Name),
+                            "Size (Compressed)",
+                            "EntrySizeCell",
+                            null,
+                            new GridLength(1, GridUnitType.Star),
+                            new TemplateColumnOptions<Node>
+                            {
+                                CompareAscending = Node.SortAscending(x => x.Size),
+                                CompareDescending = Node.SortDescending(x => x.Size),
                                 IsTextSearchEnabled = true,
                                 TextSearchValueSelector = x => x.Name,
-                                BeginEditGestures = BeginEditGestures.None
-                            }),
-                        x => x.Children,
-                        x => x.IsDirectory,
-                        x => x.IsExpanded),
-                    new TextColumn<Node, string?>(
-                        "Extension",
-                        x => x.Extension,
-                        new GridLength(1, GridUnitType.Star),
-                        options: new TextColumnOptions<Node> {
-                            CompareAscending = Node.SortAscending(x => x.Extension),
-                            CompareDescending = Node.SortDescending(x => x.Extension)
-                        }),
-                    new TemplateColumn<Node>(
-                        "Size (Compressed)",
-                        "EntrySizeCell",
-                        null,
-                        new GridLength(1, GridUnitType.Star),
-                        new TemplateColumnOptions<Node> {
-                            CompareAscending = Node.SortAscending(x => x.Size),
-                            CompareDescending = Node.SortDescending(x => x.Size),
-                            IsTextSearchEnabled = true,
-                            TextSearchValueSelector = x => x.Name
-                        })
-                    // TODO: We could do an extra column for percentage of overall size,
-                    // bit of work to recalculate everything as stuff moves so cba rn
-                }
-            };
+                            }
+                        ),
+                        // TODO: We could do an extra column for percentage of overall size,
+                        // bit of work to recalculate everything as stuff moves so cba rn
+                    },
+                };
 
-            DataGridSource.RowSelection!.SingleSelect = false;
-            DataGridSource.RowSelection!.SelectionChanged += (_, _) =>
-                SetActiveFile(DataGridSource?.RowSelection.SelectedItems.Count > 0
-                    ? DataGridSource?.RowSelection.SelectedItems[0]
-                    : null);
-        });
+                DataGridSource.RowSelection!.SingleSelect = false;
+                DataGridSource.RowSelection!.SelectionChanged += (_, _) =>
+                    SetActiveFile(
+                        DataGridSource?.RowSelection.SelectedItems.Count > 0
+                            ? DataGridSource?.RowSelection.SelectedItems[0]
+                            : null
+                    );
+            });
 
     // Null here is fine, just closes RHS pane.
     private void SetActiveFile(Node? node)
@@ -129,12 +141,11 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     private bool GetSelection(out IReadOnlyList<Node> nodes, bool single, bool onlyDirectory = false)
     {
         nodes = DataGridSource?.RowSelection?.SelectedItems!;
-        return nodes is { Count: > 0 } &&
-               (!single || nodes.Count == 1) &&
-               (!onlyDirectory || nodes.All(node => node.IsDirectory)) &&
-               Tree is not null;
+        return nodes is { Count: > 0 }
+            && (!single || nodes.Count == 1)
+            && (!onlyDirectory || nodes.All(node => node.IsDirectory))
+            && Tree is not null;
     }
-
 
     private void RemoveRecursive(Node node)
     {
@@ -181,7 +192,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                     .GetMessageBoxStandard(
                         "Update references?",
                         "Do you want to update instances of this path in other parts of the BSP?",
-                        ButtonEnum.YesNo)
+                        ButtonEnum.YesNo
+                    )
                     .ShowWindowDialogAsync(Program.Desktop.MainWindow);
 
                 moveReferences = result == ButtonResult.Yes;
@@ -237,7 +249,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 _pakfileLump!.AddEntry(
                     string.Join("/", [.. branchPath, Path.GetRelativePath(rootPath, path).Replace('\\', '/')]),
                     stream,
-                    updater);
+                    updater
+                );
                 stream.Dispose();
             }
         });
@@ -287,7 +300,6 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
         Logger.Info($"Created file {string.Join("/", path)}");
     }
-
 
     public async Task RenameSelected()
     {
@@ -404,10 +416,12 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         var commonParentPath = Node.FindCommonAncestor(nodes).PathString + '/';
         try
         {
-            foreach (PakfileEntryViewModel entry in nodes
-                         .SelectMany(x => x.IsDirectory ? x.EnumerateLeaves() : [x])
-                         .Select(x => x.Leaf)
-                         .OfType<PakfileEntryViewModel>())
+            foreach (
+                PakfileEntryViewModel entry in nodes
+                    .SelectMany(x => x.IsDirectory ? x.EnumerateLeaves() : [x])
+                    .Select(x => x.Leaf)
+                    .OfType<PakfileEntryViewModel>()
+            )
             {
                 FileInfo fi = new(Path.GetFullPath(exportDir.FullName + '/' + entry.Key[commonParentPath.Length..]));
                 if (fi.Exists)
@@ -434,22 +448,30 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     }
 
     // This has a big fuckoff empty label at the top of the dialog, dunno how to get rid of it.
-    private static IMsBox<string> CreateMessageBox(string title, string inputLabel, string buttonLabel,
-        string defaultInput = "") =>
-        MessageBoxManager.GetMessageBoxCustom(new MessageBoxCustomParams {
-            ContentTitle = title,
-            ShowInCenter = true,
-            InputParams = new InputParams { Label = inputLabel, DefaultValue = defaultInput },
-            Width = 400,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            ButtonDefinitions = new[] {
-                new ButtonDefinition { Name = buttonLabel, IsDefault = true },
-                new ButtonDefinition { Name = "Cancel", IsCancel = true }
+    private static IMsBox<string> CreateMessageBox(
+        string title,
+        string inputLabel,
+        string buttonLabel,
+        string defaultInput = ""
+    ) =>
+        MessageBoxManager.GetMessageBoxCustom(
+            new MessageBoxCustomParams
+            {
+                ContentTitle = title,
+                ShowInCenter = true,
+                InputParams = new InputParams { Label = inputLabel, DefaultValue = defaultInput },
+                Width = 400,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                ButtonDefinitions = new[]
+                {
+                    new ButtonDefinition { Name = buttonLabel, IsDefault = true },
+                    new ButtonDefinition { Name = "Cancel", IsCancel = true },
+                },
             }
-        });
+        );
 
-    private static Task<string> ShowMessageBox(IMsBox<string> msBox)
-        => msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
+    private static Task<string> ShowMessageBox(IMsBox<string> msBox) =>
+        msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
 
     private static async ValueTask<IStorageFolder?> PickFolder(string title = "Pick folder")
     {
@@ -457,7 +479,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             return null;
 
         IReadOnlyList<IStorageFolder> result = await Program.Desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(
-            new FolderPickerOpenOptions { Title = title });
+            new FolderPickerOpenOptions { Title = title }
+        );
 
         if (result is not { Count: 1 })
             return null;
@@ -471,6 +494,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             return null;
 
         return await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
-            new FilePickerOpenOptions { Title = title, AllowMultiple = true });
+            new FilePickerOpenOptions { Title = title, AllowMultiple = true }
+        );
     }
 }

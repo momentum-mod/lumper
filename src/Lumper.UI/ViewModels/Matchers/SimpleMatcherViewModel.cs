@@ -6,6 +6,6 @@ public class SimpleMatcherViewModel : MatcherViewModel
 {
     public override string Name => "Simple";
 
-    public override Matcher ConstructMatcher(string pattern)
-        => new SimpleMatcher(pattern, string.IsNullOrEmpty(pattern));
+    public override Matcher ConstructMatcher(string pattern) =>
+        new SimpleMatcher(pattern, string.IsNullOrEmpty(pattern));
 }

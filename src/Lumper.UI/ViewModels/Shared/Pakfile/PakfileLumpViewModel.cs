@@ -30,26 +30,29 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 
         InitEntries();
     }
-    public void UpdateEntries(bool checkIfModified)
-    => Entries.Edit(updater =>
-    {
-        foreach (PakfileEntry entry in _pakfile.Entries.OrderBy(x => new FileInfo(x.Key).Name))
+
+    public void UpdateEntries(bool checkIfModified) =>
+        Entries.Edit(updater =>
         {
-            if (entry.IsModified || !checkIfModified)
-                updater.AddOrUpdate(CreateEntryViewModel(entry));
-        }
-    });
+            foreach (PakfileEntry entry in _pakfile.Entries.OrderBy(x => new FileInfo(x.Key).Name))
+            {
+                if (entry.IsModified || !checkIfModified)
+                    updater.AddOrUpdate(CreateEntryViewModel(entry));
+            }
+        });
 
-    private void InitEntries() =>
-        UpdateEntries(false);
+    private void InitEntries() => UpdateEntries(false);
 
-    private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry)
-        => entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
+    private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry) =>
+        entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
             ? new PakfileEntryVtfViewModel(entry, this)
             : new PakfileEntryTextViewModel(entry, this);
 
-    public PakfileEntryViewModel AddEntry(string key, Stream stream,
-        ISourceUpdater<PakfileEntryViewModel, string>? updater = null)
+    public PakfileEntryViewModel AddEntry(
+        string key,
+        Stream stream,
+        ISourceUpdater<PakfileEntryViewModel, string>? updater = null
+    )
     {
         var entry = new PakfileEntry(_pakfile, key, stream) { IsModified = true };
         _pakfile.Entries.Add(entry);
@@ -89,14 +92,15 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     // Directories in Source that are sometimes omitted from a property, e.g. an
     // ambient_generic's "message" (sound file) doesn't need sound/ on the front,
     // for a sound file in sound/foo/bar, foo/bar/ is valid.
-    private static readonly string[] SourceRootDirectories = [
+    private static readonly string[] SourceRootDirectories =
+    [
         "materials",
         "scripts",
         "sound",
         "particles",
         "cfg",
         "models",
-        "resource"
+        "resource",
     ];
 
     // Lots of stuff in paklump isn't text and it's expensive to read and parse,
@@ -119,10 +123,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     // havent't spent much time looking. When adding new entries be *very* careful -
     // it make be that for some files, the cases where the extensions can be omitted
     // depend on specific KV1 keys.
-    private static readonly Dictionary<string, string[]> IgnorableExtensions =
-        new() {
-            { ".vmt", [".vtf"] }
-        };
+    private static readonly Dictionary<string, string[]> IgnorableExtensions = new() { { ".vmt", [".vtf"] } };
 
     /// <summary>
     /// Update references to a path when a file moves, scanning the entity lump and
@@ -167,8 +168,9 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     if (!newPath.Split('/')[0].Equals(directoryMatch, cmp))
                     {
                         Logger.Warn(
-                            $"Could move {prop.Key} property of {entity.PresentableName} from {oldPath} " +
-                            $"to {newPath} but looks like it would create an invalid path!");
+                            $"Could move {prop.Key} property of {entity.PresentableName} from {oldPath} "
+                                + $"to {newPath} but looks like it would create an invalid path!"
+                        );
                         continue;
                     }
 
@@ -189,13 +191,12 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             }
         }
 
-
         // Pakfiles. Lot of same logic as above, but horrible to combine.
-        foreach (PakfileEntryTextViewModel entry in
-                 Entries.Items
-                     .OfType<PakfileEntryTextViewModel>()
-                     .Where(item => RefactorablePakfileTypes
-                         .Any(type => item.Key.EndsWith(type, cmp))))
+        foreach (
+            PakfileEntryTextViewModel entry in Entries
+                .Items.OfType<PakfileEntryTextViewModel>()
+                .Where(item => RefactorablePakfileTypes.Any(type => item.Key.EndsWith(type, cmp)))
+        )
         {
             if (!entry.IsContentLoaded)
                 entry.LoadContent();
@@ -208,7 +209,10 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             var matchIndex = -1;
             var changes = 0;
 
-            var tryWithoutExtension = IgnorableExtensions.TryGetValue(Path.GetExtension(entry.Key), out var opNoExtension);
+            var tryWithoutExtension = IgnorableExtensions.TryGetValue(
+                Path.GetExtension(entry.Key),
+                out var opNoExtension
+            );
             while (true)
             {
                 var match = entry.Content.IndexOf(opNoPrefix, startIndex: matchIndex + 1, cmp);
@@ -224,7 +228,8 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                         match = entry.Content.IndexOf(
                             opNoPrefix[..^ext.Length],
                             startIndex: matchIndex + 1,
-                            comparisonType: cmp);
+                            comparisonType: cmp
+                        );
 
                         if (match != -1)
                         {
@@ -243,8 +248,8 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 {
                     updatedOp = string.Join("/", oldPath.Split('/')[1..])[..^sliceFromEnd];
                     updatedNp = string.Join("/", newPath.Split('/')[1..])[..^sliceFromEnd];
-                    entry.Content = entry.Content[..matchIndex] + updatedNp +
-                                    entry.Content[(matchIndex + updatedOp.Length)..];
+                    entry.Content =
+                        entry.Content[..matchIndex] + updatedNp + entry.Content[(matchIndex + updatedOp.Length)..];
                     changes++;
                     entry.IsModified = true;
                 }
@@ -252,8 +257,11 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 {
                     var wholeMatchIndex = matchIndex - opPrefix.Length - 1;
 
-                    if (!entry.Content[wholeMatchIndex..(oldPath.Length - sliceFromEnd)]
-                            .Equals(oldPath[..^sliceFromEnd], cmp))
+                    if (
+                        !entry
+                            .Content[wholeMatchIndex..(oldPath.Length - sliceFromEnd)]
+                            .Equals(oldPath[..^sliceFromEnd], cmp)
+                    )
                     {
                         continue;
                     }
@@ -261,8 +269,9 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     updatedOp = oldPath;
                     updatedNp = newPath;
                     entry.Content =
-                        entry.Content[..wholeMatchIndex] + updatedNp +
-                        entry.Content[(wholeMatchIndex + updatedOp.Length)..];
+                        entry.Content[..wholeMatchIndex]
+                        + updatedNp
+                        + entry.Content[(wholeMatchIndex + updatedOp.Length)..];
 
                     changes++;
                     entry.IsModified = true;

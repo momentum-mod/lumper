@@ -72,6 +72,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 entry.UpdateData(Encoding.Default.GetBytes(newString));
         }
     }
+
     /// <summary>
     /// Gets the default cubemap path as Source uses the filename when searching.
     /// Returns a dictionary with the key as the old string
@@ -100,7 +101,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     /// Returns a dictionary with the key as the old string
     /// and the value as the new string
     /// </summary>
-    public Dictionary<string,string> RenameCubemapsPath(string newFileName)
+    public Dictionary<string, string> RenameCubemapsPath(string newFileName)
     {
         string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
         var entriesModified = new Dictionary<string, string>();
@@ -172,15 +173,20 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     {
         // If we have open filestream, pakfile isn't modified, and compression isn't
         // changing (or already already compressed), we can just read straight from filestream and write out again.
-        if (!IsModified &&
-            (compression == DesiredCompression.Unchanged ||
-             IsCompressed ||
-             (!IsCompressed && compression == DesiredCompression.Uncompressed)))
+        if (
+            !IsModified
+            && (
+                compression == DesiredCompression.Unchanged
+                || IsCompressed
+                || (!IsCompressed && compression == DesiredCompression.Uncompressed)
+            )
+        )
         {
             if (IsCompressed && compression == DesiredCompression.Uncompressed)
             {
                 Logger.Debug(
-                    "Saving uncompressed but the pakfile lump is unmodified and already compressed, leaving as-is.");
+                    "Saving uncompressed but the pakfile lump is unmodified and already compressed, leaving as-is."
+                );
             }
 
             DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
@@ -228,10 +234,8 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             // BASTARD slow path, have to reconstruct the zip every time. Might be possible to avoid but having
             // fought with SharpCompress for hours I can't figure it out.
             using var outStream = new MemoryStream();
-            var zipWriter =
-                (ZipWriter)WriterFactory.Open(outStream,
-                    ArchiveType.Zip,
-                    new ZipWriterOptions(CompressionType.None));
+            var zipWriter = (ZipWriter)
+                WriterFactory.Open(outStream, ArchiveType.Zip, new ZipWriterOptions(CompressionType.None));
 
             var numEntries = Entries.Count;
             var incr = (float)IoHandler.WriteProgressProportions.Paklump / numEntries;
@@ -243,11 +247,14 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
                 handler?.UpdateProgress(incr, $"Packing {entry.Key} ({index + 1}/{numEntries})");
 
-                using Stream zipStream = zipWriter.WriteToStream(entry.Key,
-                    new ZipWriterEntryOptions {
+                using Stream zipStream = zipWriter.WriteToStream(
+                    entry.Key,
+                    new ZipWriterEntryOptions
+                    {
                         CompressionType = CompressionType.LZMA,
-                        ModificationDateTime = entry.ZipEntry?.LastModifiedTime
-                    });
+                        ModificationDateTime = entry.ZipEntry?.LastModifiedTime,
+                    }
+                );
 
                 entry.GetReadOnlyStream().CopyTo(zipStream);
             }
@@ -273,9 +280,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     private void UpdateZip()
     {
         // Delete every item from the zip that's not in the PakLump entries (was completely deleted by user)
-        foreach (ZipArchiveEntry entry in Zip.Entries
-                     .Where(entry => Entries.All(x => x.ZipEntry != entry))
-                     .ToList())
+        foreach (ZipArchiveEntry entry in Zip.Entries.Where(entry => Entries.All(x => x.ZipEntry != entry)).ToList())
         {
             Zip.RemoveEntry(entry);
         }

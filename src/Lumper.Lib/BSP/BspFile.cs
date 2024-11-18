@@ -44,13 +44,10 @@ public sealed partial class BspFile : IDisposable
     // creating a BspFile instance without loading an actual BSP.
     private BspFile() { }
 
-    public static BspFile? FromPath(string path, IoHandler? handler)
-        => new BspFile { Name = Path.GetFileNameWithoutExtension(path) }
-            .Load(path, handler);
+    public static BspFile? FromPath(string path, IoHandler? handler) =>
+        new BspFile { Name = Path.GetFileNameWithoutExtension(path) }.Load(path, handler);
 
-    public static BspFile? FromStream(Stream stream, IoHandler? handler)
-        => new BspFile()
-            .Load(stream, handler);
+    public static BspFile? FromStream(Stream stream, IoHandler? handler) => new BspFile().Load(stream, handler);
 
     public BspFile? Load(string path, IoHandler? handler)
     {
@@ -96,11 +93,7 @@ public sealed partial class BspFile : IDisposable
     /// When save successful but failed to update active file stream to the new file.
     /// The UI/CLI should do a full load of that file in that case.
     /// </exception>
-    public void SaveToFile(
-        string? path,
-        DesiredCompression compress,
-        IoHandler? handler,
-        bool makeBackup)
+    public void SaveToFile(string? path, DesiredCompression compress, IoHandler? handler, bool makeBackup)
     {
         if (path is null && FilePath is null)
             throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
@@ -110,7 +103,7 @@ public sealed partial class BspFile : IDisposable
             PakfileLump pakfile = GetLump<PakfileLump>();
 
             Dictionary<string, string> modified = pakfile.RenameCubemapsPath(Path.GetFileName(path));
-            foreach (KeyValuePair<string,string> modifiedPath in modified)
+            foreach (KeyValuePair<string, string> modifiedPath in modified)
                 pakfile.UpdatePathReferences(modifiedPath.Value, modifiedPath.Key, ".vmt");
         }
 
@@ -126,8 +119,9 @@ public sealed partial class BspFile : IDisposable
             // If so, make a backup if requested.
             if (makeBackup && File.Exists(outPath))
             {
-                backupPath = BspExtensionRegex().Replace(outPath, "") +
-                             $"_lumperbackup{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.bsp";
+                backupPath =
+                    BspExtensionRegex().Replace(outPath, "")
+                    + $"_lumperbackup{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}.bsp";
                 if (File.Exists(backupPath))
                 {
                     // This should never happen since path depends on current
@@ -343,7 +337,8 @@ public sealed partial class BspFile : IDisposable
         }
     }
 
-    public T GetLump<T>() where T : Lump<BspLumpType> => Lumps.Values.OfType<T>().First();
+    public T GetLump<T>()
+        where T : Lump<BspLumpType> => Lumps.Values.OfType<T>().First();
 
     public Lump<BspLumpType> GetLump(BspLumpType lumpType) => Lumps[lumpType];
 
@@ -357,7 +352,7 @@ public sealed partial class BspFile : IDisposable
         {
             var dir = Path.GetDirectoryName(FilePath) ?? ".";
             var name = Path.GetFileNameWithoutExtension(FilePath);
-             path = Path.Join(dir, name + ".json");
+            path = Path.Join(dir, name + ".json");
         }
 
         using var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write);
@@ -370,18 +365,17 @@ public sealed partial class BspFile : IDisposable
     {
         if (sortLumps)
         {
-            Lumps = Lumps
-                .OrderBy(x => x.Key)
-                .ToDictionary(x => x.Key, x => x.Value);
+            Lumps = Lumps.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
         }
 
         using var bspStream = new MemoryStream();
         using var bspWriter = new BspFileWriter(this, bspStream, handler, DesiredCompression.Unchanged);
         bspWriter.Save();
 
-        var jsonSerializerSettings = new JsonSerializerSettings {
+        var jsonSerializerSettings = new JsonSerializerSettings
+        {
             ContractResolver = new JsonContractResolver(sortProperties, ignoreOffset),
-            Formatting = Formatting.Indented
+            Formatting = Formatting.Indented,
         };
 
         var serializer = JsonSerializer.Create(jsonSerializerSettings);

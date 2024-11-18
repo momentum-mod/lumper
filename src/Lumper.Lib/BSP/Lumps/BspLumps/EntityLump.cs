@@ -16,8 +16,8 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
-        => Read(reader, length, false);
+    public override void Read(BinaryReader reader, long length, IoHandler? handler = null) =>
+        Read(reader, length, false);
 
     /// <summary>
     /// Parse an entity lump using a BinaryReader on a stream.
@@ -27,9 +27,7 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
     /// </summary>
     public void Read(BinaryReader reader, long length, bool strict)
     {
-        while (ReadEntity(reader, reader.BaseStream.Position + length, strict))
-        {
-        }
+        while (ReadEntity(reader, reader.BaseStream.Position + length, strict)) { }
     }
 
     private bool ReadEntity(BinaryReader reader, long endPos, bool strict)
@@ -117,8 +115,10 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
             if (strict)
                 throw;
 
-            Logger.Error(ex,
-                $"Failed to parse entity. Entity was {Data.Count} in list. Saving this BSP could cause data loss!");
+            Logger.Error(
+                ex,
+                $"Failed to parse entity. Entity was {Data.Count} in list. Saving this BSP could cause data loss!"
+            );
 
             // Read to end of entity
             var foundEnd = false;

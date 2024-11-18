@@ -25,6 +25,6 @@ public class FileSizeConverter : IValueConverter
         return $"{Math.Ceiling(convertedSize / 1024 * 10) / 10:N1} KB";
     }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => throw new NotSupportedException();
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
 }

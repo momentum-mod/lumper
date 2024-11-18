@@ -17,15 +17,17 @@ public class JobStatusConverter : IValueConverter
         {
             return new BindingNotification(
                 new ArgumentOutOfRangeException(nameof(value)),
-                BindingErrorType.DataValidationError);
+                BindingErrorType.DataValidationError
+            );
         }
 
-        return status switch {
+        return status switch
+        {
             JobStatus.Waiting => MaterialIconKind.TimerSandEmpty,
             JobStatus.Running => MaterialIconKind.TimerSand,
             JobStatus.Success => MaterialIconKind.Check,
             JobStatus.Failed => MaterialIconKind.Warning,
-            _ => throw new NotImplementedException() // No fucking clue why Roslyn insists we have this
+            _ => throw new NotImplementedException(), // No fucking clue why Roslyn insists we have this
         };
     }
 

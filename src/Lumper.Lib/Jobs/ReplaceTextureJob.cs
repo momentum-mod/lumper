@@ -60,11 +60,12 @@ public class ReplaceTextureJob : Job, IJob
             // Compiled because we use this regex a ton of times, explicit capture since we
             // don't care about capture groups.
             // Fine if this throws, job will just fail.
-            _regexMatcher = new Regex(Matcher,
+            _regexMatcher = new Regex(
+                Matcher,
                 RegexOptions.Compiled | RegexOptions.ExplicitCapture,
-                TimeSpan.FromSeconds(1));
+                TimeSpan.FromSeconds(1)
+            );
         }
-
 
         public bool TryReplace(TexData texture)
         {

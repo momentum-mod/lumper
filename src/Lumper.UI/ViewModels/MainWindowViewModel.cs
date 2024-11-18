@@ -29,9 +29,7 @@ public class MainWindowViewModel : ViewModel
     {
         if (Program.Desktop.Args is { Length: 1 })
         {
-            Observable.Start(
-                () => BspService.Instance.Load(Program.Desktop.Args[0]),
-                RxApp.MainThreadScheduler);
+            Observable.Start(() => BspService.Instance.Load(Program.Desktop.Args[0]), RxApp.MainThreadScheduler);
         }
     }
 
@@ -40,12 +38,16 @@ public class MainWindowViewModel : ViewModel
         if (Program.Desktop.MainWindow is null)
             return;
 
-        var dialog = new FilePickerOpenOptions {
-            AllowMultiple = false, Title = "Pick BSP File", FileTypeFilter = GenerateBspFileFilter()
+        var dialog = new FilePickerOpenOptions
+        {
+            AllowMultiple = false,
+            Title = "Pick BSP File",
+            FileTypeFilter = GenerateBspFileFilter(),
         };
 
-        IReadOnlyList<IStorageFile> result =
-            await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
+        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+            dialog
+        );
 
         if (result.Count == 0)
             return;
@@ -60,18 +62,21 @@ public class MainWindowViewModel : ViewModel
         if (Program.Desktop.MainWindow is null)
             return;
 
-        IMsBox<string>? msBox = MessageBoxManager
-            .GetMessageBoxCustom(new MessageBoxCustomParams {
+        IMsBox<string>? msBox = MessageBoxManager.GetMessageBoxCustom(
+            new MessageBoxCustomParams
+            {
                 ContentTitle = "Load from URL",
                 ShowInCenter = true,
                 Width = 400,
                 InputParams = new InputParams(),
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                ButtonDefinitions = new[] {
+                ButtonDefinitions = new[]
+                {
                     new ButtonDefinition { Name = "Load", IsDefault = true },
-                    new ButtonDefinition { Name = "Cancel", IsCancel = true }
-                }
-            });
+                    new ButtonDefinition { Name = "Cancel", IsCancel = true },
+                },
+            }
+        );
 
         var result = await msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
         var url = msBox.InputValue;
@@ -98,7 +103,11 @@ public class MainWindowViewModel : ViewModel
             return;
 
         var dialog = new FilePickerSaveOptions
-            { Title = "Save BSP File", DefaultExtension = ".bsp", FileTypeChoices = GenerateBspFileFilter() };
+        {
+            Title = "Save BSP File",
+            DefaultExtension = ".bsp",
+            FileTypeChoices = GenerateBspFileFilter(),
+        };
 
         IStorageFile? result = await Program.Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
         if (result is null)
@@ -112,10 +121,11 @@ public class MainWindowViewModel : ViewModel
         if (Program.Desktop.MainWindow is null || !BspService.Instance.HasLoadedBsp)
             return;
 
-        var dialog = new FilePickerSaveOptions {
+        var dialog = new FilePickerSaveOptions
+        {
             Title = "Export JSON Summary",
             DefaultExtension = ".json",
-            FileTypeChoices = new[] { new FilePickerFileType("JSON File") { Patterns = ["*.json"] } }
+            FileTypeChoices = new[] { new FilePickerFileType("JSON File") { Patterns = ["*.json"] } },
         };
 
         IStorageFile? result = await Program.Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
@@ -127,8 +137,10 @@ public class MainWindowViewModel : ViewModel
 
     public async Task CloseCommand()
     {
-        if (!BspService.Instance.HasLoadedBsp ||
-            !await ShowUnsavedChangesDialog("Do you want to discard your current changes?"))
+        if (
+            !BspService.Instance.HasLoadedBsp
+            || !await ShowUnsavedChangesDialog("Do you want to discard your current changes?")
+        )
             return;
 
         BspService.Instance.CloseCurrentBsp();
@@ -155,25 +167,23 @@ public class MainWindowViewModel : ViewModel
             return true;
 
         ButtonResult result = await MessageBoxManager
-            .GetMessageBoxStandard(
-                "Unsaved changes",
-                message,
-                ButtonEnum.OkCancel)
+            .GetMessageBoxStandard("Unsaved changes", message, ButtonEnum.OkCancel)
             .ShowWindowDialogAsync(Program.Desktop.MainWindow);
 
         return result == ButtonResult.Ok;
     }
 
-
-    private static FilePickerFileType[] GenerateBspFileFilter() => [
-        new FilePickerFileType("BSP Files") {
-            Patterns = new[] { "*.bsp" },
-            // MIME references from:
-            // https://www.wikidata.org/wiki/Q105858735
-            // https://www.wikidata.org/wiki/Q105859836
-            // https://www.wikidata.org/wiki/Q2701652
-            MimeTypes = new[] { "application/octet-stream", "model/vnd.valve.source.compiled-map" }
-        },
-        new FilePickerFileType("All Files") { Patterns = new[] { "*" } }
-    ];
+    private static FilePickerFileType[] GenerateBspFileFilter() =>
+        [
+            new FilePickerFileType("BSP Files")
+            {
+                Patterns = new[] { "*.bsp" },
+                // MIME references from:
+                // https://www.wikidata.org/wiki/Q105858735
+                // https://www.wikidata.org/wiki/Q105859836
+                // https://www.wikidata.org/wiki/Q2701652
+                MimeTypes = new[] { "application/octet-stream", "model/vnd.valve.source.compiled-map" },
+            },
+            new FilePickerFileType("All Files") { Patterns = new[] { "*" } },
+        ];
 }

@@ -16,7 +16,8 @@ public class StripperJobViewModel : JobViewModel
     [Reactive]
     public string? ConfigPath { get; set; }
 
-    public StripperJobViewModel(StripperJob job) : base(job)
+    public StripperJobViewModel(StripperJob job)
+        : base(job)
     {
         RegisterView<StripperJobViewModel, StripperJobView>();
 
@@ -32,8 +33,9 @@ public class StripperJobViewModel : JobViewModel
         if (Program.Desktop.MainWindow is null)
             return;
 
-        IReadOnlyList<IStorageFile> result =
-            await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(GenerateFilePickerOptions());
+        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+            GenerateFilePickerOptions()
+        );
 
         if (result.Count == 0)
             return;
@@ -41,9 +43,11 @@ public class StripperJobViewModel : JobViewModel
         ConfigPath = result[0].Path.LocalPath;
     }
 
-    private static FilePickerOpenOptions GenerateFilePickerOptions() => new() {
-        Title = "Pick Stripper Config",
-        AllowMultiple = false,
-        FileTypeFilter = [new FilePickerFileType("Stripper Config") { Patterns = new[] { "*.cfg" } }]
-    };
+    private static FilePickerOpenOptions GenerateFilePickerOptions() =>
+        new()
+        {
+            Title = "Pick Stripper Config",
+            AllowMultiple = false,
+            FileTypeFilter = [new FilePickerFileType("Stripper Config") { Patterns = new[] { "*.cfg" } }],
+        };
 }

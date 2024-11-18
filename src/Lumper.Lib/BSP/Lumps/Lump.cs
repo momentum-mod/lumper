@@ -10,7 +10,8 @@ using Newtonsoft.Json;
 /// <summary>
 /// Lump of a specific <see cref="BspLumpType"/>
 /// </summary>
-public abstract class Lump<T>(BspFile parent) : Lump(parent) where T : System.Enum
+public abstract class Lump<T>(BspFile parent) : Lump(parent)
+    where T : System.Enum
 {
     public T Type { get; set; } = default!;
 }

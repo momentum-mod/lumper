@@ -20,12 +20,9 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
         InitializeComponent();
 
         this.WhenActivated(disposables =>
-            ViewModel?.Messages
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(AddLogMessage)
-                .DisposeWith(disposables));
+            ViewModel?.Messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(AddLogMessage).DisposeWith(disposables)
+        );
     }
-
 
     private const int MaxMessages = 500;
     private int _messageCounter;
@@ -53,10 +50,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 }
                 else
                 {
-                    Logs.Inlines.Add(new Run(" (2)") {
-                        FontStyle = FontStyle.Italic,
-                        FontWeight = FontWeight.Medium
-                    });
+                    Logs.Inlines.Add(new Run(" (2)") { FontStyle = FontStyle.Italic, FontWeight = FontWeight.Medium });
                     _isBatching = true;
                 }
 
@@ -82,26 +76,34 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
             if (Logs.Inlines.Count > 0)
                 Logs.Inlines.Add(new LineBreak());
 
-            Logs.Inlines.Add(new Run(logMessage.Level.ToString().PadRight(8)) {
-                Foreground = LogLevelColors[logMessage.Level]
-            });
+            Logs.Inlines.Add(
+                new Run(logMessage.Level.ToString().PadRight(8)) { Foreground = LogLevelColors[logMessage.Level] }
+            );
 
             var origin = logMessage.Origin;
             // Don't split off front stuff if not a lumper thing (e.g. a RunExternalToolTask)
             origin = origin.StartsWith("Lumper") ? origin.Split('.')[^1] : origin;
-            Logs.Inlines.Add(new Run(origin.PadRight(26)) {
-                FontStyle = FontStyle.Italic, FontWeight = FontWeight.Medium, Foreground = Brushes.Gray
-            });
+            Logs.Inlines.Add(
+                new Run(origin.PadRight(26))
+                {
+                    FontStyle = FontStyle.Italic,
+                    FontWeight = FontWeight.Medium,
+                    Foreground = Brushes.Gray,
+                }
+            );
 
             Logs.Inlines.Add(new Run(logMessage.Message));
 
             if (logMessage.Exception is { } ex)
             {
                 Logs.Inlines.Add(new LineBreak());
-                Logs.Inlines.Add(new Run($"{new string(' ', 8 + 26)}{ex.GetType().Name}: ") {
-                    Foreground = Brushes.Crimson,
-                    FontStyle = FontStyle.Italic
-                });
+                Logs.Inlines.Add(
+                    new Run($"{new string(' ', 8 + 26)}{ex.GetType().Name}: ")
+                    {
+                        Foreground = Brushes.Crimson,
+                        FontStyle = FontStyle.Italic,
+                    }
+                );
 
                 Logs.Inlines.Add(new Run(ex.Message) { Foreground = Brushes.IndianRed });
             }
@@ -115,16 +117,18 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
         }
     }
 
-    private static readonly Dictionary<LogLevel, IBrush> LogLevelColors = new() {
+    private static readonly Dictionary<LogLevel, IBrush> LogLevelColors = new()
+    {
         { LogLevel.Info, Brushes.LightBlue },
         { LogLevel.Warn, Brushes.Orange },
         { LogLevel.Error, Brushes.Red },
         { LogLevel.Fatal, Brushes.Fuchsia },
         { LogLevel.Debug, Brushes.Aqua },
         { LogLevel.Trace, Brushes.Chartreuse },
-        { LogLevel.Off, Brushes.Gray }
+        { LogLevel.Off, Brushes.Gray },
     };
 
     private void ScrollToBottom(object? _, RoutedEventArgs __) => ScrollToBottom();
+
     private void ScrollToBottom() => ScrollViewer.ScrollToEnd();
 }

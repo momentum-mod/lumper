@@ -22,68 +22,73 @@ public partial class PakfileExplorerView : ReactiveUserControl<PakfileExplorerVi
     {
         InitializeComponent();
 
-        this.WhenActivated(disposables => ViewModel!
-            .WhenAnyValue(x => x.DataGridSource)
-            .Where(x => x is not null)
-            .Subscribe(grid =>
-            {
-                // Ugly as hell but very hard to make this work.
-                IObservable<EventPattern<TreeSelectionModelSelectionChangedEventArgs<PakfileTreeNodeViewModel>>>
-                    selectionEventObs =
-                        Observable
-                            .FromEventPattern<TreeSelectionModelSelectionChangedEventArgs<
-                                PakfileTreeNodeViewModel>>(
-                                h => grid!.RowSelection!.SelectionChanged += h,
-                                h => grid!.RowSelection!.SelectionChanged -= h
-                            );
+        this.WhenActivated(disposables =>
+            ViewModel!
+                .WhenAnyValue(x => x.DataGridSource)
+                .Where(x => x is not null)
+                .Subscribe(grid =>
+                {
+                    // Ugly as hell but very hard to make this work.
+                    IObservable<
+                        EventPattern<TreeSelectionModelSelectionChangedEventArgs<PakfileTreeNodeViewModel>>
+                    > selectionEventObs = Observable.FromEventPattern<
+                        TreeSelectionModelSelectionChangedEventArgs<PakfileTreeNodeViewModel>
+                    >(h => grid!.RowSelection!.SelectionChanged += h, h => grid!.RowSelection!.SelectionChanged -= h);
 
+                    IObservable<bool> isDirectory = selectionEventObs.Select(x =>
+                        (IReadOnlyList<PakfileTreeNodeViewModel>)x.EventArgs.SelectedItems is [{ IsDirectory: true }]
+                    );
 
-                IObservable<bool> isDirectory =
-                    selectionEventObs.Select(x =>
-                        (IReadOnlyList<PakfileTreeNodeViewModel>)x.EventArgs.SelectedItems is [{ IsDirectory: true }]);
-
-                Grid.ContextMenu = new ContextMenu {
-                    ItemsSource = new List<object> {
-                        new MenuItem {
-                            Header = "Import File(s)",
-                            [!IsVisibleProperty] = isDirectory.ToBinding(),
-                            Command = ReactiveCommand.CreateFromTask(() => ViewModel!.ImportFiles())
+                    Grid.ContextMenu = new ContextMenu
+                    {
+                        ItemsSource = new List<object>
+                        {
+                            new MenuItem
+                            {
+                                Header = "Import File(s)",
+                                [!IsVisibleProperty] = isDirectory.ToBinding(),
+                                Command = ReactiveCommand.CreateFromTask(() => ViewModel!.ImportFiles()),
+                            },
+                            new MenuItem
+                            {
+                                Header = "Import Directory",
+                                [!IsVisibleProperty] = isDirectory.ToBinding(),
+                                Command = ReactiveCommand.CreateFromTask(() => ViewModel!.ImportDirectory()),
+                            },
+                            new MenuItem
+                            {
+                                Header = "Create File",
+                                [!IsVisibleProperty] = isDirectory.ToBinding(),
+                                Command = ReactiveCommand.CreateFromTask(() => ViewModel!.CreateEmptyFile()),
+                            },
+                            new MenuItem
+                            {
+                                Header = "Create Directory",
+                                [!IsVisibleProperty] = isDirectory.ToBinding(),
+                                Command = ReactiveCommand.CreateFromTask(() => ViewModel!.CreateEmptyDirectory()),
+                            },
+                            new Separator { [!IsVisibleProperty] = isDirectory.ToBinding() },
+                            new MenuItem
+                            {
+                                Header = "Export",
+                                Command = ReactiveCommand.CreateFromTask(() => ViewModel!.ExportFiles()),
+                            },
+                            new Separator(),
+                            new MenuItem
+                            {
+                                Header = "Rename",
+                                Command = ReactiveCommand.CreateFromTask(() => ViewModel!.RenameSelected()),
+                            },
+                            new MenuItem
+                            {
+                                Header = "Delete",
+                                Command = ReactiveCommand.Create(() => ViewModel!.DeleteSelected()),
+                            },
                         },
-                        new MenuItem {
-                            Header = "Import Directory",
-                            [!IsVisibleProperty] = isDirectory.ToBinding(),
-                            Command = ReactiveCommand.CreateFromTask(() => ViewModel!.ImportDirectory())
-                        },
-                        new MenuItem {
-                            Header = "Create File",
-                            [!IsVisibleProperty] = isDirectory.ToBinding(),
-                            Command = ReactiveCommand.CreateFromTask(() => ViewModel!.CreateEmptyFile())
-                        },
-                        new MenuItem {
-                            Header = "Create Directory",
-                            [!IsVisibleProperty] = isDirectory.ToBinding(),
-                            Command = ReactiveCommand.CreateFromTask(() => ViewModel!.CreateEmptyDirectory())
-                        },
-                        new Separator {
-                            [!IsVisibleProperty] = isDirectory.ToBinding()
-                        },
-                        new MenuItem {
-                            Header = "Export",
-                            Command = ReactiveCommand.CreateFromTask(() => ViewModel!.ExportFiles())
-                        },
-                        new Separator(),
-                        new MenuItem {
-                            Header = "Rename",
-                            Command = ReactiveCommand.CreateFromTask(() => ViewModel!.RenameSelected())
-                        },
-                        new MenuItem {
-                            Header = "Delete",
-                            Command = ReactiveCommand.Create(() => ViewModel!.DeleteSelected())
-                        }
-                    }
-                };
-            })
-            .DisposeWith(disposables));
+                    };
+                })
+                .DisposeWith(disposables)
+        );
     }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
@@ -110,9 +115,11 @@ public partial class PakfileExplorerView : ReactiveUserControl<PakfileExplorerVi
         }
 
         // This is a HORRIBLE hack because TreeDataGrid doesn't expose event for drag drop completing
-        Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
+        Observable
+            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
                 h => Grid.Rows.CollectionChanged += h,
-                h => Grid.Rows.CollectionChanged -= h)
+                h => Grid.Rows.CollectionChanged -= h
+            )
             .Throttle(TimeSpan.FromMilliseconds(50))
             .Take(1)
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -123,10 +130,8 @@ public partial class PakfileExplorerView : ReactiveUserControl<PakfileExplorerVi
             );
     }
 
-    private List<PakfileTreeNodeViewModel>? Selected
-        => Grid.RowSelection?.SelectedItems
-            .Cast<PakfileTreeNodeViewModel>()
-            .ToList();
+    private List<PakfileTreeNodeViewModel>? Selected =>
+        Grid.RowSelection?.SelectedItems.Cast<PakfileTreeNodeViewModel>().ToList();
 
     private bool CanDragTo(object? node, TreeDataGridRowDragEventArgs e)
     {

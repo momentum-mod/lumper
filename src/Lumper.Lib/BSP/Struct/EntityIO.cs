@@ -88,24 +88,12 @@ public partial class EntityIo : ICloneable
         }
     }
 
-    public override string ToString()
-        => TargetEntityName +
-           _separator +
-           Input +
-           _separator +
-           Parameter +
-           _separator +
-           Delay +
-           _separator +
-           TimesToFire;
+    public override string ToString() =>
+        TargetEntityName + _separator + Input + _separator + Parameter + _separator + Delay + _separator + TimesToFire;
 
     public object Clone() => MemberwiseClone();
 
     // Match string,string,string,number,number where numbers can be decimals, negative, -.xxx
-    [GeneratedRegex(
-        @"^[^,]*," +
-        @"[^,]*," +
-        @"[^,]*" +
-        @"(,(-?\d*\.?\d+)?){2}$")]
+    [GeneratedRegex(@"^[^,]*," + @"[^,]*," + @"[^,]*" + @"(,(-?\d*\.?\d+)?){2}$")]
     private static partial Regex EntityIoRegex();
 }

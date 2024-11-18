@@ -8,6 +8,5 @@ public partial class PakfileEntryVtfView : ReactiveUserControl<PakfileEntryVtfVi
 {
     public PakfileEntryVtfView() => InitializeComponent();
 
-    private void Image_OnPointerPressed(object? _, PointerPressedEventArgs __)
-        => ViewModel!.OpenVtfImageWindow();
+    private void Image_OnPointerPressed(object? _, PointerPressedEventArgs __) => ViewModel!.OpenVtfImageWindow();
 }

@@ -17,10 +17,8 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
     private readonly BspFile _bsp = file;
 
     [JsonProperty]
-    public IReadOnlyDictionary<BspLumpType, LumpHeaderInfo> Headers
-        => Lumps.ToDictionary(
-            x => x.Item1 is Lump<BspLumpType> lump ? lump.Type : BspLumpType.Unknown,
-            x => x.Item2);
+    public IReadOnlyDictionary<BspLumpType, LumpHeaderInfo> Headers =>
+        Lumps.ToDictionary(x => x.Item1 is Lump<BspLumpType> lump ? lump.Type : BspLumpType.Unknown, x => x.Item2);
 
     protected override IoHandler? Handler { get; set; } = handler;
 
@@ -69,7 +67,8 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         {
             var type = (BspLumpType)i;
 
-            Lump<BspLumpType> lump = type switch {
+            Lump<BspLumpType> lump = type switch
+            {
                 BspLumpType.Entities => new EntityLump(_bsp),
                 BspLumpType.Texinfo => new TexInfoLump(_bsp),
                 BspLumpType.Texdata => new TexDataLump(_bsp),
@@ -77,7 +76,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 BspLumpType.TexdataStringData => new TexDataStringDataLump(_bsp),
                 BspLumpType.Pakfile => new PakfileLump(_bsp),
                 BspLumpType.GameLump => new GameLump(_bsp),
-                _ => new UnmanagedLump<BspLumpType>(_bsp)
+                _ => new UnmanagedLump<BspLumpType>(_bsp),
             };
 
             LumpHeaderInfo lumpHeaderInfo = new();
@@ -98,11 +97,13 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 lumpHeaderInfo.UncompressedLength = fourCc;
             }
 
-            Logger.Debug($"Read lump {type} ({(int)type})".PadRight(48)
-                         + $"offset: {lumpHeaderInfo.Offset}".PadRight(24)
-                         + $"length: {length}".PadRight(24)
-                         + $"version: {lump.Version}".PadRight(20)
-                         + $"fourCC: {fourCc}");
+            Logger.Debug(
+                $"Read lump {type} ({(int)type})".PadRight(48)
+                    + $"offset: {lumpHeaderInfo.Offset}".PadRight(24)
+                    + $"length: {length}".PadRight(24)
+                    + $"version: {lump.Version}".PadRight(20)
+                    + $"fourCC: {fourCc}"
+            );
 
             _bsp.Lumps.Add(type, lump);
             Lumps.Add(new Tuple<Lump, LumpHeaderInfo>(lump, lumpHeaderInfo));
@@ -193,7 +194,8 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 else if (header.Offset > prevEnd)
                 {
                     Logger.Debug(
-                        $"Space between lumps {prevLump!.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}");
+                        $"Space between lumps {prevLump!.Type} {prevEnd} <-- {header.Offset - prevEnd} --> {header.Offset} {lump.Type}"
+                    );
                 }
 
                 if (header.Offset + header.Length >= prevEnd)
@@ -223,12 +225,10 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 Logger.Warn($"Didn't find null at the end of texture string! ({texture.TexName})");
             }
 
-            texture.TexName = end > 0
-                ? Encoding.ASCII.GetString(
-                    texDataStringDataLump.Data,
-                    stringTableOffset,
-                    end - stringTableOffset)
-                : "";
+            texture.TexName =
+                end > 0
+                    ? Encoding.ASCII.GetString(texDataStringDataLump.Data, stringTableOffset, end - stringTableOffset)
+                    : "";
         }
     }
 

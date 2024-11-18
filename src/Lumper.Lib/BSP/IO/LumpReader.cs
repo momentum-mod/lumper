@@ -89,11 +89,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
             var serializer = new JsonSerializer { Formatting = Formatting.Indented };
             using var sw = new StreamWriter(stream);
             using var writer = new JsonTextWriter(sw);
-            serializer.Serialize(writer,
-                Lumps.Select(x => new {
-                    Header = x.Item2,
-                    Lump = x.Item1
-                }));
+            serializer.Serialize(writer, Lumps.Select(x => new { Header = x.Item2, Lump = x.Item1 }));
         }
         catch (Exception ex)
         {

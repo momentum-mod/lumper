@@ -143,7 +143,12 @@ public class PakfileTreeNodeViewModel : ViewModel
         // Okay, actually the filename, create the node
         // `value` being null here is fine, just means we're creating a directory. Those don't actually get saved out
         // (zips can't have empty directories), but UI uses them.
-        var newNode = new Node(this, root: false) { Name = path[0], Leaf = value, Size = size };
+        var newNode = new Node(this, root: false)
+        {
+            Name = path[0],
+            Leaf = value,
+            Size = size,
+        };
         if (value is null)
             newNode.Children = [];
         (Children ??= []).Add(newNode);
@@ -226,8 +231,8 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public void RecalculateSize() => Size = Children?.Sum(child => child.Size) ?? 0;
 
-    public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector)
-        => (x, y) =>
+    public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector) =>
+        (x, y) =>
         {
             if (x is null && y is null)
                 return 0;
@@ -238,8 +243,8 @@ public class PakfileTreeNodeViewModel : ViewModel
             return Comparer<T>.Default.Compare(selector(x), selector(y));
         };
 
-    public static Comparison<Node?> SortDescending<T>(Func<Node, T> selector)
-        => (x, y) =>
+    public static Comparison<Node?> SortDescending<T>(Func<Node, T> selector) =>
+        (x, y) =>
         {
             if (x is null && y is null)
                 return 0;

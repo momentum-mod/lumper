@@ -110,7 +110,6 @@ public sealed class PakfileEntry : IDisposable
         }
     }
 
-
     public void UpdateData(byte[] data)
     {
         lock (_instanceLock)

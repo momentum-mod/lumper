@@ -40,10 +40,7 @@ public abstract class BspNode : ViewModel
     /// <param name="backingField">Field to update</param>
     /// <param name="newValue">New value</param>
     /// <param name="propertyName"></param>
-    protected bool UpdateField<T>(
-        ref T backingField,
-        T newValue,
-        [CallerMemberName] string? propertyName = null)
+    protected bool UpdateField<T>(ref T backingField, T newValue, [CallerMemberName] string? propertyName = null)
     {
         if ((backingField is null && newValue is null) || (backingField is not null && backingField.Equals(newValue)))
             return false;

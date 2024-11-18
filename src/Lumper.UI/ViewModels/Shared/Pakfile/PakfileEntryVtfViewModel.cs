@@ -8,15 +8,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Lib.BSP.Struct;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.PixelFormats;
-using Views.Shared.Pakfile;
 using Views.Shared;
+using Views.Shared.Pakfile;
 using Vtf;
-using Lib.BSP.Struct;
 
 public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 {
@@ -52,35 +52,27 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
     public bool HasSeparateWindow { get; set; }
 
-    public PakfileEntryVtfViewModel(PakfileEntry entry, BspNode parent) : base(entry, parent)
+    public PakfileEntryVtfViewModel(PakfileEntry entry, BspNode parent)
+        : base(entry, parent)
     {
         RegisterView<PakfileEntryVtfViewModel, PakfileEntryVtfView>();
 
         // Ugly null handling, see
         // https://www.reactiveui.net/docs/handbook/when-any.html#null-propogation-inside-whenanyvalue
-        this.WhenAnyValue(
-                x => x.VtfFile,
-                x => x.VtfFile!.FaceCount,
-                (file, count) => file is not null ? count - 1 : 0)
+        this.WhenAnyValue(x => x.VtfFile, x => x.VtfFile!.FaceCount, (file, count) => file is not null ? count - 1 : 0)
             .ToPropertyEx(this, x => x.FaceMax);
 
-        this.WhenAnyValue(
-                x => x.VtfFile,
-                x => x.VtfFile!.FrameCount,
-                (file, count) => file is not null ? count - 1 : 0)
+        this.WhenAnyValue(x => x.VtfFile, x => x.VtfFile!.FrameCount, (file, count) => file is not null ? count - 1 : 0)
             .ToPropertyEx(this, x => x.FrameMax);
 
         this.WhenAnyValue(
                 x => x.VtfFile,
                 x => x.VtfFile!.MipmapCount,
-                (file, count) => file is not null ? count - 1 : 0)
+                (file, count) => file is not null ? count - 1 : 0
+            )
             .ToPropertyEx(this, x => x.MipmapMax);
 
-        this.WhenAnyValue(
-                x => x.MipmapLevel,
-                x => x.Frame,
-                x => x.Face,
-                x => x.Slice)
+        this.WhenAnyValue(x => x.MipmapLevel, x => x.Frame, x => x.Face, x => x.Slice)
             .Skip(1)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Subscribe(x => _ = FetchImage());
@@ -120,10 +112,14 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         if (VtfFile is null || Program.Desktop.MainWindow is null)
             return;
 
-        IReadOnlyList<IStorageFile> result =
-            await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions {
-                AllowMultiple = false, Title = "Pick image file", FileTypeFilter = GenerateImageFileFilter()
-            });
+        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                Title = "Pick image file",
+                FileTypeFilter = GenerateImageFileFilter(),
+            }
+        );
         if (result is not { Count: 1 })
             return;
 
@@ -148,7 +144,12 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         if (HasSeparateWindow)
             return;
 
-        var window = new VtfImageWindow { DataContext = this, Height = 1024, Width = 1288 }; // 1024 + 256 + 8
+        var window = new VtfImageWindow
+        {
+            DataContext = this,
+            Height = 1024,
+            Width = 1288,
+        }; // 1024 + 256 + 8
         window.Show();
 
         HasSeparateWindow = true;
@@ -162,12 +163,16 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         return new Bitmap(mem);
     }
 
-    private static readonly BmpEncoder Encoder = new() {
-        SupportTransparency = true, BitsPerPixel = BmpBitsPerPixel.Pixel32, SkipMetadata = false
+    private static readonly BmpEncoder Encoder = new()
+    {
+        SupportTransparency = true,
+        BitsPerPixel = BmpBitsPerPixel.Pixel32,
+        SkipMetadata = false,
     };
 
-    private static FilePickerFileType[] GenerateImageFileFilter() => [
-        new FilePickerFileType("Image files") { Patterns = new[] { "*.bmp", "*.jpeg", "*.jpg", "*.png" } },
-        new FilePickerFileType("All files") { Patterns = new[] { "*" } }
-    ];
+    private static FilePickerFileType[] GenerateImageFileFilter() =>
+        [
+            new FilePickerFileType("Image files") { Patterns = new[] { "*.bmp", "*.jpeg", "*.jpg", "*.png" } },
+            new FilePickerFileType("All files") { Patterns = new[] { "*" } },
+        ];
 }

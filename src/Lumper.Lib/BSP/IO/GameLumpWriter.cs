@@ -38,9 +38,10 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output, IoHandler? 
         // The last gamelump header should be 0 so we add a empty lump at the end
         _gameLump.Lumps.TryAdd(0, null);
 
-        LumpDataStart = BaseStream.Position +
-                        4 /* gamelump count 32bit int */ +
-                        (_gameLump.Lumps.Count * GameLumpHeader.StructureSize);
+        LumpDataStart =
+            BaseStream.Position
+            + 4 /* gamelump count 32bit int */
+            + (_gameLump.Lumps.Count * GameLumpHeader.StructureSize);
         List<GameLumpHeader> headers = WriteAllLumps();
         WriteHeader(headers);
     }
@@ -78,15 +79,15 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output, IoHandler? 
             HeaderInfo.Add((lump, newHeaderInfo));
 
             // TODO: meh
-            lump.Version = lump is Sprp sprp
-                ? (ushort)sprp.StaticProps.GetVersion()
-                : (ushort)lump.Version;
+            lump.Version = lump is Sprp sprp ? (ushort)sprp.StaticProps.GetVersion() : (ushort)lump.Version;
 
             headers.Add(new GameLumpHeader(newHeaderInfo, (ushort)lump.Version, (int)key));
 
-            Logger.Debug($"Wrote gamelump {key} {(int)key}".PadRight(48) +
-                         $"offset: {newHeaderInfo.Offset}".PadRight(24) +
-                         $"length: {newHeaderInfo.Length}".PadRight(24));
+            Logger.Debug(
+                $"Wrote gamelump {key} {(int)key}".PadRight(48)
+                    + $"offset: {newHeaderInfo.Offset}".PadRight(24)
+                    + $"length: {newHeaderInfo.Length}".PadRight(24)
+            );
         }
 
         if (headers.Count != 0 && headers.Last().Id != 0)

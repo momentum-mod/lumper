@@ -17,5 +17,5 @@ public enum SurfaceFlag
     Noshadows,
     Nodecals,
     Nochop,
-    Hitbox
+    Hitbox,
 }

@@ -21,8 +21,7 @@ internal sealed class Program
 
         try
         {
-            BuildAvaloniaApp()
-                .StartWithClassicDesktopLifetime(args);
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
 
             RxApp.DefaultExceptionHandler = new ObservableExceptionHandler();
 
@@ -38,11 +37,8 @@ internal sealed class Program
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.
-    private static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-            .LogToTrace()
-            .UseReactiveUI();
+    private static AppBuilder BuildAvaloniaApp() =>
+        AppBuilder.Configure<App>().UsePlatformDetect().LogToTrace().UseReactiveUI();
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

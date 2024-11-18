@@ -6,6 +6,6 @@ public class GlobMatcherViewModel : MatcherViewModel
 {
     public override string Name => "Glob";
 
-    public override Matcher ConstructMatcher(string pattern)
-        => new GlobMatcher($"*{pattern}*", string.IsNullOrEmpty(pattern), true);
+    public override Matcher ConstructMatcher(string pattern) =>
+        new GlobMatcher($"*{pattern}*", string.IsNullOrEmpty(pattern), true);
 }

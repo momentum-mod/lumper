@@ -93,9 +93,11 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
             LumpHeaderInfo newHeaderInfo = Write(lump);
             LumpHeaders[lumpType] = new BspLumpHeader(newHeaderInfo, lump.Version);
 
-            Logger.Debug($"Wrote {lumpType} ({(int)lumpType})".PadRight(48)
-                         + $"offset: {newHeaderInfo.Offset}".PadRight(24)
-                         + $"length: {newHeaderInfo.Length}");
+            Logger.Debug(
+                $"Wrote {lumpType} ({(int)lumpType})".PadRight(48)
+                    + $"offset: {newHeaderInfo.Offset}".PadRight(24)
+                    + $"length: {newHeaderInfo.Length}"
+            );
         }
     }
 

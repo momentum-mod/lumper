@@ -27,7 +27,8 @@ public class RunExternalToolJobViewModel : JobViewModel
     [Reactive]
     public bool WritesToInputFile { get; set; }
 
-    public RunExternalToolJobViewModel(RunExternalToolJob job) : base(job)
+    public RunExternalToolJobViewModel(RunExternalToolJob job)
+        : base(job)
     {
         RegisterView<RunExternalToolJobViewModel, RunExternalToolJobView>();
 
@@ -42,11 +43,19 @@ public class RunExternalToolJobViewModel : JobViewModel
         this.WhenAnyValue(x => x.WorkingDir).BindTo(this, x => x.Job.WorkingDir);
 
         this.WhenAnyValue(x => x.WritesToStdOut) // @formatter:off
-            .Do(x => { if (x) WritesToInputFile = false; })
+            .Do(x =>
+            {
+                if (x)
+                    WritesToInputFile = false;
+            })
             .BindTo(this, x => x.Job.WritesToStdOut);
 
         this.WhenAnyValue(x => x.WritesToInputFile)
-            .Do(x => { if (x) WritesToStdOut = false; }) // @formatter:on
+            .Do(x =>
+            {
+                if (x)
+                    WritesToStdOut = false;
+            }) // @formatter:on
             .BindTo(this, x => x.Job.WritesToInputFile);
     }
 
@@ -62,26 +71,22 @@ public class RunExternalToolJobViewModel : JobViewModel
         if (Program.Desktop.MainWindow is null)
             return;
 
-        IReadOnlyList<IStorageFile> result =
-            await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions {
-                Title = "Pick Executable",
-                AllowMultiple = false
-            });
+        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions { Title = "Pick Executable", AllowMultiple = false }
+        );
 
         if (result.Count > 0)
             Path = result[0].Path.LocalPath;
     }
-
 
     public async void ShowFolderPickerDialog()
     {
         if (Program.Desktop.MainWindow is null)
             return;
 
-        IReadOnlyList<IStorageFolder> result =
-            await Program.Desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions {
-                Title = "Pick Working Directory"
-            });
+        IReadOnlyList<IStorageFolder> result = await Program.Desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(
+            new FolderPickerOpenOptions { Title = "Pick Working Directory" }
+        );
 
         if (result.Count > 0)
             WorkingDir = result[0].Path.LocalPath;

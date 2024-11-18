@@ -22,41 +22,42 @@ public partial class RawEntitiesView : ReactiveUserControl<RawEntitiesViewModel>
         TextEditor editor = this.FindControl<TextEditor>("TextEditor")!;
         editor.Encoding = Encoding.ASCII;
         editor.ShowLineNumbers = true;
-        editor.ContextMenu = new ContextMenu {
-            ItemsSource = new List<MenuItem> {
-                new() {
+        editor.ContextMenu = new ContextMenu
+        {
+            ItemsSource = new List<MenuItem>
+            {
+                new()
+                {
                     Header = "Copy",
                     InputGesture = new KeyGesture(Key.C, KeyModifiers.Control),
-                    Command = ReactiveCommand.Create(editor.Copy)
+                    Command = ReactiveCommand.Create(editor.Copy),
                 },
-                new() {
+                new()
+                {
                     Header = "Paste",
                     InputGesture = new KeyGesture(Key.V, KeyModifiers.Control),
-                    Command = ReactiveCommand.Create(editor.Paste)
+                    Command = ReactiveCommand.Create(editor.Paste),
                 },
-                new() {
+                new()
+                {
                     Header = "Cut",
                     InputGesture = new KeyGesture(Key.X, KeyModifiers.Control),
-                    Command = ReactiveCommand.Create(editor.Cut)
-                }
-            }
+                    Command = ReactiveCommand.Create(editor.Cut),
+                },
+            },
         };
 
         this.WhenActivated(disposables =>
         {
-            BspService.Instance
-                .WhenAnyValue(x => x.EntityLumpViewModel)
+            BspService
+                .Instance.WhenAnyValue(x => x.EntityLumpViewModel)
                 .Subscribe(entlump =>
-                    Observable.Start(
-                        () => ViewModel!.LoadEntityLump(entlump, editor),
-                        RxApp.MainThreadScheduler))
+                    Observable.Start(() => ViewModel!.LoadEntityLump(entlump, editor), RxApp.MainThreadScheduler)
+                )
                 .DisposeWith(disposables);
 
             Disposable
-                .Create(() =>
-                    Observable.Start(
-                        ViewModel!.SaveOrDiscardEntityLump,
-                        RxApp.MainThreadScheduler))
+                .Create(() => Observable.Start(ViewModel!.SaveOrDiscardEntityLump, RxApp.MainThreadScheduler))
                 .DisposeWith(disposables);
         });
     }

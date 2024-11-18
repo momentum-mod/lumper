@@ -38,14 +38,15 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
     public VtfBrowserViewModel()
     {
         // Generate observable catch of just VTFs, loading them as they're added
-        IObservableCache<PakfileEntryVtfViewModel, string> vtfs = BspService.Instance
-            .WhenAnyValue(x => x.PakfileLumpViewModel)
+        IObservableCache<PakfileEntryVtfViewModel, string> vtfs = BspService
+            .Instance.WhenAnyValue(x => x.PakfileLumpViewModel)
             .Where(x => x is not null)
-            .Select(x => x!.Entries
-                .Connect()
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .Filter(y => y is PakfileEntryVtfViewModel)
-                .Cast(y => (PakfileEntryVtfViewModel)y)
+            .Select(x =>
+                x!
+                    .Entries.Connect()
+                    .ObserveOn(RxApp.TaskpoolScheduler)
+                    .Filter(y => y is PakfileEntryVtfViewModel)
+                    .Cast(y => (PakfileEntryVtfViewModel)y)
             )
             .Switch()
             .AsObservableCache();
@@ -60,15 +61,16 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
             .Select(x =>
             {
                 var ((search, showCubemaps), _) = x;
-                GlobMatcher matcher = search.Contains('*') || search.Contains('?')
-                    ? new GlobMatcher(search, false, true)
-                    : new GlobMatcher($"*{search}*", false, true);
+                GlobMatcher matcher =
+                    search.Contains('*') || search.Contains('?')
+                        ? new GlobMatcher(search, false, true)
+                        : new GlobMatcher($"*{search}*", false, true);
 
                 // Can appear to be stupid slow in the UI, but this stuff is fine, it's Avalonia render stuff.
-                return vtfs.Items
-                    .Where(item =>
-                        (showCubemaps || !CubemapRegex().IsMatch(item.Name)) &&
-                        (string.IsNullOrWhiteSpace(search) || matcher.Match(item.Name))
+                return vtfs
+                    .Items.Where(item =>
+                        (showCubemaps || !CubemapRegex().IsMatch(item.Name))
+                        && (string.IsNullOrWhiteSpace(search) || matcher.Match(item.Name))
                     )
                     .OrderBy(y => y.Name)
                     .ToList()
@@ -77,25 +79,29 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.FilteredItems);
 
-
         var cts = new CancellationTokenSource();
-        PageService.Instance.WhenAnyValue(x => x.ActivePage)
+        PageService
+            .Instance.WhenAnyValue(x => x.ActivePage)
             .Where(x => x is Page.VtfBrowser)
-            .Select(_ => this.WhenAnyValue(x => x.FilteredItems)
-                .ObserveOn(RxApp.TaskpoolScheduler)
-                .WhereNotNull()
-                .Do(items =>
-                {
-                    foreach (PakfileEntryVtfViewModel item in items.Where(x => !x.Loaded))
-                        item.Load(cts);
-                })
-                .TakeUntil(PageService.Instance.WhenAnyValue(x => x.ActivePage)
-                    .Where(x => x is not Page.VtfBrowser)
-                    .Do(_ =>
+            .Select(_ =>
+                this.WhenAnyValue(x => x.FilteredItems)
+                    .ObserveOn(RxApp.TaskpoolScheduler)
+                    .WhereNotNull()
+                    .Do(items =>
                     {
-                        cts.Cancel();
-                        cts = new CancellationTokenSource();
-                    }))
+                        foreach (PakfileEntryVtfViewModel item in items.Where(x => !x.Loaded))
+                            item.Load(cts);
+                    })
+                    .TakeUntil(
+                        PageService
+                            .Instance.WhenAnyValue(x => x.ActivePage)
+                            .Where(x => x is not Page.VtfBrowser)
+                            .Do(_ =>
+                            {
+                                cts.Cancel();
+                                cts = new CancellationTokenSource();
+                            })
+                    )
             )
             .Switch()
             .Subscribe();

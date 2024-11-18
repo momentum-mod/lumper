@@ -10,8 +10,7 @@ using Newtonsoft.Json.Serialization;
 
 public class JsonContractResolver(bool sortProperties, bool ignoreOffset) : DefaultContractResolver
 {
-    protected override IList<JsonProperty> CreateProperties(Type type,
-        MemberSerialization memberSerialization)
+    protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
     {
         IList<JsonProperty> baseProperties = base.CreateProperties(type, memberSerialization);
 
@@ -19,21 +18,25 @@ public class JsonContractResolver(bool sortProperties, bool ignoreOffset) : Defa
 
         if (sortProperties)
         {
-            orderedProperties = orderedProperties
-                .OrderBy(p => p.Order ?? int.MaxValue)
-                .ThenBy(p => p.PropertyName);
+            orderedProperties = orderedProperties.OrderBy(p => p.Order ?? int.MaxValue).ThenBy(p => p.PropertyName);
         }
 
         if (ignoreOffset)
         {
-            orderedProperties = orderedProperties.Where(
-                prop => prop.DeclaringType is not null &&
-                        !(prop.DeclaringType.IsAssignableTo(typeof(IUnmanagedLump)) &&
-                          prop.PropertyName == nameof(IUnmanagedLump.DataStreamOffset)) &&
-                        !((prop.DeclaringType.IsAssignableFrom(typeof(LumpHeaderInfo)) ||
-                           prop.DeclaringType.IsAssignableFrom(typeof(BspLumpHeader)) ||
-                           prop.DeclaringType.IsAssignableFrom(typeof(GameLumpHeader))) &&
-                          prop.PropertyName == nameof(LumpHeaderInfo.Offset))
+            orderedProperties = orderedProperties.Where(prop =>
+                prop.DeclaringType is not null
+                && !(
+                    prop.DeclaringType.IsAssignableTo(typeof(IUnmanagedLump))
+                    && prop.PropertyName == nameof(IUnmanagedLump.DataStreamOffset)
+                )
+                && !(
+                    (
+                        prop.DeclaringType.IsAssignableFrom(typeof(LumpHeaderInfo))
+                        || prop.DeclaringType.IsAssignableFrom(typeof(BspLumpHeader))
+                        || prop.DeclaringType.IsAssignableFrom(typeof(GameLumpHeader))
+                    )
+                    && prop.PropertyName == nameof(LumpHeaderInfo.Offset)
+                )
             );
         }
 

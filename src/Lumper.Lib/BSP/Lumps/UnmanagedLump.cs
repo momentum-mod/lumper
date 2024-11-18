@@ -17,7 +17,8 @@ public interface IUnmanagedLump : IFileBackedLump
 /// <summary>
 /// Stores a buffer of some lump data we're not parsing for writing out on save
 /// </summary>
-public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump where T : Enum
+public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
+    where T : Enum
 {
     [JsonIgnore]
     public Stream DataStream { get; set; } = null!;

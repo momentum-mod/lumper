@@ -4,5 +4,5 @@ public enum DesiredCompression
 {
     Compressed,
     Uncompressed,
-    Unchanged
+    Unchanged,
 }
