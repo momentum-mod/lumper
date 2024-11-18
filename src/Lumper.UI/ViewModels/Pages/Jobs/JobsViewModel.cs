@@ -21,20 +21,20 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 {
     public JobsViewModel()
     {
-        JobTypes = [
+        JobTypes =
+        [
             new JobMenuItem<ReplaceTextureJob>(this, () => new ReplaceTextureJob()),
             new JobMenuItem<StripperJob>(this, () => new StripperJob()),
-            new JobMenuItem<RunExternalToolJob>(this, () => new RunExternalToolJob())
+            new JobMenuItem<RunExternalToolJob>(this, () => new RunExternalToolJob()),
         ];
 
-        this.WhenAnyValue(x => x.SelectedJob)
-            .Where(x => x is not null)
-            .BindTo(this, x => x.ActiveJobPage);
+        this.WhenAnyValue(x => x.SelectedJob).Where(x => x is not null).BindTo(this, x => x.ActiveJobPage);
 
         this.WhenAnyValue(
                 x => x.SelectedJob,
                 x => x.IsRunning,
-                (selectedJob, isRunning) => selectedJob is not null && !isRunning)
+                (selectedJob, isRunning) => selectedJob is not null && !isRunning
+            )
             .ToPropertyEx(this, x => x.IsNotRunningAndHasSelection);
     }
 
@@ -56,12 +56,14 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static JobViewModel CreateJobViewModel(IJob job) => job switch {
-        StripperJob stripper => new StripperJobViewModel(stripper),
-        RunExternalToolJob runExternal => new RunExternalToolJobViewModel(runExternal),
-        ReplaceTextureJob changeTexture => new ReplaceTextureJobViewModel(changeTexture),
-        _ => throw new ArgumentException("Invalid job")
-    };
+    public static JobViewModel CreateJobViewModel(IJob job) =>
+        job switch
+        {
+            StripperJob stripper => new StripperJobViewModel(stripper),
+            RunExternalToolJob runExternal => new RunExternalToolJobViewModel(runExternal),
+            ReplaceTextureJob changeTexture => new ReplaceTextureJobViewModel(changeTexture),
+            _ => throw new ArgumentException("Invalid job"),
+        };
 
     public async Task Run()
     {
@@ -76,34 +78,43 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
             return;
         }
 
-        await Observable.Start(() =>
-        {
-            Logger.Info("Running job queue");
-
-            foreach (JobViewModel job in Jobs)
+        await Observable.Start(
+            () =>
             {
-                job.Reset();
+                Logger.Info("Running job queue");
 
-                try
+                foreach (JobViewModel job in Jobs)
                 {
-                    job.Status = job.Run(bspFile) ? JobStatus.Success : JobStatus.Failed;
-                }
-                catch (Exception exception)
-                {
-                    Logger.Error(
-                        $"Job execution failed for job \"{job.Job.JobNameInternal}\"! Threw {exception.GetType()}: {exception.Message}");
-                }
-            }
+                    job.Reset();
 
-            IsRunning = false;
+                    try
+                    {
+                        job.Status = job.Run(bspFile) ? JobStatus.Success : JobStatus.Failed;
+                    }
+                    catch (Exception exception)
+                    {
+                        Logger.Error(
+                            $"Job execution failed for job \"{job.Job.JobNameInternal}\"! Threw {exception.GetType()}: {exception.Message}"
+                        );
+                    }
+                }
 
-            Logger.Info("Job execution complete");
-        }, RxApp.TaskpoolScheduler);
+                IsRunning = false;
+
+                Logger.Info("Job execution complete");
+            },
+            RxApp.TaskpoolScheduler
+        );
     }
 
-    private enum MoveDir { Up = -1, Down = 1 }
+    private enum MoveDir
+    {
+        Up = -1,
+        Down = 1,
+    }
 
     public void MoveSelectedUp() => MoveSelectedInDirection(MoveDir.Up);
+
     public void MoveSelectedDown() => MoveSelectedInDirection(MoveDir.Down);
 
     private void MoveSelectedInDirection(MoveDir dir)
@@ -125,7 +136,6 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         SelectedJob = Jobs[newIdx];
     }
 
-
     public void RemoveSelectedJob()
     {
         if (SelectedJob is null || Jobs.Count < 1)
@@ -136,7 +146,6 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
     }
 
     public void RemoveAll() => Jobs.Clear();
-
 
     public void Load(Stream stream)
     {
@@ -177,9 +186,13 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
             return;
 
         IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
-            new FilePickerOpenOptions {
-                AllowMultiple = false, Title = "Pick Jobs File", FileTypeFilter = GenerateJsonFileFilter()
-            });
+            new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                Title = "Pick Jobs File",
+                FileTypeFilter = GenerateJsonFileFilter(),
+            }
+        );
 
         if (result is not { Count: 1 })
             return;
@@ -193,7 +206,8 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
             return;
 
         IStorageFile? result = await Program.Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(
-            new FilePickerSaveOptions { Title = "Save Jobs File", FileTypeChoices = GenerateJsonFileFilter() });
+            new FilePickerSaveOptions { Title = "Save Jobs File", FileTypeChoices = GenerateJsonFileFilter() }
+        );
 
         if (result is null)
             return;
@@ -201,8 +215,9 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         Save(await result.OpenWriteAsync());
     }
 
-    private static FilePickerFileType[] GenerateJsonFileFilter() => [
-        new FilePickerFileType("JSON Files") { Patterns = new[] { "*.json" } },
-        new FilePickerFileType("All Files") { Patterns = new[] { "*" } }
-    ];
+    private static FilePickerFileType[] GenerateJsonFileFilter() =>
+        [
+            new FilePickerFileType("JSON Files") { Patterns = new[] { "*.json" } },
+            new FilePickerFileType("All Files") { Patterns = new[] { "*" } },
+        ];
 }

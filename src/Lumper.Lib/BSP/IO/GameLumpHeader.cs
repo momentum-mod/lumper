@@ -2,9 +2,7 @@ namespace Lumper.Lib.BSP.IO;
 
 public class GameLumpHeader
 {
-    public GameLumpHeader()
-    {
-    }
+    public GameLumpHeader() { }
 
     public GameLumpHeader(LumpHeaderInfo headerInfo, ushort version, int id)
     {

@@ -20,18 +20,20 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         this.WhenActivated(disposables =>
         {
             // Stupid shit to get this to behave like a radiobutton. I miss Angular
-            PageService.Instance
-                .WhenAnyValue(x => x.ActivePage)
+            PageService
+                .Instance.WhenAnyValue(x => x.ActivePage)
                 .Subscribe(pageName =>
                 {
                     foreach (Control control in PageButtons.Children.Where(child => child is ToggleButton))
                     {
                         var button = (ToggleButton)control;
-                        button.IsChecked = pageName is not null &&
-                                           button.CommandParameter is not null &&
-                                           pageName == (Page)button.CommandParameter;
+                        button.IsChecked =
+                            pageName is not null
+                            && button.CommandParameter is not null
+                            && pageName == (Page)button.CommandParameter;
                     }
-                }).DisposeWith(disposables);
+                })
+                .DisposeWith(disposables);
 
             PageService.Instance.ViewPage(Page.EntityEditor);
         });

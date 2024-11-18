@@ -40,8 +40,10 @@ public class BitmapAssetValueConverter : IValueConverter
                     var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
                     if (assemblyName is null)
                     {
-                        return new BindingNotification(new ArgumentNullException(nameof(value)),
-                            BindingErrorType.DataValidationError);
+                        return new BindingNotification(
+                            new ArgumentNullException(nameof(value)),
+                            BindingErrorType.DataValidationError
+                        );
                     }
 
                     uri = new Uri($"avares://{assemblyName}{rawUri}");
@@ -52,8 +54,11 @@ public class BitmapAssetValueConverter : IValueConverter
             case Image<Rgba32> img when targetType.IsAssignableFrom(typeof(Bitmap)):
             {
                 using var mem = new MemoryStream();
-                var encoder = new BmpEncoder {
-                    SupportTransparency = true, BitsPerPixel = BmpBitsPerPixel.Pixel32, SkipMetadata = false
+                var encoder = new BmpEncoder
+                {
+                    SupportTransparency = true,
+                    BitsPerPixel = BmpBitsPerPixel.Pixel32,
+                    SkipMetadata = false,
                 };
                 img.SaveAsBmp(mem, encoder);
                 mem.Seek(0, SeekOrigin.Begin);
@@ -66,7 +71,5 @@ public class BitmapAssetValueConverter : IValueConverter
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        new BindingNotification(
-            new ArgumentOutOfRangeException(nameof(value)),
-            BindingErrorType.DataValidationError);
+        new BindingNotification(new ArgumentOutOfRangeException(nameof(value)), BindingErrorType.DataValidationError);
 }

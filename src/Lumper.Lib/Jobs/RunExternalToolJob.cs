@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Bsp.Enum;
 using BSP;
+using Bsp.Enum;
 using BSP.IO;
 using NLog;
 
@@ -115,7 +115,8 @@ public class RunExternalToolJob : Job, IJob
 
         Progress.Count = 25;
 
-        Output stdOut, stdErr;
+        Output stdOut,
+            stdErr;
         bool ret;
         var args = Args;
         using (var process = new Process())
@@ -128,14 +129,15 @@ public class RunExternalToolJob : Job, IJob
                     args = args.Replace("%OUTPUT%", $"\"{outputPath}\"");
             }
 
-            process.StartInfo = new ProcessStartInfo {
+            process.StartInfo = new ProcessStartInfo
+            {
                 FileName = Path,
                 Arguments = args,
                 WorkingDirectory = WorkingDir,
                 UseShellExecute = false,
                 CreateNoWindow = false,
                 RedirectStandardOutput = true,
-                RedirectStandardError = true
+                RedirectStandardError = true,
             };
 
             var name = new FileInfo(Path).Name;
@@ -172,8 +174,9 @@ public class RunExternalToolJob : Job, IJob
         else
         {
             Logger.Error(
-                $"{System.IO.Path.GetFileName(Path)} executable returned non-zero exit code!" +
-                "\nstderr:" + new StreamReader(stdErr.Mem).ReadToEnd().Replace("\n", "\n       ")
+                $"{System.IO.Path.GetFileName(Path)} executable returned non-zero exit code!"
+                    + "\nstderr:"
+                    + new StreamReader(stdErr.Mem).ReadToEnd().Replace("\n", "\n       ")
             );
         }
 

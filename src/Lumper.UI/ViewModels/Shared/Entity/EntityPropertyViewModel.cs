@@ -21,7 +21,6 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
 
             if (wasClassname)
                 ((EntityViewModel)Parent).ResetClassName();
-
             else if (value == "classname")
                 ((EntityViewModel)Parent).Name = vm.Value!;
         }
@@ -116,17 +115,17 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
     }
 
     // Not bothering with IEquatable cus it's extra faff
-    public bool Equals(EntityPropertyIoViewModel other)
-        => other.TargetEntityName == TargetEntityName &&
-           other.Input == Input &&
-           other.Parameter == Parameter &&
-           other.Delay == Delay &&
-           other.TimesToFire == TimesToFire;
+    public bool Equals(EntityPropertyIoViewModel other) =>
+        other.TargetEntityName == TargetEntityName
+        && other.Input == Input
+        && other.Parameter == Parameter
+        && other.Delay == Delay
+        && other.TimesToFire == TimesToFire;
 
     public override bool Match(Matcher matcher) =>
-        matcher.Match(TargetEntityName) ||
-        matcher.Match(Input) ||
-        matcher.Match(Parameter) ||
-        matcher.Match(Delay.ToString()) ||
-        matcher.Match(TimesToFire.ToString());
+        matcher.Match(TargetEntityName)
+        || matcher.Match(Input)
+        || matcher.Match(Parameter)
+        || matcher.Match(Delay.ToString())
+        || matcher.Match(TimesToFire.ToString());
 }

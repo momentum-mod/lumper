@@ -61,18 +61,15 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             .ObserveOn(RxApp.TaskpoolScheduler)
             // Throttle changes to search pattern
             .Throttle(TimeSpan.FromMilliseconds(100))
-            .CombineLatest(
-                this.WhenAnyValue(x => x.SelectedMatcher)
-            )
+            .CombineLatest(this.WhenAnyValue(x => x.SelectedMatcher))
             // Combine latest of each seach pattern and selected matcher type into a Matcher
             .Select(tuple =>
-                {
-                    (var pattern, MatcherViewModel? matcher) = tuple;
-                    return matcher is not null && !string.IsNullOrWhiteSpace(pattern)
-                        ? matcher.ConstructMatcher(pattern)
-                        : null;
-                }
-            )
+            {
+                (var pattern, MatcherViewModel? matcher) = tuple;
+                return matcher is not null && !string.IsNullOrWhiteSpace(pattern)
+                    ? matcher.ConstructMatcher(pattern)
+                    : null;
+            })
             // Combine latest with overall lump changes, e.g. new BSP is loaded
             .CombineLatest(BspService.Instance.WhenAnyValue(x => x.EntityLumpViewModel))
             // Also watch changes to the entity collection. We don't care *what* entities have changed, just that
@@ -88,45 +85,41 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
                 tuple.Second is not null
                     ? tuple.Second.Entities.Connect().Select(_ => tuple)
                     // Null if entity lump was closed, just return tuple so can generate empty list
-                    : Observable.Return(tuple))
+                    : Observable.Return(tuple)
+            )
             .Switch()
             .Select(tuple =>
+            {
+                (Matcher? matcher, EntityLumpViewModel? entLump) = tuple;
+
+                // No ELVM loaded, probably no BSP loaded: empty list.
+                if (entLump is null)
                 {
-                    (Matcher? matcher, EntityLumpViewModel? entLump) = tuple;
-
-                    // No ELVM loaded, probably no BSP loaded: empty list.
-                    if (entLump is null)
-                    {
-                        IsFiltered = false;
-                        Tabs.Clear();
-                        SelectedTab = null;
-                        return new List<EntityViewModel>().AsReadOnly();
-                    }
-
-                    // No matchers: readonly list of all the entities in the ELVM.
-                    if (matcher is null)
-                    {
-                        IsFiltered = false;
-                        return entLump.Entities.Items.ToList().AsReadOnly();
-                    }
-
-                    // We have a matcher, filter the entity list. Note that the above ObserveOn ensures we're on a
-                    // separate thread if available, as filteration searches every *property* of every entity, so
-                    // quite expensive.
-                    IsFiltered = true;
-                    return entLump.Entities.Items.Where(entity => entity.Match(matcher)).ToList().AsReadOnly();
+                    IsFiltered = false;
+                    Tabs.Clear();
+                    SelectedTab = null;
+                    return new List<EntityViewModel>().AsReadOnly();
                 }
-            )
+
+                // No matchers: readonly list of all the entities in the ELVM.
+                if (matcher is null)
+                {
+                    IsFiltered = false;
+                    return entLump.Entities.Items.ToList().AsReadOnly();
+                }
+
+                // We have a matcher, filter the entity list. Note that the above ObserveOn ensures we're on a
+                // separate thread if available, as filteration searches every *property* of every entity, so
+                // quite expensive.
+                IsFiltered = true;
+                return entLump.Entities.Items.Where(entity => entity.Match(matcher)).ToList().AsReadOnly();
+            })
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.FilteredEntities);
 
-        this.WhenAnyValue(x => x.FilteredEntities)
-            .Select(x => x?.Count ?? 0)
-            .ToPropertyEx(this, x => x.FilteredCount);
+        this.WhenAnyValue(x => x.FilteredEntities).Select(x => x?.Count ?? 0).ToPropertyEx(this, x => x.FilteredCount);
 
-        BspService
-            .WhenAnyValue(x => x.EntityLumpViewModel)
-            .ToPropertyEx(this, x => x.EntityLumpViewModel);
+        BspService.WhenAnyValue(x => x.EntityLumpViewModel).ToPropertyEx(this, x => x.EntityLumpViewModel);
     }
 
     public void SelectTab(EntityViewModel? model)

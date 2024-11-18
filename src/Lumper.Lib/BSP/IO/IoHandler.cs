@@ -39,14 +39,14 @@ public class IoHandler(CancellationTokenSource cts)
     {
         Header = 5,
         OtherLumps = 50,
-        Paklump = 45
+        Paklump = 45,
     }
 
     public enum WriteProgressProportions
     {
         Header = 5,
         OtherLumps = 25,
-        Paklump = 70
+        Paklump = 70,
     }
 }
 

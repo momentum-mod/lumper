@@ -19,12 +19,14 @@ public partial class PakfileEntryTextView : ReactiveUserControl<PakfileEntryText
 
         this.WhenActivated(_ =>
         {
-            this.Bind(ViewModel,
+            this.Bind(
+                ViewModel,
                 viewModel => viewModel.Content,
                 view => view.TextEditor.Text,
                 Observable.FromEventPattern<RoutedEventArgs>(
                     handler => TextEditor.LostFocus += handler,
-                    handler => TextEditor.LostFocus -= handler)
+                    handler => TextEditor.LostFocus -= handler
+                )
             );
 
             EventHandler handler = null!;
@@ -36,24 +38,29 @@ public partial class PakfileEntryTextView : ReactiveUserControl<PakfileEntryText
             TextEditor.TextChanged += handler;
 
             TextEditor.Encoding = Encoding.ASCII;
-            TextEditor.ContextMenu = new ContextMenu {
-                ItemsSource = new List<MenuItem> {
-                    new() {
+            TextEditor.ContextMenu = new ContextMenu
+            {
+                ItemsSource = new List<MenuItem>
+                {
+                    new()
+                    {
                         Header = "Copy",
                         InputGesture = new KeyGesture(Key.C, KeyModifiers.Control),
-                        Command = ReactiveCommand.Create(() => TextEditor.Copy())
+                        Command = ReactiveCommand.Create(() => TextEditor.Copy()),
                     },
-                    new() {
+                    new()
+                    {
                         Header = "Paste",
                         InputGesture = new KeyGesture(Key.V, KeyModifiers.Control),
-                        Command = ReactiveCommand.Create(() => TextEditor.Paste())
+                        Command = ReactiveCommand.Create(() => TextEditor.Paste()),
                     },
-                    new() {
+                    new()
+                    {
                         Header = "Cut",
                         InputGesture = new KeyGesture(Key.X, KeyModifiers.Control),
-                        Command = ReactiveCommand.Create(() => TextEditor.Cut())
-                    }
-                }
+                        Command = ReactiveCommand.Create(() => TextEditor.Cut()),
+                    },
+                },
             };
         });
     }

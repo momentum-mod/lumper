@@ -7,18 +7,16 @@ using NLog;
 
 public class Entity : ICloneable
 {
-    public Entity() : this(null) { }
+    public Entity()
+        : this(null) { }
 
     public int EntityLumpVersion { get; init; }
 
     public List<EntityProperty> Properties { get; set; }
 
-    public Entity(IEnumerable<KeyValuePair<string, string>>? kv)
-        => Properties = kv is not null
-            ? kv.Select(x => EntityProperty
-                .Create(x, EntityLumpVersion))
-                .OfType<EntityProperty>()
-                .ToList()
+    public Entity(IEnumerable<KeyValuePair<string, string>>? kv) =>
+        Properties = kv is not null
+            ? kv.Select(x => EntityProperty.Create(x, EntityLumpVersion)).OfType<EntityProperty>().ToList()
             : [];
 
     /// <summary>
@@ -30,22 +28,20 @@ public class Entity : ICloneable
     {
         get
         {
-            var hammerid = Properties
+            string? hammerid = Properties
                 .OfType<EntityProperty<string>>()
-                .FirstOrDefault(x => x.Key == "hammerid")?
-                .Value;
+                .FirstOrDefault(x => x.Key == "hammerid")
+                ?.Value;
 
-            var className = Properties
-                .OfType<EntityProperty<string>>()
-                .FirstOrDefault(x => x.Key == "classname")?
-                .Value ?? "<missing classname>";
+            var className =
+                Properties.OfType<EntityProperty<string>>().FirstOrDefault(x => x.Key == "classname")?.Value
+                ?? "<missing classname>";
 
             return hammerid is not null ? $"{className} [HammerID {hammerid}]" : className;
         }
     }
 
-    public object Clone()
-        => new Entity { Properties = Properties.Select(x => (EntityProperty)x.Clone()).ToList() };
+    public object Clone() => new Entity { Properties = Properties.Select(x => (EntityProperty)x.Clone()).ToList() };
 
     public abstract class EntityProperty(string key) : ICloneable
     {
@@ -57,8 +53,8 @@ public class Entity : ICloneable
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public static EntityProperty? Create(KeyValuePair<string, string> kv, int elVersion = 0)
-            => Create(kv.Key, kv.Value, elVersion);
+        public static EntityProperty? Create(KeyValuePair<string, string> kv, int elVersion = 0) =>
+            Create(kv.Key, kv.Value, elVersion);
 
         public static EntityProperty? Create(string key, string value, int elVersion = 0)
         {
@@ -85,12 +81,13 @@ public class Entity : ICloneable
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <typeparam name="T"></typeparam>
-    public class EntityProperty<T>(string key, T? value) : EntityProperty(key) where T : ICloneable
+    public class EntityProperty<T>(string key, T? value) : EntityProperty(key)
+        where T : ICloneable
     {
         public T? Value { get; set; } = value;
 
         public override string? ValueString => Value?.ToString();
 
-        public override object Clone() => new EntityProperty<T>(Key, (T?) Value?.Clone());
+        public override object Clone() => new EntityProperty<T>(Key, (T?)Value?.Clone());
     }
 }

@@ -66,5 +66,5 @@ public enum BspLumpType
     OverlayFades = 60,
     OverlaySystemLevels = 61,
     Physlevel = 62,
-    DispMultiblend = 63
+    DispMultiblend = 63,
 }

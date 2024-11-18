@@ -34,7 +34,8 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public long? CompressedSize => BaseEntry.CompressedSize;
 
-    protected PakfileEntryViewModel(PakfileEntry baseEntry, BspNode parent) : base(parent)
+    protected PakfileEntryViewModel(PakfileEntry baseEntry, BspNode parent)
+        : base(parent)
     {
         BaseEntry = baseEntry;
         Key = BaseEntry.Key;

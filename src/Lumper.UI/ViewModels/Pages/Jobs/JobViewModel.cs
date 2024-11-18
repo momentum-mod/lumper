@@ -10,7 +10,7 @@ public enum JobStatus
     Success,
     Waiting,
     Running,
-    Failed
+    Failed,
 }
 
 public abstract class JobViewModel : ViewModel

@@ -45,18 +45,15 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
 
         LoadEntityList();
 
-        Entities.CountChanged
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .ToPropertyEx(this, x => x.EntityCount);
+        Entities.CountChanged.ObserveOn(RxApp.MainThreadScheduler).ToPropertyEx(this, x => x.EntityCount);
     }
 
-    private void LoadEntityList()
-        => Entities.Edit(innerCache =>
+    private void LoadEntityList() =>
+        Entities.Edit(innerCache =>
         {
             innerCache.Clear();
             innerCache.AddOrUpdate(_entityLump.Data.Select(ent => new EntityViewModel(ent, this)));
         });
-
 
     // Note: don't use this for doing large inserts, you'll make the SourceCache fire a billion
     // update notifications. Use .Edit to batch all changes together:
@@ -170,12 +167,12 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
                 // changes as well.
                 switch (propVm)
                 {
-                    case EntityPropertyStringViewModel { EntityProperty: Entity.EntityProperty<string> sM } sVm when
-                        sVm.EntityProperty != sM || sVm.Value != sM.Value:
+                    case EntityPropertyStringViewModel { EntityProperty: Entity.EntityProperty<string> sM } sVm
+                        when sVm.EntityProperty != sM || sVm.Value != sM.Value:
                         sVm.Value = sM.Value;
                         break;
-                    case EntityPropertyIoViewModel { EntityProperty: Entity.EntityProperty<EntityIo> ioM } ioVm when
-                        ioVm.EntityProperty != ioM || ioVm.EntityProperty.Equals(ioM):
+                    case EntityPropertyIoViewModel { EntityProperty: Entity.EntityProperty<EntityIo> ioM } ioVm
+                        when ioVm.EntityProperty != ioM || ioVm.EntityProperty.Equals(ioM):
                         ioVm.TargetEntityName = ioM.Value?.TargetEntityName;
                         ioVm.Input = ioM.Value?.Input;
                         ioVm.Delay = ioM.Value?.Delay;

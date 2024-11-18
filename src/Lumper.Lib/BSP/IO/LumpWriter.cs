@@ -28,10 +28,11 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
         // Always uncompressed if empty
         if (lump.Empty)
         {
-            return new LumpHeaderInfo {
+            return new LumpHeaderInfo
+            {
                 Offset = BaseStream.Position,
                 CompressedLength = -1,
-                UncompressedLength = 0
+                UncompressedLength = 0,
             };
         }
 
@@ -54,10 +55,11 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
 
                 lump.Write(BaseStream, Handler);
 
-                return new LumpHeaderInfo {
+                return new LumpHeaderInfo
+                {
                     Offset = offset,
                     UncompressedLength = unmanagedLump.UncompressedLength,
-                    CompressedLength = BaseStream.Position - offset
+                    CompressedLength = BaseStream.Position - offset,
                 };
             }
 
@@ -67,8 +69,10 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
             return WriteUncompressed(lump);
         }
 
-        if (Compression == DesiredCompression.Compressed ||
-            (Compression == DesiredCompression.Unchanged && lump.IsCompressed))
+        if (
+            Compression == DesiredCompression.Compressed
+            || (Compression == DesiredCompression.Unchanged && lump.IsCompressed)
+        )
         {
             return WriteCompressed(lump);
         }
@@ -87,10 +91,11 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
         else
             lump.Write(BaseStream, Handler);
 
-        return new LumpHeaderInfo {
+        return new LumpHeaderInfo
+        {
             Offset = offset,
             UncompressedLength = BaseStream.Position - offset,
-            CompressedLength = -1
+            CompressedLength = -1,
         };
     }
 
@@ -124,8 +129,10 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
             // bytes so useless for very small lumps.
             if (uncompressedLength > 0)
             {
-                Logger.Debug("Compressed lump larger than uncompressed, skipping. " +
-                             $"(compressed: {mem.Length}, uncompressed: {uncompressedLength})");
+                Logger.Debug(
+                    "Compressed lump larger than uncompressed, skipping. "
+                        + $"(compressed: {mem.Length}, uncompressed: {uncompressedLength})"
+                );
             }
 
             uncompressedStream.Seek(0, SeekOrigin.Begin);
@@ -152,10 +159,11 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
             mem.CopyTo(BaseStream);
         }
 
-        return new LumpHeaderInfo {
+        return new LumpHeaderInfo
+        {
             Offset = offset,
             CompressedLength = compressedLength,
-            UncompressedLength = uncompressedLength
+            UncompressedLength = uncompressedLength,
         };
     }
 }

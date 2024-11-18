@@ -17,7 +17,8 @@ public sealed class ReplaceTextureJobViewModel : JobViewModel, IDisposable
 
     public override ReplaceTextureJob Job { get; }
 
-    public ReplaceTextureJobViewModel(ReplaceTextureJob job) : base(job)
+    public ReplaceTextureJobViewModel(ReplaceTextureJob job)
+        : base(job)
     {
         RegisterView<ReplaceTextureJobViewModel, ReplaceTextureJobView>();
 
@@ -25,24 +26,19 @@ public sealed class ReplaceTextureJobViewModel : JobViewModel, IDisposable
 
         _source.Edit(_ =>
             _source.AddRange(
-                job.Replacers.Select(x => new ReplacerViewModel {
+                job.Replacers.Select(x => new ReplacerViewModel
+                {
                     ReplaceWith = x.ReplaceWith,
                     Matcher = x.Matcher,
                     IsRegex = x.IsRegex,
-                    Model = x
-                }))
+                    Model = x,
+                })
+            )
         );
 
-        _source
-            .Connect()
-            .Bind(out _replacers)
-            .Subscribe();
+        _source.Connect().Bind(out _replacers).Subscribe();
 
-        _source
-            .Connect()
-            .Transform(x => x.Model)
-            .ToCollection()
-            .Subscribe(x => job.Replacers = [.. x]);
+        _source.Connect().Transform(x => x.Model).ToCollection().Subscribe(x => job.Replacers = [.. x]);
     }
 
     public void Add() => _source.Add(new ReplacerViewModel());

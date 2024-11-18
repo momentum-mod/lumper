@@ -76,10 +76,16 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
 
     static VtfFileViewModel() => VTFAPI.Initialize();
 
-    public async Task<Image<Rgba32>?> GetImage(CancellationTokenSource? cts, uint frame, uint face, uint slice,
-        uint mipmapLevel)
+    public async Task<Image<Rgba32>?> GetImage(
+        CancellationTokenSource? cts,
+        uint frame,
+        uint face,
+        uint slice,
+        uint mipmapLevel
+    )
     {
-        var data = await VtfLibQueue.Run<byte[]>(() =>
+        var data = await VtfLibQueue.Run<byte[]>(
+            () =>
             {
                 Prepare();
 
@@ -100,7 +106,8 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
 
                 return data;
             },
-            cts);
+            cts
+        );
 
         if (data is null)
             return null;
@@ -112,11 +119,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         var j = 0;
         for (var i = 0; i < dest.Length; i += 4)
         {
-            rgba[j++] = new Rgba32(
-                dest[i],
-                dest[i + 1],
-                dest[i + 2],
-                dest[i + 3]);
+            rgba[j++] = new Rgba32(dest[i], dest[i + 1], dest[i + 2], dest[i + 3]);
         }
 
         // We could make the UI significantly faster if we did a resize here. But code is complicated and leads
@@ -125,8 +128,8 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         return Image.LoadPixelData<Rgba32>(rgba.AsSpan(), (int)ImageWidth, (int)ImageHeight);
     }
 
-    public async Task SetImageData(Image<Rgba32> image, uint frame, uint face, uint slice, uint mipmapLevel)
-        => await VtfLibQueue.Run(() =>
+    public async Task SetImageData(Image<Rgba32> image, uint frame, uint face, uint slice, uint mipmapLevel) =>
+        await VtfLibQueue.Run(() =>
         {
             Prepare();
 
@@ -147,8 +150,8 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
             SaveVtf();
         });
 
-    public async Task SetNewImage(Image<Rgba32> image)
-        => await VtfLibQueue.Run(() =>
+    public async Task SetNewImage(Image<Rgba32> image) =>
+        await VtfLibQueue.Run(() =>
         {
             Prepare();
 
@@ -157,8 +160,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
             VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
 
             // TODO: Allow picking this. For Strata-based games, use BC7!
-            createOptions.imageFormat =
-                hasAlpha ? VTFImageFormat.IMAGE_FORMAT_DXT5 : VTFImageFormat.IMAGE_FORMAT_DXT1;
+            createOptions.imageFormat = hasAlpha ? VTFImageFormat.IMAGE_FORMAT_DXT5 : VTFImageFormat.IMAGE_FORMAT_DXT1;
             if (!VTFFile.ImageCreateSingle((uint)image.Width, (uint)image.Height, buffer, ref createOptions))
             {
                 try
@@ -174,7 +176,6 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
 
             SaveVtf();
         });
-
 
     private void Prepare()
     {
@@ -222,9 +223,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         FaceCount = VTFFile.ImageGetFaceCount();
         MipmapCount = VTFFile.ImageGetMipmapCount();
         Flags = (VTFImageFlag)VTFFile.ImageGetFlags();
-        FlagList = Utils.ExpandBitfield(Flags)
-            .Select(x => x.ToString().Replace("TEXTUREFLAGS_", ""))
-            .ToList();
+        FlagList = Utils.ExpandBitfield(Flags).Select(x => x.ToString().Replace("TEXTUREFLAGS_", "")).ToList();
         MajorVersion = VTFFile.ImageGetMajorVersion();
         MinorVersion = VTFFile.ImageGetMinorVersion();
         ImageSize = VTFFile.ImageGetSize();
@@ -234,7 +233,9 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
         ImageFormatString = ImageFormat.ToString().Replace("IMAGE_FORMAT_", "");
         Depth = VTFFile.ImageGetDepth();
 
-        float x = 0, y = 0, z = 0;
+        float x = 0,
+            y = 0,
+            z = 0;
         VTFFile.ImageGetReflectivity(ref x, ref y, ref z);
         Reflectivity = [Math.Round(x, 2), Math.Round(y, 2), Math.Round(z, 2)];
     }
@@ -277,13 +278,15 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
 
         public static Task Run(Action fn) => Run(fn, null);
 
-        public static async Task Run(Action fn, CancellationTokenSource? cts)
-            => await Run<object>(() =>
+        public static async Task Run(Action fn, CancellationTokenSource? cts) =>
+            await Run<object>(
+                () =>
                 {
                     fn();
                     return true; // Return literally anything so this is a valid Func<object>
                 },
-                cts);
+                cts
+            );
 
         public static Task<T> Run<T>(Func<object> fn) => Run<T>(fn, null)!;
 
@@ -300,9 +303,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
                 }
             }
 
-            return await Output
-                .FirstAsync(x => x.Item1 == fn)
-                .Select(x => (T?)x.Item2);
+            return await Output.FirstAsync(x => x.Item1 == fn).Select(x => (T?)x.Item2);
         }
 
         private static void ProcessQueue()
@@ -310,9 +311,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
             while (!Queue.IsEmpty)
             {
                 (Func<object>, CancellationTokenSource?) next;
-                while (!Queue.TryDequeue(out next))
-                {
-                }
+                while (!Queue.TryDequeue(out next)) { }
 
                 (Func<object> fn, CancellationTokenSource? cts) = next;
 

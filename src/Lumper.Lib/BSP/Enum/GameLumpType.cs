@@ -10,5 +10,7 @@ public enum GameLumpType
     dprp = 0x64707270, // detail prop
     dplt = 0x64706c74, // detail prop lighting LDR
     dplh = 0x64706c68, // detail prop lighting HDR
-    pmti = 0x706d7469 // (1886221417) from BSPConvert
+    pmti =
+        0x706d7469 // (1886221417) from BSPConvert
+    ,
 }

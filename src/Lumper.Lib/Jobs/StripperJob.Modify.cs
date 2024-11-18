@@ -19,48 +19,65 @@ public partial class StripperJob
         public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr)
         {
             var prevBlock = "";
-            ParseBlock(reader, blockOpen, ref lineNr, (line, lNr) =>
-            {
-                line = line.Trim();
-
-                var blockOpenInner = false;
-                if (line == "{")
+            ParseBlock(
+                reader,
+                blockOpen,
+                ref lineNr,
+                (line, lNr) =>
                 {
-                    line = prevBlock;
-                    blockOpenInner = true;
+                    line = line.Trim();
+
+                    var blockOpenInner = false;
+                    if (line == "{")
+                    {
+                        line = prevBlock;
+                        blockOpenInner = true;
+                    }
+                    else if (IsComment(line))
+                    {
+                        return;
+                    }
+
+                    List<KvPair> props = line switch
+                    {
+                        "match:" => Match,
+                        "replace:" => Replace,
+                        "delete:" => Delete,
+                        "insert:" => Insert,
+                        _ => throw new InvalidDataException($"Unknown title {line} in line {lNr}"),
+                    };
+
+                    prevBlock = line;
+
+                    ParseBlock(
+                        reader,
+                        blockOpenInner,
+                        ref lNr,
+                        (lineParam, lNrParam) => props.Add(ParseProp(lineParam, lNrParam))
+                    );
                 }
-                else if (IsComment(line))
-                {
-                    return;
-                }
-
-                List<KvPair> props = line switch {
-                    "match:" => Match,
-                    "replace:" => Replace,
-                    "delete:" => Delete,
-                    "insert:" => Insert,
-                    _ => throw new InvalidDataException($"Unknown title {line} in line {lNr}")
-                };
-
-                prevBlock = line;
-
-                ParseBlock(reader, blockOpenInner, ref lNr,
-                    (lineParam, lNrParam) => props.Add(ParseProp(lineParam, lNrParam)));
-            });
+            );
         }
 
         public override void Apply(EntityLump lump)
         {
-            foreach (Entity entity in lump.Data
-                         .Where(entity => Match
-                             .All(filterProperty => entity.Properties
-                                 .Any(entityProperty => MatchKeyValue(filterProperty, entityProperty))))
-                         .ToList())
+            foreach (
+                Entity entity in lump
+                    .Data.Where(entity =>
+                        Match.All(filterProperty =>
+                            entity.Properties.Any(entityProperty => MatchKeyValue(filterProperty, entityProperty))
+                        )
+                    )
+                    .ToList()
+            )
             {
                 foreach (KvPair replaceProp in Replace)
                 {
-                    foreach (Entity.EntityProperty prop in
-                             entity.Properties.Where(prop => prop.Key == replaceProp.Key).ToList())
+                    foreach (
+                        Entity.EntityProperty prop in entity
+                            .Properties.Where(prop => prop.Key == replaceProp.Key)
+                            .ToList()
+                    )
                     {
                         var newProp = Entity.EntityProperty.Create(replaceProp.Key, replaceProp.Value);
                         if (newProp is null)
@@ -68,17 +85,19 @@ public partial class StripperJob
 
                         entity.Properties[entity.Properties.IndexOf(prop)] = newProp;
                         Logger.Info(
-                            $"Set value of {prop.Key} to {prop.ValueString} on entity {entity.PresentableName}");
+                            $"Set value of {prop.Key} to {prop.ValueString} on entity {entity.PresentableName}"
+                        );
                     }
                 }
 
-                foreach (Entity.EntityProperty toDelete in Delete.SelectMany(deleteProp => entity.Properties
-                             .Where(prop => MatchKeyValue(deleteProp, prop))
-                             .ToList()))
+                foreach (
+                    Entity.EntityProperty toDelete in Delete.SelectMany(deleteProp =>
+                        entity.Properties.Where(prop => MatchKeyValue(deleteProp, prop)).ToList()
+                    )
+                )
                 {
                     entity.Properties.Remove(toDelete);
-                    Logger.Info(
-                        $"Removed property {toDelete} on entity {entity.PresentableName}");
+                    Logger.Info($"Removed property {toDelete} on entity {entity.PresentableName}");
                 }
 
                 foreach (KvPair insertProp in Insert)
@@ -89,7 +108,8 @@ public partial class StripperJob
 
                     entity.Properties.Add(newProp);
                     Logger.Info(
-                        $"Added property {newProp.Key}: {newProp.ValueString} to entity {entity.PresentableName}");
+                        $"Added property {newProp.Key}: {newProp.ValueString} to entity {entity.PresentableName}"
+                    );
                 }
             }
         }

@@ -12,8 +12,7 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    protected override void ReadItem(BinaryReader reader)
-        => Data.Add(new string(reader.ReadChars(StructureSize)));
+    protected override void ReadItem(BinaryReader reader) => Data.Add(new string(reader.ReadChars(StructureSize)));
 
     protected override void WriteItem(BinaryWriter writer, int index)
     {
