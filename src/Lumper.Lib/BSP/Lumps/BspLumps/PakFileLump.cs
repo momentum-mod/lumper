@@ -49,7 +49,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     /// Updates all path references in the PakFileLump from oldPath to newPath,
     /// i.e. if a VMT references a VTF, it will be updated.
     /// </summary>
-    public void UpdatePathReferences(string newPath, string oldPath)
+    public void UpdatePathReferences(string newPath, string oldPath, string? limitExtension = null)
     {
         var opSplit = oldPath.Split('/');
         var npSplit = newPath.Split('/');
@@ -62,6 +62,8 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
         foreach (PakfileEntry entry in Entries)
         {
+            if (limitExtension is null || !entry.Key.EndsWith(limitExtension))
+                continue;
 
             var entryString = Encoding.Default.GetString(entry.GetReadOnlyStream().ToArray());
             var newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
