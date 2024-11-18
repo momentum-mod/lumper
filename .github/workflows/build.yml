@@ -18,12 +18,12 @@ jobs:
     - name: Set version name  # ref_name but replace slashes and spaces with dashes
       id: version
       run: echo "ref-name=$(echo $GITHUB_REF_NAME | sed 's/\//-/g' | sed 's/ /-/g')" >> $GITHUB_OUTPUT
-    
-    - name: checkout code
+
+    - name: Checkout
       uses: actions/checkout@v4
       with:
         submodules: true
-            
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -35,19 +35,19 @@ jobs:
     - name: Make dirs
       run: mkdir out_linux out_windows
 
-    
     - name: Restore dependencies
       run: dotnet restore
-      
+
+
     - name: Build Windows
-      run: | 
-        dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_windows/ src/Lumper.CLI && \
-        dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_windows/ src/Lumper.UI
+      run: |
+        dotnet publish -c Release -r win-x64 -o out_windows/ src/Lumper.CLI && \
+        dotnet publish -c Release -r win-x64 -o out_windows/ src/Lumper.UI
 
     - name: Build Linux
-      run: | 
-        dotnet publish -c Release --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_linux/ src/Lumper.CLI && \
-        dotnet publish -c Release --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o out_linux/ src/Lumper.UI
+      run: |
+        dotnet publish -c Release -o out_linux/ src/Lumper.CLI && \
+        dotnet publish -c Release -o out_linux/ src/Lumper.UI
 
 
     - name: Upload Windows artifacts
@@ -85,6 +85,7 @@ jobs:
         NLog.config \
         \
         && cd ..
+
 
     - name: Release
       uses: softprops/action-gh-release@v2
