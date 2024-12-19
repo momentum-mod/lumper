@@ -1,0 +1,27 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <AssemblyVersion>0.1.1</AssemblyVersion>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <OutputPath>../../build</OutputPath>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <!-- Disable trim warnings - these are prooooobably okay -->
+    <NoWarn>IL2026,IL2104</NoWarn>
+    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)\resources\NLog.config" CopyToOutputDirectory="Always"/>
+    <None Include="$(MSBuildThisFileDirectory)\resources\RegisterLumperURLProtocol.ps1" CopyToOutputDirectory="Always"/>
+  </ItemGroup>
+
+</Project>
