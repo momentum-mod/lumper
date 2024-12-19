@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Views.Shared.Pakfile;
 using NLog;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 public class PakfileEntryTextViewModel : PakfileEntryViewModel
@@ -24,7 +25,12 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public PakfileEntryTextViewModel(PakfileEntry entry, BspNode parent)
-        : base(entry, parent) => RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+        : base(entry, parent)
+    {
+        RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+
+        this.WhenAnyValue(x => x.Content).Subscribe(x => UpdateHash(x ?? string.Empty));
+    }
 
     public override void Load(CancellationTokenSource? cts = null)
     {
