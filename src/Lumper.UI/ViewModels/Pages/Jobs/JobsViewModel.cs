@@ -12,7 +12,6 @@ using Lumper.Lib.Bsp;
 using Lumper.Lib.Jobs;
 using Lumper.UI.Services;
 using Lumper.UI.Views.Pages.Jobs;
-using Newtonsoft.Json;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -147,37 +146,27 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 
     public void RemoveAll() => Jobs.Clear();
 
-    public void Load(Stream stream)
+    public void LoadWorkflow(Stream stream)
     {
-        var serializer = new JsonSerializer();
-        using var sr = new StreamReader(stream);
-        using var reader = new JsonTextReader(sr);
-        List<Job>? jobs;
-        try
+        if (!Job.TryLoadWorkflow(stream, out List<Job>? workflow))
         {
-            jobs = serializer.Deserialize<List<Job>>(reader);
-        }
-        catch (JsonSerializationException ex)
-        {
-            Logger.Error(ex, "Failed to load jobs workflow");
+            Logger.Warn("Could not load workflow");
             return;
         }
-
-        if (jobs is null)
-            return;
 
         SelectedJob = null;
         Jobs.Clear();
-        foreach (Job job in jobs)
+        foreach (Job job in workflow)
             Jobs.Add(CreateJobViewModel(job));
+
+        Logger.Info("Workflow loaded");
     }
 
-    public void Save(Stream stream)
+    public void SaveWorkflow(Stream stream)
     {
-        var serializer = new JsonSerializer { Formatting = Formatting.Indented };
-        using var sw = new StreamWriter(stream);
-        using var writer = new JsonTextWriter(sw);
-        serializer.Serialize(writer, Jobs.Select(x => x.Job));
+        Job.SaveWorkflow(stream, Jobs.Select(x => x.Job).ToList());
+
+        Logger.Info("Workflow saved");
     }
 
     public async Task ShowLoadJobsFileDialog()
@@ -197,7 +186,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         if (result is not { Count: 1 })
             return;
 
-        Load(await result[0].OpenReadAsync());
+        LoadWorkflow(await result[0].OpenReadAsync());
     }
 
     public async Task ShowSaveJobsFileDialog()
@@ -212,12 +201,12 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         if (result is null)
             return;
 
-        Save(await result.OpenWriteAsync());
+        SaveWorkflow(await result.OpenWriteAsync());
     }
 
     private static FilePickerFileType[] GenerateJsonFileFilter() =>
         [
-            new FilePickerFileType("JSON Files") { Patterns = new[] { "*.json" } },
-            new FilePickerFileType("All Files") { Patterns = new[] { "*" } },
+            new FilePickerFileType("JSON Files") { Patterns = ["*.json"] },
+            new FilePickerFileType("All Files") { Patterns = ["*"] },
         ];
 }
