@@ -1,24 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="../../BuildShared.props" />
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ApplicationIcon>Assets\Images\Lumper.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <OutputPath>../../build</OutputPath>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
-    <!-- Disable trim warnings - these are prooooobably okay -->
-    <NoWarn>IL2026,IL2104</NoWarn>
-    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,15 +37,6 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets\**"/>
     <AvaloniaResource Remove="Assets\Lumper.ico"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove=".gitignore"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="NLog.config" CopyToOutputDirectory="Always"/>
-    <None Update="RegisterLumperURLProtocol.ps1" CopyToOutputDirectory="Always"/>
   </ItemGroup>
 
   <ItemGroup>
