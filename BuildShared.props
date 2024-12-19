@@ -24,6 +24,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)\resources\NLog.config" CopyToOutputDirectory="Always"/>
     <None Include="$(MSBuildThisFileDirectory)\resources\RegisterLumperURLProtocol.ps1" CopyToOutputDirectory="Always"/>
+    <None Include="$(MSBuildThisFileDirectory)\resources\AssetManifest.rsv" CopyToOutputDirectory="Always"/>
   </ItemGroup>
 
 </Project>
