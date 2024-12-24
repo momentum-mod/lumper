@@ -66,7 +66,7 @@
                         CommandParameter="{Binding}"
                         HorizontalAlignment="Right"
                         Background="Transparent" BorderBrush="Transparent" Padding="0">
-                  <materialIcons:MaterialIcon Kind="Close" />
+                  <materialIcons:MaterialIcon Kind="Delete" />
                 </Button>
               </Grid>
             </DataTemplate>
@@ -115,7 +115,7 @@
                       <TextBox Text="{Binding Key}" />
                       <TextBox Text="{Binding Value}" Grid.Column="2" />
                       <Button Command="{Binding Delete}" Grid.Column="4" Height="32">
-                        <materialIcons:MaterialIcon Kind="CloseThick" />
+                        <materialIcons:MaterialIcon Kind="Delete" />
                       </Button>
                     </Grid>
                   </DataTemplate>
@@ -131,7 +131,7 @@
                       </Grid.Styles>
                       <TextBox Text="{Binding Key}" Grid.Row="0" Grid.Column="0" />
                       <Button Command="{Binding Delete}" Grid.Row="0" Grid.Column="2" Height="32">
-                        <materialIcons:MaterialIcon Kind="CloseThick" />
+                        <materialIcons:MaterialIcon Kind="Delete" />
                       </Button>
                       <TextBlock Text="Target Entity Name" Grid.Row="2" Grid.Column="0" />
                       <TextBox Text="{Binding TargetEntityName}" Grid.Row="2" Grid.Column="2"
