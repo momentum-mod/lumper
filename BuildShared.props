@@ -1,7 +1,7 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <AssemblyVersion>0.1.1</AssemblyVersion>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>

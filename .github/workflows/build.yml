@@ -15,9 +15,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set version name  # ref_name but replace slashes and spaces with dashes
+    - name: Set version and ref name
       id: version
-      run: echo "ref-name=$(echo $GITHUB_REF_NAME | sed 's/\//-/g' | sed 's/ /-/g')" >> $GITHUB_OUTPUT
+      # https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/store-information-in-variables#default-environment-variables
+      # GITHUB_REF_NAME will be either the current tag, for releases, or the branch name (all other builds)
+      # version-name is a semantically versioned string to use as the MSBuild $Version variable
+      # ref-name is GITHUB_REF_NAME but sanitised to replace slashes and spaces with dashes
+      run: |
+        echo "version-name=$( if [ $GITHUB_REF_TYPE = 'tag' ]; then echo $GITHUB_REF_NAME; else echo '0.0.0'; fi )" >> $GITHUB_OUTPUT && \
+        echo "ref-name=$( echo $GITHUB_REF_NAME | sed 's/\//-/g' | sed 's/ /-/g' )" >> $GITHUB_OUTPUT
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -47,13 +53,13 @@ jobs:
 
     - name: Build Windows
       run: |
-        dotnet publish -c Release -r win-x64 -o out_windows/ src/Lumper.CLI && \
-        dotnet publish -c Release -r win-x64 -o out_windows/ src/Lumper.UI
+        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 -o out_windows/ src/Lumper.CLI && \
+        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 -o out_windows/ src/Lumper.UI
 
     - name: Build Linux
       run: |
-        dotnet publish -c Release -o out_linux/ src/Lumper.CLI && \
-        dotnet publish -c Release -o out_linux/ src/Lumper.UI
+        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -o out_linux/ src/Lumper.CLI && \
+        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -o out_linux/ src/Lumper.UI
 
 
     - name: Upload Windows artifacts
