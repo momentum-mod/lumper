@@ -74,7 +74,13 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    static VtfFileViewModel() => VTFAPI.Initialize();
+    static VtfFileViewModel()
+    {
+        if (VTFAPI.Initialize())
+            Logger.Debug("Initialized VTFAPI");
+        else
+            Logger.Error("Failed to initialize VTFAPI!");
+    }
 
     public async Task<Image<Rgba32>?> GetImage(
         CancellationTokenSource? cts,
