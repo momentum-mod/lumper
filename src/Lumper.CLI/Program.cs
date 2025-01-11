@@ -68,11 +68,8 @@ internal sealed class Program
     // If method completes successfully, the program will exit with status code 0.
     private static void Run(CommandLineOptions options)
     {
-        var bspFile = BspFile.FromPath(options.InputPath, null);
-
-        if (bspFile is null)
-            throw new InvalidDataException("Failed to load BSP file");
-
+        BspFile bspFile =
+            BspFile.FromPath(options.InputPath, null) ?? throw new InvalidDataException("Failed to load BSP file");
         if (options.JobWorkflow is { } workflowPath)
             RunWorkflow(bspFile, workflowPath);
 

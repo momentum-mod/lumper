@@ -72,7 +72,7 @@ public class CommandLineOptions
     [Option(
         'k',
         "jsonOpts",
-        Default = CLI.JsonOptions.SortLumps | CLI.JsonOptions.SortProperties | CLI.JsonOptions.IgnoreOffset,
+        Default = JsonOptions.SortLumps | JsonOptions.SortProperties | JsonOptions.IgnoreOffset,
         Required = false,
         HelpText = "Provide either flags (1 = Sort Lumps, 2 = Sort Properties, 4 = Ignore Offsets),"
             + " or comma-separator list of names, e.g. sortproperties,ignoreoffsets."
