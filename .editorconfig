@@ -242,9 +242,10 @@ dotnet_diagnostic.CA1822.severity = suggestion
 # making a separate property and making the class partial just for this.
 dotnet_diagnostic.SYSLIB1045.severity = suggestion
 
-# Formatting rules are omitted / disabled - CSharpier handles everything.
-dotnet_diagnostic.IDE0055.severity = none
-dotnet_analyzer_diagnostic.category-Style.severity = none
+# Formatting rules that are handled by CSharpier. Unfortunately `dotnet format style` includes a *lot* more than
+# style stuff.
+dotnet_diagnostic.IDE0011.severity = none # "Add braces"
+dotnet_diagnostic.IDE0055.severity = none # "Fix formatting"
 
 # https://docs.microsoft.com/dotnet/fundamentals/code-analysis/style-rules/formatting-rules#net-formatting-rules
 # Dotnet namespace options

@@ -35,8 +35,10 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: Check dotnet analyzers
-      run: dotnet format analyzers --verify-no-changes
+    - name: Check dotnet format
+      run: |
+        dotnet format analyzers --verify-no-changes && \
+        dotnet format style --verify-no-changes
 
     - name: Check csharpier formatting
       run: dotnet tool restore && dotnet csharpier . --check
