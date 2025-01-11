@@ -155,7 +155,7 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         HasSeparateWindow = true;
     }
 
-    private static Bitmap ImageToBitmap(Image<Rgba32> image, int? size = null)
+    private static Bitmap ImageToBitmap(Image<Rgba32> image)
     {
         using var mem = new MemoryStream();
         image.SaveAsBmp(mem, Encoder);

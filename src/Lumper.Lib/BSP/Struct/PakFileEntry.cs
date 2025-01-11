@@ -69,7 +69,7 @@ public sealed class PakfileEntry : IDisposable
     private readonly object _instanceLock = new();
 
     // Static lock for access to zip archive - SharpCompress's OpenEntryStream is not thread-safe.
-    private static readonly object _zipAccessLock = new();
+    private static readonly object ZipAccessLock = new();
 
     /// <summary>
     /// Get an stream to the uncompressed pakfile entry.
@@ -93,7 +93,7 @@ public sealed class PakfileEntry : IDisposable
             else
             {
                 MemoryStream outStream;
-                lock (_zipAccessLock)
+                lock (ZipAccessLock)
                 {
                     using Stream zipStream = ZipEntry!.OpenEntryStream();
                     outStream = new MemoryStream();
