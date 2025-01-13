@@ -33,13 +33,13 @@ public class RemoveAssetJob : Job, IJob
 
         PakfileLump pakfileLump = bsp.GetLump<PakfileLump>();
 
-        var numMatches = 0;
+        int numMatches = 0;
 
         // Could probably speed this up a bit by parallelizing, but we can't read
         // multiple zip entries at a time, and that's the most expensive operation here.
         foreach (PakfileEntry entry in pakfileLump.Entries.ToList())
         {
-            var hash = entry.HashSHA1;
+            string hash = entry.HashSHA1;
             if (!AssetManifest.Manifest.TryGetValue(hash, out List<AssetManifest.Asset>? assets))
                 continue;
 
@@ -48,7 +48,7 @@ public class RemoveAssetJob : Job, IJob
 
             pakfileLump.Entries.Remove(entry);
             numMatches++;
-            var matches = string.Join(", ", assets.Select(asset => $"{asset.Origin} asset {asset.Path}"));
+            string matches = string.Join(", ", assets.Select(asset => $"{asset.Origin} asset {asset.Path}"));
             Logger.Info($"Removed {entry.Key} which matched {matches}");
         }
 
