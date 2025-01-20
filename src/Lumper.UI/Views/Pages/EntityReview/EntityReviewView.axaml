@@ -1,0 +1,27 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.EntityReview"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.EntityReview.EntityReviewView"
+             x:DataType="vm:EntityReviewViewModel">
+
+  <Grid RowDefinitions="Auto, *">
+    <Grid Grid.Row="0" ColumnDefinitions="*, 8, Auto" Margin="8">
+      <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding RulesFilePath}" />
+      <Button Grid.Column="2" Command="{Binding ShowFilePickerDialog}">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <materialIcons:MaterialIcon Kind="ClipboardTextOutline" />
+          <TextBlock VerticalAlignment="Center">Pick Ruleset</TextBlock>
+        </StackPanel>
+      </Button>
+    </Grid>
+    <DataGrid Grid.Row="1" ItemsSource="Ent"></DataGrid>
+    <!-- <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto"> -->
+    <!-- -->
+    <!-- </ScrollViewer> -->
+  </Grid>
+
+</UserControl>

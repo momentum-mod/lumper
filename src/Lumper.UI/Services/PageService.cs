@@ -12,6 +12,7 @@ using Lumper.UI.ViewModels.Pages.VtfBrowser;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using ViewModels.Pages.EntityReview;
 
 // This would live in PageService but then Avalonia x:Static can't access it.
 // https://github.com/AvaloniaUI/Avalonia/issues/13452
@@ -22,6 +23,7 @@ public enum Page
     VtfBrowser,
     Jobs,
     RawEntities,
+    EntityReview,
 }
 
 /// <summary>
@@ -45,6 +47,7 @@ public sealed class PageService : ReactiveObject
         { Page.VtfBrowser, new LazyPage<VtfBrowserViewModel>(true) },
         { Page.Jobs, new LazyPage<JobsViewModel>(false) },
         { Page.RawEntities, new LazyPage<RawEntitiesViewModel>(true) },
+        { Page.EntityReview, new LazyPage<EntityReviewViewModel>(true) },
     };
 
     [Reactive]

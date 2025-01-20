@@ -65,7 +65,7 @@ public class CommandLineOptions
         'J',
         "jsonPath",
         Required = false,
-        HelpText = "Output JSON summary of the BSP the given path, relative to current directory. If given, --json can be omitted."
+        HelpText = "Output JSON summary of the BSP to the given path, relative to current directory. If given, --json can be omitted."
     )]
     public string? JsonPath { get; set; }
 
@@ -78,6 +78,22 @@ public class CommandLineOptions
             + " or comma-separator list of names, e.g. sortproperties,ignoreoffsets."
     )]
     public JsonOptions JsonOptions { get; set; }
+
+    [Option(
+        'r',
+        "entityRules",
+        Required = false,
+        HelpText = "Validate the BSP file against default set of entity rules (entityrules_momentum.json)."
+    )]
+    public bool ValidateEntityRules { get; set; }
+
+    [Option(
+        'R',
+        "customEntityRules",
+        Required = false,
+        HelpText = "Validate the BSP file against a set of entity rules at a given path."
+    )]
+    public string? CustomEntityRules { get; set; }
 
     [Option(
         'v',

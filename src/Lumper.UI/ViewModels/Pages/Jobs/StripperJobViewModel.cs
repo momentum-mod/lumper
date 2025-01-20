@@ -48,6 +48,6 @@ public class StripperJobViewModel : JobViewModel
         {
             Title = "Pick Stripper Config",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Stripper Config") { Patterns = new[] { "*.cfg" } }],
+            FileTypeFilter = [new FilePickerFileType("Stripper Config") { Patterns = ["*.cfg"] }],
         };
 }

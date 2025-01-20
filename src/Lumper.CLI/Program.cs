@@ -5,7 +5,10 @@ using CommandLine;
 using CommandLine.Text;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.Jobs;
+using Lumper.Lib.Util;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -70,6 +73,14 @@ internal sealed class Program
     {
         BspFile bspFile =
             BspFile.FromPath(options.InputPath, null) ?? throw new InvalidDataException("Failed to load BSP file");
+
+        // TODO: Considering making program exit 0/1 after this - seems unlikely anyone would use this param then other
+        // stuff as well?
+        if (options.CustomEntityRules is not null)
+            ValidateEntityRules(bspFile, options.CustomEntityRules);
+        else if (options.ValidateEntityRules)
+            ValidateEntityRules(bspFile, null);
+
         if (options.JobWorkflow is { } workflowPath)
             RunWorkflow(bspFile, workflowPath);
 
@@ -122,6 +133,61 @@ internal sealed class Program
             stopwatch.Stop();
             Logger.Info($"Job completed in {stopwatch.ElapsedMilliseconds}ms");
         }
+    }
+
+    private static void ValidateEntityRules(BspFile bspFile, string? rulesPath)
+    {
+        Dictionary<string, EntityRule> rules;
+        try
+        {
+            rules = EntityRule.LoadRules(rulesPath);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidDataException($"Could not load rules file {rulesPath}", ex);
+        }
+
+        EntityLump entLump = bspFile.GetLump<EntityLump>();
+
+        int noClassname = 0;
+        Dictionary<EntityRule.AllowLevel, List<string>> counts = new()
+        {
+            [EntityRule.AllowLevel.Allow] = [],
+            [EntityRule.AllowLevel.Warn] = [],
+            [EntityRule.AllowLevel.Deny] = [],
+            [EntityRule.AllowLevel.Unknown] = [],
+        };
+
+        foreach (Entity entity in entLump.Data)
+        {
+            string? className = entity.Properties.FirstOrDefault(x => x.Key == "classname")?.ValueString;
+
+            if (className is null)
+                noClassname++;
+            else if (!rules.TryGetValue(className, out EntityRule? rule))
+                counts[EntityRule.AllowLevel.Unknown].Add(className);
+            else
+                counts[rule.Level].Add(className);
+        }
+
+        Logger.Info("Entity rule validation results:");
+
+        Logger.Info($"Allowed - {counts[EntityRule.AllowLevel.Allow].Count}");
+
+        List<string> warns = counts[EntityRule.AllowLevel.Warn];
+        if (warns.Count > 0)
+            Logger.Warn($"Warning - {warns.Count}\n{string.Join(", ", warns)}");
+        else
+            Logger.Info("Warning - 0");
+
+        List<string> disallows = counts[EntityRule.AllowLevel.Deny];
+        if (disallows.Count > 0)
+            Logger.Error($"Disallowed - {disallows.Count}\n{string.Join(", ", disallows)}");
+        else
+            Logger.Info("Disallowed - 0");
+
+        if (noClassname > 0)
+            Logger.Error($"{noClassname} entities with no classname!!");
     }
 
     private static int ShowHelp(ParserResult<CommandLineOptions> parserResult)

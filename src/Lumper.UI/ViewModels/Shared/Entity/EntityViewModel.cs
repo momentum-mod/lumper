@@ -1,11 +1,15 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
+using Lumper.Lib.Util;
 using Lumper.UI.Models.Matchers;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+using Services;
 
 public class EntityViewModel : MatchableBspNode
 {
@@ -29,6 +33,9 @@ public class EntityViewModel : MatchableBspNode
             AddPropertyViewModel(property);
 
         ResetClassName();
+
+        if (EntityRuleService.Instance.Rules is not null)
+            SetEntityRuleProps(EntityRuleService.Instance.Rules);
     }
 
     public EntityPropertyViewModel AddPropertyViewModel(Entity.EntityProperty entityProperty)
@@ -80,6 +87,19 @@ public class EntityViewModel : MatchableBspNode
                 ?.Value;
             return $"{Name} (HammerID {hammerid})";
         }
+    }
+
+    [Reactive]
+    public EntityRule.AllowLevel? EntityRuleLevel { get; private set; }
+
+    [Reactive]
+    public string? EntityRuleComment { get; private set; }
+
+    public void SetEntityRuleProps(Dictionary<string, EntityRule> rules)
+    {
+        rules.TryGetValue(Name, out EntityRule? rule);
+        EntityRuleLevel = rule?.Level;
+        EntityRuleComment = rule?.Comment;
     }
 
     public override bool Match(Matcher matcher) => Properties.Any(item => item.Match(matcher));
