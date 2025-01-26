@@ -4,7 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using DynamicData;
-using Lib.Jobs;
+using Lumper.Lib.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Views.Pages.Jobs;
