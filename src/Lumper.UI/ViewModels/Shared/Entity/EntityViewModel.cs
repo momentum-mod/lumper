@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
-using Lumper.UI.Models.Matchers;
 using ReactiveUI;
 
 public class EntityViewModel : MatchableBspNode
@@ -81,5 +80,5 @@ public class EntityViewModel : MatchableBspNode
         }
     }
 
-    public override bool Match(Matcher matcher) => Properties.Any(item => item.Match(matcher));
+    public override bool Match(string expr) => Properties.Any(item => item.Match(expr));
 }

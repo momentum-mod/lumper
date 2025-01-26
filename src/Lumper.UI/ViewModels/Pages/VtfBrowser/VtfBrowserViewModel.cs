@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using DynamicData;
-using Models.Matchers;
+using Lumper.Lib.ExtensionMethods;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using Services;
@@ -61,16 +61,12 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
             .Select(x =>
             {
                 ((string search, bool showCubemaps), IChangeSet<PakfileEntryVtfViewModel, string> _) = x;
-                GlobMatcher matcher =
-                    search.Contains('*') || search.Contains('?')
-                        ? new GlobMatcher(search, false, true)
-                        : new GlobMatcher($"*{search}*", false, true);
 
                 // Can appear to be stupid slow in the UI, but this stuff is fine, it's Avalonia render stuff.
                 return vtfs
                     .Items.Where(item =>
                         (showCubemaps || !CubemapRegex().IsMatch(item.Name))
-                        && (string.IsNullOrWhiteSpace(search) || matcher.Match(item.Name))
+                        && (string.IsNullOrWhiteSpace(search) || search.MatchesSimpleExpression(item.Name))
                     )
                     .OrderBy(y => y.Name)
                     .ToList()

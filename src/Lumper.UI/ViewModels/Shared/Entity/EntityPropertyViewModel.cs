@@ -1,7 +1,7 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
 using Lumper.Lib.Bsp.Struct;
-using Lumper.UI.Models.Matchers;
+using Lumper.Lib.ExtensionMethods;
 
 public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProperty, BspNode bspNode)
     : MatchableBspNode(bspNode)
@@ -54,7 +54,7 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
         entityProperty.Value = Value;
     }
 
-    public override bool Match(Matcher matcher) => matcher.Match(Value);
+    public override bool Match(string expr) => Value?.MatchesSimpleExpression(expr) ?? false;
 }
 
 public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityProperty, BspNode bspNode)
@@ -122,10 +122,10 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
         && other.Delay == Delay
         && other.TimesToFire == TimesToFire;
 
-    public override bool Match(Matcher matcher) =>
-        matcher.Match(TargetEntityName)
-        || matcher.Match(Input)
-        || matcher.Match(Parameter)
-        || matcher.Match(Delay.ToString())
-        || matcher.Match(TimesToFire.ToString());
+    public override bool Match(string expr) =>
+        (TargetEntityName?.MatchesSimpleExpression(expr) ?? false)
+        || (Input?.MatchesSimpleExpression(expr) ?? false)
+        || (Parameter?.MatchesSimpleExpression(expr) ?? false)
+        || (Delay?.ToString().MatchesSimpleExpression(expr) ?? false)
+        || (TimesToFire?.ToString().MatchesSimpleExpression(expr) ?? false);
 }
