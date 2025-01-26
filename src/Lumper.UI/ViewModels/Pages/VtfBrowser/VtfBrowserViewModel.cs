@@ -8,11 +8,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using DynamicData;
 using Lumper.Lib.ExtensionMethods;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Pakfile;
+using Lumper.UI.Views.Pages.VtfBrowser;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
-using Shared.Pakfile;
-using Views.Pages.VtfBrowser;
 
 public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel, VtfBrowserView>
 {
