@@ -1,7 +1,6 @@
 namespace Lumper.UI.ViewModels.Shared;
 
 using System.Runtime.CompilerServices;
-using Lumper.UI.Models.Matchers;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using ReactiveUI;
@@ -84,5 +83,5 @@ public abstract class HierarchicalBspNode(BspNode parent) : BspNode
 
 public abstract class MatchableBspNode(BspNode parent) : HierarchicalBspNode(parent)
 {
-    public abstract bool Match(Matcher matcher);
+    public abstract bool Match(string expr);
 }

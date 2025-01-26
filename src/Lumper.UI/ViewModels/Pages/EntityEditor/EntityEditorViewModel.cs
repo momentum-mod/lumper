@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Linq;
-using Lumper.UI.Models.Matchers;
 using Lumper.UI.Services;
-using Lumper.UI.ViewModels.Matchers;
 using Lumper.UI.ViewModels.Shared.Entity;
 using Lumper.UI.Views.Pages.EntityEditor;
 using ReactiveUI;
@@ -31,13 +29,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     public bool IsFiltered { get; private set; }
 
     [Reactive]
-    private MatcherViewModel? SelectedMatcher { get; set; } = new SimpleMatcherViewModel();
-
-    [Reactive]
     public string SearchPattern { get; set; } = "";
-
-    [ObservableAsProperty]
-    public MatcherViewModel? Matcher { get; }
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
 
@@ -61,16 +53,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             .ObserveOn(RxApp.TaskpoolScheduler)
             // Throttle changes to search pattern
             .Throttle(TimeSpan.FromMilliseconds(100))
-            .CombineLatest(this.WhenAnyValue(x => x.SelectedMatcher))
-            // Combine latest of each seach pattern and selected matcher type into a Matcher
-            .Select(tuple =>
-            {
-                (string? pattern, MatcherViewModel? matcher) = tuple;
-                return matcher is not null && !string.IsNullOrWhiteSpace(pattern)
-                    ? matcher.ConstructMatcher(pattern)
-                    : null;
-            })
-            // Combine latest with overall lump changes, e.g. new BSP is loaded
+            // Combine with overall lump changes, e.g. new BSP is loaded
             .CombineLatest(BspService.Instance.WhenAnyValue(x => x.EntityLumpViewModel))
             // Also watch changes to the entity collection. We don't care *what* entities have changed, just that
             // *something* changed, and we still want the incoming values (matchers and ent lump), so map those values
@@ -90,7 +73,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             .Switch()
             .Select(tuple =>
             {
-                (Matcher? matcher, EntityLumpViewModel? entLump) = tuple;
+                (string searchString, EntityLumpViewModel? entLump) = tuple;
 
                 // No ELVM loaded, probably no BSP loaded: empty list.
                 if (entLump is null)
@@ -102,17 +85,17 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
                 }
 
                 // No matchers: readonly list of all the entities in the ELVM.
-                if (matcher is null)
+                if (string.IsNullOrWhiteSpace(searchString))
                 {
                     IsFiltered = false;
                     return entLump.Entities.Items.ToList().AsReadOnly();
                 }
 
-                // We have a matcher, filter the entity list. Note that the above ObserveOn ensures we're on a
+                // We have a search, filter the entity list. Note that the above ObserveOn ensures we're on a
                 // separate thread if available, as filteration searches every *property* of every entity, so
                 // quite expensive.
                 IsFiltered = true;
-                return entLump.Entities.Items.Where(entity => entity.Match(matcher)).ToList().AsReadOnly();
+                return entLump.Entities.Items.Where(entity => entity.Match(searchString)).ToList().AsReadOnly();
             })
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.FilteredEntities);
