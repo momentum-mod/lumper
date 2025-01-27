@@ -73,9 +73,7 @@ diffing BSP versions in Git.
 ## Download
 
 See the [Releases](https://github.com/momentum-mod/lumper/releases) tab on the
-right! This program is very new, and we
-don't currently have any kind of auto-updater, so worth checking back here for
-updates regularly.
+right! The UI application will automatically offer updates when launched.
 
 ## Momentum
 
