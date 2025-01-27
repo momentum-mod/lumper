@@ -89,6 +89,10 @@
               <MenuItem Header="_Jobs" Command="{Binding PageService.ViewPage}"
                         CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D5" />
             </MenuItem>
+            <MenuItem Header="_About">
+              <MenuItem Header="_Check for updates" Command="{Binding UpdaterService.CheckForUpdates}"/>
+              <!-- TODO: About dialog! -->
+            </MenuItem>
           </Menu>
         </StackPanel>
       </DockPanel>
