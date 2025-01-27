@@ -462,11 +462,11 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 InputParams = new InputParams { Label = inputLabel, DefaultValue = defaultInput },
                 Width = 400,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                ButtonDefinitions = new[]
-                {
+                ButtonDefinitions =
+                [
                     new ButtonDefinition { Name = buttonLabel, IsDefault = true },
                     new ButtonDefinition { Name = "Cancel", IsCancel = true },
-                },
+                ],
             }
         );
 
