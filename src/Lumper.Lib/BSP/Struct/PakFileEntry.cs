@@ -140,6 +140,5 @@ public sealed class PakfileEntry : IDisposable
     public void Dispose() => DisposeIssuedStreams();
 
     // Deliberately not [JsonIgnore]ed so we expose this to JSON dumps.
-    public string HashSHA1 =>
-        BitConverter.ToString(SHA1.Create().ComputeHash(GetReadOnlyStream())).Replace("-", string.Empty);
+    public string HashSHA1 => Convert.ToHexString(SHA1.Create().ComputeHash(GetReadOnlyStream()));
 }
