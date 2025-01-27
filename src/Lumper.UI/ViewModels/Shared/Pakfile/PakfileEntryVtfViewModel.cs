@@ -109,10 +109,10 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
     public async Task SetImage(bool createNew)
     {
-        if (VtfFile is null || Program.Desktop.MainWindow is null)
+        if (VtfFile is null)
             return;
 
-        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+        IReadOnlyList<IStorageFile> result = await Program.MainWindow.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions
             {
                 AllowMultiple = false,

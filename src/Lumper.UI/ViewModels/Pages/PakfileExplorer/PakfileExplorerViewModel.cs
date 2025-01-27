@@ -194,7 +194,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                         "Do you want to update instances of this path in other parts of the BSP?",
                         ButtonEnum.YesNo
                     )
-                    .ShowWindowDialogAsync(Program.Desktop.MainWindow);
+                    .ShowWindowDialogAsync(Program.MainWindow);
 
                 moveReferences = result == ButtonResult.Yes;
                 queriedUser = true;
@@ -470,15 +470,11 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             }
         );
 
-    private static Task<string> ShowMessageBox(IMsBox<string> msBox) =>
-        msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
+    private static Task<string> ShowMessageBox(IMsBox<string> msBox) => msBox.ShowWindowDialogAsync(Program.MainWindow);
 
     private static async ValueTask<IStorageFolder?> PickFolder(string title = "Pick folder")
     {
-        if (Program.Desktop.MainWindow is null)
-            return null;
-
-        IReadOnlyList<IStorageFolder> result = await Program.Desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(
+        IReadOnlyList<IStorageFolder> result = await Program.MainWindow.StorageProvider.OpenFolderPickerAsync(
             new FolderPickerOpenOptions { Title = title }
         );
 
@@ -488,13 +484,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         return result[0];
     }
 
-    private static async ValueTask<IReadOnlyList<IStorageFile>?> PickFiles(string title = "Pick file(s)")
-    {
-        if (Program.Desktop.MainWindow is null)
-            return null;
-
-        return await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+    private static Task<IReadOnlyList<IStorageFile>> PickFiles(string title = "Pick file(s)") =>
+        Program.MainWindow.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions { Title = title, AllowMultiple = true }
         );
-    }
 }

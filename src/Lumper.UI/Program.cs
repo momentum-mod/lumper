@@ -3,6 +3,7 @@ namespace Lumper.UI;
 using System;
 using System.Diagnostics;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
 using NLog;
@@ -57,4 +58,9 @@ internal sealed class Program
             return desktop;
         }
     }
+
+    // MainWindow should never be null given we use Avalonia,
+    // null checks are extremely annoying when using message boxes.
+    public static Window MainWindow =>
+        Desktop.MainWindow ?? throw new InvalidOperationException("MainWindow is null somehow!");
 }

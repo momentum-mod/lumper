@@ -171,10 +171,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 
     public async Task ShowLoadJobsFileDialog()
     {
-        if (Program.Desktop.MainWindow is null)
-            return;
-
-        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+        IReadOnlyList<IStorageFile> result = await Program.MainWindow.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions
             {
                 AllowMultiple = false,
@@ -191,10 +188,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 
     public async Task ShowSaveJobsFileDialog()
     {
-        if (Program.Desktop.MainWindow is null)
-            return;
-
-        IStorageFile? result = await Program.Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(
+        IStorageFile? result = await Program.MainWindow.StorageProvider.SaveFilePickerAsync(
             new FilePickerSaveOptions { Title = "Save Jobs File", FileTypeChoices = GenerateJsonFileFilter() }
         );
 

@@ -68,10 +68,7 @@ public class RunExternalToolJobViewModel : JobViewModel
 
     public async Task ShowFilePickerDialog()
     {
-        if (Program.Desktop.MainWindow is null)
-            return;
-
-        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+        IReadOnlyList<IStorageFile> result = await Program.MainWindow.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions { Title = "Pick Executable", AllowMultiple = false }
         );
 
@@ -79,12 +76,9 @@ public class RunExternalToolJobViewModel : JobViewModel
             Path = result[0].Path.LocalPath;
     }
 
-    public async void ShowFolderPickerDialog()
+    public async Task ShowFolderPickerDialog()
     {
-        if (Program.Desktop.MainWindow is null)
-            return;
-
-        IReadOnlyList<IStorageFolder> result = await Program.Desktop.MainWindow.StorageProvider.OpenFolderPickerAsync(
+        IReadOnlyList<IStorageFolder> result = await Program.MainWindow.StorageProvider.OpenFolderPickerAsync(
             new FolderPickerOpenOptions { Title = "Pick Working Directory" }
         );
 
