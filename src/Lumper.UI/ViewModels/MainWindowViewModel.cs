@@ -62,11 +62,11 @@ public class MainWindowViewModel : ViewModel
                 Width = 400,
                 InputParams = new InputParams(),
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                ButtonDefinitions = new[]
-                {
+                ButtonDefinitions =
+                [
                     new ButtonDefinition { Name = "Load", IsDefault = true },
                     new ButtonDefinition { Name = "Cancel", IsCancel = true },
-                },
+                ],
             }
         );
 
@@ -117,7 +117,7 @@ public class MainWindowViewModel : ViewModel
         {
             Title = "Export JSON Summary",
             DefaultExtension = ".json",
-            FileTypeChoices = new[] { new FilePickerFileType("JSON File") { Patterns = ["*.json"] } },
+            FileTypeChoices = [new FilePickerFileType("JSON File") { Patterns = ["*.json"] }],
         };
 
         IStorageFile? result = await Program.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
@@ -168,15 +168,15 @@ public class MainWindowViewModel : ViewModel
 
     private static FilePickerFileType[] GenerateBspFileFilter() =>
         [
-            new FilePickerFileType("BSP Files")
+            new("BSP Files")
             {
-                Patterns = new[] { "*.bsp" },
+                Patterns = ["*.bsp"],
                 // MIME references from:
                 // https://www.wikidata.org/wiki/Q105858735
                 // https://www.wikidata.org/wiki/Q105859836
                 // https://www.wikidata.org/wiki/Q2701652
-                MimeTypes = new[] { "application/octet-stream", "model/vnd.valve.source.compiled-map" },
+                MimeTypes = ["application/octet-stream", "model/vnd.valve.source.compiled-map"],
             },
-            new FilePickerFileType("All Files") { Patterns = new[] { "*" } },
+            new("All Files") { Patterns = ["*"] },
         ];
 }

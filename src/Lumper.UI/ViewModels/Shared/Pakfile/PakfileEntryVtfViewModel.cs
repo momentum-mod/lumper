@@ -172,7 +172,7 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
     private static FilePickerFileType[] GenerateImageFileFilter() =>
         [
-            new FilePickerFileType("Image files") { Patterns = new[] { "*.bmp", "*.jpeg", "*.jpg", "*.png" } },
-            new FilePickerFileType("All files") { Patterns = new[] { "*" } },
+            new FilePickerFileType("Image files") { Patterns = ["*.bmp", "*.jpeg", "*.jpg", "*.png"] },
+            new FilePickerFileType("All files") { Patterns = ["*"] },
         ];
 }
