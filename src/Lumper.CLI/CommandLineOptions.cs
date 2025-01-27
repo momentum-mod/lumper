@@ -16,6 +16,15 @@ public class CommandLineOptions
     public required string InputPath { get; set; }
 
     [Option(
+        'v',
+        "verbose",
+        Default = false,
+        Required = false,
+        HelpText = "Enable verbose output (include debug messages)"
+    )]
+    public bool Verbose { get; set; }
+
+    [Option(
         'o',
         "output",
         Required = false,
@@ -78,13 +87,4 @@ public class CommandLineOptions
             + " or comma-separator list of names, e.g. sortproperties,ignoreoffsets."
     )]
     public JsonOptions JsonOptions { get; set; }
-
-    [Option(
-        'v',
-        "--verbose",
-        Default = false,
-        Required = false,
-        HelpText = "Enable verbose output (include debug messages)"
-    )]
-    public bool Verbose { get; set; }
 }
