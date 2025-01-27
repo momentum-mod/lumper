@@ -192,4 +192,8 @@
       <Setter Property="Padding" Value="4" />
     </Style>
   </Style>
+
+  <Style Selector="HyperlinkButton AccessText">
+    <Setter Property="TextDecorations" Value="" />
+  </Style>
 </Styles>
