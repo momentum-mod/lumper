@@ -87,4 +87,13 @@ public class CommandLineOptions
             + " or comma-separator list of names, e.g. sortproperties,ignoreoffsets."
     )]
     public JsonOptions JsonOptions { get; set; }
+
+    [Option(
+        'a',
+        "check-assets",
+        Default = false,
+        Required = false,
+        HelpText = "[VALIDATOR] Check whether the paklump contains official Valve assets, exits with 1 if so."
+    )]
+    public bool CheckAssets { get; set; }
 }
