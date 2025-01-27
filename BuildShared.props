@@ -22,9 +22,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)\resources\NLog.config" CopyToOutputDirectory="Always"/>
-    <None Include="$(MSBuildThisFileDirectory)\resources\RegisterLumperURLProtocol.ps1" CopyToOutputDirectory="Always"/>
-    <None Include="$(MSBuildThisFileDirectory)\resources\AssetManifest.rsv" CopyToOutputDirectory="Always"/>
+    <Content Include="$(MSBuildThisFileDirectory)\resources\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
   </ItemGroup>
 
 </Project>
