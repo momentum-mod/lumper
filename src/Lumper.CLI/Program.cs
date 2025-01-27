@@ -50,8 +50,7 @@ internal sealed class Program
         consoleRule.SetLoggingLevels(options.Verbose ? LogLevel.Debug : LogLevel.Info, LogLevel.Fatal);
         try
         {
-            Run(options);
-            return 0;
+            return Run(options) ? 0 : 1;
         }
         catch (Exception ex)
         {
@@ -66,10 +65,17 @@ internal sealed class Program
     // status code.
     //
     // If method completes successfully, the program will exit with status code 0.
-    private static void Run(CommandLineOptions options)
+    private static bool Run(CommandLineOptions options)
     {
         BspFile bspFile =
             BspFile.FromPath(options.InputPath, null) ?? throw new InvalidDataException("Failed to load BSP file");
+
+        // If this is ever true, the application is being used to perform validations, then exit with 0 or 1.
+        bool inValidationMode = false;
+        if (inValidationMode)
+            // All validations passed, exit with 0.
+            return true;
+
         if (options.JobWorkflow is { } workflowPath)
             RunWorkflow(bspFile, workflowPath);
 
@@ -86,6 +92,8 @@ internal sealed class Program
 
         if (options.JsonDump || options.JsonPath is not null)
             JsonDump(bspFile, options);
+
+        return true;
     }
 
     private static void JsonDump(BspFile bspFile, CommandLineOptions options) =>
@@ -161,11 +169,15 @@ internal sealed class Program
                         };
                     h.AddPostOptionsLines(
                         [
-                            "Without options, Lumper will simply read the BSP file and exit.",
-                            "If any options provided cause modifications, the BSP will be output to the same path.",
-                            "If you want to output to a different path, use the -o option.",
-                            "If -c or -C are given, an output file will always be produced, even if unmodified.",
-                            "If neither -c or -C are given and a BSP is output, BSP will be written in its current state.",
+                            "Without options, Lumper will simply read the BSP file and exit. "
+                                + "If any options provided cause modifications, the BSP will be output to the same path. "
+                                + "If you want to output to a different path, use the -o option.",
+                            "",
+                            "If -c or -C are given, an output file will always be produced, even if unmodified. "
+                                + "If neither -c or -C are given and a BSP is output, BSP will be written in its current state.",
+                            "",
+                            "Any parameters marked with [VALIDATOR] will cause the program to exit with status 0 if all "
+                                + "validations pass, or 1 if any fail. Non-validator params will be ignored!",
                         ]
                     );
                     return HelpText.DefaultParsingErrorsHandler(parserResult, h);
