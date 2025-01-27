@@ -110,7 +110,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         if (model is null || model == SelectedTab?.Entity)
             return;
 
-        if (SelectedTab is not null && SelectedTab.Entity.IsModified == false && SelectedTab.IsPinned == false)
+        if (SelectedTab is not null && !SelectedTab.Entity.IsModified && !SelectedTab.IsPinned)
             Tabs.Remove(SelectedTab);
 
         EntityEditorTabViewModel? newTab = Tabs.FirstOrDefault(x => x.Entity == model);
@@ -125,7 +125,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
     public void TogglePinnedTab(EntityEditorTabViewModel tab)
     {
-        if (tab.IsPinned == false && tab != SelectedTab)
+        if (!tab.IsPinned && tab != SelectedTab)
             Tabs.Remove(tab);
     }
 
