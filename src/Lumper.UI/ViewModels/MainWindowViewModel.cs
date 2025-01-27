@@ -35,9 +35,6 @@ public class MainWindowViewModel : ViewModel
 
     public async Task OpenCommand()
     {
-        if (Program.Desktop.MainWindow is null)
-            return;
-
         var dialog = new FilePickerOpenOptions
         {
             AllowMultiple = false,
@@ -45,9 +42,7 @@ public class MainWindowViewModel : ViewModel
             FileTypeFilter = GenerateBspFileFilter(),
         };
 
-        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
-            dialog
-        );
+        IReadOnlyList<IStorageFile> result = await Program.MainWindow.StorageProvider.OpenFilePickerAsync(dialog);
 
         if (result.Count == 0)
             return;
@@ -59,10 +54,7 @@ public class MainWindowViewModel : ViewModel
 
     public async Task OpenUrlCommand()
     {
-        if (Program.Desktop.MainWindow is null)
-            return;
-
-        IMsBox<string>? msBox = MessageBoxManager.GetMessageBoxCustom(
+        IMsBox<string> msBox = MessageBoxManager.GetMessageBoxCustom(
             new MessageBoxCustomParams
             {
                 ContentTitle = "Load from URL",
@@ -78,7 +70,7 @@ public class MainWindowViewModel : ViewModel
             }
         );
 
-        string result = await msBox.ShowWindowDialogAsync(Program.Desktop.MainWindow);
+        string result = await msBox.ShowWindowDialogAsync(Program.MainWindow);
         string url = msBox.InputValue;
 
         if (result == "Cancel" || !url.StartsWith("http"))
@@ -99,7 +91,7 @@ public class MainWindowViewModel : ViewModel
 
     public async Task SaveAsCommand()
     {
-        if (Program.Desktop.MainWindow is null || !BspService.Instance.HasLoadedBsp)
+        if (!BspService.Instance.HasLoadedBsp)
             return;
 
         var dialog = new FilePickerSaveOptions
@@ -109,7 +101,7 @@ public class MainWindowViewModel : ViewModel
             FileTypeChoices = GenerateBspFileFilter(),
         };
 
-        IStorageFile? result = await Program.Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+        IStorageFile? result = await Program.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
         if (result is null)
             return;
 
@@ -118,7 +110,7 @@ public class MainWindowViewModel : ViewModel
 
     public async Task JsonDumpCommand()
     {
-        if (Program.Desktop.MainWindow is null || !BspService.Instance.HasLoadedBsp)
+        if (!BspService.Instance.HasLoadedBsp)
             return;
 
         var dialog = new FilePickerSaveOptions
@@ -128,7 +120,7 @@ public class MainWindowViewModel : ViewModel
             FileTypeChoices = new[] { new FilePickerFileType("JSON File") { Patterns = ["*.json"] } },
         };
 
-        IStorageFile? result = await Program.Desktop.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
+        IStorageFile? result = await Program.MainWindow.StorageProvider.SaveFilePickerAsync(dialog);
         if (result is null)
             return;
 
@@ -148,7 +140,7 @@ public class MainWindowViewModel : ViewModel
         BspService.Instance.CloseCurrentBsp();
     }
 
-    public void ExitCommand() => Program.Desktop.MainWindow?.Close();
+    public void ExitCommand() => Program.MainWindow.Close();
 
     public static async Task OnClose(WindowClosingEventArgs e)
     {
@@ -168,11 +160,10 @@ public class MainWindowViewModel : ViewModel
         if (!BspService.Instance.IsModified)
             return true;
 
-        ButtonResult result = await MessageBoxManager
-            .GetMessageBoxStandard("Unsaved changes", message, ButtonEnum.OkCancel)
-            .ShowWindowDialogAsync(Program.Desktop.MainWindow);
-
-        return result == ButtonResult.Ok;
+        return await MessageBoxManager
+            .GetMessageBoxStandard("Unsaved changes", message, ButtonEnum.YesNo)
+            .ShowWindowDialogAsync(Program.MainWindow)
+            .ContinueWith(result => result.Result == ButtonResult.Yes);
     }
 
     private static FilePickerFileType[] GenerateBspFileFilter() =>

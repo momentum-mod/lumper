@@ -132,15 +132,12 @@ public sealed class BspService : ReactiveObject
             var cts = new CancellationTokenSource();
             var handler = new IoHandler(cts);
 
-            if (Program.Desktop.MainWindow is not null)
+            progressWindow = new IoProgressWindow
             {
-                progressWindow = new IoProgressWindow
-                {
-                    Title = $"Loading {Path.GetFileName(pathOrUrl)}",
-                    Handler = handler,
-                };
-                _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
-            }
+                Title = $"Loading {Path.GetFileName(pathOrUrl)}",
+                Handler = handler,
+            };
+            _ = progressWindow.ShowDialog(Program.MainWindow);
 
             BspFile = outStream is not null
                 ? await Observable.Start(() => BspFile.FromStream(outStream, handler), RxApp.TaskpoolScheduler)
@@ -181,11 +178,8 @@ public sealed class BspService : ReactiveObject
         var stream = new MemoryStream();
         try
         {
-            if (Program.Desktop.MainWindow is not null)
-            {
-                progressWindow = new IoProgressWindow { Title = $"Downloading {url}", Handler = handler };
-                _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
-            }
+            progressWindow = new IoProgressWindow { Title = $"Downloading {url}", Handler = handler };
+            _ = progressWindow.ShowDialog(Program.MainWindow);
 
             using var httpClient = new HttpClient();
             using HttpResponseMessage response = await httpClient.GetAsync(
@@ -277,15 +271,8 @@ public sealed class BspService : ReactiveObject
 
             string outName = outFile is not null ? Path.GetFileName(outFile.Path.AbsolutePath) : FileName!;
 
-            if (Program.Desktop.MainWindow is not null)
-            {
-                progressWindow = new IoProgressWindow
-                {
-                    Title = $"Saving {outName} ({compressString})",
-                    Handler = handler,
-                };
-                _ = progressWindow.ShowDialog(Program.Desktop.MainWindow);
-            }
+            progressWindow = new IoProgressWindow { Title = $"Saving {outName} ({compressString})", Handler = handler };
+            _ = progressWindow.ShowDialog(Program.MainWindow);
 
             // get the cubemaps that will be changed
 

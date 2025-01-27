@@ -59,7 +59,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
             DataStream.Seek(0, SeekOrigin.Begin);
             await DataStream.CopyToAsync(fileStream);
             fileStream.Flush();
-            await Program.Desktop.MainWindow!.Launcher.LaunchUriAsync(new Uri(fileName));
+            await Program.MainWindow.Launcher.LaunchUriAsync(new Uri(fileName));
         }
         catch (IOException ex)
         {

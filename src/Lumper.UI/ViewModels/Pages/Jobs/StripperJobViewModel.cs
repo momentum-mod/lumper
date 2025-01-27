@@ -30,10 +30,7 @@ public class StripperJobViewModel : JobViewModel
 
     public async Task ShowFilePickerDialog()
     {
-        if (Program.Desktop.MainWindow is null)
-            return;
-
-        IReadOnlyList<IStorageFile> result = await Program.Desktop.MainWindow.StorageProvider.OpenFilePickerAsync(
+        IReadOnlyList<IStorageFile> result = await Program.MainWindow.StorageProvider.OpenFilePickerAsync(
             GenerateFilePickerOptions()
         );
 
@@ -48,6 +45,6 @@ public class StripperJobViewModel : JobViewModel
         {
             Title = "Pick Stripper Config",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Stripper Config") { Patterns = new[] { "*.cfg" } }],
+            FileTypeFilter = [new FilePickerFileType("Stripper Config") { Patterns = ["*.cfg"] }],
         };
 }
