@@ -279,7 +279,7 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
     {
         private static readonly ConcurrentQueue<(Func<object>, CancellationTokenSource?)> Queue = new();
         private static readonly Subject<(Func<object>, object?)> Output = new();
-        private static readonly object Lock = new();
+        private static readonly Lock Lock = new();
         private static bool _isRunning;
 
         public static Task Run(Action fn) => Run(fn, null);

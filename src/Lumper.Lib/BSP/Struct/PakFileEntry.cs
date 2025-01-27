@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Newtonsoft.Json;
 using SharpCompress.Archives.Zip;
@@ -66,10 +67,10 @@ public sealed class PakfileEntry : IDisposable
     [JsonIgnore]
     // Instance lock for access to buffer and issued streams, ensuring original data is read from
     // zip thread-safely, and that new streams are not issued as data is being replaced.
-    private readonly object _instanceLock = new();
+    private readonly Lock _instanceLock = new();
 
     // Static lock for access to zip archive - SharpCompress's OpenEntryStream is not thread-safe.
-    private static readonly object ZipAccessLock = new();
+    private static readonly Lock ZipAccessLock = new();
 
     /// <summary>
     /// Get an stream to the uncompressed pakfile entry.
