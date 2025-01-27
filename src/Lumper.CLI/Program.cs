@@ -3,9 +3,12 @@ namespace Lumper.CLI;
 using System.Diagnostics;
 using CommandLine;
 using CommandLine.Text;
+using Lib.Bsp.Struct;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Enum;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Jobs;
+using Lumper.Lib.Util;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -72,6 +75,13 @@ internal sealed class Program
 
         // If this is ever true, the application is being used to perform validations, then exit with 0 or 1.
         bool inValidationMode = false;
+        if (options.CheckAssets)
+        {
+            inValidationMode = true;
+            if (!CheckAssets(bspFile))
+                return false;
+        }
+
         if (inValidationMode)
             // All validations passed, exit with 0.
             return true;
@@ -129,6 +139,44 @@ internal sealed class Program
 
             stopwatch.Stop();
             Logger.Info($"Job completed in {stopwatch.ElapsedMilliseconds}ms");
+        }
+    }
+
+    private static bool CheckAssets(BspFile bspFile)
+    {
+        // Not bother with OriginFilter stuff, seems very unlikely to be helpful in Momentum's case.
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+
+        int numMatches = 0;
+
+        var sw = new Stopwatch();
+        sw.Start();
+
+        // Not parallelizing as zip reads block per-entry
+        foreach (PakfileEntry entry in pakfileLump.Entries)
+        {
+            if (!AssetManifest.Manifest.TryGetValue(entry.Hash, out List<AssetManifest.Asset>? assets))
+                continue;
+
+            numMatches++;
+            string matches = string.Join(
+                ", ",
+                assets.Select(asset => entry.Key == asset.Path ? asset.Origin : $"{asset.Origin} asset {asset.Path}")
+            );
+            Logger.Error($"{entry.Key} matched {matches}");
+        }
+
+        Logger.Debug($"Asset check completed in {sw.ElapsedMilliseconds}ms");
+
+        if (numMatches > 0)
+        {
+            Logger.Error($"BSP file contains {numMatches} packed game assets!");
+            return false;
+        }
+        else
+        {
+            Logger.Info("Did not find any packed game assets");
+            return true;
         }
     }
 
