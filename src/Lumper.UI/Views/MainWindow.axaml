@@ -90,8 +90,9 @@
                         CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D5" />
             </MenuItem>
             <MenuItem Header="_About">
-              <MenuItem Header="_Check for updates" Command="{Binding UpdaterService.CheckForUpdates}"/>
-              <!-- TODO: About dialog! -->
+              <MenuItem Header="_Check For Updates" Command="{Binding UpdaterService.CheckForUpdates}" />
+              <Separator />
+              <MenuItem Header="About" Command="{Binding AboutCommand}" />
             </MenuItem>
           </Menu>
         </StackPanel>

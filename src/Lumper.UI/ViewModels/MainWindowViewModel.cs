@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using LogViewer;
 using Lumper.UI.Services;
+using Lumper.UI.Views;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
 using MsBox.Avalonia.Dto;
@@ -142,6 +143,12 @@ public class MainWindowViewModel : ViewModel
     }
 
     public void ExitCommand() => Program.MainWindow.Close();
+
+    public void AboutCommand()
+    {
+        var aboutWindow = new AboutWindow();
+        aboutWindow.ShowDialog(Program.MainWindow);
+    }
 
     public static async Task OnClose(WindowClosingEventArgs e)
     {
