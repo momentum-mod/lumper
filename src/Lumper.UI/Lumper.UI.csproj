@@ -4,11 +4,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ApplicationIcon>Assets\Images\Lumper.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <LangVersion>13</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
