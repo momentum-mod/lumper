@@ -12,8 +12,8 @@ public partial class AboutWindow : ReactiveWindow<ViewModel>
         InitializeComponent();
 
         UpdaterService.SemVer version = UpdaterService.GetAssemblyVersion();
+        LumperVersion.Text = version.IsDevBuild ? "Lumper (Dev Build)" : $"Lumper v{version}";
 
-        LumperVersion.Text = $"Lumper v{version}";
         DotnetVersion.Text = $".NET {System.Environment.Version}";
         AvaloniaVersion.Text =
             $"Avalonia {Assembly.Load("Avalonia").GetName().Version?.ToString() ?? "Unknown Version"}";
