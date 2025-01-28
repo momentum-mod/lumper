@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Lumper.Lib.Jobs;
+using Lumper.UI.Services;
+using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
-using Views.Pages.Jobs;
 
 public class StripperJobViewModel : JobViewModel
 {

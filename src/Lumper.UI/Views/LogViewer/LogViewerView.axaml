@@ -19,11 +19,11 @@
             ToolTip.Tip="Scroll to Bottom">
       <materialIcons:MaterialIcon Kind="FormatAlignBottom" Width="24" Height="24" />
     </Button>
-    <ToggleButton Name="AutoScroll" IsChecked="True" Margin="4 0 4 4" Grid.Column="1" Padding="0"
+    <ToggleButton IsChecked="{Binding StateService.LogAutoScroll}" Margin="4 0 4 4" Grid.Column="1" Padding="0"
                   Grid.Row="1" ToolTip.Tip="Auto Scroll">
       <materialIcons:MaterialIcon Kind="ArrowVerticalLock" Width="24" Height="24" />
     </ToggleButton>
-    <ToggleButton Name="ShowDebug" IsChecked="False" Margin="4 0 4 4" Grid.Column="1" Padding="0"
+    <ToggleButton IsChecked="{Binding StateService.LogShowDebug}" Margin="4 0 4 4" Grid.Column="1" Padding="0"
                   Grid.Row="2" ToolTip.Tip="Show Debug Logs">
       <materialIcons:MaterialIcon Kind="Bug" Width="24" Height="24" />
     </ToggleButton>

@@ -53,7 +53,7 @@
         <TextBox Grid.Column="0" Height="32" Width="164" Margin="8" Text="{Binding TextureSearch}"
                  Watermark="Search" />
         <CheckBox Grid.Column="1" Margin="4" VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                  IsChecked="{Binding ShowCubemaps, Mode=TwoWay}">
+                  IsChecked="{Binding StateService.VtfBrowserShowCubemaps, Mode=TwoWay}">
           Show Cubemaps
         </CheckBox>
         <Panel Grid.Column="2" Height="32" Width="1" Margin="8 0 12 0" Background="#10FFFFFF" />
