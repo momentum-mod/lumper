@@ -42,7 +42,7 @@
               <MenuItem Header="_Save As..." Command="{Binding SaveAsCommand}" HotKey="Ctrl+Shift+S"
                         InputGesture="Ctrl+Shift+S" />
               <!-- This thing is a bastard to right-align due to weird menu styling, don't bother -->
-              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding BspService.ShouldCompress}">
+              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding StateService.SaveCompressed}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">
                   <TextBlock Text="Save Compressed" />
                   <materialIcons:MaterialIcon Kind="QuestionMarkCircle">
@@ -56,7 +56,7 @@
                   </materialIcons:MaterialIcon>
                 </StackPanel>
               </CheckBox>
-              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding BspService.MakeBackup}">
+              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding StateService.MakeBackup}">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                   <TextBlock Text="Make Backup" />
                   <materialIcons:MaterialIcon Kind="QuestionMarkCircle">

@@ -9,6 +9,7 @@ using Avalonia.Controls.Documents;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
+using Lumper.UI.Services;
 using Lumper.UI.ViewModels.LogViewer;
 using NLog;
 using ReactiveUI;
@@ -31,7 +32,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 
     private void AddLogMessage(LogMessage logMessage)
     {
-        if (logMessage.Level == LogLevel.Debug && !(ShowDebug.IsChecked ?? false))
+        if (logMessage.Level == LogLevel.Debug && !StateService.Instance.LogShowDebug)
             return;
 
         try
@@ -108,7 +109,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 Logs.Inlines.Add(new Run(ex.Message) { Foreground = Brushes.IndianRed });
             }
 
-            if (AutoScroll.IsChecked!.Value)
+            if (StateService.Instance.LogAutoScroll)
                 ScrollToBottom();
         }
         catch (Exception e)

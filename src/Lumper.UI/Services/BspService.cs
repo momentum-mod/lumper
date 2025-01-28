@@ -70,12 +70,6 @@ public sealed class BspService : ReactiveObject
     [Reactive]
     public bool HasLoadedBsp { get; set; }
 
-    [Reactive]
-    public bool ShouldCompress { get; set; }
-
-    [Reactive]
-    public bool MakeBackup { get; set; } = true;
-
     private EntityLumpViewModel? _entityLumpViewModel;
 
     public EntityLumpViewModel? EntityLumpViewModel =>
@@ -264,7 +258,7 @@ public sealed class BspService : ReactiveObject
             var cts = new CancellationTokenSource();
             var handler = new IoHandler(cts);
 
-            DesiredCompression compress = ShouldCompress
+            DesiredCompression compress = StateService.Instance.SaveCompressed
                 ? DesiredCompression.Compressed
                 : DesiredCompression.Uncompressed;
             string compressString = compress == DesiredCompression.Compressed ? "compressed" : "uncompressed";
@@ -278,7 +272,13 @@ public sealed class BspService : ReactiveObject
 
             Dictionary<string, string> modified = BspFile.GetLump<PakfileLump>().GetCubemapsToChange(outName);
             await Observable.Start(
-                () => BspFile.SaveToFile(outFile?.Path.LocalPath, compress: compress, handler, makeBackup: MakeBackup),
+                () =>
+                    BspFile.SaveToFile(
+                        outFile?.Path.LocalPath,
+                        compress: compress,
+                        handler,
+                        makeBackup: StateService.Instance.MakeBackup
+                    ),
                 RxApp.TaskpoolScheduler
             );
 
