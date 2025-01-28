@@ -26,7 +26,7 @@ public sealed partial class UpdaterService : ReactiveObject
 
     private const string ReleasesUrl = "https://api.github.com/repos/momentum-mod/lumper/releases";
 
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     // Check for updates as soon as service starts, if haven't checked in last hour.
     private UpdaterService()
@@ -50,7 +50,7 @@ public sealed partial class UpdaterService : ReactiveObject
 
         if (currentVersion.IsDevBuild)
         {
-            Logger.Debug("Running a development build, skipping update check");
+            _logger.Debug("Running a development build, skipping update check");
             return;
         }
 
@@ -58,7 +58,7 @@ public sealed partial class UpdaterService : ReactiveObject
 
         if (GetAssemblyVersion() >= latestRelease.Version)
         {
-            Logger.Debug("Current build is up to date");
+            _logger.Debug("Current build is up to date");
             return;
         }
 
@@ -82,7 +82,7 @@ public sealed partial class UpdaterService : ReactiveObject
     /// <summary>
     /// Downloads an update for the program, applies it, and then restarts itself with the new version
     /// </summary>
-    private static async ValueTask Update(GithubRelease release)
+    private async ValueTask Update(GithubRelease release)
     {
         (OSPlatform os, string osPrefix) = GetPlatform();
         bool isWindows = os == OSPlatform.Windows;
@@ -138,7 +138,7 @@ public sealed partial class UpdaterService : ReactiveObject
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to download update!");
+            _logger.Error(ex, "Failed to download update!");
             progressWindow.Close();
             return;
         }
@@ -164,7 +164,7 @@ public sealed partial class UpdaterService : ReactiveObject
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to move updater executable!");
+            _logger.Error(ex, "Failed to move updater executable!");
             progressWindow.Close();
             return;
         }
@@ -183,13 +183,13 @@ public sealed partial class UpdaterService : ReactiveObject
                 entry.ExtractToFile(Path.Combine(appDir, entry.Name), overwrite: true);
                 float prog = (float)(100 - downloadProgressProportion) / numEntries;
                 handler.UpdateProgress(prog, $"Extracting {entry.Name}");
-                Logger.Info($"Extracted {entry.Name}");
+                _logger.Info($"Extracted {entry.Name}");
             }
         }
         catch (Exception ex)
         {
             File.Move(tmpPath, updaterExecutablePath);
-            Logger.Error(ex, "Failed to extract new version, reverting!");
+            _logger.Error(ex, "Failed to extract new version, reverting!");
             return;
         }
         finally
@@ -199,7 +199,7 @@ public sealed partial class UpdaterService : ReactiveObject
 
         if (isWindows)
         {
-            Logger.Info("Update completed, restarting...");
+            _logger.Info("Update completed, restarting...");
 
             Program.MainWindow.Closed += (_, _) =>
                 Process.Start(
@@ -213,7 +213,7 @@ public sealed partial class UpdaterService : ReactiveObject
         }
         else
         {
-            Logger.Info("Update completed!");
+            _logger.Info("Update completed!");
 
             await MessageBoxManager
                 .GetMessageBoxStandard("Update complete", "Update is complete, please relaunch the application!")
