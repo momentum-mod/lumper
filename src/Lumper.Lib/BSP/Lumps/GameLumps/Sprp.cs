@@ -8,9 +8,10 @@ using NLog;
 
 public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
 {
-    public StaticPropDictLump StaticPropsDict { get; set; } = null!;
-    public StaticPropLeafLump StaticPropsLeaf { get; set; } = null!;
-    public StaticPropLump StaticProps { get; set; } = null!;
+    // All are null iff Sprp is empty when reading i.e. header says length == 0
+    public StaticPropDictLump? StaticPropsDict { get; set; }
+    public StaticPropLeafLump? StaticPropsLeaf { get; set; }
+    public StaticPropLump? StaticProps { get; set; }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -60,15 +61,27 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
     {
         var w = new BinaryWriter(stream);
 
-        w.Write(StaticPropsDict.Data.Count);
-        StaticPropsDict.Write(w.BaseStream);
+        if (StaticPropsDict is not null)
+        {
+            w.Write(StaticPropsDict.Data.Count);
+            StaticPropsDict.Write(w.BaseStream);
+        }
 
-        w.Write(StaticPropsLeaf.Data.Count);
-        StaticPropsLeaf.Write(w.BaseStream);
+        if (StaticPropsLeaf is not null)
+        {
+            w.Write(StaticPropsLeaf.Data.Count);
+            StaticPropsLeaf.Write(w.BaseStream);
+        }
 
-        w.Write(StaticProps.Data.Count);
-        StaticProps.Write(w.BaseStream);
+        if (StaticProps is not null)
+        {
+            w.Write(StaticProps.Data.Count);
+            StaticProps.Write(w.BaseStream);
+        }
     }
 
-    public override bool Empty => StaticProps.Empty && StaticPropsDict.Empty && StaticPropsLeaf.Empty;
+    public override bool Empty =>
+        (StaticProps is null || StaticProps.Empty)
+        && (StaticPropsDict is null || StaticPropsDict.Empty)
+        && (StaticPropsLeaf is null || StaticPropsLeaf.Empty);
 }
