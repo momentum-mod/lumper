@@ -77,8 +77,9 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output, IoHandler? 
             LumpHeaderInfo newHeaderInfo = Write(lump);
             HeaderInfo.Add((lump, newHeaderInfo));
 
-            // TODO: meh
-            lump.Version = lump is Sprp sprp ? (ushort)sprp.StaticProps.GetVersion() : (ushort)lump.Version;
+            lump.Version = lump is Sprp sprp
+                ? (ushort)(sprp.StaticProps?.GetVersion() ?? (ushort)StaticPropVersion.Unknown)
+                : (ushort)lump.Version;
 
             headers.Add(new GameLumpHeader(newHeaderInfo, (ushort)lump.Version, (int)key));
 
