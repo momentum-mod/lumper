@@ -107,7 +107,6 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
         lump.Write(uncompressedStream, Handler);
         long uncompressedLength = uncompressedStream.Length;
 
-        long compressedLength;
         uncompressedStream.Seek(0, SeekOrigin.Begin);
 
         using var mem = new MemoryStream();
@@ -122,42 +121,20 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
         lzmaStream.Dispose();
 
         mem.Seek(0, SeekOrigin.Begin);
+        long compressedLength = mem.Length;
 
-        if (uncompressedLength == 0 || mem.Length > uncompressedLength)
-        {
-            // No point compressing empty lumps, also LZMA header takes up 22
-            // bytes so useless for very small lumps.
-            if (uncompressedLength > 0)
-            {
-                Logger.Debug(
-                    "Compressed lump larger than uncompressed, skipping. "
-                        + $"(compressed: {mem.Length}, uncompressed: {uncompressedLength})"
-                );
-            }
+        var writer = new BinaryWriter(mem);
+        const int lzmaId = ('A' << 24) | ('M' << 16) | ('Z' << 8) | 'L';
+        writer.Write(lzmaId);
+        writer.Write((int)uncompressedStream.Length);
+        writer.Write((int)mem.Length - headerSize);
+        writer.Write(lzmaStream.Properties);
 
-            uncompressedStream.Seek(0, SeekOrigin.Begin);
-            uncompressedStream.CopyTo(BaseStream);
+        if (writer.BaseStream.Position != headerSize)
+            throw new InvalidDataException("Failed to compress stream: bad LZMA header");
 
-            compressedLength = -1;
-        }
-        else
-        {
-            mem.Seek(0, SeekOrigin.Begin);
-            compressedLength = mem.Length;
-
-            var writer = new BinaryWriter(mem);
-            const int lzmaId = ('A' << 24) | ('M' << 16) | ('Z' << 8) | 'L';
-            writer.Write(lzmaId);
-            writer.Write((int)uncompressedStream.Length);
-            writer.Write((int)mem.Length - headerSize);
-            writer.Write(lzmaStream.Properties);
-
-            if (writer.BaseStream.Position != headerSize)
-                throw new InvalidDataException("Failed to compress stream: bad LZMA header");
-
-            mem.Seek(0, SeekOrigin.Begin);
-            mem.CopyTo(BaseStream);
-        }
+        mem.Seek(0, SeekOrigin.Begin);
+        mem.CopyTo(BaseStream);
 
         return new LumpHeaderInfo
         {
