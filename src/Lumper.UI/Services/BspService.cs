@@ -80,7 +80,7 @@ public sealed class BspService : ReactiveObject
     public PakfileLumpViewModel? PakfileLumpViewModel =>
         LazyLoadLump(ref _pakfileLumpViewModel, () => new PakfileLumpViewModel(BspFile!));
 
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private List<ILumpViewModel?> Lumps => [_entityLumpViewModel, _pakfileLumpViewModel];
 
@@ -101,7 +101,7 @@ public sealed class BspService : ReactiveObject
         if (!file.Path.IsFile || file.Path.AbsolutePath is null)
             throw new IOException("Failed to get file path");
 
-        Logger.Info($"Loading {file.Path.AbsolutePath}");
+        _logger.Info($"Loading {file.Path.AbsolutePath}");
         IsLoading = true;
 
         return await Load(file.Path.AbsolutePath);
@@ -150,7 +150,7 @@ public sealed class BspService : ReactiveObject
         catch (Exception ex)
         {
             CloseCurrentBsp();
-            Logger.Error(ex, "Failed to load BSP file!");
+            _logger.Error(ex, "Failed to load BSP file!");
             return false;
         }
         finally
@@ -163,7 +163,7 @@ public sealed class BspService : ReactiveObject
         return true;
     }
 
-    private static async Task<Stream?> HttpDownload(string url)
+    private async Task<Stream?> HttpDownload(string url)
     {
         IoProgressWindow? progressWindow = null;
         byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
@@ -214,9 +214,9 @@ public sealed class BspService : ReactiveObject
         catch (Exception ex)
         {
             if (ex is TaskCanceledException)
-                Logger.Info("Download cancelled by user");
+                _logger.Info("Download cancelled by user");
             else
-                Logger.Error(ex, "Failed to download map!");
+                _logger.Error(ex, "Failed to download map!");
 
             await stream.DisposeAsync();
             return null;
@@ -302,12 +302,12 @@ public sealed class BspService : ReactiveObject
         }
         catch (FileLoadException)
         {
-            Logger.Warn("Failed to load new file, doing a full UI file load");
+            _logger.Warn("Failed to load new file, doing a full UI file load");
             await Observable.Start(() => Load(outFile?.Path.LocalPath ?? FilePath!), RxApp.TaskpoolScheduler);
         }
         catch (Exception ex)
         {
-            Logger.Error(ex, "Failed to save file!");
+            _logger.Error(ex, "Failed to save file!");
             return false;
         }
         finally
@@ -406,7 +406,7 @@ public sealed class BspService : ReactiveObject
         CloseCurrentBsp();
         string source = string.Join(' ', Path.GetFileNameWithoutExtension(callerFile), callerMember);
         string message = $"{source} is requesting a loaded BSP when it shouldn't!";
-        Logger.Error(message); // Log this since this error message tends to get lost
+        _logger.Error(message); // Log this since this error message tends to get lost
         throw new InvalidOperationException(message);
     }
 
