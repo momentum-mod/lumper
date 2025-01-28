@@ -27,12 +27,13 @@ public class MainWindowViewModel : ViewModel
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public MainWindowViewModel()
+    public MainWindowViewModel() =>
+        Program.Desktop.Startup += (_, _) => Program.MainWindow.Opened += (_, _) => OnMainWindowOpened();
+
+    private void OnMainWindowOpened()
     {
-        if (Program.Desktop.Args is { Length: 1 })
-        {
-            Observable.Start(() => BspService.Instance.Load(Program.Desktop.Args[0]), RxApp.MainThreadScheduler);
-        }
+        if (Program.Desktop.Args is [{ } bspFile])
+            Observable.Start(() => BspService.Instance.Load(bspFile), RxApp.MainThreadScheduler);
     }
 
     public async Task OpenCommand()
