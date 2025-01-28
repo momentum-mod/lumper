@@ -13,7 +13,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.Bsp.IO;
-using Lumper.UI.ViewModels;
 using Lumper.UI.Views;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -86,6 +85,9 @@ public sealed partial class UpdaterService : ReactiveObject
     private static async ValueTask Update(GithubRelease release)
     {
         (OSPlatform os, string osPrefix) = GetPlatform();
+        bool isWindows = os == OSPlatform.Windows;
+        bool isLinux = !isWindows;
+
         using var zipStream = new MemoryStream();
         var cts = new CancellationTokenSource();
         var handler = new IoHandler(cts);
@@ -143,20 +145,22 @@ public sealed partial class UpdaterService : ReactiveObject
 
         handler.UpdateProgress(0, "Extracting release files...");
 
-        // Zip stream is downloaded into memory, now need to extract it. On both Windows and Linux, we cannot
-        // delete/overwrite the running executable (Lumper.UI(.exe)) but we *can* rename it, extract the new
-        // executable with the original name. Then we just need to spawn a separate progress to clean up the
-        // renamed executable and run the new one.
-        string cwd = AppContext.BaseDirectory;
-        string updaterExecutablePath = Path.Combine(cwd, "Lumper.UI" + (os == OSPlatform.Windows ? ".exe" : ""));
+        string appDir = AppContext.BaseDirectory;
+        string updaterExecutablePath = Path.Combine(appDir, "Lumper.UI" + (os == OSPlatform.Windows ? ".exe" : ""));
         string tmpPath = updaterExecutablePath + ".bak";
 
         try
         {
-            if (File.Exists(tmpPath))
-                File.Delete(tmpPath);
-
-            File.Move(updaterExecutablePath, tmpPath);
+            // Zip stream is downloaded into memory, now need to extract it.
+            // - On Windows, we can't overwrite the running executable, but we can rename it, then delete after
+            //   process exits.
+            // - On Linux, we can delete the executable then overwrite it, but on Ubuntu at least, I can't
+            //   seem to launch a different executable via Process.Start() (running the original executable
+            //   *does* seem to work though??)
+            if (os == OSPlatform.Windows)
+                File.Move(updaterExecutablePath, tmpPath);
+            else if (File.Exists(updaterExecutablePath))
+                File.Delete(updaterExecutablePath);
         }
         catch (Exception ex)
         {
@@ -176,7 +180,7 @@ public sealed partial class UpdaterService : ReactiveObject
 
             foreach (ZipArchiveEntry entry in zip.Entries)
             {
-                entry.ExtractToFile(Path.Combine(cwd, entry.Name), overwrite: true);
+                entry.ExtractToFile(Path.Combine(appDir, entry.Name), overwrite: true);
                 float prog = (float)(100 - downloadProgressProportion) / numEntries;
                 handler.UpdateProgress(prog, $"Extracting {entry.Name}");
                 Logger.Info($"Extracted {entry.Name}");
@@ -193,29 +197,30 @@ public sealed partial class UpdaterService : ReactiveObject
             progressWindow.Close();
         }
 
-        Logger.Info("Update completed, restarting...");
+        if (isWindows)
+        {
+            Logger.Info("Update completed, restarting...");
 
-        Process.Start(
-            os == OSPlatform.Windows
-                ? new ProcessStartInfo("cmd.exe", "/c sleep 1 && rm ./Lumper.UI.exe.bak && Lumper.UI.exe")
-                {
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    WorkingDirectory = cwd,
-                }
-                : new ProcessStartInfo("sleep 1 && rm ./Lumper.UI.bak && ./Lumper.UI")
-                {
-                    CreateNoWindow = true,
-                    UseShellExecute = true,
-                    RedirectStandardError = true,
-                    RedirectStandardOutput = true,
-                    WorkingDirectory = cwd,
-                }
-        );
+            Program.MainWindow.Closed += (_, _) =>
+                Process.Start(
+                    new ProcessStartInfo("cmd.exe", "/c sleep 1 && del Lumper.UI.exe.bak && Lumper.UI.exe")
+                    {
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        WorkingDirectory = appDir,
+                    }
+                );
+        }
+        else
+        {
+            Logger.Info("Update completed!");
 
-        Environment.Exit(0);
+            await MessageBoxManager
+                .GetMessageBoxStandard("Update complete", "Update is complete, please relaunch the application!")
+                .ShowWindowDialogAsync(Program.MainWindow);
+        }
+
+        Program.Desktop.Shutdown();
     }
 
     private async Task<GithubRelease> FetchGithubUpdates()
