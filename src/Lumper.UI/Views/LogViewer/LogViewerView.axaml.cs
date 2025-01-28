@@ -89,11 +89,16 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 {
                     FontStyle = FontStyle.Italic,
                     FontWeight = FontWeight.Medium,
-                    Foreground = Brushes.Gray,
+                    Foreground = Brushes.LightGray,
                 }
             );
 
-            Logs.Inlines.Add(new Run(logMessage.Message));
+            Logs.Inlines.Add(
+                new Run(logMessage.Message)
+                {
+                    Foreground = logMessage.Exception is null ? Brushes.White : Brushes.LightPink,
+                }
+            );
 
             if (logMessage.Exception is { } ex)
             {
@@ -107,6 +112,14 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 );
 
                 Logs.Inlines.Add(new Run(ex.Message) { Foreground = Brushes.IndianRed });
+                if (ex.StackTrace is not null)
+                {
+                    Logs.Inlines.Add(new LineBreak());
+                    string indent = new(' ', 8 + 26);
+                    Logs.Inlines.Add(
+                        new Run(indent + ex.StackTrace.Replace("\n", "\n" + indent)) { Foreground = Brushes.Tomato }
+                    );
+                }
             }
 
             if (StateService.Instance.LogAutoScroll)
