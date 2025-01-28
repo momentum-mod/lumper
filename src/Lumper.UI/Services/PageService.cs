@@ -56,7 +56,7 @@ public sealed class PageService : ReactiveObject
     [Reactive]
     public Page? PreviousPage { get; private set; }
 
-    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private PageService() =>
         BspService
@@ -99,7 +99,7 @@ public sealed class PageService : ReactiveObject
         catch (Exception ex)
         {
             // Hopefully catches anything thrown up when loading page or shared VMs
-            Logger.Error(ex, "Failed to load page");
+            _logger.Error(ex, "Failed to load page");
             ActivePage = null;
             ActivePageVm = null;
         }
