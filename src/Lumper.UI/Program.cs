@@ -59,8 +59,8 @@ internal sealed class Program
         }
     }
 
-    // MainWindow should never be null given we use Avalonia,
-    // null checks are extremely annoying when using message boxes.
+    // MainWindow should never be null given we use Avalonia desktop mode and mainwindow is
+    // always alive; null checks get very annoying when using message boxes.
     public static Window MainWindow =>
         Desktop.MainWindow ?? throw new InvalidOperationException("MainWindow is null somehow!");
 }
