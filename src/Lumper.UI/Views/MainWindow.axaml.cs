@@ -39,6 +39,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         });
     }
 
+    // ReSharper disable once AsyncVoidMethod - Needed for event binding
     private async void Window_OnClosing(object? _, WindowClosingEventArgs e)
     {
         if (ViewModel is null)

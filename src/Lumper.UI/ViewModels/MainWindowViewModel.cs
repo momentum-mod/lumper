@@ -1,6 +1,5 @@
 namespace Lumper.UI.ViewModels;
 
-using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -133,14 +132,11 @@ public class MainWindowViewModel : ViewModel
     public async Task CloseCommand()
     {
         if (
-            !BspService.Instance.HasLoadedBsp
-            || !await ShowUnsavedChangesDialog("Do you want to discard your current changes?")
+            BspService.Instance.HasLoadedBsp
+            && BspService.Instance.IsModified
+            && await ShowUnsavedChangesDialog("Do you want to discard your current changes?")
         )
-        {
-            return;
-        }
-
-        BspService.Instance.CloseCurrentBsp();
+            BspService.Instance.CloseCurrentBsp();
     }
 
     public void ExitCommand() => Program.MainWindow.Close();
@@ -151,29 +147,23 @@ public class MainWindowViewModel : ViewModel
         aboutWindow.ShowDialog(Program.MainWindow);
     }
 
-    public static async Task OnClose(WindowClosingEventArgs e)
-    {
-        e.Cancel = true;
-
-        if (!await ShowUnsavedChangesDialog("Are you sure you want to close the application without saving?"))
-            return;
-
-        // Since we have to cancel closing event on start due to not being able to await on Event
-        // and message box cannot work in synchronous mode due to main window thread being frozen,
-        // we have to manually close process. (Window.Close() would recursively call OnClose function)
-        Environment.Exit(1);
-    }
-
-    private static async Task<bool> ShowUnsavedChangesDialog(string message)
+    public static async ValueTask OnClose(WindowClosingEventArgs e)
     {
         if (!BspService.Instance.IsModified)
-            return true;
+            return;
 
-        return await MessageBoxManager
+        // We need to cancel this immediately otherwise window closes before we can await the dialog
+        e.Cancel = true;
+
+        if (await ShowUnsavedChangesDialog("Are you sure you want to close the application without saving?"))
+            Program.Desktop.Shutdown();
+    }
+
+    private static Task<bool> ShowUnsavedChangesDialog(string message) =>
+        MessageBoxManager
             .GetMessageBoxStandard("Unsaved changes", message, ButtonEnum.YesNo)
             .ShowWindowDialogAsync(Program.MainWindow)
             .ContinueWith(result => result.Result == ButtonResult.Yes);
-    }
 
     private static FilePickerFileType[] GenerateBspFileFilter() =>
         [
