@@ -6,9 +6,9 @@ using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
+using Lumper.UI.ViewModels.Shared.Pakfile;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Shared.Pakfile;
 using Node = PakfileTreeNodeViewModel;
 using PathList = System.Collections.Generic.List<string>;
 
