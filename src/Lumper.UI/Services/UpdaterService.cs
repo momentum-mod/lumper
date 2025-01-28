@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.Bsp.IO;
+using Lumper.UI.ViewModels;
 using Lumper.UI.Views;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -48,7 +49,7 @@ public sealed partial class UpdaterService : ReactiveObject
     {
         SemVer currentVersion = GetAssemblyVersion();
 
-        if (currentVersion is { Major: 0, Minor: 0, Patch: 0 })
+        if (currentVersion.IsDevBuild)
         {
             Logger.Debug("Running a development build, skipping update check");
             return;
@@ -291,6 +292,8 @@ public sealed partial class UpdaterService : ReactiveObject
         public static bool operator <=(SemVer a, SemVer b) => !(a > b);
 
         public static bool operator >=(SemVer a, SemVer b) => !(a < b);
+
+        public bool IsDevBuild => Major == 0 && Minor == 0 && Patch == 0;
 
         public override string ToString() => $"{Major}.{Minor}.{Patch}";
 
