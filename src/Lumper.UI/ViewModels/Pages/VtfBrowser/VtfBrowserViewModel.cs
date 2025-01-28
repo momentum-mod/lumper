@@ -16,6 +16,8 @@ using ReactiveUI.Fody.Helpers;
 
 public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel, VtfBrowserView>
 {
+    public StateService StateService { get; } = StateService.Instance;
+
     [ObservableAsProperty]
     public ReadOnlyCollection<PakfileEntryVtfViewModel>? FilteredItems { get; }
 
@@ -28,9 +30,6 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
     // Using a power of 2 doesn't have a significant improvement visually and 128/256 sizes feel too small/large
     [Reactive]
     public double Dimensions { get; set; } = 192;
-
-    [Reactive]
-    public bool ShowCubemaps { get; set; }
 
     [Reactive]
     public string TextureSearch { get; set; } = "";
@@ -55,7 +54,7 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
 
         this.WhenAnyValue(x => x.TextureSearch)
             .Throttle(TimeSpan.FromMilliseconds(200))
-            .CombineLatest(this.WhenAnyValue(x => x.ShowCubemaps))
+            .CombineLatest(this.WhenAnyValue(x => x.StateService.VtfBrowserShowCubemaps))
             .ObserveOn(RxApp.TaskpoolScheduler)
             .CombineLatest(vtfs.Connect())
             .Select(x =>

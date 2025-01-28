@@ -5,11 +5,11 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Lumper.Lib.Jobs;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Pakfile;
+using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
-using Shared.Pakfile;
-using Views.Pages.Jobs;
 
 public class RunExternalToolJobViewModel : JobViewModel
 {

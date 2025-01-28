@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Platform.Storage;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Pakfile;
+using Lumper.UI.Views.Pages.PakfileExplorer;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
 using MsBox.Avalonia.Dto;
@@ -17,9 +20,6 @@ using MsBox.Avalonia.Models;
 using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Services;
-using Shared.Pakfile;
-using Views.Pages.PakfileExplorer;
 using Node = PakfileTreeNodeViewModel;
 
 public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorerViewModel, PakfileExplorerView>

@@ -28,9 +28,17 @@ public sealed partial class UpdaterService : ReactiveObject
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    // Check for updates as soon as service starts
-    // TODO: Track the last update check using Data Persistence, don't call if done recently
-    private UpdaterService() => _ = CheckForUpdates();
+    // Check for updates as soon as service starts, if haven't checked in last hour.
+    private UpdaterService()
+    {
+        const int updateCheckInterval = 60 * 60;
+        long time = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+        long lastCheck = StateService.Instance.LastUpdateCheck;
+        StateService.Instance.LastUpdateCheck = time;
+
+        if (time - lastCheck > updateCheckInterval)
+            _ = CheckForUpdates();
+    }
 
     /// <summary>
     /// Check whether the running executable is up-to-date with the latest release on Github

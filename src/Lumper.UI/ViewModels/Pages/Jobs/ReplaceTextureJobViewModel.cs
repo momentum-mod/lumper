@@ -5,9 +5,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using DynamicData;
 using Lumper.Lib.Jobs;
+using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using Views.Pages.Jobs;
 
 public sealed class ReplaceTextureJobViewModel : JobViewModel, IDisposable
 {

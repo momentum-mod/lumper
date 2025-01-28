@@ -2,8 +2,8 @@
 
 using System.Reflection;
 using Avalonia.ReactiveUI;
-using Services;
-using ViewModels;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels;
 
 public partial class AboutWindow : ReactiveWindow<ViewModel>
 {

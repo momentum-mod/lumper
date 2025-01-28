@@ -3,12 +3,15 @@ namespace Lumper.UI.ViewModels.LogViewer;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Lumper.UI.Services;
 using Lumper.UI.ViewModels;
 using Lumper.UI.Views.LogViewer;
 using NLog;
 
 public sealed class LogViewerViewModel : ViewModelWithView<LogViewerViewModel, LogViewerView>, IDisposable
 {
+    public static StateService StateService => StateService.Instance;
+
     // Subject is an easy way to get reactive NLog output. Any thread can call AddLog, but the view listens to the
     // subject on the main thread. ReplaySubject is used because if someone loads a map with a launch arg, the loading
     // is allowed to get started in its own thread before the view is fully initialized. ReplaySubject will buffer
