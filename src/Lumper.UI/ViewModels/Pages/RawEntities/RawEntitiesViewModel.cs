@@ -3,11 +3,11 @@ namespace Lumper.UI.ViewModels.Pages.RawEntities;
 using System.IO;
 using System.Reactive.Linq;
 using AvaloniaEdit;
+using Lumper.UI.Services;
+using Lumper.UI.ViewModels.Shared.Entity;
+using Lumper.UI.Views.Pages.RawEntities;
 using NLog;
 using ReactiveUI;
-using Services;
-using Shared.Entity;
-using Views.Pages.RawEntities;
 
 public sealed class RawEntitiesViewModel : ViewModelWithView<RawEntitiesViewModel, RawEntitiesView>
 {
