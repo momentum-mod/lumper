@@ -19,6 +19,9 @@ public class StateService : ReactiveObject
     public StateService() => Instance = this;
 
     [DataMember, Reactive]
+    public long LastUpdateCheck { get; set; } = 0;
+
+    [DataMember, Reactive]
     public bool SaveCompressed { get; set; } = false;
 
     [DataMember, Reactive]
