@@ -22,6 +22,7 @@ public class MainWindowViewModel : ViewModel
     public static BspService BspService => BspService.Instance;
     public static PageService PageService => PageService.Instance;
     public static UpdaterService UpdaterService => UpdaterService.Instance;
+    public static StateService StateService => StateService.Instance;
 
     public LogViewerViewModel LogViewer { get; set; } = new();
 
