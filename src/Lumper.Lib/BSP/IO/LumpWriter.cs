@@ -124,8 +124,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
         long compressedLength = mem.Length;
 
         var writer = new BinaryWriter(mem);
-        const int lzmaId = ('A' << 24) | ('M' << 16) | ('Z' << 8) | 'L';
-        writer.Write(lzmaId);
+        writer.Write("LZMA"u8);
         writer.Write((int)uncompressedStream.Length);
         writer.Write((int)mem.Length - headerSize);
         writer.Write(lzmaStream.Properties);
