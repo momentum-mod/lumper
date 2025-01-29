@@ -50,7 +50,7 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
     {
         Seek(0, SeekOrigin.Begin);
 
-        Write(Encoding.ASCII.GetBytes("VBSP"));
+        Write("VBSP"u8);
         Write(_bsp.Version);
 
         foreach (BspLumpHeader? lump in LumpHeaders.OrderBy(x => x.Key).Select(x => x.Value))
