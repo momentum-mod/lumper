@@ -1,7 +1,6 @@
 namespace Lumper.Lib.Bsp.Struct;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
@@ -13,7 +12,8 @@ using SharpCompress.Archives.Zip;
 /// A pakfile entry derived from either a ZipArchiveEntry or just a stream.
 /// We assume one is non-null throughout.
 /// </summary>
-public sealed class PakfileEntry : IDisposable
+[JsonObject(MemberSerialization.OptIn)]
+public sealed class PakfileEntry
 {
     public PakfileEntry(PakfileLump parent, ZipArchiveEntry zipEntry)
     {
@@ -27,15 +27,19 @@ public sealed class PakfileEntry : IDisposable
         _parent = parent;
         Key = key;
 
+        // Initing this from a stream assumes we're *not* using a zip entry, so we're modifying
+        // the paklump.
+        IsModified = true;
+
         using var mem = new MemoryStream();
         stream.CopyTo(mem);
         _buffer = mem.GetBuffer();
     }
 
     // Probably shouldn't be public but whatever. be careful!
-    [JsonIgnore]
     public ZipArchiveEntry? ZipEntry { get; }
 
+    [JsonProperty]
     public string Key { get; set; }
 
     [JsonProperty]
@@ -43,10 +47,8 @@ public sealed class PakfileEntry : IDisposable
 
     private readonly PakfileLump _parent;
 
-    [JsonIgnore]
     private bool _isModified;
 
-    [JsonIgnore]
     public bool IsModified
     {
         get => _isModified;
@@ -58,88 +60,58 @@ public sealed class PakfileEntry : IDisposable
         }
     }
 
-    [JsonIgnore]
-    private byte[]? _buffer;
-
-    [JsonIgnore]
-    private readonly List<MemoryStream> _issuedStreams = [];
-
-    [JsonIgnore]
-    // Instance lock for access to buffer and issued streams, ensuring original data is read from
-    // zip thread-safely, and that new streams are not issued as data is being replaced.
-    private readonly Lock _instanceLock = new();
+    private ReadOnlyMemory<byte>? _buffer;
 
     // Static lock for access to zip archive - SharpCompress's OpenEntryStream is not thread-safe.
     private static readonly Lock ZipAccessLock = new();
 
     /// <summary>
-    /// Get an stream to the uncompressed pakfile entry.
-    ///
-    /// The returned stream is unwritable, and wraps a single buffer stored on this class.
-    /// This allows providing multiple streams which safely can be reading concurrently,
-    /// without duplicating the buffer.
-    ///
-    /// However, the stream can be invalidated if the entry is updated by the user.
+    /// Retrieve a ReadonlySpan of the entry data, reading from the pakfile if it hasn't been read already.
     /// </summary>
-    public MemoryStream GetReadOnlyStream()
+    public ReadOnlySpan<byte> GetData()
     {
-        lock (_instanceLock)
+        if (_buffer is null)
         {
-            if (_buffer is not null)
+            lock (ZipAccessLock)
             {
-                var stream = new MemoryStream(_buffer!, writable: false);
-                _issuedStreams.Add(stream);
-                return stream;
-            }
-            else
-            {
-                MemoryStream outStream;
-                lock (ZipAccessLock)
-                {
-                    using Stream zipStream = ZipEntry!.OpenEntryStream();
-                    outStream = new MemoryStream();
-                    zipStream.CopyTo(outStream);
-                }
-
-                _buffer = outStream.ToArray();
-                outStream.Dispose();
-
-                var stream = new MemoryStream(_buffer!, writable: false);
-                _issuedStreams.Add(stream);
-                return stream;
+                using var mem = new MemoryStream(); // Note MemoryStream disposal doesn't delete underlying buffer
+                using Stream zipStream = ZipEntry!.OpenEntryStream();
+                zipStream.CopyTo(mem);
+                _buffer = mem.GetBuffer();
             }
         }
+
+        return _buffer.Value.Span;
     }
 
-    public void UpdateData(byte[] data)
+    public void UpdateData(ReadOnlyMemory<byte> data)
     {
-        lock (_instanceLock)
+        _buffer = data;
+        _hash = null;
+        IsModified = true;
+    }
+
+    private string? _hash;
+
+    /// <summary>
+    /// Get a SHA1 hash of the current pakfile entry data.
+    ///
+    /// If the entry hasn't been read from the Pakfile zip already, the contents will be read into
+    /// this class's buffer. This is by far the  most expensive part of this method, and only one
+    /// zip entry can be read at a time -- do not try to parallelize multiple calls to this method
+    /// for multiple entries.
+    /// </summary>
+    [JsonProperty]
+    public string Hash
+    {
+        get
         {
-            DisposeIssuedStreams();
-            _buffer = new byte[data.Length];
-            Array.Copy(data, _buffer, data.Length);
-            IsModified = true;
+            if (_hash is not null)
+                return _hash;
+
+            _hash = Convert.ToHexString(SHA1.HashData(GetData()));
+
+            return _hash;
         }
     }
-
-    public void UpdateData(MemoryStream stream)
-    {
-        lock (_instanceLock)
-        {
-            DisposeIssuedStreams();
-            _buffer = stream.ToArray();
-            IsModified = true;
-        }
-    }
-
-    private void DisposeIssuedStreams()
-    {
-        foreach (MemoryStream oldStream in _issuedStreams)
-            oldStream.Close();
-    }
-
-    public void Dispose() => DisposeIssuedStreams();
-
-    // Deliberately not [JsonIgnore]ed so we expose this to JSON dumps.
-    public string HashSHA1 => Convert.ToHexString(SHA1.Create().ComputeHash(GetReadOnlyStream()));
 }

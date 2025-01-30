@@ -36,9 +36,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
     {
         try
         {
-            DataStream.Seek(0, SeekOrigin.Begin);
-            var sr = new StreamReader(DataStream, Encoding.ASCII);
-            Content = sr.ReadToEnd();
+            Content = Encoding.ASCII.GetString(Data);
         }
         catch
         {
@@ -56,8 +54,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
         try
         {
             await using var fileStream = new FileStream(fileName, FileMode.CreateNew);
-            DataStream.Seek(0, SeekOrigin.Begin);
-            await DataStream.CopyToAsync(fileStream);
+            fileStream.Write(Data);
             fileStream.Flush();
             await Program.MainWindow.Launcher.LaunchUriAsync(new Uri(fileName));
         }
@@ -72,11 +69,6 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
         if (!IsModified)
             return;
 
-        using var stream = new MemoryStream();
-        using var writer = new StreamWriter(stream, Encoding.ASCII);
-        writer.AutoFlush = true;
-        writer.Write(Content);
-        stream.Seek(0, SeekOrigin.Begin);
-        DataStream = stream;
+        UpdateData(Encoding.ASCII.GetBytes(Content ?? ""));
     }
 }
