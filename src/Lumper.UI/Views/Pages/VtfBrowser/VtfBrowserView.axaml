@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:views="clr-namespace:Lumper.UI.Views.Pages.VtfBrowser"
              xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.VtfBrowser"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -22,6 +23,38 @@
             <Button BorderBrush="#10FFFFFF" Background="#08FFFFFF" BorderThickness="1" Margin="4"
                     CornerRadius="4" Cursor="Hand" Command="{Binding OpenVtfImageWindow}" Padding="0">
               <Panel>
+                <StackPanel ZIndex="10" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
+                            Orientation="Horizontal" IsVisible="{Binding !!MatchingGameAssets}" Background="#88000000">
+                  <ToolTip.Tip>
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="This texture is present in a Valve game or other asset pack!" />
+                      <ItemsControl ItemsSource="{Binding MatchingGameAssets}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock TextWrapping="NoWrap" FontFamily="{StaticResource Monospace}">
+                              <Run FontWeight="Bold">Origin </Run>
+                              <Run Text="{Binding Origin, FallbackValue='?'}" />
+                              <LineBreak />
+                              <Run FontWeight="Bold">Path </Run>
+                              <Run Text="{Binding Path, FallbackValue='?'}" />
+                            </TextBlock>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </ToolTip.Tip>
+
+                  <ItemsControl ItemsSource="{Binding MatchingGameAssets}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock FontWeight="Medium" VerticalAlignment="Center" FontSize="14" Margin="8 4 0 4"
+                                   FontFamily="{StaticResource Monospace}" Text="{Binding Origin, FallbackValue='?'}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <materialIcons:MaterialIcon Width="20" Height="20" Kind="AlertCircleOutline" Foreground="Red"
+                                              Margin="4 3 6 4" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </StackPanel>
                 <StackPanel
                   MaxWidth="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
                   <Image
