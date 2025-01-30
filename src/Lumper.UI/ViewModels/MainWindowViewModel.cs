@@ -5,8 +5,9 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using LogViewer;
+using Lumper.Lib.Util;
 using Lumper.UI.Services;
+using Lumper.UI.ViewModels.LogViewer;
 using Lumper.UI.Views;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
@@ -27,8 +28,13 @@ public class MainWindowViewModel : ViewModel
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public MainWindowViewModel() =>
+    public MainWindowViewModel()
+    {
         Program.Desktop.Startup += (_, _) => Program.MainWindow.Opened += (_, _) => OnMainWindowOpened();
+
+        // Preload the asset manifest in the background
+        Observable.Start(AssetManifest.Preload, RxApp.TaskpoolScheduler);
+    }
 
     private void OnMainWindowOpened()
     {
