@@ -35,4 +35,8 @@ public class StateService : ReactiveObject
 
     [DataMember, Reactive]
     public bool VtfBrowserShowCubemaps { get; set; } = false;
+
+    [DataMember, Reactive]
+    // Using a power of 2 doesn't have a significant improvement visually and 128/256 sizes feel too small/large
+    public double VtfBrowserDimensions { get; set; } = 192;
 }

@@ -23,16 +23,16 @@
                     CornerRadius="4" Cursor="Hand" Command="{Binding OpenVtfImageWindow}" Padding="0">
               <Panel>
                 <StackPanel
-                  MaxWidth="{Binding ViewModel.Dimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
+                  MaxWidth="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
                   <Image
-                    Height="{Binding ViewModel.Dimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
-                    Width="{Binding ViewModel.Dimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
+                    Height="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
+                    Width="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
                     Source="{Binding Image}" IsVisible="{Binding Loaded}">
                   </Image>
                   <TextBlock
                     TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Bottom"
                     Text="{Binding Name}" Padding="4"
-                    MaxWidth="{Binding ViewModel.Dimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
+                    MaxWidth="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
                     <ToolTip.Tip>
                       <StackPanel Width="600">
                         <TextBlock Text="{Binding Name}" />
@@ -50,7 +50,7 @@
 
     <Border Grid.Row="1" BorderBrush="#10FFFFFF" Background="#20000000" Padding="4" BorderThickness="0 1 0 0">
       <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, *, Auto, Auto">
-        <TextBox Grid.Column="0" Height="32" Width="164" Margin="8" Text="{Binding TextureSearch}"
+        <TextBox Grid.Column="0" Height="32" Width="256" Margin="8" Text="{Binding TextureSearch}"
                  Watermark="Search" />
         <CheckBox Grid.Column="1" Margin="4" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                   IsChecked="{Binding StateService.VtfBrowserShowCubemaps, Mode=TwoWay}">
@@ -71,9 +71,9 @@
           No textures found
         </TextBlock>
         <TextBlock Grid.Column="5" VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
-                   FontSize="12" Text="{Binding Dimensions, StringFormat=N0}" />
+                   FontSize="12" Text="{Binding StateService.VtfBrowserDimensions, StringFormat=N0}" />
         <Slider Grid.Column="6" Width="200" Margin="8 0 16 0" Minimum="128" Maximum="512"
-                Value="{Binding Dimensions, Mode=TwoWay}" />
+                Value="{Binding StateService.VtfBrowserDimensions, Mode=TwoWay}" />
       </Grid>
     </Border>
   </Grid>
