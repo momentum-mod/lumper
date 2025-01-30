@@ -30,13 +30,13 @@ public class MainWindowViewModel : ViewModel
 
     public MainWindowViewModel()
     {
-        Program.Desktop.Startup += (_, _) => Program.MainWindow.Opened += (_, _) => OnMainWindowOpened();
+        Program.Desktop.Startup += (_, _) => Program.MainWindow.Loaded += (_, _) => OnMainWindowOpened();
 
         // Preload the asset manifest in the background
         Observable.Start(AssetManifest.Preload, RxApp.TaskpoolScheduler);
     }
 
-    private void OnMainWindowOpened()
+    private static void OnMainWindowOpened()
     {
         if (Program.Desktop.Args is [{ } bspFile])
             Observable.Start(() => BspService.Instance.Load(bspFile), RxApp.MainThreadScheduler);
