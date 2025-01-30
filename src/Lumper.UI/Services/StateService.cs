@@ -1,13 +1,13 @@
 ﻿namespace Lumper.UI.Services;
 
-using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 /// <summary>
 /// Singleton for storing any state we want to persist between sessions.
 /// </summary>
-[DataContract]
+[JsonObject(MemberSerialization.OptOut)]
 public class StateService : ReactiveObject
 {
     // This is instantiated before the app window even opens, safe to `null!`
@@ -18,25 +18,25 @@ public class StateService : ReactiveObject
     // somehow??
     public StateService() => Instance = this;
 
-    [DataMember, Reactive]
+    [Reactive]
     public long LastUpdateCheck { get; set; } = 0;
 
-    [DataMember, Reactive]
+    [Reactive]
     public bool SaveCompressed { get; set; } = false;
 
-    [DataMember, Reactive]
+    [Reactive]
     public bool MakeBackup { get; set; } = true;
 
-    [DataMember, Reactive]
+    [Reactive]
     public bool LogShowDebug { get; set; } = false;
 
-    [DataMember, Reactive]
+    [Reactive]
     public bool LogAutoScroll { get; set; } = true;
 
-    [DataMember, Reactive]
+    [Reactive]
     public bool VtfBrowserShowCubemaps { get; set; } = false;
 
-    [DataMember, Reactive]
+    [Reactive]
     // Using a power of 2 doesn't have a significant improvement visually and 128/256 sizes feel too small/large
     public double VtfBrowserDimensions { get; set; } = 192;
 }
