@@ -27,9 +27,6 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
     [ObservableAsProperty]
     public int NumberOfOfficialAssets { get; set; }
 
-    // Using a power of 2 doesn't have a significant improvement visually and 128/256 sizes feel too small/large
-    [Reactive]
-    public double Dimensions { get; set; } = 192;
 
     [Reactive]
     public string TextureSearch { get; set; } = "";
