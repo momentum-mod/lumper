@@ -39,6 +39,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     public PakfileExplorerViewModel() =>
         BspService
             .Instance.WhenAnyValue(x => x.PakfileLumpViewModel)
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(pakfile =>
             {
                 if (pakfile is null)
