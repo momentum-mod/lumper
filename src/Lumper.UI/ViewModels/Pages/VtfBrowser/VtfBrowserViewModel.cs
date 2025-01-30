@@ -24,10 +24,6 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
     [ObservableAsProperty]
     public int TotalItems { get; set; }
 
-    [ObservableAsProperty]
-    public int NumberOfOfficialAssets { get; set; }
-
-
     [Reactive]
     public string TextureSearch { get; set; } = "";
 
