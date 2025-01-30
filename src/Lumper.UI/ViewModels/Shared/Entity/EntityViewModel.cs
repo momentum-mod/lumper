@@ -9,6 +9,7 @@ using ReactiveUI;
 public class EntityViewModel : MatchableBspNode
 {
     public Entity Entity { get; }
+
     public ObservableCollectionExtended<EntityPropertyViewModel> Properties { get; } = [];
 
     private string? _name;
@@ -18,7 +19,7 @@ public class EntityViewModel : MatchableBspNode
         set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
-    public EntityViewModel(Entity entity, BspNode parent)
+    public EntityViewModel(Entity entity, EntityLumpViewModel parent)
         : base(parent)
     {
         Entity = entity;
