@@ -27,10 +27,10 @@ public class App : Application
         // https://www.reactiveui.net/docs/handbook/data-persistence.html
         //
         // Avalonia page mentions viewmodel "tree", which would require hierarchical
-        // [DataContract]/[DataMember]s of viewmodels as properties of their parents,
-        // something like that. Seems very awkward to make work with lazy page loading
-        // stuff.
-        // We don't need to persist very much anyway, so just using a single "StateService"
+        // serializations of viewmodels as properties of their parents.
+        // Our lazy loading PageService stuff means we don't store child viewmodels directly
+        // on viewmodels, so annoying to get working.
+        // We don't need to persist very much anyway, so using a single "StateService"
         // singleton that stores everything we want to persist.
 
         // Initialize suspension helper using application lifetime

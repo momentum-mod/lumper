@@ -13,7 +13,7 @@
       <StackPanel Orientation="Horizontal" Margin="12 8 12 0" Spacing="16">
         <Image Height="64" Width="64" Source="avares://Lumper.UI/Assets/Images/Lumper.png" VerticalAlignment="Top" />
         <StackPanel Orientation="Vertical" Spacing="2">
-          <TextBlock Name="LumperVersion" FontSize="32" FontWeight="Medium" />
+          <TextBlock Name="LumperVersion" FontSize="32" FontWeight="Medium" Margin="0 0 0 4" />
           <TextBlock FontSize="14" FontStyle="Italic">Created by the Momentum Mod team and other contributors</TextBlock>
           <TextBlock FontSize="12" Name="DotnetVersion" Margin="0 8 0 0" />
           <TextBlock FontSize="12" Name="AvaloniaVersion" />
