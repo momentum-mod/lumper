@@ -87,7 +87,7 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
         if (!_inited)
         {
-            VtfFile ??= new VtfFileViewModel(BaseEntry);
+            VtfFile ??= new VtfFileViewModel(this);
             _inited = true;
         }
 
@@ -135,9 +135,6 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
         await FetchImage();
     }
-
-    // Doesn't actually need to do any work since SetNewImage writes to PakfileEntry stream
-    public override void UpdateModel() { }
 
     public void OpenVtfImageWindow()
     {

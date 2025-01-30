@@ -64,11 +64,11 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             if (limitExtension is null || !entry.Key.EndsWith(limitExtension))
                 continue;
 
-            string entryString = Encoding.Default.GetString(entry.GetReadOnlyStream().ToArray());
+            string entryString = Encoding.UTF8.GetString(entry.GetData());
             string newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
 
             if (newString != entryString)
-                entry.UpdateData(Encoding.Default.GetBytes(newString));
+                entry.UpdateData(Encoding.UTF8.GetBytes(newString));
         }
     }
 
@@ -255,7 +255,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                     }
                 );
 
-                entry.GetReadOnlyStream().CopyTo(zipStream);
+                zipStream.Write(entry.GetData());
             }
 
             zipWriter.Dispose();
@@ -280,9 +280,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     {
         // Delete every item from the zip that's not in the PakLump entries (was completely deleted by user)
         foreach (ZipArchiveEntry entry in Zip.Entries.Where(entry => Entries.All(x => x.ZipEntry != entry)).ToList())
-        {
             Zip.RemoveEntry(entry);
-        }
 
         foreach (PakfileEntry entry in Entries)
         {
@@ -293,14 +291,22 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 if (existingEntry is not null)
                     Zip.RemoveEntry(existingEntry);
 
+                // This requires an extra copy, Microsoft.Toolkit.HighPerformance has a thing for MemoryStream directly
+                // over a ReadonlyMemory (which we could expose from PakfileEntry if we really wanted) using marshalling
+                // but don't need the dependency.
+                var mem = new MemoryStream(entry.GetData().ToArray());
+
                 // Add new/updated entry. Compressed if we're compressing everything, or Pakfile contains at least one
                 // compressed entry (so map is for an engine build that supports LZMA)
-                Zip.AddEntry(entry.Key, entry.GetReadOnlyStream(), true);
+                // Could expose ReadonlyMemory from entry
+                Zip.AddEntry(entry.Key, mem, true);
             }
             // New items that haven't been marked IsModified (they probably should've been, whatever)
             else if (entry.ZipEntry is null)
             {
-                Zip.AddEntry(entry.Key, entry.GetReadOnlyStream(), true);
+                var mem = new MemoryStream(entry.GetData().ToArray());
+
+                Zip.AddEntry(entry.Key, mem, true);
             }
         }
     }

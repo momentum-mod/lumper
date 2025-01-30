@@ -11,9 +11,9 @@ using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.ViewModels;
 using NLog;
+using Pakfile;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
@@ -23,7 +23,7 @@ using VTFLib;
 /// <summary>
 /// This is a simple reactive wrapper around VTFLib.NET (which is itself a wrapper around VTFLib).
 /// </summary>
-public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
+public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
 {
     [Reactive]
     public bool Loaded { get; private set; }
@@ -191,12 +191,8 @@ public class VtfFileViewModel(PakfileEntry pakfileEntry) : ViewModel
             return;
         }
 
-        using var mem = new MemoryStream();
-        // Impossible to safely access the underlying buffer of this pakfileEntry; it's possible
-        // to expose a ReadOnlySpan, but not allowed to pass that to ImageLoadLump, since no guarantee
-        // that a method taking a byte[] won't modify it.
-        pakfileEntry.GetReadOnlyStream().CopyTo(mem);
-        byte[] vtfBuffer = mem.GetBuffer();
+        // Copy (ToArray) is required since VTFLib needs a byte[] which is inherently mutable.
+        byte[] vtfBuffer = pakfileEntry.Data.ToArray();
 
         VTFFile.CreateImage(ref _imageIndex);
         VTFFile.BindImage(_imageIndex);
