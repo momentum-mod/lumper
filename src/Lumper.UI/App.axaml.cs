@@ -1,6 +1,7 @@
 namespace Lumper.UI;
 
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.ReactiveUI;
 using Lumper.UI.Services;
@@ -14,6 +15,13 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // If we're not a desktop lifetime, we're probably an in-editor UI preview - abandon ship!
+        if (ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            base.OnFrameworkInitializationCompleted();
+            return;
+        }
+
         // Data persistence logic based on
         // https://docs.avaloniaui.net/docs/concepts/reactiveui/data-persistence#creating-the-suspension-driver
         // https://www.reactiveui.net/docs/handbook/data-persistence.html
@@ -26,7 +34,7 @@ public class App : Application
         // singleton that stores everything we want to persist.
 
         // Initialize suspension helper using application lifetime
-        var suspension = new AutoSuspendHelper(Program.Desktop);
+        var suspension = new AutoSuspendHelper(desktop);
 
         // Instantiate instance of StateService which will register itself as the static
         // StateService.Instance property. `() => StateService.Instance()` doesn't work
@@ -36,7 +44,7 @@ public class App : Application
         suspension.OnFrameworkInitializationCompleted();
 
         // Init main window
-        Program.Desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
+        desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
         base.OnFrameworkInitializationCompleted();
     }
 }
