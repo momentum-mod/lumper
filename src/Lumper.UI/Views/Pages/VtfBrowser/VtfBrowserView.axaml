@@ -24,7 +24,7 @@
                     CornerRadius="4" Cursor="Hand" Command="{Binding OpenVtfImageWindow}" Padding="0">
               <Panel>
                 <StackPanel ZIndex="10" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
-                            Orientation="Horizontal" IsVisible="{Binding !!MatchingGameAssets}" Background="#88000000">
+                            Orientation="Horizontal" IsVisible="{Binding !!MatchingGameAssets.Count}" Background="#88000000">
                   <ToolTip.Tip>
                     <StackPanel Spacing="4">
                       <TextBlock Text="This texture is present in a Valve game or other asset pack!" />
