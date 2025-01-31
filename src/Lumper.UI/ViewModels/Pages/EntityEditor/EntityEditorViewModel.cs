@@ -3,6 +3,7 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using Lumper.UI.Services;
@@ -19,8 +20,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     [ObservableAsProperty]
     public EntityLumpViewModel? EntityLumpViewModel { get; }
 
-    [ObservableAsProperty]
-    public ReadOnlyCollection<EntityViewModel>? FilteredEntities { get; }
+    [ObservableAsProperty, AllowNull]
+    public ReadOnlyCollection<EntityViewModel> FilteredEntities { get; }
 
     [ObservableAsProperty]
     public int FilteredCount { get; }

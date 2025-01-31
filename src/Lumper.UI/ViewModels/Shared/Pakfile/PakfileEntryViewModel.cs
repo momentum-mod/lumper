@@ -2,6 +2,7 @@ namespace Lumper.UI.ViewModels.Shared.Pakfile;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading;
@@ -31,8 +32,8 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     [ObservableAsProperty]
     public string? Hash { get; }
 
-    [ObservableAsProperty]
-    public List<AssetManifest.Asset>? MatchingGameAssets { get; set; }
+    [ObservableAsProperty, AllowNull]
+    public List<AssetManifest.Asset> MatchingGameAssets { get; set; }
 
     protected PakfileEntryViewModel(PakfileEntry baseEntry, BspNode parent)
         : base(parent)
@@ -53,7 +54,7 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
             .ToPropertyEx(this, x => x.Hash, deferSubscription: true);
 
         this.WhenAnyValue(x => x.Hash)
-            .Select(x => x is not null ? AssetManifest.Manifest.GetValueOrDefault(x) : null)
+            .Select(x => x is not null ? AssetManifest.Manifest.GetValueOrDefault(x) : [])
             .ToPropertyEx(this, x => x.MatchingGameAssets);
     }
 
