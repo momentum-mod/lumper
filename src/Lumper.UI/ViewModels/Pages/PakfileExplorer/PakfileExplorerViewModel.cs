@@ -389,7 +389,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
                 Directory.CreateDirectory(dirName);
                 await using var fstream = new FileStream(fi.FullName, FileMode.Create);
-                fstream.Write(entry.Data);
+                fstream.Write(entry.GetData());
             }
 
             Logger.Info($"Wrote pakfile contents to {rootPath}");
@@ -437,7 +437,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
                 Directory.CreateDirectory(dirName);
                 await using var fstream = new FileStream(fi.FullName, FileMode.Create);
-                fstream.Write(entry.Data);
+                fstream.Write(entry.GetData());
 
                 Logger.Info($"Exported {entry.Key} to {fi.FullName}");
             }

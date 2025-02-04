@@ -192,7 +192,7 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         }
 
         // Copy (ToArray) is required since VTFLib needs a byte[] which is inherently mutable.
-        byte[] vtfBuffer = pakfileEntry.Data.ToArray();
+        byte[] vtfBuffer = pakfileEntry.GetData().ToArray();
 
         VTFFile.CreateImage(ref _imageIndex);
         VTFFile.BindImage(_imageIndex);

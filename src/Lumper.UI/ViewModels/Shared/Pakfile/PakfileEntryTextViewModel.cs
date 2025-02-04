@@ -36,7 +36,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
     {
         try
         {
-            Content = Encoding.ASCII.GetString(Data);
+            Content = Encoding.ASCII.GetString(GetData());
         }
         catch
         {
@@ -54,7 +54,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
         try
         {
             await using var fileStream = new FileStream(fileName, FileMode.CreateNew);
-            fileStream.Write(Data);
+            fileStream.Write(GetData());
             fileStream.Flush();
             await Program.MainWindow.Launcher.LaunchUriAsync(new Uri(fileName));
         }
