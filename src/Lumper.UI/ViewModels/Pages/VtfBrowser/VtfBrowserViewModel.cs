@@ -32,6 +32,7 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
         // Generate observable catch of just VTFs, loading them as they're added
         IObservableCache<PakfileEntryVtfViewModel, string> vtfs = BspService
             .Instance.WhenAnyValue(x => x.PakfileLumpViewModel)
+            .ObserveOn(RxApp.TaskpoolScheduler)
             .Where(x => x is not null)
             .Select(x =>
                 x!
