@@ -167,6 +167,7 @@ public sealed class BspService : ReactiveObject, IDisposable
             IsLoading = false;
         }
 
+        OnBspChanged();
         IsModified = false;
         return true;
     }
@@ -428,5 +429,13 @@ public sealed class BspService : ReactiveObject, IDisposable
             return backingField;
 
         return backingField ??= newFn();
+    }
+
+    public void Dispose()
+    {
+        _entityLumpViewModel?.Dispose();
+        _pakfileLumpViewModel?.Dispose();
+        _bspSubject.Dispose();
+        BspFile?.Dispose();
     }
 }
