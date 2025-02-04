@@ -2,13 +2,10 @@ namespace Lumper.UI.ViewModels.Shared.Pakfile;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Reactive.Linq;
 using System.Threading;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.Util;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 public abstract class PakfileEntryViewModel : HierarchicalBspNode
@@ -16,46 +13,41 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     // The non-reactive BSP.Lib entry this class wraps.
     public PakfileEntry BaseEntry { get; }
 
+    private string _key = "";
+    public string Key
+    {
+        get => _key;
+        set
+        {
+            _key = value;
+            BaseEntry.Key = value;
+            var fi = new FileInfo(value);
+            // We often load hundreds of these at once, bad for perf to WhenAnyValue => ToProperty observables for
+            // each - just use setters and [Reactive] RaiseAndSetIfChanged.
+            Name = fi.Name;
+            Extension = fi.Extension;
+        }
+    }
+
     [Reactive]
-    public string Key { get; set; }
+    public string Name { get; set; } = "";
 
-    public ReadOnlySpan<byte> Data => BaseEntry.GetData();
-
-    [ObservableAsProperty]
-    public string Name { get; } = "";
-
-    [ObservableAsProperty]
-    public string Extension { get; } = null!;
+    [Reactive]
+    public string Extension { get; set; } = "";
 
     public long? CompressedSize => BaseEntry.CompressedSize;
 
-    [ObservableAsProperty]
-    public string? Hash { get; }
+    [Reactive]
+    public string? Hash { get; set; }
 
-    [ObservableAsProperty, AllowNull]
-    public List<AssetManifest.Asset> MatchingGameAssets { get; set; }
+    [Reactive]
+    public List<AssetManifest.Asset> MatchingGameAssets { get; set; } = [];
 
     protected PakfileEntryViewModel(PakfileEntry baseEntry, BspNode parent)
         : base(parent)
     {
         BaseEntry = baseEntry;
         Key = BaseEntry.Key;
-
-        IObservable<string> key = this.WhenAnyValue(x => x.Key);
-        key.BindTo(this, x => x.BaseEntry.Key);
-        key.Select(x => new FileInfo(x).Name).ToPropertyEx(this, x => x.Name);
-        key.Select(x => new FileInfo(x).Extension.ToLower()).ToPropertyEx(this, x => x.Extension);
-
-        // Hash access causes a pakfile read (expensive, single-threaded!) so defer until requested,
-        // and never run in the main (UI) thread!
-        this.WhenAnyValue(x => x.BaseEntry)
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            .Select(x => x.Hash)
-            .ToPropertyEx(this, x => x.Hash, deferSubscription: true);
-
-        this.WhenAnyValue(x => x.Hash)
-            .Select(x => x is not null ? AssetManifest.Manifest.GetValueOrDefault(x) : [])
-            .ToPropertyEx(this, x => x.MatchingGameAssets);
     }
 
     public abstract void Load(CancellationTokenSource? cts = null);
@@ -69,8 +61,37 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     public void UpdateData(ReadOnlyMemory<byte> data)
     {
         BaseEntry.UpdateData(data);
-        this.RaisePropertyChanged(nameof(Data));
-        this.RaisePropertyChanged(nameof(Hash));
+        OnDataUpdate();
+    }
+
+    public void PrefetchData()
+    {
+        BaseEntry.PrefetchData();
+        OnDataUpdate();
+    }
+
+    public ReadOnlySpan<byte> GetData()
+    {
+        ReadOnlySpan<byte> data = BaseEntry.GetData();
+        OnDataUpdate();
+        return data;
+    }
+
+    private void OnDataUpdate()
+    {
+        // Hashes need to read the entire ZipArchive contents to be calculated, and we can only read one zip entry at a
+        // time. If we use a getter that calls GetData() we massively degrade performance in the texture browser, since
+        // every <ItemsControl> template requests a hash which requests GetData(), which gets stuck behind a lock
+        // as archive entries are read sequentially.
+        //
+        // Instead, we let GetData() calls set our hash, and in the texture browser, let the VTF loading loop be
+        // responsible for GetData() calls, which will set Hash when once returned, which will reactivity update in
+        // the UI.
+        //
+        // If you need calculate Hash or other values derived from zip entry data, call PrefetchData(). Just be wary
+        // of running for multiple pakfileentryvms in parallel!
+        Hash = BaseEntry.Hash;
+        MatchingGameAssets = Hash is not null ? AssetManifest.Manifest.GetValueOrDefault(Hash) ?? [] : [];
     }
 
     /// <summary>

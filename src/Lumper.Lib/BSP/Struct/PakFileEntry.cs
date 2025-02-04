@@ -65,23 +65,29 @@ public sealed class PakfileEntry
     // Static lock for access to zip archive - SharpCompress's OpenEntryStream is not thread-safe.
     private static readonly Lock ZipAccessLock = new();
 
+    public void PrefetchData()
+    {
+        if (_buffer is not null)
+            return;
+
+        lock (ZipAccessLock)
+        {
+            using var mem = new MemoryStream((int)ZipEntry!.Size); // Note MemoryStream disposal doesn't delete underlying buffer
+            using Stream zipStream = ZipEntry!.OpenEntryStream();
+            zipStream.CopyTo(mem);
+            _buffer = mem.GetBuffer();
+        }
+    }
+
     /// <summary>
     /// Retrieve a ReadonlySpan of the entry data, reading from the pakfile if it hasn't been read already.
     /// </summary>
     public ReadOnlySpan<byte> GetData()
     {
         if (_buffer is null)
-        {
-            lock (ZipAccessLock)
-            {
-                using var mem = new MemoryStream((int)ZipEntry!.Size); // Note MemoryStream disposal doesn't delete underlying buffer
-                using Stream zipStream = ZipEntry!.OpenEntryStream();
-                zipStream.CopyTo(mem);
-                _buffer = mem.GetBuffer();
-            }
-        }
+            PrefetchData();
 
-        return _buffer.Value.Span;
+        return _buffer!.Value.Span;
     }
 
     public void UpdateData(ReadOnlyMemory<byte> data)
