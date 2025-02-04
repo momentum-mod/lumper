@@ -91,9 +91,7 @@ public class MainWindowViewModel : ViewModel
     public async Task SaveCommand()
     {
         if (BspService.Instance.BspFile?.FilePath is null)
-        {
             await SaveAsCommand();
-        }
 
         await BspService.Instance.Save();
     }
