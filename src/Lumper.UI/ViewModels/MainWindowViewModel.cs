@@ -136,12 +136,16 @@ public class MainWindowViewModel : ViewModel
 
     public async Task CloseCommand()
     {
+        if (!BspService.Instance.HasLoadedBsp)
+            return;
+
         if (
-            BspService.Instance.HasLoadedBsp
-            && BspService.Instance.IsModified
-            && await ShowUnsavedChangesDialog("Do you want to discard your current changes?")
+            BspService.Instance.IsModified
+            && !await ShowUnsavedChangesDialog("Do you want to discard your current changes?")
         )
-            BspService.Instance.CloseCurrentBsp();
+            return;
+
+        BspService.Instance.CloseCurrentBsp();
     }
 
     public void ExitCommand() => Program.MainWindow.Close();
