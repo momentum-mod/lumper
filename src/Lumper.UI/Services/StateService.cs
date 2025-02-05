@@ -1,5 +1,7 @@
 ﻿namespace Lumper.UI.Services;
 
+using System;
+using DynamicData.Binding;
 using Newtonsoft.Json;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -39,4 +41,27 @@ public class StateService : ReactiveObject
     [Reactive]
     // Using a power of 2 doesn't have a significant improvement visually and 128/256 sizes feel too small/large
     public double VtfBrowserDimensions { get; set; } = 192;
+
+    public ObservableCollectionExtended<string> RecentFiles { get; set; } = [];
+
+    public void UpdateRecentFiles(string bspPath, bool opened)
+    {
+        using IDisposable suspend = RecentFiles.SuspendNotifications();
+
+        // If we just opened a new BSP, remove from recent list if in there
+        if (opened)
+        {
+            RecentFiles.Remove(bspPath);
+            return;
+        }
+
+        // Otherwise add closed BSP to the top of the list, removing any duplicates,
+        // and capping the list at 5 entries.
+        RecentFiles.Remove(bspPath);
+        RecentFiles.Add(bspPath);
+
+        const int maxRecent = 5;
+        if (RecentFiles.Count > maxRecent)
+            RecentFiles.RemoveAt(0);
+    }
 }

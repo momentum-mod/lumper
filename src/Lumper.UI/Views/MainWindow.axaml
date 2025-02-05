@@ -36,6 +36,7 @@
               <MenuItem Header="_Open from URL..." Command="{Binding OpenUrlCommand}"
                         HotKey="Ctrl+Shift+O"
                         InputGesture="Ctrl+Shift+O" />
+              <MenuItem Header="_Open Recent" Name="RecentFiles" />
               <Separator />
               <MenuItem Header="_Save" Command="{Binding SaveCommand}" HotKey="Ctrl+S"
                         InputGesture="Ctrl+S" />

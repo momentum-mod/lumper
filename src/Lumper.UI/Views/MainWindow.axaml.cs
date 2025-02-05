@@ -1,6 +1,7 @@
 namespace Lumper.UI.Views;
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using Avalonia.Controls;
@@ -36,6 +37,25 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 .DisposeWith(disposables);
 
             PageService.Instance.ViewPage(Page.EntityEditor);
+
+            StateService.Instance.RecentFiles.CollectionChanged += (_, _) =>
+                RecentFiles.ItemsSource = StateService
+                    .Instance.RecentFiles.Select(path =>
+                    {
+                        const int max = 40;
+                        if (path.Length > max)
+                            path = "..." + path[^max..];
+                        // Underscore needed otherwise accelerate key thing eats first underscore
+                        path = "_" + path;
+
+                        return new MenuItem
+                        {
+                            Header = path,
+                            Command = ReactiveCommand.CreateFromTask(async () => await BspService.Instance.Load(path)),
+                        };
+                    })
+                    .Reverse()
+                    .ToList();
         });
     }
 
