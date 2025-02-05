@@ -26,7 +26,7 @@
                        IsVisible="{Binding IsFiltered}">
               <TextBlock.Text>
                 <MultiBinding StringFormat="\{0\} / \{1\} entities">
-                  <Binding Path="FilteredCount" FallbackValue="" />
+                  <Binding Path="FilteredEntities.Count" FallbackValue="0" />
                   <Binding Path="EntityLumpViewModel.EntityCount" FallbackValue="" />
                 </MultiBinding>
               </TextBlock.Text>

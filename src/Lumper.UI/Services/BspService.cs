@@ -4,6 +4,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -15,6 +16,7 @@ using Avalonia.Platform.Storage;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.UI.ViewModels.Shared;
 using Lumper.UI.ViewModels.Shared.Entity;
@@ -66,6 +68,12 @@ public sealed class BspService : ReactiveObject, IDisposable
     public string? FilePath { get; }
 
     /// <summary>
+    /// Size of the BSP file on disk, in bytes.
+    /// </summary>
+    [ObservableAsProperty]
+    public long? FileSize { get; }
+
+    /// <summary>
     /// Whether the service current has a loaded BSP file
     /// </summary>
     [ObservableAsProperty]
@@ -93,7 +101,31 @@ public sealed class BspService : ReactiveObject, IDisposable
         this.WhenAnyValue(x => x.BspFile).Subscribe(_ => OnBspChanged());
         _bspSubject.Select(x => x?.Name).ToPropertyEx(this, x => x.FileName);
         _bspSubject.Select(x => x?.FilePath).ToPropertyEx(this, x => x.FilePath);
+        _bspSubject.Select(x => x?.FileSize).ToPropertyEx(this, x => x.FileSize);
         _bspSubject.Select(x => x is not null).ToPropertyEx(this, x => x.HasLoadedBsp);
+        _bspSubject
+            .Select(x =>
+            {
+                if (x is null)
+                    return null;
+
+                IEnumerable<Lump> lumps =
+                [
+                    .. x.Lumps.Values.Where(y => y.Type != BspLumpType.GameLump),
+                    .. x.GetLump<GameLump>().Lumps.Values.OfType<Lump>(),
+                ];
+                var nonEmpty = lumps.Where(y => !y.Empty).ToList();
+                int compressed = nonEmpty.Select(y => y.IsCompressed ? 1 : 0).Sum();
+                int total = nonEmpty.Count;
+
+                return compressed switch
+                {
+                    0 => "Uncompressed",
+                    _ when compressed == total => "Compressed",
+                    _ => $"Partially compressed ({compressed}/{total} nonempty lumps)",
+                };
+            })
+            .ToPropertyEx(this, x => x.CompressionStatus);
     }
 
     // Initial subject to mark BSP changes, can't get RaisePropertyChanged(nameof(BspFile)) to work
@@ -168,6 +200,10 @@ public sealed class BspService : ReactiveObject, IDisposable
         }
 
         OnBspChanged();
+
+        if (FilePath is not null)
+            StateService.Instance.UpdateRecentFiles(FilePath, true);
+
         IsModified = false;
         return true;
     }
@@ -335,6 +371,9 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// </summary>
     public void CloseCurrentBsp()
     {
+        if (BspFile?.FilePath is { } path)
+            StateService.Instance.UpdateRecentFiles(path, false);
+
         BspFile?.Dispose();
         BspFile = null;
         ResetLumpViewModels();

@@ -8,6 +8,7 @@ using Avalonia.Platform.Storage;
 using Lumper.Lib.Util;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.LogViewer;
+using Lumper.UI.ViewModels.StatusBar;
 using Lumper.UI.Views;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
@@ -25,6 +26,8 @@ public class MainWindowViewModel : ViewModel
     public static StateService StateService => StateService.Instance;
 
     public LogViewerViewModel LogViewer { get; set; } = new();
+
+    public StatusBarViewModel StatusBar { get; set; } = new();
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

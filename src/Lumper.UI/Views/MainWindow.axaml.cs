@@ -1,7 +1,6 @@
 namespace Lumper.UI.Views;
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using Avalonia.Controls;
@@ -43,14 +42,13 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                     .Instance.RecentFiles.Select(path =>
                     {
                         const int max = 40;
-                        if (path.Length > max)
-                            path = "..." + path[^max..];
+                        string header = path.Length > max ? "..." + path[^max..] : path;
                         // Underscore needed otherwise accelerate key thing eats first underscore
-                        path = "_" + path;
+                        header = "_" + header;
 
                         return new MenuItem
                         {
-                            Header = path,
+                            Header = header,
                             Command = ReactiveCommand.CreateFromTask(async () => await BspService.Instance.Load(path)),
                         };
                     })

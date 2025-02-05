@@ -26,6 +26,8 @@ public sealed partial class BspFile : IDisposable
     [JsonIgnore]
     public string? FilePath { get; private set; }
 
+    public long? FileSize { get; private set; }
+
     public int Revision { get; set; }
 
     public int Version { get; set; }
@@ -54,6 +56,7 @@ public sealed partial class BspFile : IDisposable
         FilePath = GetUnescapedFilePathString(path);
         FileStream?.Dispose();
         FileStream = File.OpenRead(FilePath);
+        FileSize = new FileInfo(FilePath).Length;
 
         using var reader = new BspFileReader(this, FileStream, handler);
 
@@ -220,6 +223,7 @@ public sealed partial class BspFile : IDisposable
             Name = Path.GetFileNameWithoutExtension(outPath);
             FilePath = outPath;
             FileStream = File.OpenRead(outPath);
+            FileSize = new FileInfo(outPath).Length;
 
             Logger.Info($"Saved {outPath}");
 
@@ -269,7 +273,7 @@ public sealed partial class BspFile : IDisposable
             Lump lump = GetLump(bspLumpType);
 
             if (lump is not GameLump and not PakfileLump)
-                lump.IsCompressed = bspHeader.FourCc > 0;
+                lump.IsCompressed = bspHeader.Length > 0 && bspHeader.FourCc > 0;
 
             if (lump is GameLump gl)
             {

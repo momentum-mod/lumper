@@ -1,0 +1,36 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.StatusBar"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="26"
+             x:Class="Lumper.UI.Views.StatusBar.StatusBarView"
+             x:DataType="vm:StatusBarViewModel">
+
+  <UserControl.Resources>
+    <converters:FileSizeConverter x:Key="FileSize" />
+  </UserControl.Resources>
+
+  <StackPanel Orientation="Horizontal" Spacing="8" Margin="12 6">
+    <StackPanel.Styles>
+      <Style Selector="TextBlock">
+        <Setter Property="FontSize" Value="14"></Setter>
+      </Style>
+    </StackPanel.Styles>
+    <TextBlock Text="{Binding FilePathTrimmed, FallbackValue='No BSP Loaded'}" />
+    <StackPanel Orientation="Horizontal" IsVisible="{Binding BspService.HasLoadedBsp}" Spacing="8">
+      <TextBlock Text="|" Foreground="#888" FontSize="13" />
+      <materialIcons:MaterialIcon Kind="ContentSave" />
+      <TextBlock FontSize="14"
+                 Text="{Binding BspService.FileSize, StringFormat='\{0\} on disk', Converter={StaticResource FileSize}, FallbackValue='Unknown size'}" />
+      <TextBlock Text="|" FontSize="13" Foreground="#888" />
+      <materialIcons:MaterialIcon Kind="ZipBox" />
+      <TextBlock Text="{Binding BspService.CompressionStatus}" FontSize="14" />
+      <TextBlock Text="|" Foreground="#888" FontSize="13" />
+      <materialIcons:MaterialIcon Kind="FileTree" />
+      <TextBlock Text="{Binding PakfileSize}" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>
