@@ -4,8 +4,10 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -14,6 +16,7 @@ using Avalonia.Platform.Storage;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.UI.ViewModels.Shared;
 using Lumper.UI.ViewModels.Shared.Entity;
@@ -27,7 +30,7 @@ using ReactiveUI.Fody.Helpers;
 /// Singleton service handling the currently loaded BSP file.
 /// This service has sole responsibility for storing BSP, and all IO work.
 /// </summary>
-public sealed class BspService : ReactiveObject
+public sealed class BspService : ReactiveObject, IDisposable
 {
     /// <summary>
     /// The singleton instance to the service
@@ -55,20 +58,29 @@ public sealed class BspService : ReactiveObject
     /// <summary>
     /// The name of the BSP file, without .bsp extension. null is no BSP is loaded.
     /// </summary>
-    [Reactive]
-    public string? FileName { get; private set; }
+    [ObservableAsProperty]
+    public string? FileName { get; }
 
     /// <summary>
     /// The name of the BSP file, without .bsp extension. null is no BSP is loaded.
     /// </summary>
-    [Reactive]
-    public string? FilePath { get; private set; }
+    [ObservableAsProperty]
+    public string? FilePath { get; }
+
+    /// <summary>
+    /// Size of the BSP file on disk, in bytes.
+    /// </summary>
+    [ObservableAsProperty]
+    public long? FileSize { get; }
 
     /// <summary>
     /// Whether the service current has a loaded BSP file
     /// </summary>
-    [Reactive]
-    public bool HasLoadedBsp { get; set; }
+    [ObservableAsProperty]
+    public bool HasLoadedBsp { get; }
+
+    [ObservableAsProperty]
+    public string? CompressionStatus { get; }
 
     private EntityLumpViewModel? _entityLumpViewModel;
 
@@ -84,14 +96,42 @@ public sealed class BspService : ReactiveObject
 
     private List<ILumpViewModel?> Lumps => [_entityLumpViewModel, _pakfileLumpViewModel];
 
-    private BspService() => this.WhenAnyValue(x => x.BspFile).Subscribe(_ => UpdateBspProperties());
-
-    private void UpdateBspProperties()
+    private BspService()
     {
-        FileName = BspFile?.Name;
-        FilePath = BspFile?.FilePath;
-        HasLoadedBsp = BspFile is not null;
+        this.WhenAnyValue(x => x.BspFile).Subscribe(_ => OnBspChanged());
+        _bspSubject.Select(x => x?.Name).ToPropertyEx(this, x => x.FileName);
+        _bspSubject.Select(x => x?.FilePath).ToPropertyEx(this, x => x.FilePath);
+        _bspSubject.Select(x => x?.FileSize).ToPropertyEx(this, x => x.FileSize);
+        _bspSubject.Select(x => x is not null).ToPropertyEx(this, x => x.HasLoadedBsp);
+        _bspSubject
+            .Select(x =>
+            {
+                if (x is null)
+                    return null;
+
+                IEnumerable<Lump> lumps =
+                [
+                    .. x.Lumps.Values.Where(y => y.Type != BspLumpType.GameLump),
+                    .. x.GetLump<GameLump>().Lumps.Values.OfType<Lump>(),
+                ];
+                var nonEmpty = lumps.Where(y => !y.Empty).ToList();
+                int compressed = nonEmpty.Select(y => y.IsCompressed ? 1 : 0).Sum();
+                int total = nonEmpty.Count;
+
+                return compressed switch
+                {
+                    0 => "Uncompressed",
+                    _ when compressed == total => "Compressed",
+                    _ => $"Partially compressed ({compressed}/{total} nonempty lumps)",
+                };
+            })
+            .ToPropertyEx(this, x => x.CompressionStatus);
     }
+
+    // Initial subject to mark BSP changes, can't get RaisePropertyChanged(nameof(BspFile)) to work
+    private readonly Subject<BspFile?> _bspSubject = new();
+
+    private void OnBspChanged() => _bspSubject.OnNext(BspFile);
 
     /// <summary>
     /// Load a BSP file from a system file
@@ -137,7 +177,7 @@ public sealed class BspService : ReactiveObject
                 ? await Observable.Start(() => BspFile.FromStream(outStream, handler), RxApp.TaskpoolScheduler)
                 : await Observable.Start(() => BspFile.FromPath(pathOrUrl, handler), RxApp.TaskpoolScheduler);
 
-            progressWindow?.Close();
+            progressWindow.Close();
 
             if (handler.Cancelled)
             {
@@ -158,6 +198,11 @@ public sealed class BspService : ReactiveObject
             progressWindow?.Close();
             IsLoading = false;
         }
+
+        OnBspChanged();
+
+        if (FilePath is not null)
+            StateService.Instance.UpdateRecentFiles(FilePath, true);
 
         IsModified = false;
         return true;
@@ -316,7 +361,7 @@ public sealed class BspService : ReactiveObject
             IsLoading = false;
         }
 
-        UpdateBspProperties();
+        OnBspChanged();
         IsModified = false;
         return true;
     }
@@ -326,8 +371,11 @@ public sealed class BspService : ReactiveObject
     /// </summary>
     public void CloseCurrentBsp()
     {
+        if (BspFile?.FilePath is { } path)
+            StateService.Instance.UpdateRecentFiles(path, false);
+
         BspFile?.Dispose();
-        BspFile = null; // This calls UpdateBspProperties
+        BspFile = null;
         ResetLumpViewModels();
 
         IsModified = false;
@@ -420,5 +468,13 @@ public sealed class BspService : ReactiveObject
             return backingField;
 
         return backingField ??= newFn();
+    }
+
+    public void Dispose()
+    {
+        _entityLumpViewModel?.Dispose();
+        _pakfileLumpViewModel?.Dispose();
+        _bspSubject.Dispose();
+        BspFile?.Dispose();
     }
 }

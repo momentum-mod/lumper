@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using Lumper.UI.ViewModels;
 using Lumper.UI.ViewModels.Pages.EntityEditor;
+using Lumper.UI.ViewModels.Pages.EntityReview;
 using Lumper.UI.ViewModels.Pages.Jobs;
 using Lumper.UI.ViewModels.Pages.PakfileExplorer;
 using Lumper.UI.ViewModels.Pages.RawEntities;
@@ -22,6 +23,7 @@ public enum Page
     VtfBrowser,
     Jobs,
     RawEntities,
+    EntityReview,
 }
 
 /// <summary>
@@ -38,14 +40,16 @@ public sealed class PageService : ReactiveObject
     // Collection of all available pages.
     // For performance, ViewModels are only constructed when the pages are accessed.
     // When a new BSP is loaded, any inactive ephemeral viewmodels are discarded.
-    private readonly Dictionary<Page, ILazyPage<ViewModel>> _pageVms = new()
-    {
-        { Page.EntityEditor, new LazyPage<EntityEditorViewModel>(true) },
-        { Page.PakfileExplorer, new LazyPage<PakfileExplorerViewModel>(true) },
-        { Page.VtfBrowser, new LazyPage<VtfBrowserViewModel>(true) },
-        { Page.Jobs, new LazyPage<JobsViewModel>(false) },
-        { Page.RawEntities, new LazyPage<RawEntitiesViewModel>(true) },
-    };
+    public Dictionary<Page, ILazyPage<ViewModel>> Pages { get; } =
+        new()
+        {
+            { Page.EntityEditor, new LazyPage<EntityEditorViewModel>(true) },
+            { Page.PakfileExplorer, new LazyPage<PakfileExplorerViewModel>(true) },
+            { Page.VtfBrowser, new LazyPage<VtfBrowserViewModel>(true) },
+            { Page.Jobs, new LazyPage<JobsViewModel>(false) },
+            { Page.RawEntities, new LazyPage<RawEntitiesViewModel>(true) },
+            { Page.EntityReview, new LazyPage<EntityReviewViewModel>(true) },
+        };
 
     [Reactive]
     public ViewModel? ActivePageVm { get; set; }
@@ -64,7 +68,7 @@ public sealed class PageService : ReactiveObject
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(_ =>
             {
-                foreach ((Page page, ILazyPage<ViewModel> pageVm) in _pageVms)
+                foreach ((Page page, ILazyPage<ViewModel> pageVm) in Pages)
                 {
                     // When active BSP file changes (incl. closing), reset any page that is
                     //  - loaded
@@ -87,7 +91,7 @@ public sealed class PageService : ReactiveObject
         if (page == ActivePage)
             return;
 
-        if (!_pageVms.TryGetValue(page, out ILazyPage<ViewModel>? pageVm))
+        if (!Pages.TryGetValue(page, out ILazyPage<ViewModel>? pageVm))
             throw new ArgumentException($"Bad page name {page}");
 
         PreviousPage = ActivePage;
@@ -107,7 +111,7 @@ public sealed class PageService : ReactiveObject
 
     // This wrapper interface + class is required because we need a covariant type for Get(),
     // so that e.g. LazyPage<VtfBrowserViewModel> is assignable to LazyPage<ViewModel>.
-    private interface ILazyPage<out T>
+    public interface ILazyPage<out T>
     {
         public bool Ephemeral { get; }
 

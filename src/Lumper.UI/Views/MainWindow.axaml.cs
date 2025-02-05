@@ -36,6 +36,24 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 .DisposeWith(disposables);
 
             PageService.Instance.ViewPage(Page.EntityEditor);
+
+            StateService.Instance.RecentFiles.CollectionChanged += (_, _) =>
+                RecentFiles.ItemsSource = StateService
+                    .Instance.RecentFiles.Select(path =>
+                    {
+                        const int max = 40;
+                        string header = path.Length > max ? "..." + path[^max..] : path;
+                        // Underscore needed otherwise accelerate key thing eats first underscore
+                        header = "_" + header;
+
+                        return new MenuItem
+                        {
+                            Header = header,
+                            Command = ReactiveCommand.CreateFromTask(async () => await BspService.Instance.Load(path)),
+                        };
+                    })
+                    .Reverse()
+                    .ToList();
         });
     }
 

@@ -3,7 +3,6 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reactive.Linq;
 using Lumper.UI.Services;
@@ -20,11 +19,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     [ObservableAsProperty]
     public EntityLumpViewModel? EntityLumpViewModel { get; }
 
-    [ObservableAsProperty, AllowNull]
-    public ReadOnlyCollection<EntityViewModel> FilteredEntities { get; }
-
     [ObservableAsProperty]
-    public int FilteredCount { get; }
+    public ReadOnlyCollection<EntityViewModel>? FilteredEntities { get; }
 
     [Reactive]
     public bool IsFiltered { get; private set; }
@@ -100,8 +96,6 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             })
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.FilteredEntities);
-
-        this.WhenAnyValue(x => x.FilteredEntities).Select(x => x?.Count ?? 0).ToPropertyEx(this, x => x.FilteredCount);
 
         BspService.WhenAnyValue(x => x.EntityLumpViewModel).ToPropertyEx(this, x => x.EntityLumpViewModel);
     }

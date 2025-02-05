@@ -1,0 +1,1243 @@
+{
+    "ai_changetarget": {
+        "Level": 3
+    },
+    "ambient_generic": {
+        "Level": 3
+    },
+    "beam_spotlight": {
+        "Level": 3
+    },
+    "color_correction": {
+        "Level": 3
+    },
+    "color_correction_volume": {
+        "Level": 3
+    },
+    "commentary_auto": {
+        "Level": 1,
+        "Comment": "Only used by commentary system"
+    },
+    "cycler_actor": {
+        "Level": 1
+    },
+    "env_ambient_light": {
+        "Level": 1,
+        "Comment": "Buggy entity causes ambient light to be carried over between maps"
+    },
+    "env_beam": {
+        "Level": 3
+    },
+    "env_blood": {
+        "Level": 3
+    },
+    "env_bubbles": {
+        "Level": 3
+    },
+    "env_cascade_light": {
+        "Level": 3
+    },
+    "env_credits": {
+        "Level": 3
+    },
+    "env_cubemap": {
+        "Level": 3
+    },
+    "env_detail_controller": {
+        "Level": 3
+    },
+    "env_dof_controller": {
+        "Level": 3
+    },
+    "env_dustpuff": {
+        "Level": 3
+    },
+    "env_effectscript": {
+        "Level": 3
+    },
+    "env_embers": {
+        "Level": 3
+    },
+    "env_entity_dissolver": {
+        "Level": 3
+    },
+    "env_entity_igniter": {
+        "Level": 3
+    },
+    "env_entity_maker": {
+        "Level": 3
+    },
+    "env_explosion": {
+        "Level": 3
+    },
+    "env_fade": {
+        "Level": 3
+    },
+    "env_fire": {
+        "Level": 3
+    },
+    "env_firesensor": {
+        "Level": 3
+    },
+    "env_firesource": {
+        "Level": 3
+    },
+    "env_fog_controller": {
+        "Level": 3
+    },
+    "env_funnel": {
+        "Level": 3
+    },
+    "env_global": {
+        "Level": 1,
+        "Comment": "Entity carries global state across level transitions"
+    },
+    "env_glow": {
+        "Level": 3
+    },
+    "env_gunfire": {
+        "Level": 3
+    },
+    "env_hudhint": {
+        "Level": 3
+    },
+    "env_instructor_hint": {
+        "Level": 3
+    },
+    "env_laser": {
+        "Level": 3
+    },
+    "env_lightglow": {
+        "Level": 3
+    },
+    "env_message": {
+        "Level": 2,
+        "Comment": "This entity reads from /scripts/titles.txt, override this in your map if you want custom messages"
+    },
+    "env_microphone": {
+        "Level": 3
+    },
+    "env_movieexplosion": {
+        "Level": 3
+    },
+    "env_muzzleflash": {
+        "Level": 3
+    },
+    "env_particle_performance_monitor": {
+        "Level": 1,
+        "Comment": "Debugging entity only used for testing"
+    },
+    "env_particlelight": {
+        "Level": 3
+    },
+    "env_particlescript": {
+        "Level": 3
+    },
+    "env_physexplosion": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "env_physimpact": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "env_player_surface_trigger": {
+        "Level": 3
+    },
+    "env_projectedtexture": {
+        "Level": 3
+    },
+    "env_rockettrail": {
+        "Level": 3
+    },
+    "env_rotorshooter": {
+        "Level": 3
+    },
+    "env_screeneffect": {
+        "Level": 3
+    },
+    "env_screenoverlay": {
+        "Level": 3
+    },
+    "env_shake": {
+        "Level": 2,
+        "Comment": "Use with care, don't shake the player's view if it affects gameplay"
+    },
+    "env_shooter": {
+        "Level": 3
+    },
+    "env_smokestack": {
+        "Level": 3
+    },
+    "env_smoketrail": {
+        "Level": 3
+    },
+    "env_soundscape": {
+        "Level": 3
+    },
+    "env_soundscape_proxy": {
+        "Level": 3
+    },
+    "env_soundscape_triggerable": {
+        "Level": 3
+    },
+    "env_spark": {
+        "Level": 3
+    },
+    "env_speaker": {
+        "Level": 3
+    },
+    "env_splash": {
+        "Level": 3
+    },
+    "env_sporeexplosion": {
+        "Level": 3
+    },
+    "env_sprite": {
+        "Level": 3
+    },
+    "env_sprite_clientside": {
+        "Level": 3
+    },
+    "env_sprite_oriented": {
+        "Level": 3
+    },
+    "env_spritetrail": {
+        "Level": 3
+    },
+    "env_steam": {
+        "Level": 3
+    },
+    "env_sun": {
+        "Level": 3
+    },
+    "env_texturetoggle": {
+        "Level": 3
+    },
+    "env_tilt": {
+        "Level": 1,
+        "Comment": "This entity does not work"
+    },
+    "env_tonemap_controller": {
+        "Level": 3
+    },
+    "env_viewpunch": {
+        "Level": 2,
+        "Comment": "Use with care, don't punch the player's view if it affects gameplay"
+    },
+    "env_wind": {
+        "Level": 1,
+        "Comment": "Used with physics entities, wind carries over between maps"
+    },
+    "env_zoom": {
+        "Level": 3
+    },
+    "filter_activator_class": {
+        "Level": 3
+    },
+    "filter_activator_context": {
+        "Level": 3
+    },
+    "filter_activator_involume": {
+        "Level": 3
+    },
+    "filter_activator_keyfield": {
+        "Level": 3
+    },
+    "filter_activator_mass_greater": {
+        "Level": 3
+    },
+    "filter_activator_model": {
+        "Level": 3
+    },
+    "filter_activator_name": {
+        "Level": 3
+    },
+    "filter_activator_surfacedata": {
+        "Level": 3
+    },
+    "filter_activator_team": {
+        "Level": 3
+    },
+    "filter_base": {
+        "Level": 1,
+        "Comment": "Base class of other filters, no filter logic of its own"
+    },
+    "filter_damage_type": {
+        "Level": 3
+    },
+    "filter_enemy": {
+        "Level": 3
+    },
+    "filter_momentum_collectibles": {
+        "Level": 3
+    },
+    "filter_momentum_surface_collision": {
+        "Level": 3
+    },
+    "filter_momentum_timer_progress": {
+        "Level": 3
+    },
+    "filter_multi": {
+        "Level": 3
+    },
+    "filter_player_held": {
+        "Level": 2,
+        "Comment": "This filter only applies to entities being held with +use"
+    },
+    "filter_velocity": {
+        "Level": 3
+    },
+    "fog_volume": {
+        "Level": 3
+    },
+    "func_areaportal": {
+        "Level": 3
+    },
+    "func_areaportalwindow": {
+        "Level": 3
+    },
+    "func_bhop": {
+        "Level": 3
+    },
+    "func_breakable": {
+        "Level": 3
+    },
+    "func_breakable_surf": {
+        "Level": 3
+    },
+    "func_brush": {
+        "Level": 3
+    },
+    "func_button": {
+        "Level": 3
+    },
+    "func_clip_vphysics": {
+        "Level": 3
+    },
+    "func_conveyor": {
+        "Level": 3
+    },
+    "func_detail": {
+        "Level": 3
+    },
+    "func_detail_blocker": {
+        "Level": 3
+    },
+    "func_door": {
+        "Level": 3
+    },
+    "func_door_rotating": {
+        "Level": 3
+    },
+    "func_dustcloud": {
+        "Level": 3
+    },
+    "func_dustmotes": {
+        "Level": 3
+    },
+    "func_fish_pool": {
+        "Level": 3
+    },
+    "func_guntarget": {
+        "Level": 3
+    },
+    "func_illusionary": {
+        "Level": 3
+    },
+    "func_instance": {
+        "Level": 3
+    },
+    "func_instance_io_proxy": {
+        "Level": 3
+    },
+    "func_instance_origin": {
+        "Level": 3
+    },
+    "func_instance_parms": {
+        "Level": 3
+    },
+    "func_ladder": {
+        "Level": 3
+    },
+    "func_ladderendpoint": {
+        "Level": 3
+    },
+    "func_lod": {
+        "Level": 3
+    },
+    "func_lookdoor": {
+        "Level": 3
+    },
+    "func_movelinear": {
+        "Level": 3
+    },
+    "func_nogrenades": {
+        "Level": 3
+    },
+    "func_occluder": {
+        "Level": 2,
+        "Comment": "Use this entity with care, it can be CPU intensive"
+    },
+    "func_overbounce": {
+        "Level": 3
+    },
+    "func_physbox": {
+        "Level": 2,
+        "Comment": "The \"tools/toolsgrenadeclip\" material is solid to projectiles only and may be better for phase walls"
+    },
+    "func_physbox_multiplayer": {
+        "Level": 2
+    },
+    "func_platrot": {
+        "Level": 3
+    },
+    "func_precipitation": {
+        "Level": 3
+    },
+    "func_precipitation_blocker": {
+        "Level": 3
+    },
+    "func_proprrespawnzone": {
+        "Level": 1,
+        "Comment": "Debugging entity only used for testing"
+    },
+    "func_pushable": {
+        "Level": 1,
+        "Comment": "Use func_physbox instead"
+    },
+    "func_reflective_glass": {
+        "Level": 2,
+        "Comment": "Use with care, this entity is buggy"
+    },
+    "func_rot_button": {
+        "Level": 3
+    },
+    "func_rotating": {
+        "Level": 3
+    },
+    "func_slick": {
+        "Level": 3
+    },
+    "func_slide": {
+        "Level": 3
+    },
+    "func_smokevolume": {
+        "Level": 3
+    },
+    "func_tank": {
+        "Level": 1,
+        "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
+    },
+    "func_tanklaser": {
+        "Level": 1,
+        "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
+    },
+    "func_tankmortar": {
+        "Level": 1,
+        "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
+    },
+    "func_tankphyscannister": {
+        "Level": 1,
+        "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
+    },
+    "func_tankpulselaser": {
+        "Level": 1,
+        "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
+    },
+    "func_tanktrain": {
+        "Level": 1,
+        "Comment": "This entity is unimplemented"
+    },
+    "func_touch": {
+        "Level": 3
+    },
+    "func_trackautochange": {
+        "Level": 3
+    },
+    "func_trackchange": {
+        "Level": 3
+    },
+    "func_tracktrain": {
+        "Level": 3
+    },
+    "func_train": {
+        "Level": 2,
+        "Comment": "This entity is obsolete, you may want to use func_tracktrain instead"
+    },
+    "func_traincontrols": {
+        "Level": 3
+    },
+    "func_useableladder": {
+        "Level": 3
+    },
+    "func_viscluster": {
+        "Level": 3
+    },
+    "func_wall": {
+        "Level": 3
+    },
+    "func_wall_toggle": {
+        "Level": 3
+    },
+    "func_water": {
+        "Level": 3
+    },
+    "func_water_analog": {
+        "Level": 3
+    },
+    "func_weight_button": {
+        "Level": 2
+    },
+    "game_gib_manager": {
+        "Level": 3
+    },
+    "game_globalvars": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "game_ragdoll_manager": {
+        "Level": 3
+    },
+    "game_text": {
+        "Level": 3
+    },
+    "game_ui": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "game_zone_player": {
+        "Level": 2,
+        "Comment": "This entity counts players but in Momentum Mod there's only ever one player, even in lobbies"
+    },
+    "generic_actor": {
+        "Level": 1,
+        "Comment": "NPC entity, not relevant to Momentum Mod"
+    },
+    "gibshooter": {
+        "Level": 2,
+        "Comment": "Obsolete, you may want to use env_shooter instead"
+    },
+    "hammer_notes": {
+        "Level": 3
+    },
+    "hammer_updateignorelist": {
+        "Level": 3
+    },
+    "info_camera_link": {
+        "Level": 3
+    },
+    "info_constraint_anchor": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "info_game_event_proxy": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "info_ladder_dismount": {
+        "Level": 3
+    },
+    "info_landmark": {
+        "Level": 3
+    },
+    "info_lighting": {
+        "Level": 3
+    },
+    "info_lighting_relative": {
+        "Level": 3
+    },
+    "info_mass_center": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "info_no_dynamic_shadow": {
+        "Level": 3
+    },
+    "info_null": {
+        "Level": 3
+    },
+    "info_overlay": {
+        "Level": 3
+    },
+    "info_overlay_transition": {
+        "Level": 3
+    },
+    "info_particle_system": {
+        "Level": 3
+    },
+    "info_player_deathmatch": {
+        "Level": 3
+    },
+    "info_player_start": {
+        "Level": 3
+    },
+    "info_projecteddecal": {
+        "Level": 3
+    },
+    "info_target": {
+        "Level": 3
+    },
+    "info_target_instructor_hint": {
+        "Level": 3
+    },
+    "info_teleport_destination": {
+        "Level": 3
+    },
+    "infodecal": {
+        "Level": 3
+    },
+    "keyframe_rope": {
+        "Level": 3
+    },
+    "keyframe_track": {
+        "Level": 3
+    },
+    "light": {
+        "Level": 3
+    },
+    "light_directional": {
+        "Level": 3
+    },
+    "light_dynamic": {
+        "Level": 3
+    },
+    "light_environment": {
+        "Level": 3
+    },
+    "light_spot": {
+        "Level": 3
+    },
+    "linked_portal_door": {
+        "Level": 3
+    },
+    "logic_achievement": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "logic_auto": {
+        "Level": 3
+    },
+    "logic_branch": {
+        "Level": 3
+    },
+    "logic_branch_listener": {
+        "Level": 3
+    },
+    "logic_case": {
+        "Level": 3
+    },
+    "logic_collision_pair": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "logic_compare": {
+        "Level": 3
+    },
+    "logic_console": {
+        "Level": 1,
+        "Comment": "Debugging entity only used for testing"
+    },
+    "logic_context_accessor": {
+        "Level": 3
+    },
+    "logic_convar": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "logic_coop_manager": {
+        "Level": 3
+    },
+    "logic_datadesc_accessor": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "logic_entity_position": {
+        "Level": 3
+    },
+    "logic_eventlistener": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "logic_eventlistener_itemequip": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "logic_format": {
+        "Level": 3
+    },
+    "logic_gate": {
+        "Level": 3
+    },
+    "logic_keyfield": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "logic_lineto": {
+        "Level": 3
+    },
+    "logic_measure_direction": {
+        "Level": 2
+    },
+    "logic_measure_movement": {
+        "Level": 2
+    },
+    "logic_modelinfo": {
+        "Level": 3
+    },
+    "logic_multicompare": {
+        "Level": 3
+    },
+    "logic_playerproxy": {
+        "Level": 3
+    },
+    "logic_playmovie": {
+        "Level": 1,
+        "Comment": "Do not play movies in your map"
+    },
+    "logic_random_outputs": {
+        "Level": 2,
+        "Comment": "Be careful not to use this in a way that randomizes gameplay"
+    },
+    "logic_register_activator": {
+        "Level": 3
+    },
+    "logic_relay": {
+        "Level": 3
+    },
+    "logic_relay_queue": {
+        "Level": 3
+    },
+    "logic_sequence": {
+        "Level": 3
+    },
+    "logic_timer": {
+        "Level": 2,
+        "Comment": "Should be removed if part of an automatic jail"
+    },
+    "material_modify_control": {
+        "Level": 3
+    },
+    "math_bits": {
+        "Level": 3
+    },
+    "math_clamp": {
+        "Level": 3
+    },
+    "math_colorblend": {
+        "Level": 3
+    },
+    "math_counter": {
+        "Level": 3
+    },
+    "math_counter_advanced": {
+        "Level": 3
+    },
+    "math_generate": {
+        "Level": 3
+    },
+    "math_lightpattern": {
+        "Level": 3
+    },
+    "math_mod": {
+        "Level": 3
+    },
+    "math_remap": {
+        "Level": 3
+    },
+    "math_vector": {
+        "Level": 3
+    },
+    "mom_replay_playback": {
+        "Level": 1,
+        "Comment": "Don't play replays in your map"
+    },
+    "momentary_rot_button": {
+        "Level": 3
+    },
+    "momentum_generic_bomb": {
+        "Level": 3
+    },
+    "momentum_pickup_ammo": {
+        "Level": 3
+    },
+    "momentum_powerup_damage_boost": {
+        "Level": 3
+    },
+    "momentum_powerup_haste": {
+        "Level": 3
+    },
+    "momentum_weapon_spawner": {
+        "Level": 3
+    },
+    "monster_generic": {
+        "Level": 1,
+        "Comment": "NPC entity, not relevant to Momentum Mod"
+    },
+    "move_keyframed": {
+        "Level": 3
+    },
+    "move_rope": {
+        "Level": 3
+    },
+    "move_track": {
+        "Level": 3
+    },
+    "npc_furniture": {
+        "Level": 1,
+        "Comment": "NPC entity, not relevant to Momentum Mod"
+    },
+    "npc_heardanger": {
+        "Level": 1,
+        "Comment": "NPC entity, not relevant to Momentum Mod"
+    },
+    "parallax_obb": {
+        "Level": 3
+    },
+    "path_corner": {
+        "Level": 3
+    },
+    "path_corner_crash": {
+        "Level": 3
+    },
+    "path_track": {
+        "Level": 3
+    },
+    "phys_ballsocket": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_constraint": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_constraintsystem": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_convert": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_hinge": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_keepupright": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_lengthconstraint": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_magnet": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_motor": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_pulleyconstraint": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_ragdollconstraint": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_ragdollmagnet": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_slideconstraint": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_spring": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_thruster": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "phys_torque": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "physics_cannister": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "player_speedmod": {
+        "Level": 3
+    },
+    "player_weaponstrip": {
+        "Level": 2,
+        "Comment": "This entity may not function how you expect in Momentum Mod"
+    },
+    "point_anglesensor": {
+        "Level": 3
+    },
+    "point_angularvelocitysensor": {
+        "Level": 3
+    },
+    "point_bonusmaps_accessor": {
+        "Level": 1
+    },
+    "point_camera": {
+        "Level": 3
+    },
+    "point_clientcommand": {
+        "Level": 2
+    },
+    "point_commentary_node": {
+        "Level": 1,
+        "Comment": "Only used by commentary system"
+    },
+    "point_devshot_camera": {
+        "Level": 3
+    },
+    "point_enable_motion_fixup": {
+        "Level": 3
+    },
+    "point_entity_finder": {
+        "Level": 3
+    },
+    "point_gamestats_counter": {
+        "Level": 1,
+        "Comment": "Debugging entity only used for testing"
+    },
+    "point_hurt": {
+        "Level": 3
+    },
+    "point_message": {
+        "Level": 3
+    },
+    "point_playermoveconstraint": {
+        "Level": 3
+    },
+    "point_posecontroller": {
+        "Level": 3
+    },
+    "point_proximity_sensor": {
+        "Level": 3
+    },
+    "point_servercommand": {
+        "Level": 1,
+        "Comment": "Don't issue server commands in your map. Use zone settings to set the max map velocity."
+    },
+    "point_spotlight": {
+        "Level": 3
+    },
+    "point_teleport": {
+        "Level": 3
+    },
+    "point_template": {
+        "Level": 3
+    },
+    "point_tesla": {
+        "Level": 3
+    },
+    "point_velocitysensor": {
+        "Level": 3
+    },
+    "point_viewcontrol": {
+        "Level": 2,
+        "Comment": "Be careful not to abuse this entity"
+    },
+    "point_viewproxy": {
+        "Level": 2,
+        "Comment": "Be careful not to abuse this entity"
+    },
+    "point_worldtext": {
+        "Level": 3
+    },
+    "postprocess_controller": {
+        "Level": 3
+    },
+    "prop_detail": {
+        "Level": 3
+    },
+    "prop_detail_sprite": {
+        "Level": 3
+    },
+    "prop_door_rotating": {
+        "Level": 3
+    },
+    "prop_dynamic": {
+        "Level": 3
+    },
+    "prop_dynamic_glow": {
+        "Level": 3
+    },
+    "prop_dynamic_ornament": {
+        "Level": 3
+    },
+    "prop_dynamic_override": {
+        "Level": 3
+    },
+    "prop_hallucination": {
+        "Level": 3
+    },
+    "prop_physics": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "prop_physics_multiplayer": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "prop_physics_override": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "prop_physics_ragdoll": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "prop_physics_respawnable": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "prop_ragdoll": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "prop_sphere": {
+        "Level": 2,
+        "Comment": "Use physics entities with care"
+    },
+    "prop_static": {
+        "Level": 3
+    },
+    "shadow_control": {
+        "Level": 3
+    },
+    "simple_physics_brush": {
+        "Level": 1,
+        "Comment": "Use func_physbox instead"
+    },
+    "simple_physics_prop": {
+        "Level": 1,
+        "Comment": "Use prop_physics or prop_dynamic instead"
+    },
+    "sky_camera": {
+        "Level": 3
+    },
+    "skybox_swapper": {
+        "Level": 3
+    },
+    "spark_shower": {
+        "Level": 3
+    },
+    "sunlight_shadow_control": {
+        "Level": 3
+    },
+    "tanktrain_ai": {
+        "Level": 1,
+        "Comment": "Unused entity for func_tanktrain"
+    },
+    "tanktrain_aitarget": {
+        "Level": 1,
+        "Comment": "Unused entity for func_tanktrain"
+    },
+    "target_changegravity": {
+        "Level": 3
+    },
+    "test_sidelist": {
+        "Level": 1,
+        "Comment": "Debugging entity only used for testing"
+    },
+    "test_traceline": {
+        "Level": 1,
+        "Comment": "Debugging entity only used for testing"
+    },
+    "trigger_bounce_stickybombs": {
+        "Level": 3
+    },
+    "trigger_brush": {
+        "Level": 1,
+        "Comment": "Use func_button instead"
+    },
+    "trigger_catapult": {
+        "Level": 3
+    },
+    "trigger_changelevel": {
+        "Level": 1,
+        "Comment": "Do not transition levels in your map"
+    },
+    "trigger_gravity": {
+        "Level": 3
+    },
+    "trigger_hierarchy": {
+        "Level": 3
+    },
+    "trigger_hurt": {
+        "Level": 3
+    },
+    "trigger_impact": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "trigger_jumppad": {
+        "Level": 3
+    },
+    "trigger_look": {
+        "Level": 3
+    },
+    "trigger_momentum_limitmovement": {
+        "Level": 2,
+        "Comment": "Do not disable movement directions unless all are disabled together."
+    },
+    "trigger_momentum_progress": {
+        "Level": 3
+    },
+    "trigger_momentum_promptinput": {
+        "Level": 1
+    },
+    "trigger_momentum_teleport": {
+        "Level": 3
+    },
+    "trigger_multiple": {
+        "Level": 3
+    },
+    "trigger_once": {
+        "Level": 2
+    },
+    "trigger_playermovement": {
+        "Level": 3
+    },
+    "trigger_proximity": {
+        "Level": 3
+    },
+    "trigger_push": {
+        "Level": 2,
+        "Comment": "trigger_pushes are potentially exploitable with crouch boosting and should often be replaced with trigger_setspeed and OnJump/OnLand triggers"
+    },
+    "trigger_remove": {
+        "Level": 3
+    },
+    "trigger_setspeed": {
+        "Level": 3
+    },
+    "trigger_softbarrier": {
+        "Level": 3
+    },
+    "trigger_soundoperator": {
+        "Level": 3
+    },
+    "trigger_soundscape": {
+        "Level": 3
+    },
+    "trigger_stick_explosive": {
+        "Level": 3
+    },
+    "trigger_stickybomb_limit": {
+        "Level": 3
+    },
+    "trigger_teleport": {
+        "Level": 3
+    },
+    "trigger_teleport_relative": {
+        "Level": 3
+    },
+    "trigger_tonemap": {
+        "Level": 3
+    },
+    "trigger_transition": {
+        "Level": 1,
+        "Comment": "Do not transition to other levels from your map"
+    },
+    "trigger_userinput": {
+        "Level": 1,
+        "Comment": "Not relevant to Momentum Mod"
+    },
+    "trigger_vphysics_motion": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "trigger_wind": {
+        "Level": 2,
+        "Comment": "This is for physics entities, use physics entities with care"
+    },
+    "vgui_movie_display": {
+        "Level": 2,
+        "Comment": "This is a VGUI entity, VGUI may not work and may be removed in the future"
+    },
+    "vgui_screen": {
+        "Level": 2,
+        "Comment": "This is a VGUI entity, VGUI may not work and may be removed in the future"
+    },
+    "vgui_slideshow_display": {
+        "Level": 2,
+        "Comment": "This is a VGUI entity, VGUI may not work and may be removed in the future"
+    },
+    "vgui_world_text_panel": {
+        "Level": 2,
+        "Comment": "This is a VGUI entity, VGUI may not work and may be removed in the future"
+    },
+    "water_lod_control": {
+        "Level": 3
+    },
+    "weapon_cubemap": {
+        "Level": 1,
+        "Comment": "Do not give the player the cubemap weapon"
+    },
+    "weapon_knife": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_concgrenade": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_grenade": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_machinegun": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_pistol": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_rocketlauncher": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_shotgun": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_sniper": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_stickybomblauncher": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "zone_allowbhop": {
+        "Level": 3
+    },
+    "zone_timer_cancel": {
+        "Level": 3
+    },
+    "zone_timer_checkpoint": {
+        "Level": 3
+    },
+    "zone_timer_end": {
+        "Level": 3
+    },
+    "zone_timer_stage": {
+        "Level": 3
+    },
+    "zone_timer_start": {
+        "Level": 3
+    }
+}

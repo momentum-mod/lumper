@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
+using Lumper.Lib.ExtensionMethods;
 using ReactiveUI;
 
 public class EntityViewModel : MatchableBspNode
@@ -12,10 +13,12 @@ public class EntityViewModel : MatchableBspNode
 
     public ObservableCollectionExtended<EntityPropertyViewModel> Properties { get; } = [];
 
+    public const string MissingClassname = "<missing classname!>";
+
     private string? _name;
     public string Name
     {
-        get => !string.IsNullOrWhiteSpace(_name) ? _name : "<missing classname!>";
+        get => !string.IsNullOrWhiteSpace(_name) ? _name : MissingClassname;
         set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
@@ -82,4 +85,6 @@ public class EntityViewModel : MatchableBspNode
     }
 
     public override bool Match(string expr) => Properties.Any(item => item.Match(expr));
+
+    public bool MatchClassname(string expr) => _name?.MatchesSimpleExpression(expr) ?? false;
 }
