@@ -18,18 +18,18 @@
     </Grid.ColumnDefinitions>
     <TextBox Grid.Column="0" Grid.Row="0" Text="{Binding Filters.Classname}" Margin="0 0 0 4"
              Watermark="Entity Type (classname)" />
-    <Grid Grid.Column="0" Grid.Row="1" Margin="0 0 0 8" ColumnDefinitions="1*, 4, 1*">
+    <Grid Grid.Column="0" Grid.Row="1" Margin="0 0 0 4" ColumnDefinitions="1*, 4, 1*">
       <TextBox Grid.Column="0" Text="{Binding Filters.Key}" Watermark="Key" />
       <TextBox Grid.Column="2" Text="{Binding Filters.Value}" Watermark="Value" />
     </Grid>
-    <Grid Grid.Column="0" Grid.Row="2" Margin="0 0 0 8" ColumnDefinitions="Auto, 16, *, Auto">
+    <Grid Grid.Column="0" Grid.Row="2" Margin="0 0 0 4" ColumnDefinitions="Auto, 16, *, Auto">
       <Button Grid.Column="0" Command="{Binding EntityLumpViewModel.AddEmptyEntity, FallbackValue=''}"
               HorizontalAlignment="Right" IsEnabled="{Binding BspService.HasLoadedBsp}" Padding="0"
               ToolTip.Tip="Add Entity">
         <materialIcons:MaterialIcon Kind="Plus" Width="20" Height="20" />
       </Button>
-      <TextBlock Grid.Column="2" FontStyle="Italic" Foreground="LightGray"
-                 VerticalAlignment="Center" FontFamily="{StaticResource Monospace}" IsVisible="{Binding IsFiltered}">
+      <TextBlock Grid.Column="2" FontStyle="Italic" Foreground="LightGray" VerticalAlignment="Center"
+                 FontFamily="{StaticResource Monospace}" IsVisible="{Binding IsFiltered}">
         <TextBlock.Text>
           <MultiBinding StringFormat="\{0\} / \{1\} entities">
             <Binding Path="FilteredEntities.Count" FallbackValue="0" />
@@ -37,14 +37,37 @@
           </MultiBinding>
         </TextBlock.Text>
       </TextBlock>
-      <TextBlock Grid.Column="1" Margin="4 0 0 0" FontStyle="Italic" Foreground="LightGray"
-                 IsVisible="{Binding !IsFiltered}" VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
+      <TextBlock Grid.Column="2" FontStyle="Italic" Foreground="LightGray" IsVisible="{Binding !IsFiltered}"
+                 VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
                  Text="{Binding EntityLumpViewModel.EntityCount, StringFormat='\{0\} entities', FallbackValue=''}" />
-      <Button Grid.Column="2" Command="{Binding EntityLumpViewModel.AddEmptyEntity, FallbackValue=''}"
-              HorizontalAlignment="Right" IsEnabled="{Binding BspService.HasLoadedBsp}" Padding="0"
-              ToolTip.Tip="Add Entity">
-        <materialIcons:MaterialIcon Kind="Plus" Width="24" Height="24" />
-      </Button>
+      <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4">
+        <ToolTip.Tip>
+          <StackPanel>
+            <TextBlock>Applies a trailing wildcard to all string expressions.</TextBlock>
+            <TextBlock>
+              If checked,
+              <Run FontFamily="{StaticResource Monospace}">light</Run>
+              will also match
+              <Run FontFamily="{StaticResource Monospace}">light_spot</Run>,
+              <Run FontFamily="{StaticResource Monospace}">light_environment</Run>,
+              etc...
+            </TextBlock>
+            <TextBlock>
+              If unchecked, it will only match
+              <Run FontFamily="{StaticResource Monospace}">light</Run>.
+            </TextBlock>
+            <TextBlock>
+              <Run FontFamily="{StaticResource Monospace}">*</Run>
+              (greedy) and
+              <Run FontFamily="{StaticResource Monospace}">?</Run>
+              (non-greedy) wildcards are supported. Use
+              <Run FontFamily="{StaticResource Monospace}">\</Run> to escape.
+            </TextBlock>
+          </StackPanel>
+        </ToolTip.Tip>
+        <TextBlock Foreground="LightGray" VerticalAlignment="Center">Wildcard Wrapping</TextBlock>
+        <CheckBox IsChecked="{Binding Filters.WildcardWrapping}" Padding="0" />
+      </StackPanel>
     </Grid>
     <Border Grid.Column="0" Grid.Row="3" CornerRadius="4">
       <ListBox Name="EntityList" ItemsSource="{Binding FilteredEntities}"

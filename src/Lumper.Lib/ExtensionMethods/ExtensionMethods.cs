@@ -4,15 +4,14 @@ using System.IO.Enumeration;
 
 public static class ExtensionMethods
 {
-    public static bool MatchesSimpleExpression(this string str, string expr)
+    public static bool MatchesSimpleExpression(this string str, string expr, bool wildcardWrapping)
     {
         if (string.IsNullOrEmpty(expr))
             return false;
 
-        // Match to the end of the string if no wildcard is present. Not quite as greedy as string.Contains (`*expr*`),
-        // which to match stuff you don't want.
-        if (!expr.Contains('*'))
-            expr += "*";
+        // Match all characters before and after the given string if wildcardWrapping is enabled.
+        if (wildcardWrapping && !expr.Contains('*'))
+            expr = $"*{expr}*";
 
         // Algorithm here references a bunch of Windows filename crap but implementation without useExtendedWildcards
         // is exactly what we want.

@@ -28,9 +28,9 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
 
     public override void UpdateModel() => EntityProperty.Key = Key;
 
-    public bool MatchKey(string expr) => Key.MatchesSimpleExpression(expr);
+    public bool MatchKey(string expr, bool wildcardWrapping) => Key.MatchesSimpleExpression(expr, wildcardWrapping);
 
-    public abstract bool MatchValue(string expr);
+    public abstract bool MatchValue(string expr, bool trailingWildcard);
 
     public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
 }
@@ -58,7 +58,8 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
         entityProperty.Value = Value;
     }
 
-    public override bool MatchValue(string expr) => Value?.MatchesSimpleExpression(expr) ?? false;
+    public override bool MatchValue(string expr, bool trailingWildcard) =>
+        Value?.MatchesSimpleExpression(expr, trailingWildcard) ?? false;
 }
 
 public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityProperty, BspNode bspNode)
@@ -126,10 +127,10 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
         && other.Delay == Delay
         && other.TimesToFire == TimesToFire;
 
-    public override bool MatchValue(string expr) =>
-        (TargetEntityName?.MatchesSimpleExpression(expr) ?? false)
-        || (Input?.MatchesSimpleExpression(expr) ?? false)
-        || (Parameter?.MatchesSimpleExpression(expr) ?? false)
-        || (Delay?.ToString().MatchesSimpleExpression(expr) ?? false)
-        || (TimesToFire?.ToString().MatchesSimpleExpression(expr) ?? false);
+    public override bool MatchValue(string expr, bool trailingWildcard) =>
+        (TargetEntityName?.MatchesSimpleExpression(expr, trailingWildcard) ?? false)
+        || (Input?.MatchesSimpleExpression(expr, trailingWildcard) ?? false)
+        || (Parameter?.MatchesSimpleExpression(expr, trailingWildcard) ?? false)
+        || (Delay?.ToString().MatchesSimpleExpression(expr, trailingWildcard) ?? false)
+        || (TimesToFire?.ToString().MatchesSimpleExpression(expr, trailingWildcard) ?? false);
 }

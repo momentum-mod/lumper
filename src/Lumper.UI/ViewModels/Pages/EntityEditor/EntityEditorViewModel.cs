@@ -40,6 +40,9 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
         [Reactive]
         public string Value { get; set; } = "";
+
+        [Reactive]
+        public bool WildcardWrapping { get; set; } = true;
     }
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
@@ -116,10 +119,12 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         bool filtered = false;
         output = input;
 
+        bool wc = Filters.WildcardWrapping;
+
         if (!string.IsNullOrWhiteSpace(Filters.Classname))
         {
             filtered = true;
-            output = output.Where(vm => vm.Name.MatchesSimpleExpression(Filters.Classname));
+            output = output.Where(vm => vm.Name.MatchesSimpleExpression(Filters.Classname, wc));
         }
 
         bool hasKeys = !string.IsNullOrWhiteSpace(Filters.Key);
@@ -127,13 +132,15 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         if (hasKeys || hasValues)
         {
             filtered = true;
-            // csharpier-ignore
             if (hasKeys && hasValues)
-                output = output.Where(vm => vm.Properties.Any(p => p.MatchKey(Filters.Key) && p.MatchValue(Filters.Value)));
+                output = output.Where(vm =>
+                    vm.Properties.Any(p => p.MatchKey(Filters.Key, wc) && p.MatchValue(Filters.Value, wc))
+                );
             else if (hasKeys)
-                output = output.Where(vm => vm.Properties.Any(p => p.MatchKey(Filters.Key)));
+                output = output.Where(vm => vm.Properties.Any(p => p.MatchKey(Filters.Key, wc)));
             else
-                output = output.Where(vm => vm.Properties.Any(p => p.MatchValue(Filters.Value)));
+                output = output.Where(vm => vm.Properties.Any(p => p.MatchValue(Filters.Value, wc)));
+        }
         }
 
         return filtered;
