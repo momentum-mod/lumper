@@ -10,7 +10,7 @@
              x:Class="Lumper.UI.Views.Pages.EntityEditor.EntityEditorView"
              x:DataType="vm:EntityEditorViewModel">
 
-  <Grid RowDefinitions="Auto, Auto, Auto, Auto, *" Margin="8">
+  <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *" Margin="8">
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="360" MinWidth="200" />
       <ColumnDefinition Width="2" />
@@ -22,12 +22,16 @@
       <TextBox Grid.Column="0" Text="{Binding Filters.Key}" Watermark="Key" />
       <TextBox Grid.Column="2" Text="{Binding Filters.Value}" Watermark="Value" />
     </Grid>
-    <Grid Grid.Column="0" Grid.Row="2" ColumnDefinitions="Auto, 8, Auto, 8, Auto, 8, Auto, *, Auto" Margin="4 0 0 4">
-      <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="LightGray">Brush Entities</TextBlock>
-      <CheckBox Grid.Column="2" IsChecked="{Binding Filters.ShowBrushEntities}"/>
-      <TextBlock Grid.Column="4" VerticalAlignment="Center" Margin="8 0 0 0" Foreground="LightGray">Point Entities</TextBlock>
-      <CheckBox Grid.Column="6" IsChecked="{Binding Filters.ShowPointEntities}"/>
-      <StackPanel Grid.Column="8" Orientation="Horizontal" Spacing="4">
+    <Grid Grid.Column="0" Grid.Row="2" Margin="0, 0, 0, 4" ColumnDefinitions="3*, 4, 1*">
+      <TextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}" Watermark="In Sphere" />
+      <TextBox Grid.Column="2" Text="{Binding Filters.SphereRadius}" Watermark="Radius" />
+    </Grid>
+    <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, 8, Auto, 8, Auto, 8, Auto, *, Auto" Margin="4 0 0 4">
+      <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="LightGray">Brush</TextBlock>
+      <CheckBox Grid.Column="2" IsChecked="{Binding Filters.ShowBrushEntities}" />
+      <TextBlock Grid.Column="4" VerticalAlignment="Center" Margin="8 0 0 0" Foreground="LightGray">Point</TextBlock>
+      <CheckBox Grid.Column="6" IsChecked="{Binding Filters.ShowPointEntities}" />
+      <StackPanel Grid.Column="8" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
         <ToolTip.Tip>
           <StackPanel>
             <TextBlock>Applies a trailing wildcard to all string expressions.</TextBlock>
@@ -56,7 +60,7 @@
         <CheckBox IsChecked="{Binding Filters.WildcardWrapping}" Padding="0" />
       </StackPanel>
     </Grid>
-    <Grid Grid.Column="0" Grid.Row="3" Margin="4 0 0 8" ColumnDefinitions="Auto, *, Auto">
+    <Grid Grid.Column="0" Grid.Row="4" Margin="4 0 0 8" ColumnDefinitions="Auto, *, Auto">
       <TextBlock Grid.Column="0" FontStyle="Italic" Foreground="LightGray" VerticalAlignment="Center"
                  FontFamily="{StaticResource Monospace}" IsVisible="{Binding IsFiltered}">
         <TextBlock.Text>
@@ -75,7 +79,7 @@
         <materialIcons:MaterialIcon Kind="Plus" Width="20" Height="20" />
       </Button>
     </Grid>
-    <Border Grid.Column="0" Grid.Row="4" CornerRadius="4">
+    <Border Grid.Column="0" Grid.Row="5" CornerRadius="4">
       <ListBox Name="EntityList" ItemsSource="{Binding FilteredEntities}"
                SelectionChanged="EntityList_OnSelectionChanged"
                SelectionMode="Single" Background="#08FFFFFF" CornerRadius="4" Classes="ScrollThin"
@@ -107,9 +111,9 @@
         </ListBox.ItemTemplate>
       </ListBox>
     </Border>
-    <GridSplitter Grid.Column="1" Margin="8, 0" Grid.Row="0" Grid.RowSpan="5" MinWidth="1" Width="1"
+    <GridSplitter Grid.Column="1" Margin="8, 0" Grid.Row="0" Grid.RowSpan="6" MinWidth="1" Width="1"
                   ResizeDirection="Columns" />
-    <TabControl Grid.Column="2" Grid.Row="0" Grid.RowSpan="5" Padding="0" ItemsSource="{Binding Tabs}"
+    <TabControl Grid.Column="2" Grid.Row="0" Grid.RowSpan="6" Padding="0" ItemsSource="{Binding Tabs}"
                 SelectedItem="{Binding SelectedTab}">
       <TabControl.Styles>
         <Style Selector="TabItem">

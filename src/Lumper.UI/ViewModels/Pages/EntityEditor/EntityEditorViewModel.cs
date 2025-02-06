@@ -3,10 +3,13 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData.Binding;
+using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
@@ -49,6 +52,28 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
         [Reactive]
         public bool ShowPointEntities { get; set; } = true;
+
+        [Reactive]
+        public string SpherePosition { get; set; } = "";
+
+        [Reactive]
+        public string SphereRadius { get; set; } = "";
+
+        public bool TryParseSphere([NotNullWhen(true)] out (Vector3, int radius)? location)
+        {
+            location = null;
+            if (string.IsNullOrWhiteSpace(SpherePosition) || string.IsNullOrWhiteSpace(SphereRadius))
+                return false;
+
+            if (!Entity.TryParsePosition(SpherePosition, out Vector3? vec))
+                return false;
+
+            if (!int.TryParse(SphereRadius, out int radius))
+                return false;
+
+            location = (vec.Value, radius);
+            return true;
+        }
     }
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
@@ -147,6 +172,11 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             else
                 output = output.Where(vm => vm.Properties.Any(p => p.MatchValue(Filters.Value, wc)));
         }
+
+        if (Filters.TryParseSphere(out (Vector3 position, int radius)? sphere))
+        {
+            filtered = true;
+            output = output.Where(vm => vm.Entity.IsWithinSphere(sphere.Value.position, sphere.Value.radius));
         }
 
         if (!Filters.ShowBrushEntities || !Filters.ShowPointEntities)
