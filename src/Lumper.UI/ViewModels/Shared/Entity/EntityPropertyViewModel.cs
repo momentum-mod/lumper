@@ -20,9 +20,9 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
                 return;
 
             if (wasClassname)
-                ((EntityViewModel)Parent).ResetClassName();
+                ((EntityViewModel)Parent).ResetClassname();
             else if (value == "classname")
-                ((EntityViewModel)Parent).Name = vm.Value!;
+                ((EntityViewModel)Parent).Classname = vm.Value!;
         }
     }
 
@@ -48,7 +48,7 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
             UpdateField(ref _value, value);
 
             if (Key == "classname")
-                ((EntityViewModel)Parent).Name = value!; // Fine if this is null
+                ((EntityViewModel)Parent).Classname = value!; // Fine if this is null
         }
     }
 

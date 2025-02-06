@@ -10,13 +10,15 @@ public class EntityViewModel : HierarchicalBspNode
 {
     public Entity Entity { get; }
 
+    public const string MissingClassname = "<missing classname!>";
+
     public ObservableCollectionExtended<EntityPropertyViewModel> Properties { get; } = [];
 
-    private string? _name;
-    public string Name
+    private string? _classname;
+    public string Classname
     {
-        get => !string.IsNullOrWhiteSpace(_name) ? _name : "<missing classname!>";
-        set => this.RaiseAndSetIfChanged(ref _name, value);
+        get => !string.IsNullOrWhiteSpace(_classname) ? _classname : "<missing classname!>";
+        set => this.RaiseAndSetIfChanged(ref _classname, value);
     }
 
     public EntityViewModel(Entity entity, EntityLumpViewModel parent)
@@ -27,7 +29,7 @@ public class EntityViewModel : HierarchicalBspNode
         foreach (Entity.EntityProperty property in entity.Properties)
             AddPropertyViewModel(property);
 
-        ResetClassName();
+        ResetClassname();
     }
 
     public EntityPropertyViewModel AddPropertyViewModel(Entity.EntityProperty entityProperty)
@@ -66,8 +68,11 @@ public class EntityViewModel : HierarchicalBspNode
             prop.UpdateModel();
     }
 
-    public void ResetClassName() =>
-        Name = Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == "classname")?.Value!;
+    public void ResetClassname() =>
+        Classname = Properties
+            .OfType<EntityPropertyStringViewModel>()
+            .FirstOrDefault(x => x.Key == "classname")
+            ?.Value!;
 
     public string PresentableName
     {
@@ -77,7 +82,7 @@ public class EntityViewModel : HierarchicalBspNode
                 .OfType<EntityPropertyStringViewModel>()
                 .FirstOrDefault(x => x.Key == "hammerid")
                 ?.Value;
-            return $"{Name} (HammerID {hammerid})";
+            return $"{Classname} (HammerID {hammerid})";
         }
     }
 }

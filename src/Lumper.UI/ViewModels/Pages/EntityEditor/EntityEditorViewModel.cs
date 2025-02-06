@@ -124,7 +124,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         if (!string.IsNullOrWhiteSpace(Filters.Classname))
         {
             filtered = true;
-            output = output.Where(vm => vm.Name.MatchesSimpleExpression(Filters.Classname, wc));
+            output = output.Where(vm => vm.Classname.MatchesSimpleExpression(Filters.Classname, wc));
         }
 
         bool hasKeys = !string.IsNullOrWhiteSpace(Filters.Key);
