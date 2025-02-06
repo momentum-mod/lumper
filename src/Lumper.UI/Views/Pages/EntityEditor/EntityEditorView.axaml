@@ -87,7 +87,7 @@
                   <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
                 </Style>
               </Grid.Styles>
-              <TextBlock Grid.Column="0" Text="{Binding Name}" />
+              <TextBlock Grid.Column="0" Text="{Binding Classname}" />
               <TextBlock Grid.Column="2" Text="*" IsVisible="{Binding IsModified}" />
               <Button Grid.Column="4"
                       Command="{Binding ViewModel.EntityLumpViewModel.RemoveEntity, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
@@ -113,7 +113,7 @@
       <TabControl.ItemTemplate>
         <DataTemplate>
           <StackPanel Orientation="Horizontal" Spacing="4">
-            <TextBlock Text="{Binding ((entity:EntityViewModel)Entity).Name}" />
+            <TextBlock Text="{Binding ((entity:EntityViewModel)Entity).Classname}" />
             <Panel IsVisible="{Binding Entity.IsModified}" ToolTip.Tip="Modified, BSP needs saving!">
               <materialIcons:MaterialIcon Kind="ContentSaveAlert" />
             </Panel>
