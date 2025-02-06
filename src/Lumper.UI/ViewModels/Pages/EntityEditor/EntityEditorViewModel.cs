@@ -3,9 +3,10 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using DynamicData.Binding;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using Lumper.UI.Views.Pages.EntityEditor;
@@ -20,17 +21,19 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     [ObservableAsProperty]
     public EntityLumpViewModel? EntityLumpViewModel { get; }
 
-    [ObservableAsProperty, AllowNull]
-    public ReadOnlyCollection<EntityViewModel> FilteredEntities { get; }
-
     [ObservableAsProperty]
-    public int FilteredCount { get; }
+    public ReadOnlyCollection<EntityViewModel>? FilteredEntities { get; }
 
     [Reactive]
     public bool IsFiltered { get; private set; }
 
-    [Reactive]
-    public string SearchPattern { get; set; } = "";
+    public ReactiveFilters Filters { get; } = new();
+
+    public class ReactiveFilters : ReactiveObject
+    {
+        [Reactive]
+        public string SearchPattern { get; set; } = "";
+    }
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
 
@@ -41,43 +44,46 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
     public EntityEditorViewModel()
     {
-        // Track changes to the matchers, the entity lump being replaced, or any changes to the current entity lump,
-        // then generate a fresh list of entities.
-        //
-        // Note that because different matchers result in a completely new FilteredEntities
-        // collection, there's no point binding an IChangeSet to a ReadonlyObservableCollection.
-        // We could do that for entity additions/deletions, but then code is more complicated
-        // and those cases are rarer than searches. So every time the matcher, entity lump, or *contents*
-        // of the entity lump change, run the filter and output to FilteredEntities, which is just
-        // a reactive IEnumerable.
-        this.WhenAnyValue(x => x.SearchPattern)
-            .ObserveOn(RxApp.TaskpoolScheduler)
-            // Throttle changes to search pattern
-            .Throttle(TimeSpan.FromMilliseconds(100))
-            // Combine with overall lump changes, e.g. new BSP is loaded
-            .CombineLatest(BspService.Instance.WhenAnyValue(x => x.EntityLumpViewModel))
-            // Also watch changes to the entity collection. We don't care *what* entities have changed, just that
-            // *something* changed, and we still want the incoming values (matchers and ent lump), so map those values
-            // back out.
-            // Thus we get a single observable stream that notifies whenever:
-            //   (a) - the matchers changed
-            //   (b) - the whole entity lump changes - i.e. BspService.Instance.EntityLumpViewModel is set to a new
-            //         value (so, a reference to a new class)
-            //   (c) - the Entities SourceCache in the ELVM is updated (additions, removals, updates)
-            //         where the *values* it notifies with are just the current matcher and the ELVM.
-            .Select(tuple =>
-                tuple.Second is not null
-                    ? tuple.Second.Entities.Connect().Select(_ => tuple)
-                    // Null if entity lump was closed, just return tuple so can generate empty list
-                    : Observable.Return(tuple)
-            )
-            .Switch()
-            .Select(tuple =>
-            {
-                (string searchString, EntityLumpViewModel? entLump) = tuple;
+        var u = new Unit();
 
-                // No ELVM loaded, probably no BSP loaded: empty list.
-                if (entLump is null)
+        BspService.WhenAnyValue(x => x.EntityLumpViewModel).ToPropertyEx(this, x => x.EntityLumpViewModel);
+
+        // Switchmap entity lump changes (from BSP loads usually) into observable of changes to all entities,
+        // then combine with filter changes.
+        //
+        // Note that we can't use a DynamicData approach of .Filter/.Transform on ChangeSet<EntityViewModel>, since
+        // when filters change, we need to filter the *entity* entity lump, not just the items in the changeset
+        this.WhenAnyValue(x => x.EntityLumpViewModel)
+            .ObserveOn(RxApp.TaskpoolScheduler)
+            // Watch changes to the entity collection. We don't care *what* entities have changed, just that
+            // *something* changed since we're using class members (maybe bad practice, whatever), we don't care about
+            // the value we're notifying with anywhere, just use the same Unit.
+            .Select(entLump =>
+                entLump is not null
+                    // Note for that updating entity properties to trigger filter changes we'd need to set up an
+                    // AutoRefresh() observable on *every* observable, which would be prohibitively expensive.
+                    // If we really wanted this, we'd need to do some spaghetti to make property updates raise something
+                    // on the parent entity, not bothering for now.
+                    ? entLump.Entities.Connect().Select(_ => u)
+                    // Null if entity lump was closed, just return null which we'll use to generate an empty list below.
+                    : Observable.Return(u)
+            )
+            // Cancel previous observable from Connect() when ent lump changes.
+            .Switch()
+            // Also notify when any filters change. Thus we get a single observable stream that notifies whenever:
+            //   (a) - The whole entity lump changes - i.e. BspService.Instance.EntityLumpViewModel is set to a new
+            //         value (so, a reference to a new class)
+            //   (b) - the Entities SourceCache in the ELVM is updated (additions, removals, updates)
+            //   (c) - the filters change
+            .CombineLatest(
+                this.WhenAnyValue(x => x.Filters) // Needed to kick this off
+                    .Merge(Filters.WhenAnyPropertyChanged().Throttle(TimeSpan.FromMilliseconds(100))),
+                (_, _) => u
+            )
+            .Select(_ =>
+            {
+                // No ELVM loaded, just clear the list and don't bother with filters
+                if (EntityLumpViewModel is null)
                 {
                     IsFiltered = false;
                     Tabs.Clear();
@@ -85,25 +91,31 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
                     return new List<EntityViewModel>().AsReadOnly();
                 }
 
-                // No matchers: readonly list of all the entities in the ELVM.
-                if (string.IsNullOrWhiteSpace(searchString))
-                {
-                    IsFiltered = false;
-                    return entLump.Entities.Items.ToList().AsReadOnly();
-                }
+                // Run filter logic
+                IsFiltered = Filter(
+                    EntityLumpViewModel.Entities.Items,
+                    out IEnumerable<EntityViewModel> filteredEntities
+                );
 
-                // We have a search, filter the entity list. Note that the above ObserveOn ensures we're on a
-                // separate thread if available, as filteration searches every *property* of every entity, so
-                // quite expensive.
-                IsFiltered = true;
-                return entLump.Entities.Items.Where(entity => entity.Match(searchString)).ToList().AsReadOnly();
+                // Expand out to full list, set FilteredEntities to it
+                return filteredEntities.ToList().AsReadOnly();
             })
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.FilteredEntities);
+    }
 
-        this.WhenAnyValue(x => x.FilteredEntities).Select(x => x?.Count ?? 0).ToPropertyEx(this, x => x.FilteredCount);
+    private bool Filter(IEnumerable<EntityViewModel> input, out IEnumerable<EntityViewModel> output)
+    {
+        bool filtered = false;
+        output = input;
 
-        BspService.WhenAnyValue(x => x.EntityLumpViewModel).ToPropertyEx(this, x => x.EntityLumpViewModel);
+        if (!string.IsNullOrWhiteSpace(Filters.SearchPattern))
+        {
+            filtered = true;
+            output = output.Where(vm => vm.Properties.Any(prop => prop.Match(Filters.SearchPattern)));
+        }
+
+        return filtered;
     }
 
     public void SelectTab(EntityViewModel? model)

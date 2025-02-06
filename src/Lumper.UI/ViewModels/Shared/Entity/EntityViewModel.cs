@@ -6,7 +6,7 @@ using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
 using ReactiveUI;
 
-public class EntityViewModel : MatchableBspNode
+public class EntityViewModel : HierarchicalBspNode
 {
     public Entity Entity { get; }
 
@@ -80,6 +80,4 @@ public class EntityViewModel : MatchableBspNode
             return $"{Name} (HammerID {hammerid})";
         }
     }
-
-    public override bool Match(string expr) => Properties.Any(item => item.Match(expr));
 }
