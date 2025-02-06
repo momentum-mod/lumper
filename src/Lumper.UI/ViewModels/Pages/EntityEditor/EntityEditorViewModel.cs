@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData.Binding;
+using Lumper.Lib.ExtensionMethods;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using Lumper.UI.Views.Pages.EntityEditor;
@@ -32,7 +33,13 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     public class ReactiveFilters : ReactiveObject
     {
         [Reactive]
-        public string SearchPattern { get; set; } = "";
+        public string Classname { get; set; } = "";
+
+        [Reactive]
+        public string Key { get; set; } = "";
+
+        [Reactive]
+        public string Value { get; set; } = "";
     }
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
@@ -109,10 +116,24 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         bool filtered = false;
         output = input;
 
-        if (!string.IsNullOrWhiteSpace(Filters.SearchPattern))
+        if (!string.IsNullOrWhiteSpace(Filters.Classname))
         {
             filtered = true;
-            output = output.Where(vm => vm.Properties.Any(prop => prop.Match(Filters.SearchPattern)));
+            output = output.Where(vm => vm.Name.MatchesSimpleExpression(Filters.Classname));
+        }
+
+        bool hasKeys = !string.IsNullOrWhiteSpace(Filters.Key);
+        bool hasValues = !string.IsNullOrWhiteSpace(Filters.Value);
+        if (hasKeys || hasValues)
+        {
+            filtered = true;
+            // csharpier-ignore
+            if (hasKeys && hasValues)
+                output = output.Where(vm => vm.Properties.Any(p => p.MatchKey(Filters.Key) && p.MatchValue(Filters.Value)));
+            else if (hasKeys)
+                output = output.Where(vm => vm.Properties.Any(p => p.MatchKey(Filters.Key)));
+            else
+                output = output.Where(vm => vm.Properties.Any(p => p.MatchValue(Filters.Value)));
         }
 
         return filtered;
