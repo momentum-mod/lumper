@@ -16,7 +16,7 @@
       <ColumnDefinition Width="2" />
       <ColumnDefinition Width="*" MinWidth="400" />
     </Grid.ColumnDefinitions>
-    <TextBox Grid.Column="0" Grid.Row="0" Margin="0 0 0 8" Text="{Binding SearchPattern}"
+    <TextBox Grid.Column="0" Grid.Row="0" Margin="0 0 0 8" Text="{Binding Filters.SearchPattern}"
              Watermark="Filter Properties" />
     <Grid Grid.Column="0" Grid.Row="1" Margin="0 0 0 8" ColumnDefinitions="Auto, Auto, *, Auto">
       <TextBlock Grid.Column="0" Margin="4 0 0 0" FontStyle="Italic" Foreground="LightGray"

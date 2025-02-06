@@ -4,7 +4,7 @@ using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
 
 public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProperty, BspNode bspNode)
-    : MatchableBspNode(bspNode)
+    : HierarchicalBspNode(bspNode)
 {
     public Entity.EntityProperty EntityProperty { get; } = entityProperty;
 
@@ -27,6 +27,8 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
     }
 
     public override void UpdateModel() => EntityProperty.Key = Key;
+
+    public abstract bool Match(string expr);
 
     public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
 }

@@ -80,8 +80,3 @@ public abstract class HierarchicalBspNode(BspNode parent) : BspNode
         BspService.Instance.MarkAsModified();
     }
 }
-
-public abstract class MatchableBspNode(BspNode parent) : HierarchicalBspNode(parent)
-{
-    public abstract bool Match(string expr);
-}
