@@ -59,7 +59,7 @@ public partial class VtfBrowserViewModel : ViewModelWithView<VtfBrowserViewModel
                 return vtfs
                     .Items.Where(item =>
                         (showCubemaps || !CubemapRegex().IsMatch(item.Name))
-                        && (string.IsNullOrWhiteSpace(search) || search.MatchesSimpleExpression(item.Name))
+                        && (string.IsNullOrWhiteSpace(search) || search.MatchesSimpleExpression(item.Name, true))
                     )
                     .OrderBy(y => y.Name)
                     .ToList()
