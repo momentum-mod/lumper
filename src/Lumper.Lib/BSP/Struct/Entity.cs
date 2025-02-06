@@ -3,9 +3,10 @@ namespace Lumper.Lib.Bsp.Struct;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NLog;
 
-public class Entity : ICloneable
+public partial class Entity : ICloneable
 {
     public Entity()
         : this(null) { }
@@ -41,6 +42,13 @@ public class Entity : ICloneable
         }
     }
 
+
+    [GeneratedRegex(@"^\*\d+$")]
+    private static partial Regex BrushEntityRegex();
+
+    public bool IsBrushEntity =>
+        Properties.FirstOrDefault(x => x.Key == "model") is EntityProperty<string> { Value: string modelString }
+        && BrushEntityRegex().IsMatch(modelString);
     public object Clone() => new Entity { Properties = Properties.Select(x => (EntityProperty)x.Clone()).ToList() };
 
     public abstract class EntityProperty(string key) : ICloneable

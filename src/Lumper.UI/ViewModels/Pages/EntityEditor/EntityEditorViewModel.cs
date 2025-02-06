@@ -43,6 +43,12 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
         [Reactive]
         public bool WildcardWrapping { get; set; } = true;
+
+        [Reactive]
+        public bool ShowBrushEntities { get; set; } = true;
+
+        [Reactive]
+        public bool ShowPointEntities { get; set; } = true;
     }
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
@@ -141,6 +147,18 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             else
                 output = output.Where(vm => vm.Properties.Any(p => p.MatchValue(Filters.Value, wc)));
         }
+        }
+
+        if (!Filters.ShowBrushEntities || !Filters.ShowPointEntities)
+        {
+            filtered = true;
+
+            if (!Filters.ShowBrushEntities)
+                output = Filters.ShowPointEntities
+                    ? output.Where(vm => !vm.Entity.IsBrushEntity)
+                    : output.Where(_ => false); // Both are unchecked ¯\_(ツ)_/¯
+            else
+                output = output.Where(vm => vm.Entity.IsBrushEntity);
         }
 
         return filtered;
