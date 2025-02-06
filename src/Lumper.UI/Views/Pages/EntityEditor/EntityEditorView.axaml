@@ -10,16 +10,25 @@
              x:Class="Lumper.UI.Views.Pages.EntityEditor.EntityEditorView"
              x:DataType="vm:EntityEditorViewModel">
 
-  <Grid RowDefinitions="Auto, Auto, *" Margin="8">
+  <Grid RowDefinitions="Auto, Auto, Auto, *" Margin="8">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="320" MinWidth="200" />
+      <ColumnDefinition Width="360" MinWidth="200" />
       <ColumnDefinition Width="2" />
       <ColumnDefinition Width="*" MinWidth="400" />
     </Grid.ColumnDefinitions>
-    <TextBox Grid.Column="0" Grid.Row="0" Margin="0 0 0 8" Text="{Binding Filters.SearchPattern}"
-             Watermark="Filter Properties" />
-    <Grid Grid.Column="0" Grid.Row="1" Margin="0 0 0 8" ColumnDefinitions="Auto, Auto, *, Auto">
-      <TextBlock Grid.Column="0" Margin="4 0 0 0" FontStyle="Italic" Foreground="LightGray"
+    <TextBox Grid.Column="0" Grid.Row="0" Text="{Binding Filters.Classname}" Margin="0 0 0 4"
+             Watermark="Entity Type (classname)" />
+    <Grid Grid.Column="0" Grid.Row="1" Margin="0 0 0 8" ColumnDefinitions="1*, 4, 1*">
+      <TextBox Grid.Column="0" Text="{Binding Filters.Key}" Watermark="Key" />
+      <TextBox Grid.Column="2" Text="{Binding Filters.Value}" Watermark="Value" />
+    </Grid>
+    <Grid Grid.Column="0" Grid.Row="2" Margin="0 0 0 8" ColumnDefinitions="Auto, 16, *, Auto">
+      <Button Grid.Column="0" Command="{Binding EntityLumpViewModel.AddEmptyEntity, FallbackValue=''}"
+              HorizontalAlignment="Right" IsEnabled="{Binding BspService.HasLoadedBsp}" Padding="0"
+              ToolTip.Tip="Add Entity">
+        <materialIcons:MaterialIcon Kind="Plus" Width="20" Height="20" />
+      </Button>
+      <TextBlock Grid.Column="2" FontStyle="Italic" Foreground="LightGray"
                  VerticalAlignment="Center" FontFamily="{StaticResource Monospace}" IsVisible="{Binding IsFiltered}">
         <TextBlock.Text>
           <MultiBinding StringFormat="\{0\} / \{1\} entities">
@@ -37,7 +46,7 @@
         <materialIcons:MaterialIcon Kind="Plus" Width="24" Height="24" />
       </Button>
     </Grid>
-    <Border Grid.Column="0" Grid.Row="2" CornerRadius="4">
+    <Border Grid.Column="0" Grid.Row="3" CornerRadius="4">
       <ListBox Name="EntityList" ItemsSource="{Binding FilteredEntities}"
                SelectionChanged="EntityList_OnSelectionChanged"
                SelectionMode="Single" Background="#08FFFFFF" CornerRadius="4" Classes="ScrollThin"
@@ -71,7 +80,7 @@
     </Border>
     <GridSplitter Grid.Column="1" Margin="8, 0" Grid.Row="0" Grid.RowSpan="3" MinWidth="1" Width="1"
                   ResizeDirection="Columns" />
-    <TabControl Grid.Column="2" Grid.Row="0" Grid.RowSpan="3" Padding="0" ItemsSource="{Binding Tabs}"
+    <TabControl Grid.Column="2" Grid.Row="0" Grid.RowSpan="4" Padding="0" ItemsSource="{Binding Tabs}"
                 SelectedItem="{Binding SelectedTab}">
       <TabControl.Styles>
         <Style Selector="TabItem">

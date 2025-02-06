@@ -28,7 +28,9 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
 
     public override void UpdateModel() => EntityProperty.Key = Key;
 
-    public abstract bool Match(string expr);
+    public bool MatchKey(string expr) => Key.MatchesSimpleExpression(expr);
+
+    public abstract bool MatchValue(string expr);
 
     public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
 }
@@ -56,7 +58,7 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
         entityProperty.Value = Value;
     }
 
-    public override bool Match(string expr) => Value?.MatchesSimpleExpression(expr) ?? false;
+    public override bool MatchValue(string expr) => Value?.MatchesSimpleExpression(expr) ?? false;
 }
 
 public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityProperty, BspNode bspNode)
@@ -124,7 +126,7 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
         && other.Delay == Delay
         && other.TimesToFire == TimesToFire;
 
-    public override bool Match(string expr) =>
+    public override bool MatchValue(string expr) =>
         (TargetEntityName?.MatchesSimpleExpression(expr) ?? false)
         || (Input?.MatchesSimpleExpression(expr) ?? false)
         || (Parameter?.MatchesSimpleExpression(expr) ?? false)
