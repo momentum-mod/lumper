@@ -2,7 +2,9 @@ namespace Lumper.Lib.Bsp.Struct;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Text.RegularExpressions;
 using NLog;
 
@@ -42,6 +44,23 @@ public partial class Entity : ICloneable
         }
     }
 
+    public static bool TryParsePosition(string value, [NotNullWhen(true)] out Vector3? vec)
+    {
+        vec = null;
+        string[] parts = value.Split(' ');
+        if (parts.Length != 3)
+            return false;
+
+        if (
+            !float.TryParse(parts[0], out float x)
+            || !float.TryParse(parts[1], out float y)
+            || !float.TryParse(parts[2], out float z)
+        )
+            return false;
+
+        vec = new Vector3(x, y, z);
+        return true;
+    }
 
     [GeneratedRegex(@"^\*\d+$")]
     private static partial Regex BrushEntityRegex();
@@ -49,6 +68,21 @@ public partial class Entity : ICloneable
     public bool IsBrushEntity =>
         Properties.FirstOrDefault(x => x.Key == "model") is EntityProperty<string> { Value: string modelString }
         && BrushEntityRegex().IsMatch(modelString);
+
+    public bool IsWithinSphere(Vector3 position, int radius)
+    {
+        if (
+            Properties.FirstOrDefault(p => p.Key == "origin")
+            is not EntityProperty<string> { ValueString: string originString }
+        )
+            return false;
+
+        if (!TryParsePosition(originString, out Vector3? origin))
+            return false;
+
+        return Vector3.DistanceSquared(origin.Value, position) <= Math.Pow(radius, 2);
+    }
+
     public object Clone() => new Entity { Properties = Properties.Select(x => (EntityProperty)x.Clone()).ToList() };
 
     public abstract class EntityProperty(string key) : ICloneable
