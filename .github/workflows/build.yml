@@ -80,24 +80,24 @@ jobs:
     - name: Package Windows
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        cd out_windows && zip -r Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip \
-        \
-        Lumper.CLI.exe \
-        Lumper.UI.exe \
-        NLog.config \
-        RegisterLumperURLProtocol.ps1 \
-        \
+        cd out_windows && \
+        zip -r Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip \
+          Lumper.CLI.exe \
+          Lumper.UI.exe \
+          NLog.config \
+          RegisterLumperURLProtocol.ps1 \
+          resources \
         && cd ..
 
     - name: Package Linux
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        cd out_linux && zip -r Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip \
-        \
-        Lumper.CLI \
-        Lumper.UI \
-        NLog.config \
-        \
+        cd out_linux && \
+        zip -r Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip \
+          Lumper.CLI \
+          Lumper.UI \
+          NLog.config \
+          resources \
         && cd ..
 
 
