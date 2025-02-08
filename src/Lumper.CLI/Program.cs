@@ -75,16 +75,37 @@ internal sealed class Program
 
         // If this is ever true, the application is being used to perform validations, then exit with 0 or 1.
         bool inValidationMode = false;
+        bool validationSuccess = true;
+
         if (options.CheckAssets)
         {
             inValidationMode = true;
             if (!CheckAssets(bspFile))
-                return false;
+                validationSuccess = false;
+        }
+
+        if (options.CustomEntityRules is not null)
+        {
+            inValidationMode = true;
+            if (!ValidateEntityRules(bspFile, options.CustomEntityRules))
+                validationSuccess = false;
+        }
+        else if (options.ValidateEntityRules)
+        {
+            inValidationMode = true;
+            if (!ValidateEntityRules(bspFile, null))
+                validationSuccess = false;
         }
 
         if (inValidationMode)
-            // All validations passed, exit with 0.
-            return true;
+        {
+            if (validationSuccess)
+                Logger.Info("All validations passed");
+            else
+                Logger.Error("One or more validations failed!");
+
+            return validationSuccess;
+        }
 
         if (options.JobWorkflow is { } workflowPath)
             RunWorkflow(bspFile, workflowPath);
@@ -152,6 +173,8 @@ internal sealed class Program
         var sw = new Stopwatch();
         sw.Start();
 
+        Logger.Info("Checking packed official assets (may take a bit...)");
+
         // Not parallelizing as zip reads block per-entry
         foreach (PakfileEntry entry in pakfileLump.Entries)
         {
@@ -170,14 +193,80 @@ internal sealed class Program
 
         if (numMatches > 0)
         {
-            Logger.Error($"BSP file contains {numMatches} packed game assets!");
+            Logger.Error($"BSP file contains {numMatches} packed official game assets!");
             return false;
         }
         else
         {
-            Logger.Info("Did not find any packed game assets");
+            Logger.Info("Did not find any packed official game assets");
             return true;
         }
+    }
+
+    private static bool ValidateEntityRules(BspFile bspFile, string? rulesPath)
+    {
+        Dictionary<string, EntityRule> rules;
+        try
+        {
+            rules = EntityRule.LoadRules(rulesPath);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidDataException($"Could not load rules file {rulesPath}", ex);
+        }
+
+        EntityLump entLump = bspFile.GetLump<EntityLump>();
+
+        int noClassname = 0;
+        Dictionary<EntityRule.AllowLevel, HashSet<string>> counts = new()
+        {
+            [EntityRule.AllowLevel.Allow] = [],
+            [EntityRule.AllowLevel.Warn] = [],
+            [EntityRule.AllowLevel.Deny] = [],
+            [EntityRule.AllowLevel.Unknown] = [],
+        };
+
+        foreach (Entity entity in entLump.Data)
+        {
+            string? className = entity.Properties.FirstOrDefault(x => x.Key == "classname")?.ValueString;
+
+            if (className is null)
+                noClassname++;
+            else if (!rules.TryGetValue(className, out EntityRule? rule))
+                counts[EntityRule.AllowLevel.Unknown].Add(className);
+            else
+                counts[rule.Level].Add(className);
+        }
+
+        bool bad = false;
+        Logger.Info("Entity rule validation results:");
+
+        Logger.Info($"Allowed - {counts[EntityRule.AllowLevel.Allow].Count}");
+
+        HashSet<string> warns = counts[EntityRule.AllowLevel.Warn];
+        if (warns.Count > 0)
+            Logger.Warn($"Warning - {warns.Count}\n{string.Join(", ", warns)}");
+        else
+            Logger.Info("Warning - 0");
+
+        HashSet<string> disallows = counts[EntityRule.AllowLevel.Deny];
+        if (disallows.Count > 0)
+        {
+            bad = true;
+            Logger.Error($"Disallowed - {disallows.Count}\n{string.Join(", ", disallows)}");
+        }
+        else
+        {
+            Logger.Info("Disallowed - 0");
+        }
+
+        if (noClassname > 0)
+        {
+            bad = true;
+            Logger.Error($"{noClassname} entities with no classname!!");
+        }
+
+        return !bad;
     }
 
     private static int ShowHelp(ParserResult<CommandLineOptions> parserResult)
