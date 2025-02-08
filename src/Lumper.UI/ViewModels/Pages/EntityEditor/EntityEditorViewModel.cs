@@ -172,6 +172,14 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         return filtered;
     }
 
+    public void DeleteSelected()
+    {
+        if (SelectedTab is EntityEditorTabSingleEntityViewModel single)
+            EntityLumpViewModel?.RemoveEntity(single.Entity);
+        else if (SelectedTab is EntityEditorTabMultipleEntityViewModel multiple)
+            EntityLumpViewModel?.RemoveMultiple(multiple.RealEntities);
+    }
+
     public void OpenTab(List<EntityViewModel>? entities)
     {
         if (entities is null or { Count: 0 })
