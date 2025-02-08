@@ -1,5 +1,6 @@
 namespace Lumper.UI.Views.Pages.EntityEditor;
 
+using System.Linq;
 using Avalonia.Controls;
 using Avalonia.ReactiveUI;
 using Lumper.UI.ViewModels.Pages.EntityEditor;
@@ -13,9 +14,9 @@ public partial class EntityEditorView : ReactiveUserControl<EntityEditorViewMode
 
     private void OpenSelectedListItem()
     {
-        var selected = (EntityViewModel?)EntityList?.SelectedItem;
+        var selected = EntityList?.SelectedItems?.OfType<EntityViewModel>().ToList();
 
         if (selected is not null)
-            ViewModel?.SelectTab(selected);
+            ViewModel?.OpenTab(selected);
     }
 }

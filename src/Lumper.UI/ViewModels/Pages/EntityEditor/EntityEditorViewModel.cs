@@ -172,22 +172,45 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         return filtered;
     }
 
-    public void SelectTab(EntityViewModel? model)
+    public void OpenTab(List<EntityViewModel>? entities)
     {
-        if (model is null || model == SelectedTab?.Entity)
+        if (entities is null or { Count: 0 })
             return;
 
-        if (SelectedTab is not null && !SelectedTab.Entity.IsModified && !SelectedTab.IsPinned)
-            Tabs.Remove(SelectedTab);
-
-        EntityEditorTabViewModel? newTab = Tabs.FirstOrDefault(x => x.Entity == model);
-        if (newTab is null)
+        if (SelectedTab is EntityEditorTabSingleEntityViewModel { IsPinned: false, Entity.IsModified: false })
         {
-            newTab = new EntityEditorTabViewModel(model);
-            Tabs.Add(newTab);
+            Tabs.Remove(SelectedTab);
+            SelectedTab = null;
         }
 
-        SelectedTab = newTab;
+        // Never preserve tabs for multiple entity selections, too weird, confusing UX, don't like multiple tabs
+        // with textentries bound to same entity.
+        if (SelectedTab is EntityEditorTabMultipleEntityViewModel multiTab)
+        {
+            Tabs.Remove(SelectedTab);
+            SelectedTab = null;
+            multiTab.Dispose();
+        }
+
+        if (entities is [{ } singleEntity])
+        {
+            EntityEditorTabSingleEntityViewModel? newTab = Tabs.OfType<EntityEditorTabSingleEntityViewModel>()
+                .FirstOrDefault(tab => tab.Entity == singleEntity);
+
+            if (newTab is null)
+            {
+                newTab = new EntityEditorTabSingleEntityViewModel(singleEntity);
+                Tabs.Add(newTab);
+            }
+
+            SelectedTab = newTab;
+        }
+        else
+        {
+            var newTab = new EntityEditorTabMultipleEntityViewModel(entities);
+            Tabs.Add(newTab);
+            SelectedTab = newTab;
+        }
     }
 
     public void TogglePinnedTab(EntityEditorTabViewModel tab)

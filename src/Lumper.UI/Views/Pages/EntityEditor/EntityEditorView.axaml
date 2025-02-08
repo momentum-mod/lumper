@@ -116,7 +116,7 @@
     <Border Grid.Column="0" Grid.Row="5" CornerRadius="4">
       <ListBox Name="EntityList" ItemsSource="{Binding FilteredEntities}"
                SelectionChanged="EntityList_OnSelectionChanged"
-               SelectionMode="Single" Background="#08FFFFFF" CornerRadius="4" Classes="ScrollThin"
+               SelectionMode="Multiple" Background="#08FFFFFF" CornerRadius="4" Classes="ScrollThin"
                ScrollViewer.AllowAutoHide="False">
         <ListBox.Styles>
           <Style Selector="ListBoxItem">
@@ -157,14 +157,14 @@
       <TabControl.ItemTemplate>
         <DataTemplate>
           <StackPanel Orientation="Horizontal" Spacing="4">
-            <TextBlock Text="{Binding ((entity:EntityViewModel)Entity).Classname}" />
+            <TextBlock Text="{Binding Name}" />
             <Panel IsVisible="{Binding Entity.IsModified}" ToolTip.Tip="Modified, BSP needs saving!">
               <materialIcons:MaterialIcon Kind="Asterisk" />
             </Panel>
             <ToggleButton
               Command="{Binding ViewModel.TogglePinnedTab, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
-              IsChecked="{Binding IsPinned}" CommandParameter="{Binding}" BorderThickness="0"
-              ToolTip.Tip="Pin tab">
+              IsVisible="{Binding Pinnable}" IsChecked="{Binding IsPinned}" CommandParameter="{Binding}"
+              BorderThickness="0" ToolTip.Tip="Pin Tab">
               <materialIcons:MaterialIcon Kind="Pin" />
             </ToggleButton>
             <Button
