@@ -74,7 +74,7 @@ public class CommandLineOptions
         'J',
         "jsonPath",
         Required = false,
-        HelpText = "Output JSON summary of the BSP the given path, relative to current directory. If given, --json can be omitted."
+        HelpText = "Output JSON summary of the BSP to the given path, relative to current directory. If given, --json can be omitted."
     )]
     public string? JsonPath { get; set; }
 
@@ -96,4 +96,20 @@ public class CommandLineOptions
         HelpText = "[VALIDATOR] Check whether the paklump contains official Valve assets, exits with 1 if so."
     )]
     public bool CheckAssets { get; set; }
+
+    [Option(
+        'r',
+        "entityRules",
+        Required = false,
+        HelpText = "[VALIDATOR] Check the BSP file against default set of entity rules (EntityRules_Momentum.json)."
+    )]
+    public bool ValidateEntityRules { get; set; }
+
+    [Option(
+        'R',
+        "customEntityRules",
+        Required = false,
+        HelpText = "[VALIDATOR] Check the BSP file against a set of entity rules at a given path."
+    )]
+    public string? CustomEntityRules { get; set; }
 }
