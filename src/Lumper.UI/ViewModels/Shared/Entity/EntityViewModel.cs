@@ -4,20 +4,21 @@ using System;
 using System.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
+using Lumper.Lib.ExtensionMethods;
 using ReactiveUI;
 
 public class EntityViewModel : HierarchicalBspNode
 {
     public Entity Entity { get; }
 
-    public const string MissingClassname = "<missing classname!>";
-
     public ObservableCollectionExtended<EntityPropertyViewModel> Properties { get; } = [];
+
+    public const string MissingClassname = "<missing classname!>";
 
     private string? _classname;
     public string Classname
     {
-        get => !string.IsNullOrWhiteSpace(_classname) ? _classname : "<missing classname!>";
+        get => !string.IsNullOrWhiteSpace(_classname) ? _classname : MissingClassname;
         set => this.RaiseAndSetIfChanged(ref _classname, value);
     }
 
@@ -85,4 +86,7 @@ public class EntityViewModel : HierarchicalBspNode
             return $"{Classname} (HammerID {hammerid})";
         }
     }
+
+    public bool MatchClassname(string expr, bool wildcardWrapping) =>
+        _classname?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
 }
