@@ -40,7 +40,7 @@ public sealed class PageService : ReactiveObject
     // Collection of all available pages.
     // For performance, ViewModels are only constructed when the pages are accessed.
     // When a new BSP is loaded, any inactive ephemeral viewmodels are discarded.
-    private readonly Dictionary<Page, ILazyPage<ViewModel>> _pageVms = new()
+    public Dictionary<Page, ILazyPage<ViewModel>> Pages { get; } =
         new()
         {
             { Page.EntityEditor, new LazyPage<EntityEditorViewModel>(true) },
@@ -68,7 +68,7 @@ public sealed class PageService : ReactiveObject
             .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(_ =>
             {
-                foreach ((Page page, ILazyPage<ViewModel> pageVm) in _pageVms)
+                foreach ((Page page, ILazyPage<ViewModel> pageVm) in Pages)
                 {
                     // When active BSP file changes (incl. closing), reset any page that is
                     //  - loaded
@@ -91,7 +91,7 @@ public sealed class PageService : ReactiveObject
         if (page == ActivePage)
             return;
 
-        if (!_pageVms.TryGetValue(page, out ILazyPage<ViewModel>? pageVm))
+        if (!Pages.TryGetValue(page, out ILazyPage<ViewModel>? pageVm))
             throw new ArgumentException($"Bad page name {page}");
 
         PreviousPage = ActivePage;
@@ -111,7 +111,7 @@ public sealed class PageService : ReactiveObject
 
     // This wrapper interface + class is required because we need a covariant type for Get(),
     // so that e.g. LazyPage<VtfBrowserViewModel> is assignable to LazyPage<ViewModel>.
-    private interface ILazyPage<out T>
+    public interface ILazyPage<out T>
     {
         public bool Ephemeral { get; }
 
