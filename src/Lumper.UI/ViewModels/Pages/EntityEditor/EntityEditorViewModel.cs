@@ -10,7 +10,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
-using Lumper.Lib.ExtensionMethods;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using Lumper.UI.Views.Pages.EntityEditor;
@@ -155,7 +154,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         if (!string.IsNullOrWhiteSpace(Filters.Classname))
         {
             filtered = true;
-            output = output.Where(vm => vm.Classname.MatchesSimpleExpression(Filters.Classname, wc));
+            output = output.Where(vm => vm.MatchClassname(Filters.Classname, wc));
         }
 
         bool hasKeys = !string.IsNullOrWhiteSpace(Filters.Key);
