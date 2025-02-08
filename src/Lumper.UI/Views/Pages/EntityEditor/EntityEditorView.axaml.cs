@@ -2,6 +2,7 @@ namespace Lumper.UI.Views.Pages.EntityEditor;
 
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using Lumper.UI.ViewModels.Pages.EntityEditor;
 using Lumper.UI.ViewModels.Shared.Entity;
@@ -9,6 +10,8 @@ using Lumper.UI.ViewModels.Shared.Entity;
 public partial class EntityEditorView : ReactiveUserControl<EntityEditorViewModel>
 {
     public EntityEditorView() => InitializeComponent();
+
+    private void SelectAll(object? sender, RoutedEventArgs e) => EntityList?.SelectAll();
 
     private void EntityList_OnSelectionChanged(object? _, SelectionChangedEventArgs __) => OpenSelectedListItem();
 
