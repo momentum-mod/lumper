@@ -111,6 +111,10 @@
               IsEnabled="{Binding !!FilteredEntities.Count, FallbackValue='0'}">
         <materialIcons:MaterialIcon Kind="SelectAll" Width="24" Height="24" />
       </Button>
+      <Button Grid.Column="4" Command="{Binding DeleteSelected}" ToolTip.Tip="Delete Selected" Padding="0"
+              IsEnabled="{Binding SelectedTab, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <materialIcons:MaterialIcon Kind="Delete" Width="24" Height="24" />
+      </Button>
       <Button Grid.Column="6" Command="{Binding EntityLumpViewModel.AddEmptyEntity, FallbackValue=''}"
               IsEnabled="{Binding BspService.HasLoadedBsp}" Padding="0" ToolTip.Tip="Add Entity">
         <materialIcons:MaterialIcon Kind="PlusOutline" Width="24" Height="24" />

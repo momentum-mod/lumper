@@ -77,6 +77,16 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
         MarkAsModified();
     }
 
+    public void RemoveMultiple(IEnumerable<EntityViewModel> entities) =>
+        Entities.Edit(innerCache =>
+        {
+            foreach (EntityViewModel entity in entities)
+            {
+                _entityLump.Data.Remove(entity.Entity);
+                innerCache.Remove(entity);
+            }
+        });
+
     /// <summary>
     /// Update the underlying model (EntityLump) with data from the ViewModel
     /// </summary>
