@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 using Lumper.UI.ViewModels;
 using Lumper.UI.ViewModels.Pages.EntityEditor;
+using Lumper.UI.ViewModels.Pages.EntityReview;
 using Lumper.UI.ViewModels.Pages.Jobs;
 using Lumper.UI.ViewModels.Pages.PakfileExplorer;
 using Lumper.UI.ViewModels.Pages.RawEntities;
@@ -22,6 +23,7 @@ public enum Page
     VtfBrowser,
     Jobs,
     RawEntities,
+    EntityReview,
 }
 
 /// <summary>
@@ -39,13 +41,15 @@ public sealed class PageService : ReactiveObject
     // For performance, ViewModels are only constructed when the pages are accessed.
     // When a new BSP is loaded, any inactive ephemeral viewmodels are discarded.
     private readonly Dictionary<Page, ILazyPage<ViewModel>> _pageVms = new()
-    {
-        { Page.EntityEditor, new LazyPage<EntityEditorViewModel>(true) },
-        { Page.PakfileExplorer, new LazyPage<PakfileExplorerViewModel>(true) },
-        { Page.VtfBrowser, new LazyPage<VtfBrowserViewModel>(true) },
-        { Page.Jobs, new LazyPage<JobsViewModel>(false) },
-        { Page.RawEntities, new LazyPage<RawEntitiesViewModel>(true) },
-    };
+        new()
+        {
+            { Page.EntityEditor, new LazyPage<EntityEditorViewModel>(true) },
+            { Page.PakfileExplorer, new LazyPage<PakfileExplorerViewModel>(true) },
+            { Page.VtfBrowser, new LazyPage<VtfBrowserViewModel>(true) },
+            { Page.Jobs, new LazyPage<JobsViewModel>(false) },
+            { Page.RawEntities, new LazyPage<RawEntitiesViewModel>(true) },
+            { Page.EntityReview, new LazyPage<EntityReviewViewModel>(true) },
+        };
 
     [Reactive]
     public ViewModel? ActivePageVm { get; set; }

@@ -1,0 +1,63 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.EntityReview"
+             xmlns:views="clr-namespace:Lumper.UI.Views.Pages.EntityReview"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.EntityReview.EntityReviewView"
+             x:DataType="vm:EntityReviewViewModel">
+
+  <Grid RowDefinitions="Auto, *">
+    <Grid Grid.Row="0" ColumnDefinitions="*, 8, Auto" Margin="8">
+      <TextBox Grid.Column="0" IsReadOnly="True" Text="{Binding RulesFilePath}" />
+      <Button Grid.Column="2" Command="{Binding ShowFilePickerDialog}">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <materialIcons:MaterialIcon Kind="ClipboardTextOutline" />
+          <TextBlock VerticalAlignment="Center">Pick Ruleset</TextBlock>
+        </StackPanel>
+      </Button>
+    </Grid>
+    <DataGrid Grid.Row="1" ItemsSource="{Binding Results}" IsReadOnly="True" BorderBrush="#333"
+              BorderThickness="0 1 0 0" VerticalScrollBarVisibility="Visible">
+      <DataGrid.Styles>
+        <Style Selector="ScrollBar">
+          <Setter Property="AllowAutoHide" Value="False" />
+          <Setter Property="Width" Value="16" />
+        </Style>
+      </DataGrid.Styles>
+      <DataGrid.Columns>
+        <DataGridTextColumn Width="Auto" Header="Entity Type (classname)" Binding="{Binding Classname}"
+                            FontFamily="{StaticResource Monospace}" FontSize="14" />
+        <DataGridTextColumn Width="Auto" Header="Count" Binding="{Binding Count}"
+                            FontFamily="{StaticResource Monospace}" FontSize="14" />
+        <DataGridTemplateColumn Width="Auto" Header="Validity" SortMemberPath="Level">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <Panel VerticalAlignment="Stretch">
+                <Panel VerticalAlignment="Stretch" Background="{Binding Style}" Opacity="0.5" />
+                <TextBlock Text="{Binding Validity}" Margin="12 0 12 0" VerticalAlignment="Center"
+                           FontFamily="{StaticResource Monospace}" FontSize="14" />
+              </Panel>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTextColumn Width="*" Header="Comment" Binding="{Binding Comment}" FontSize="14" />
+        <DataGridTemplateColumn Width="64" Header="Edit">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <Button
+                Command="{Binding $parent[views:EntityReviewView].((vm:EntityReviewViewModel)DataContext).SwitchToEntityEditor, FallbackValue=''}"
+                CommandParameter="{Binding Classname}" Background="Transparent" BorderThickness="0" Padding="0 0 12 0"
+                HorizontalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="Edit" Foreground="#88FFFFFF" Width="20" Height="20" />
+              </Button>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+      </DataGrid.Columns>
+    </DataGrid>
+  </Grid>
+
+</UserControl>
