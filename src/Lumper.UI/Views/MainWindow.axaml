@@ -78,17 +78,17 @@
             </MenuItem>
             <MenuItem Header="_View">
               <MenuItem Header="_Entity Editor" Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.EntityEditor}"
-                        InputGesture="Ctrl+D1" />
+                        CommandParameter="{x:Static service:Page.EntityEditor}" InputGesture="Ctrl+D1" />
+              <MenuItem Header="_Entity Review" Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.EntityReview}" InputGesture="Ctrl+D2" />
               <MenuItem Header="_Raw Entities" Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.RawEntities}" InputGesture="Ctrl+D2" />
+                        CommandParameter="{x:Static service:Page.RawEntities}" InputGesture="Ctrl+D3" />
               <MenuItem Header="_Pakfile Explorer" Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.PakfileExplorer}"
-                        InputGesture="Ctrl+D3" />
+                        CommandParameter="{x:Static service:Page.PakfileExplorer}" InputGesture="Ctrl+D4" />
               <MenuItem Header="_Texture Browser" Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.VtfBrowser}" InputGesture="Ctrl+D4" />
+                        CommandParameter="{x:Static service:Page.VtfBrowser}" InputGesture="Ctrl+D5" />
               <MenuItem Header="_Jobs" Command="{Binding PageService.ViewPage}"
-                        CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D5" />
+                        CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D6" />
             </MenuItem>
             <MenuItem Header="_About">
               <MenuItem Header="_Check For Updates" Command="{Binding UpdaterService.CheckForUpdates}" />
@@ -128,7 +128,15 @@
           </ToggleButton>
 
           <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.RawEntities}" HotKey="Ctrl+D2">
+                        CommandParameter="{x:Static service:Page.EntityReview}" HotKey="Ctrl+D2">
+            <StackPanel>
+              <materialIcons:MaterialIcon Kind="ClipboardEdit" />
+              <TextBlock>Entity Review</TextBlock>
+            </StackPanel>
+          </ToggleButton>
+
+          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                        CommandParameter="{x:Static service:Page.RawEntities}" HotKey="Ctrl+D3">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="TextLong" />
               <TextBlock>Raw Entities</TextBlock>
@@ -136,7 +144,7 @@
           </ToggleButton>
 
           <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.PakfileExplorer}" HotKey="Ctrl+D3">
+                        CommandParameter="{x:Static service:Page.PakfileExplorer}" HotKey="Ctrl+D4">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="FolderZipOutline" />
               <TextBlock>Pakfile Explorer</TextBlock>
@@ -144,14 +152,14 @@
           </ToggleButton>
 
           <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.VtfBrowser}" HotKey="Ctrl+D4">
+                        CommandParameter="{x:Static service:Page.VtfBrowser}" HotKey="Ctrl+D5">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="ImageMultiple" />
               <TextBlock>Texture Browser</TextBlock>
             </StackPanel>
           </ToggleButton>
           <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.Jobs}" HotKey="Ctrl+D5">
+                        CommandParameter="{x:Static service:Page.Jobs}" HotKey="Ctrl+D6">
             <StackPanel>
               <materialIcons:MaterialIcon Kind="FormatListChecks" />
               <TextBlock>Jobs</TextBlock>
