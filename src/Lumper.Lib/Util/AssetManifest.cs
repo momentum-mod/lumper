@@ -59,7 +59,7 @@ public static class AssetManifest
 
             // We could add checks around all the asset manifest-related code to support ignoring it, but it's always used
             // in Momentum's use-case, so not putting the effort in, and throwing if the manifest isn't found.
-            string manifestPath = Path.Combine(AppContext.BaseDirectory, "AssetManifest.rsv");
+            string manifestPath = Path.Combine(AppContext.BaseDirectory, "resources", "AssetManifest.rsv");
             if (!File.Exists(manifestPath))
                 throw new IOException("Could not find AssetManifest.rsv");
 

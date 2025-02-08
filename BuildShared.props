@@ -22,10 +22,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)\resources\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)\NLog.config;$(MSBuildThisFileDirectory)\scripts\RegisterLumperURLProtocol.ps1"
+             CopyToPublishDirectory="Always"
+             ExcludeFromSingleFile="True"/>
+
+    <Content Include="$(MSBuildThisFileDirectory)\resources\**"
+             CopyToOutputDirectory="Always"
+             ExcludeFromSingleFile="true"
+             LinkBase="resources\"/>
   </ItemGroup>
 
 </Project>
