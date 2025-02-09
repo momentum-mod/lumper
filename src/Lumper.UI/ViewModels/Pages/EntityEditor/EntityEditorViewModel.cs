@@ -30,50 +30,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     [Reactive]
     public bool IsFiltered { get; private set; }
 
-    public ReactiveFilters Filters { get; } = new();
-
-    public class ReactiveFilters : ReactiveObject
-    {
-        [Reactive]
-        public string Classname { get; set; } = "";
-
-        [Reactive]
-        public string Key { get; set; } = "";
-
-        [Reactive]
-        public string Value { get; set; } = "";
-
-        [Reactive]
-        public bool WildcardWrapping { get; set; } = true;
-
-        [Reactive]
-        public bool ShowBrushEntities { get; set; } = true;
-
-        [Reactive]
-        public bool ShowPointEntities { get; set; } = true;
-
-        [Reactive]
-        public string SpherePosition { get; set; } = "";
-
-        [Reactive]
-        public string SphereRadius { get; set; } = "";
-
-        public bool TryParseSphere([NotNullWhen(true)] out (Vector3, int radius)? location)
-        {
-            location = null;
-            if (string.IsNullOrWhiteSpace(SpherePosition) || string.IsNullOrWhiteSpace(SphereRadius))
-                return false;
-
-            if (!Entity.TryParsePosition(SpherePosition, out Vector3? vec))
-                return false;
-
-            if (!int.TryParse(SphereRadius, out int radius))
-                return false;
-
-            location = (vec.Value, radius);
-            return true;
-        }
-    }
+    public EntityEditorFilters Filters { get; } = new();
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
 
