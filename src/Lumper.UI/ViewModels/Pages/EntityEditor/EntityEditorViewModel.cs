@@ -74,7 +74,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             //   (c) - the filters change
             .CombineLatest(
                 this.WhenAnyValue(x => x.Filters) // Needed to kick this off
-                    .Merge(Filters.WhenAnyPropertyChanged().Throttle(TimeSpan.FromMilliseconds(100))),
+                    .Merge(Filters.WhenAnyPropertyChanged().Throttle(TimeSpan.FromMilliseconds(10))),
                 (_, _) => u
             )
             .Select(_ =>
