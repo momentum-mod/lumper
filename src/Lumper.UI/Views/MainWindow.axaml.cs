@@ -37,26 +37,29 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
             PageService.Instance.ViewPage(Page.EntityEditor);
 
-            StateService.Instance.RecentFiles.CollectionChanged += (_, _) =>
-                RecentFiles.ItemsSource = StateService
-                    .Instance.RecentFiles.Select(path =>
-                    {
-                        const int max = 50;
-                        string header = path.Length > max ? "..." + path[^max..] : path;
-
-                        // Underscore needed otherwise accelerate key thing eats first underscore
-                        header = "_" + header;
-
-                        return new MenuItem
-                        {
-                            Header = header,
-                            Command = ReactiveCommand.CreateFromTask(async () => await BspService.Instance.Load(path)),
-                        };
-                    })
-                    .Reverse()
-                    .ToList();
+            PopulateRecentFilesList();
+            StateService.Instance.RecentFiles.CollectionChanged += (_, _) => PopulateRecentFilesList();
         });
     }
+
+    private void PopulateRecentFilesList() =>
+        RecentFiles.ItemsSource = StateService
+            .Instance.RecentFiles.Select(path =>
+            {
+                const int max = 50;
+                string header = path.Length > max ? "..." + path[^max..] : path;
+
+                // Underscore needed otherwise accelerate key thing eats first underscore
+                header = "_" + header;
+
+                return new MenuItem
+                {
+                    Header = header,
+                    Command = ReactiveCommand.CreateFromTask(async () => await BspService.Instance.Load(path)),
+                };
+            })
+            .Reverse()
+            .ToList();
 
     // ReSharper disable once AsyncVoidMethod - Needed for event binding
     private async void Window_OnClosing(object? _, WindowClosingEventArgs e)
