@@ -3,13 +3,11 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Reactive;
 using System.Reactive.Linq;
 using DynamicData.Binding;
-using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using Lumper.UI.Views.Pages.EntityEditor;
@@ -108,31 +106,49 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
         bool wc = Filters.WildcardWrapping;
 
-        if (!string.IsNullOrWhiteSpace(Filters.Classname))
+        if (
+            EntityEditorFilters.TryParseStringFilters(
+                Filters.Classname,
+                out List<string>? inclClassname,
+                out List<string>? exclClassname
+            )
+        )
         {
             filtered = true;
-            output = output.Where(vm => vm.MatchClassname(Filters.Classname, wc));
+            output = output.Where(vm =>
+                (inclClassname.Count == 0 || inclClassname.Any(classname => vm.MatchClassname(classname, wc)))
+                && !exclClassname.Any(classname => vm.MatchClassname(classname, wc))
+            );
         }
 
-        bool hasKeys = !string.IsNullOrWhiteSpace(Filters.Key);
-        bool hasValues = !string.IsNullOrWhiteSpace(Filters.Value);
-        if (hasKeys || hasValues)
+        if (
+            EntityEditorFilters.TryParseStringFilters(
+                Filters.Key,
+                out List<string>? inclKeys,
+                out List<string>? exclKeys
+            )
+        )
         {
             filtered = true;
-            if (hasKeys && hasValues)
-                output = output.Where(vm =>
-                    vm.Properties.Any(p => p.MatchKey(Filters.Key, wc) && p.MatchValue(Filters.Value, wc))
-                );
-            else if (hasKeys)
-                output = output.Where(vm => vm.Properties.Any(p => p.MatchKey(Filters.Key, wc)));
-            else
-                output = output.Where(vm => vm.Properties.Any(p => p.MatchValue(Filters.Value, wc)));
+            output = output.Where(vm =>
+                (inclKeys.Count == 0 || inclKeys.Any(key => vm.Properties.Any(prop => prop.MatchKey(key, wc))))
+                && !exclKeys.Any(classname => vm.Properties.Any(prop => prop.MatchKey(classname, wc)))
+            );
         }
 
-        if (Filters.TryParseSphere(out (Vector3 position, int radius)? sphere))
+        if (
+            EntityEditorFilters.TryParseStringFilters(
+                Filters.Value,
+                out List<string>? inclVals,
+                out List<string>? exclVals
+            )
+        )
         {
             filtered = true;
-            output = output.Where(vm => vm.Entity.IsWithinSphere(sphere.Value.position, sphere.Value.radius));
+            output = output.Where(vm =>
+                (inclVals.Count == 0 || inclVals.All(value => vm.Properties.Any(prop => prop.MatchValue(value, wc))))
+                && !exclVals.Any(classname => vm.Properties.Any(prop => prop.MatchValue(classname, wc)))
+            );
         }
 
         if (!Filters.ShowBrushEntities || !Filters.ShowPointEntities)
@@ -145,6 +161,12 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
                     : output.Where(_ => false); // Both are unchecked ¯\_(ツ)_/¯
             else
                 output = output.Where(vm => vm.Entity.IsBrushEntity);
+        }
+
+        if (Filters.TryParseSphere(out (Vector3 position, int radius)? sphere))
+        {
+            filtered = true;
+            output = output.Where(vm => vm.Entity.IsWithinSphere(sphere.Value.position, sphere.Value.radius));
         }
 
         return filtered;
