@@ -92,7 +92,14 @@ public sealed class BspService : ReactiveObject, IDisposable
     {
         this.WhenAnyValue(x => x.BspFile).Subscribe(_ => OnBspChanged());
         _bspSubject.Select(x => x?.Name).ToPropertyEx(this, x => x.FileName);
-        _bspSubject.Select(x => x?.FilePath).ToPropertyEx(this, x => x.FilePath);
+        _bspSubject
+            .Select(x => x?.FilePath)
+            .Do(x =>
+            {
+                if (x is not null)
+                    StateService.Instance.UpdateRecentFiles(x, true);
+            })
+            .ToPropertyEx(this, x => x.FilePath);
         _bspSubject.Select(x => x is not null).ToPropertyEx(this, x => x.HasLoadedBsp);
     }
 
@@ -335,6 +342,12 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// </summary>
     public void CloseCurrentBsp()
     {
+        if (!HasLoadedBsp)
+            return;
+
+        if (FilePath is not null)
+            StateService.Instance.UpdateRecentFiles(FilePath, false);
+
         BspFile?.Dispose();
         BspFile = null;
         ResetLumpViewModels();
