@@ -41,15 +41,15 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 RecentFiles.ItemsSource = StateService
                     .Instance.RecentFiles.Select(path =>
                     {
-                        const int max = 40;
-                        if (path.Length > max)
-                            path = "..." + path[^max..];
+                        const int max = 50;
+                        string header = path.Length > max ? "..." + path[^max..] : path;
+
                         // Underscore needed otherwise accelerate key thing eats first underscore
-                        path = "_" + path;
+                        header = "_" + header;
 
                         return new MenuItem
                         {
-                            Header = path,
+                            Header = header,
                             Command = ReactiveCommand.CreateFromTask(async () => await BspService.Instance.Load(path)),
                         };
                     })
