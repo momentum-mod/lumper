@@ -12,53 +12,87 @@
 
   <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *" Margin="8">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="360" MinWidth="200" />
+      <ColumnDefinition Width="360" MinWidth="260" />
       <ColumnDefinition Width="2" />
       <ColumnDefinition Width="*" MinWidth="400" />
     </Grid.ColumnDefinitions>
-    <TextBox Grid.Column="0" Grid.Row="0" Text="{Binding Filters.Classname}" Margin="0 0 0 4"
-             Watermark="Entity Type (classname)" />
+    <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="*, 6, Auto" Margin="0 0 0 4">
+      <TextBox Grid.Column="0" Text="{Binding Filters.Classname}" Watermark="Entity Type (classname)" />
+      <materialIcons:MaterialIcon Grid.Column="2" Kind="HelpBox" Width="24" Height="24" Foreground="DarkGray">
+        <ToolTip.Tip>
+          <StackPanel>
+            <TextBlock FontSize="18" FontWeight="Medium">Entity Type / Key / Value</TextBlock>
+            <TextBlock LineHeight="24">
+              Multiple inputs can be provided at once separated by commas, and entities/properties will match if any
+              value matches. Use <Run FontFamily="{StaticResource Monospace}">-</Run> to exclude on the front of a value
+              to exclude that value.
+              <LineBreak />
+              <Run FontStyle="Italic" FontWeight="Medium">Example</Run>
+              <LineBreak />
+              <Run FontFamily="{StaticResource Monospace}">light, -light_spot</Run> entity type will match any entity
+              with <Run FontFamily="{StaticResource Monospace}">light</Run> in the classname, but not
+              <Run FontFamily="{StaticResource Monospace}">light_spot</Run>.
+            </TextBlock>
+            <TextBlock FontSize="18" FontWeight="Medium">Spherical Region</TextBlock>
+            <TextBlock LineHeight="24">
+              Matches entities within a spherical region based on their origin.
+              <LineBreak />
+              <Run FontStyle="Italic" FontWeight="Medium">Example</Run>
+              <LineBreak />
+              Region: <Run FontFamily="{StaticResource Monospace}">0 0 0</Run>, Radius:
+              <Run FontFamily="{StaticResource Monospace}">0</Run>
+              Will match any entity who's origin is within 1000 units from X = 0, Y = 0, Z = 0.
+            </TextBlock>
+            <TextBlock FontSize="18" FontWeight="Medium">Wildcards</TextBlock>
+            <TextBlock LineHeight="24">
+              <Run FontFamily="{StaticResource Monospace}">*</Run> (greedy) and
+              <Run FontFamily="{StaticResource Monospace}">?</Run> (non-greedy) wildcards are supported. Use
+              <Run FontFamily="{StaticResource Monospace}">\</Run> to escape.
+            </TextBlock>
+            <TextBlock FontSize="14" FontWeight="Medium">Wildcard Wrapping</TextBlock>
+            <TextBlock LineHeight="24">
+              Applies a trailing wildcard to all string expressions.
+              <LineBreak />
+              If checked, <Run FontFamily="{StaticResource Monospace}">light</Run> will also match
+              <Run FontFamily="{StaticResource Monospace}">light_spot</Run>,
+              <Run FontFamily="{StaticResource Monospace}">light_environment</Run>, etc...
+              <LineBreak />
+              If unchecked, it will only match <Run FontFamily="{StaticResource Monospace}">light</Run>.
+            </TextBlock>
+          </StackPanel>
+        </ToolTip.Tip>
+      </materialIcons:MaterialIcon>
+    </Grid>
     <Grid Grid.Column="0" Grid.Row="1" Margin="0 0 0 4" ColumnDefinitions="1*, 4, 1*">
       <TextBox Grid.Column="0" Text="{Binding Filters.Key}" Watermark="Key" />
       <TextBox Grid.Column="2" Text="{Binding Filters.Value}" Watermark="Value" />
     </Grid>
     <Grid Grid.Column="0" Grid.Row="2" Margin="0, 0, 0, 4" ColumnDefinitions="3*, 4, 1*">
-      <TextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}" Watermark="In Sphere" />
+      <ToolTip.Tip>
+        <StackPanel>
+          <TextBlock FontStyle="Italic" FontWeight="Medium">Example</TextBlock>
+          <TextBlock>
+            <Run FontWeight="Medium">In Spherical Region</Run>
+            <Run FontFamily="{StaticResource Monospace}">0 0 0</Run>
+          </TextBlock>
+          <TextBlock>
+            <Run FontWeight="Medium">Radius</Run>
+            <Run FontFamily="{StaticResource Monospace}">0</Run>
+          </TextBlock>
+          <TextBlock>Will match any entity who's origin is within 1000 units from X = 0, Y = 0, Z = 0.</TextBlock>
+        </StackPanel>
+      </ToolTip.Tip>
+      <TextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}" Watermark="In Spherical Region (X Y Z)" />
       <TextBox Grid.Column="2" Text="{Binding Filters.SphereRadius}" Watermark="Radius" />
     </Grid>
-    <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, 8, Auto, 8, Auto, 8, Auto, *, Auto" Margin="4 0 0 4">
+    <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, 8, Auto, 12, Auto, 8, Auto, *, Auto, 8, Auto"
+          Margin="4 0 0 4">
       <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="LightGray">Brush</TextBlock>
       <CheckBox Grid.Column="2" IsChecked="{Binding Filters.ShowBrushEntities}" />
-      <TextBlock Grid.Column="4" VerticalAlignment="Center" Margin="8 0 0 0" Foreground="LightGray">Point</TextBlock>
+      <TextBlock Grid.Column="4" VerticalAlignment="Center" Foreground="LightGray">Point</TextBlock>
       <CheckBox Grid.Column="6" IsChecked="{Binding Filters.ShowPointEntities}" />
-      <StackPanel Grid.Column="8" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
-        <ToolTip.Tip>
-          <StackPanel>
-            <TextBlock>Applies a trailing wildcard to all string expressions.</TextBlock>
-            <TextBlock>
-              If checked,
-              <Run FontFamily="{StaticResource Monospace}">light</Run>
-              will also match
-              <Run FontFamily="{StaticResource Monospace}">light_spot</Run>,
-              <Run FontFamily="{StaticResource Monospace}">light_environment</Run>,
-              etc...
-            </TextBlock>
-            <TextBlock>
-              If unchecked, it will only match
-              <Run FontFamily="{StaticResource Monospace}">light</Run>.
-            </TextBlock>
-            <TextBlock>
-              <Run FontFamily="{StaticResource Monospace}">*</Run>
-              (greedy) and
-              <Run FontFamily="{StaticResource Monospace}">?</Run>
-              (non-greedy) wildcards are supported. Use
-              <Run FontFamily="{StaticResource Monospace}">\</Run> to escape.
-            </TextBlock>
-          </StackPanel>
-        </ToolTip.Tip>
-        <TextBlock Foreground="LightGray" VerticalAlignment="Center">Wildcard Wrapping</TextBlock>
-        <CheckBox IsChecked="{Binding Filters.WildcardWrapping}" Padding="0" />
-      </StackPanel>
+      <TextBlock Grid.Column="8" Foreground="LightGray" VerticalAlignment="Center">Wildcard Wrapping</TextBlock>
+      <CheckBox Grid.Column="10" IsChecked="{Binding Filters.WildcardWrapping}" Padding="0" />
     </Grid>
     <Grid Grid.Column="0" Grid.Row="4" Margin="4 0 0 8" ColumnDefinitions="Auto, *, Auto">
       <TextBlock Grid.Column="0" FontStyle="Italic" Foreground="LightGray" VerticalAlignment="Center"
@@ -125,7 +159,7 @@
           <StackPanel Orientation="Horizontal" Spacing="4">
             <TextBlock Text="{Binding ((entity:EntityViewModel)Entity).Classname}" />
             <Panel IsVisible="{Binding Entity.IsModified}" ToolTip.Tip="Modified, BSP needs saving!">
-              <materialIcons:MaterialIcon Kind="ContentSaveAlert" />
+              <materialIcons:MaterialIcon Kind="Asterisk" />
             </Panel>
             <ToggleButton
               Command="{Binding ViewModel.TogglePinnedTab, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"

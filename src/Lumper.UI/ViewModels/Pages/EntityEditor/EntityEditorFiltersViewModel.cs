@@ -34,6 +34,32 @@ public class EntityEditorFilters : ReactiveObject
     [Reactive]
     public string SphereRadius { get; set; } = "";
 
+    /// <summary>
+    /// Parse a CSV string into filter function that matchs entity value strings against the filter.
+    /// Strings prepended with '-' exclude entities matching the string.
+    /// </summary>
+    public static bool TryParseStringFilters(
+        string filter,
+        [NotNullWhen(true)] out List<string>? incl,
+        [NotNullWhen(true)] out List<string>? excl
+    )
+    {
+        incl = null;
+        excl = null;
+
+        if (string.IsNullOrWhiteSpace(filter))
+            return false;
+
+        var split = filter.Split(',').Select(s => s.Trim()).ToList();
+        if (split.Count == 0)
+            return false;
+
+        incl = split.Where(s => !s.StartsWith('-')).ToList();
+        excl = split.Where(s => s.StartsWith('-')).Select(s => s[1..]).ToList();
+
+        return true;
+    }
+
     public bool TryParseSphere([NotNullWhen(true)] out (Vector3 pos, int radius)? location)
     {
         location = null;
