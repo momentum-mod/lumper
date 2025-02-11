@@ -3,10 +3,14 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using DynamicData.Binding;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
@@ -28,6 +32,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     [Reactive]
     public bool IsFiltered { get; private set; }
 
+    // TODO: stick these idiots in stateservice
     public EntityEditorFilters Filters { get; } = new();
 
     public ObservableCollection<EntityEditorTabViewModel> Tabs { get; } = [];
@@ -36,6 +41,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
     public EntityEditorTabViewModel? SelectedTab { get; set; }
 
     public static BspService BspService => BspService.Instance;
+
+    public static GameSyncService GameSyncService => GameSyncService.Instance;
 
     public EntityEditorViewModel()
     {
@@ -92,11 +99,33 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
                     out IEnumerable<EntityViewModel> filteredEntities
                 );
 
+                var sw = new Stopwatch();
+                sw.Start();
+                var filteredEntitiesList = filteredEntities.ToList();
+                sw.Stop();
+                Console.WriteLine($"Filtering took {sw.ElapsedMilliseconds}ms");
                 // Expand out to full list, set FilteredEntities to it
-                return filteredEntities.ToList().AsReadOnly();
+                return filteredEntitiesList.ToList().AsReadOnly();
             })
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.FilteredEntities);
+
+        GameSyncService
+            .WhenAnyValue(x => x.Position)
+            .Select(pos =>
+                // Remove decimal points, clog up filter textbox and will never need such high precision.
+                pos is not null
+                    ? string.Join(" ", pos.Split(' ').Select(str => float.TryParse(str, out float val) ? (int)val : 0))
+                    : null
+            )
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(pos =>
+            {
+                if (pos is not null)
+                    Filters.SpherePosition = pos;
+            });
+
+        Observable.Start(ProcessIngamePosition, RxApp.TaskpoolScheduler);
     }
 
     private bool Filter(IEnumerable<EntityViewModel> input, out IEnumerable<EntityViewModel> output)
@@ -170,6 +199,29 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         }
 
         return filtered;
+    }
+
+    private async Task ProcessIngamePosition()
+    {
+        const string filePath = @"F:\MomentumDev\game\momentum\lumper_position_sync.txt";
+
+        await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+
+        using var reader = new StreamReader(fileStream, Encoding.UTF8);
+
+        string? line;
+        while (true)
+        {
+            line = await reader.ReadLineAsync();
+            if (!string.IsNullOrWhiteSpace(line))
+            {
+                Console.WriteLine(line);
+                Filters.SpherePosition = line;
+            }
+
+            // Wait for new data to be written
+            await Task.Delay(100);
+        }
     }
 
     public void DeleteSelected()

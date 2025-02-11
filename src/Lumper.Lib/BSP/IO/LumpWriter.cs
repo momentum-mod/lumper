@@ -42,7 +42,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.
 
         if (lump is IUnmanagedLump unmanagedLump)
         {
-            if (lump.IsCompressed)
+            if (lump.IsCompressed && unmanagedLump.UncompressedLength > 0)
             {
                 // Debated having a more complex system allowing you to specifically selected whether to leave
                 // stuff unchanged or to decompress the lump, but it's hard to imagine a use-case, and makes

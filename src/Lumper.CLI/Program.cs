@@ -118,7 +118,16 @@ internal sealed class Program
             else if (options.DontCompress)
                 compression = DesiredCompression.Uncompressed;
 
-            bspFile.SaveToFile(options.OutputPath ?? null, compression, null, !options.SkipBackup);
+            bspFile.SaveToFile(
+                options.OutputPath ?? null,
+                new BspFile.SaveToFileOptions
+                {
+                    Compression = compression,
+                    Handler = null,
+                    MakeBackup = !options.SkipBackup,
+                    RenameCubemaps = options.RenameCubemaps,
+                }
+            );
         }
 
         if (options.JsonDump || options.JsonPath is not null)

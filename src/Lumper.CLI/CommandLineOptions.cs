@@ -89,6 +89,15 @@ public class CommandLineOptions
     public JsonOptions JsonOptions { get; set; }
 
     [Option(
+        'u',
+        "renameCubemaps",
+        Default = true,
+        Required = false,
+        HelpText = "Rename cubemap textures to match the BSP file name, if the name has changed. May make saving a lot slower!"
+    )]
+    public bool RenameCubemaps { get; set; } = true;
+
+    [Option(
         'a',
         "check-assets",
         Default = false,
