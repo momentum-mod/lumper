@@ -263,6 +263,9 @@ dotnet_diagnostic.CA1711.severity = suggestion
 # Yells at use for underscores in enums. Piss off
 dotnet_diagnostic.CA1707.severity = none
 
+# Horrible, makes you do [ ..enumerable ] instead of enumerable.ToList()
+dotnet_diagnostic.IDE0305.severity = none
+
 ##########################################
 # Styles
 ##########################################
