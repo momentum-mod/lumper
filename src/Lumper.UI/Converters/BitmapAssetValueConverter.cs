@@ -31,7 +31,7 @@ public class BitmapAssetValueConverter : IValueConverter
                 Uri uri;
 
                 // Allow for assembly overrides
-                if (rawUri.StartsWith("avares://"))
+                if (rawUri.StartsWith("avares://", StringComparison.Ordinal))
                 {
                     uri = new Uri(rawUri);
                 }

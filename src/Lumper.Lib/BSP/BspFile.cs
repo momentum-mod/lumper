@@ -2,6 +2,7 @@ namespace Lumper.Lib.Bsp;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -184,7 +185,9 @@ public sealed partial class BspFile : IDisposable
         bool success;
         try
         {
-            Logger.Info($"Saving {outPath} with compression {compress.ToString().ToUpper()}");
+            Logger.Info(
+                $"Saving {outPath} with compression {compress.ToString().ToUpper(CultureInfo.InvariantCulture)}"
+            );
             success = writer.Save();
         }
         catch (Exception ex)
