@@ -61,7 +61,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
         foreach (PakfileEntry entry in Entries)
         {
-            if (limitExtension is null || !entry.Key.EndsWith(limitExtension))
+            if (limitExtension is null || !entry.Key.EndsWith(limitExtension, StringComparison.Ordinal))
                 continue;
 
             string entryString = Encoding.UTF8.GetString(entry.GetData());

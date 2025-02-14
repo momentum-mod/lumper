@@ -2,6 +2,7 @@ namespace Lumper.UI.Views.LogViewer;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -83,7 +84,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 
             string origin = logMessage.Origin;
             // Don't split off front stuff if not a lumper thing (e.g. a RunExternalToolTask)
-            origin = origin.StartsWith("Lumper") ? origin.Split('.')[^1] : origin;
+            origin = origin.StartsWith("Lumper", StringComparison.Ordinal) ? origin.Split('.')[^1] : origin;
             Logs.Inlines.Add(
                 new Run(origin.PadRight(26))
                 {

@@ -1,5 +1,6 @@
 namespace Lumper.UI.ViewModels;
 
+using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -82,7 +83,7 @@ public class MainWindowViewModel : ViewModel
         string result = await msBox.ShowWindowDialogAsync(Program.MainWindow);
         string url = msBox.InputValue;
 
-        if (result == "Cancel" || !url.StartsWith("http"))
+        if (result == "Cancel" || !url.StartsWith("http", StringComparison.Ordinal))
             return;
 
         await BspService.Load(url);

@@ -134,7 +134,9 @@ public sealed class BspService : ReactiveObject, IDisposable
 
         IoProgressWindow? progressWindow = null;
         IsLoading = true;
-        await using Stream? outStream = pathOrUrl.StartsWith("http") ? await HttpDownload(pathOrUrl) : null;
+        await using Stream? outStream = pathOrUrl.StartsWith("http", StringComparison.Ordinal)
+            ? await HttpDownload(pathOrUrl)
+            : null;
 
         try
         {
