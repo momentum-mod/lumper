@@ -1,6 +1,7 @@
 namespace Lumper.Lib.Bsp.Struct;
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -25,7 +26,7 @@ public partial class EntityIo : ICloneable
         TargetEntityName = props[0];
         Input = props[1];
         Parameter = props[2];
-        Delay = float.Parse(props[3]);
+        Delay = float.Parse(props[3], CultureInfo.InvariantCulture);
         if (int.TryParse(props[4], out int timesToFire))
         {
             TimesToFire = timesToFire;
