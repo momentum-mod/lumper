@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -312,9 +313,9 @@ public sealed partial class UpdaterService : ReactiveObject
             GroupCollection currentVersion = match.Groups;
 
             return new SemVer(
-                int.Parse(currentVersion[1].ToString()),
-                int.Parse(currentVersion[2].ToString()),
-                int.Parse(currentVersion[3].ToString())
+                int.Parse(currentVersion[1].ToString(), CultureInfo.InvariantCulture),
+                int.Parse(currentVersion[2].ToString(), CultureInfo.InvariantCulture),
+                int.Parse(currentVersion[3].ToString(), CultureInfo.InvariantCulture)
             );
         }
     }

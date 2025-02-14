@@ -3,6 +3,7 @@ namespace Lumper.Lib.Bsp.Struct;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
@@ -52,9 +53,9 @@ public partial class Entity : ICloneable
             return false;
 
         if (
-            !float.TryParse(parts[0], out float x)
-            || !float.TryParse(parts[1], out float y)
-            || !float.TryParse(parts[2], out float z)
+            !float.TryParse(parts[0], CultureInfo.InvariantCulture, out float x)
+            || !float.TryParse(parts[1], CultureInfo.InvariantCulture, out float y)
+            || !float.TryParse(parts[2], CultureInfo.InvariantCulture, out float z)
         )
             return false;
 

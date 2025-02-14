@@ -1,5 +1,6 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
+using System.Globalization;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
 
@@ -127,10 +128,11 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
         && other.Delay == Delay
         && other.TimesToFire == TimesToFire;
 
+    // csharpier-ignore
     public override bool MatchValue(string expr, bool trailingWildcard) =>
-        (TargetEntityName?.MatchesSimpleExpression(expr, trailingWildcard) ?? false)
-        || (Input?.MatchesSimpleExpression(expr, trailingWildcard) ?? false)
-        || (Parameter?.MatchesSimpleExpression(expr, trailingWildcard) ?? false)
-        || (Delay?.ToString().MatchesSimpleExpression(expr, trailingWildcard) ?? false)
-        || (TimesToFire?.ToString().MatchesSimpleExpression(expr, trailingWildcard) ?? false);
+        (TargetEntityName?.MatchesSimpleExpression(expr, trailingWildcard) ?? false) ||
+        (Input?.MatchesSimpleExpression(expr, trailingWildcard) ?? false) ||
+        (Parameter?.MatchesSimpleExpression(expr, trailingWildcard) ?? false) ||
+        (Delay?.ToString(CultureInfo.InvariantCulture).MatchesSimpleExpression(expr, trailingWildcard) ?? false) ||
+        (TimesToFire?.ToString(CultureInfo.InvariantCulture).MatchesSimpleExpression(expr, trailingWildcard) ?? false);
 }

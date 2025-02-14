@@ -47,7 +47,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                     var counter = Logs.Inlines.Last() as Run;
                     if (counter?.Text is null)
                         return;
-                    counter.Text = $" ({int.Parse(counter.Text[2..^1]) + 1})";
+                    counter.Text = $" ({int.Parse(counter.Text[2..^1], CultureInfo.InvariantCulture) + 1})";
                 }
                 else
                 {

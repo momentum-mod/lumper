@@ -2,6 +2,7 @@ namespace Lumper.UI;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 /// <summary>
@@ -16,7 +17,7 @@ public static class Utils
     public static IEnumerable<T> ExpandBitfield<T>(T flags)
         where T : Enum
     {
-        int flagInt = (int)Convert.ChangeType(flags, typeof(int));
+        int flagInt = (int)Convert.ChangeType(flags, typeof(int), CultureInfo.InvariantCulture);
         return Enum.GetValues(typeof(T))
             .Cast<uint>()
             .Where(f => (f & flagInt) != 0)
