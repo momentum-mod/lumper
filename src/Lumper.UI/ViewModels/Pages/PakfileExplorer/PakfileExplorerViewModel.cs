@@ -53,7 +53,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 _pakfileLump = pakfile;
                 Tree = new PakfileTreeViewModel(pakfile.Entries);
 
-                DataGridSource = new HierarchicalTreeDataGridSource<Node>(Tree.Root.Children ?? [])
+                DataGridSource = new HierarchicalTreeDataGridSource<Node>(Tree.Root)
                 {
                     Columns =
                     {

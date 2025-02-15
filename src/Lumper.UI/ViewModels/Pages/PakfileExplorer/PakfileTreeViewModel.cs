@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
+using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Pakfile;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -14,9 +15,17 @@ using PathList = System.Collections.Generic.List<string>;
 
 public class PakfileTreeViewModel
 {
-    public Node Root { get; } = new(null, true) { Name = "__ROOT__" };
+    public Node Root { get; }
 
-    public PakfileTreeViewModel(SourceCache<PakfileEntryViewModel, string> source) =>
+    public PakfileTreeViewModel(SourceCache<PakfileEntryViewModel, string> source)
+    {
+        Root = new Node
+        {
+            Parent = null,
+            Name = BspService.Instance.FileName ?? "<no map loaded>",
+            IsExpanded = true,
+        };
+
         source
             .Connect()
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -34,7 +43,10 @@ public class PakfileTreeViewModel
                             break;
                     }
                 }
+
+                Root.RecalculateSize();
             });
+    }
 
     public Node? Find(PathList path)
     {
