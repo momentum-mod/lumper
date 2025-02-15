@@ -67,7 +67,7 @@ public class PakfileTreeNodeViewModel : ViewModel
 {
     public PakfileEntryViewModel? Leaf { get; init; }
 
-    public Node? Parent { get; set; }
+    public required Node? Parent { get; set; }
 
     public ObservableCollectionExtended<Node>? Children { get; private set; }
 
@@ -78,22 +78,13 @@ public class PakfileTreeNodeViewModel : ViewModel
     public long? Size { get; set; }
 
     [Reactive]
-    public bool IsExpanded { get; set; }
+    public bool IsExpanded { get; set; } = false;
 
     public bool IsDirectory => Children is not null;
 
     public string? Extension => Leaf?.Extension;
 
-    public PakfileTreeNodeViewModel(Node? parent, bool root)
-    {
-        IsExpanded = root;
-        Size = Leaf?.CompressedSize ?? 0;
-
-        if (root)
-            Children = [];
-        else
-            Parent = parent;
-    }
+    public PakfileTreeNodeViewModel() => Size = Leaf?.CompressedSize ?? 0;
 
     // Note that this is the entire path, INCLUDING name.extension
     public PathList Path
@@ -134,23 +125,34 @@ public class PakfileTreeNodeViewModel : ViewModel
                 return;
             }
 
-            var newChild = new Node(this, root: false) { Name = path[0], Size = size };
+            var newChild = new Node
+            {
+                Parent = this,
+                Name = path[0],
+                Size = size,
+            };
+
             newChild.AddInternal(value, path[1..]);
+
             (Children ??= []).Add(newChild);
+
             return;
         }
 
         // Okay, actually the filename, create the node
         // `value` being null here is fine, just means we're creating a directory. Those don't actually get saved out
         // (zips can't have empty directories), but UI uses them.
-        var newNode = new Node(this, root: false)
+        var newNode = new Node
         {
+            Parent = this,
             Name = path[0],
             Leaf = value,
             Size = size,
         };
+
         if (value is null)
             newNode.Children = [];
+
         (Children ??= []).Add(newNode);
     }
 
