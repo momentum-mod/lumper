@@ -2,6 +2,8 @@ namespace Lumper.UI.ViewModels;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -87,6 +89,39 @@ public class MainWindowViewModel : ViewModel
             return;
 
         await BspService.Load(url);
+    }
+
+    public async Task OpenDragDropped(List<IStorageFile> files)
+    {
+        if (files.Count == 0)
+            return;
+
+        // If there's no BSP open, use this window. If multiple files are provided,
+        // open everything but the first in new windows, then await doing the first.
+        // If a BSP is open, do everything in separare windows.
+        IStorageFile? fileToLoadInThisWindow = null;
+        if (!BspService.HasLoadedBsp)
+        {
+            fileToLoadInThisWindow = files[0];
+            files.RemoveAt(0);
+        }
+
+        // Never spawn more than 10 new processes at once
+        const int maxNewProcesses = 10;
+
+        string? executableFileName = Process.GetCurrentProcess().MainModule?.FileName;
+        if (executableFileName is not null)
+        {
+            foreach (IStorageFile file in files.Take(maxNewProcesses))
+            {
+                Process.Start(
+                    new ProcessStartInfo { ArgumentList = { $"{file.Path.LocalPath}" }, FileName = executableFileName }
+                );
+            }
+        }
+
+        if (fileToLoadInThisWindow is not null)
+            await BspService.Load(fileToLoadInThisWindow);
     }
 
     public async Task SaveCommand()

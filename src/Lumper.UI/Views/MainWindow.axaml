@@ -10,6 +10,7 @@
         x:Class="Lumper.UI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Closing="Window_OnClosing"
+        DragDrop.AllowDrop="True"
         Title="{Binding BspService.FileName, StringFormat='Lumper - {0}', FallbackValue='Lumper', TargetNullValue='Lumper'}"
         WindowStartupLocation="CenterScreen"
         TransparencyLevelHint="AcrylicBlur"
