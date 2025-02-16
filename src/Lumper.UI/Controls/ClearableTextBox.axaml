@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:controls="clr-namespace:Lumper.UI.Controls"
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="32"
+             x:Class="Lumper.UI.Controls.ClearableTextBox">
+
+  <Panel>
+    <TextBox Name="InputBox" HorizontalAlignment="Stretch"
+             Text="{Binding $parent[controls:ClearableTextBox].Text, Mode=TwoWay}"
+             Watermark="{Binding $parent[controls:ClearableTextBox].Watermark}" />
+    <Button Click="ClearButton_OnClick" HorizontalAlignment="Right" Margin="6" Padding="2" CornerRadius="4"
+            IsVisible="{Binding #InputBox.Text, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+            Foreground="Gray" Background="Transparent" BorderThickness="0">
+      <materialIcons:MaterialIcon Kind="Close" Width="16" Height="16" />
+    </Button>
+  </Panel>
+</UserControl>
