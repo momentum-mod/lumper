@@ -30,6 +30,9 @@ public class StateService : ReactiveObject
     public bool MakeBackup { get; set; } = true;
 
     [Reactive]
+    public bool RenameCubemaps { get; set; } = true;
+
+    [Reactive]
     public bool LogShowDebug { get; set; } = false;
 
     [Reactive]

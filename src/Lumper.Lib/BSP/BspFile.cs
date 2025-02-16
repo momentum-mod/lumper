@@ -84,6 +84,14 @@ public sealed partial class BspFile : IDisposable
         return this;
     }
 
+    public record SaveToFileOptions
+    {
+        public required DesiredCompression Compression { get; init; }
+        public required bool MakeBackup { get; init; }
+        public required bool RenameCubemaps { get; init; }
+        public IoHandler? Handler { get; init; } = null;
+    }
+
     /// <summary>
     /// Save a BSP out to file, handling backups and updating the underlying
     /// file stream to use the new file.
@@ -93,12 +101,12 @@ public sealed partial class BspFile : IDisposable
     /// When save successful but failed to update active file stream to the new file.
     /// The UI/CLI should do a full load of that file in that case.
     /// </exception>
-    public void SaveToFile(string? path, DesiredCompression compress, IoHandler? handler, bool makeBackup)
+    public void SaveToFile(string? path, SaveToFileOptions options)
     {
         if (path is null && FilePath is null)
             throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
 
-        if (path != null && Path.GetFileName(path) != FilePath)
+        if (path is not null && Path.GetFileName(path) != FilePath && options.RenameCubemaps)
         {
             PakfileLump pakfile = GetLump<PakfileLump>();
 
@@ -117,7 +125,7 @@ public sealed partial class BspFile : IDisposable
 
             // Path is null or matches current file, so we're overwriting a file.
             // If so, make a backup if requested.
-            if (makeBackup && File.Exists(outPath))
+            if (options.MakeBackup && File.Exists(outPath))
             {
                 backupPath =
                     BspExtensionRegex().Replace(outPath, "")
@@ -181,12 +189,12 @@ public sealed partial class BspFile : IDisposable
         // points in code. BinaryWriter calls Flush/Close (depending on leaveOpen value) when
         // disposed, which will throw if the underlying stream is closed, so we must manually
         // close in all code paths (before closing `stream`).
-        var writer = new BspFileWriter(this, stream, handler, compress);
+        var writer = new BspFileWriter(this, stream, options.Handler, options.Compression);
         bool success;
         try
         {
             Logger.Info(
-                $"Saving {outPath} with compression {compress.ToString().ToUpper(CultureInfo.InvariantCulture)}"
+                $"Saving {outPath} with compression {options.Compression.ToString().ToUpper(CultureInfo.InvariantCulture)}"
             );
             success = writer.Save();
         }

@@ -293,9 +293,13 @@ public sealed class BspService : ReactiveObject, IDisposable
                 () =>
                     BspFile.SaveToFile(
                         outFile?.Path.LocalPath,
-                        compress: compress,
-                        handler,
-                        makeBackup: StateService.Instance.MakeBackup
+                        new BspFile.SaveToFileOptions
+                        {
+                            Compression = compress,
+                            Handler = handler,
+                            MakeBackup = StateService.Instance.MakeBackup,
+                            RenameCubemaps = StateService.Instance.RenameCubemaps,
+                        }
                     ),
                 RxApp.TaskpoolScheduler
             );
