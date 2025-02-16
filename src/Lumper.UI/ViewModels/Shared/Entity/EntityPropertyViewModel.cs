@@ -29,9 +29,10 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
 
     public override void UpdateModel() => EntityProperty.Key = Key;
 
-    public bool MatchKey(string expr, bool wildcardWrapping) => Key.MatchesSimpleExpression(expr, wildcardWrapping);
+    public bool MatchKey(string expr, bool wildcardWrapping = false) =>
+        Key.MatchesSimpleExpression(expr, wildcardWrapping);
 
-    public abstract bool MatchValue(string expr, bool trailingWildcard);
+    public abstract bool MatchValue(string expr, bool trailingWildcard = false);
 
     public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
 }

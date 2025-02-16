@@ -49,16 +49,6 @@
               <Run FontFamily="{StaticResource Monospace}">?</Run> (non-greedy) wildcards are supported. Use
               <Run FontFamily="{StaticResource Monospace}">\</Run> to escape.
             </TextBlock>
-            <TextBlock FontSize="14" FontWeight="Medium">Wildcard Wrapping</TextBlock>
-            <TextBlock LineHeight="24">
-              Applies a trailing wildcard to all string expressions.
-              <LineBreak />
-              If checked, <Run FontFamily="{StaticResource Monospace}">light</Run> will also match
-              <Run FontFamily="{StaticResource Monospace}">light_spot</Run>,
-              <Run FontFamily="{StaticResource Monospace}">light_environment</Run>, etc...
-              <LineBreak />
-              If unchecked, it will only match <Run FontFamily="{StaticResource Monospace}">light</Run>.
-            </TextBlock>
           </StackPanel>
         </ToolTip.Tip>
       </materialIcons:MaterialIcon>
@@ -85,14 +75,12 @@
       <TextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}" Watermark="In Spherical Region (X Y Z)" />
       <TextBox Grid.Column="2" Text="{Binding Filters.SphereRadius}" Watermark="Radius" />
     </Grid>
-    <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, 8, Auto, 12, Auto, 8, Auto, *, Auto, 8, Auto"
+    <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, 8, Auto, 12, Auto, 8, Auto"
           Margin="4 0 0 4">
       <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="LightGray">Brush</TextBlock>
       <CheckBox Grid.Column="2" IsChecked="{Binding Filters.ShowBrushEntities}" />
       <TextBlock Grid.Column="4" VerticalAlignment="Center" Foreground="LightGray">Point</TextBlock>
       <CheckBox Grid.Column="6" IsChecked="{Binding Filters.ShowPointEntities}" />
-      <TextBlock Grid.Column="8" Foreground="LightGray" VerticalAlignment="Center">Wildcard Wrapping</TextBlock>
-      <CheckBox Grid.Column="10" IsChecked="{Binding Filters.WildcardWrapping}" Padding="0" />
     </Grid>
     <Grid Grid.Column="0" Grid.Row="4" Margin="4 0 0 8" ColumnDefinitions="Auto, *, Auto, 6, Auto, 6, Auto">
       <TextBlock Grid.Column="0" FontStyle="Italic" Foreground="LightGray" VerticalAlignment="Center"
