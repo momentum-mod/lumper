@@ -119,34 +119,49 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             );
         }
 
-        if (
-            EntityEditorFilters.TryParseStringFilters(
-                Filters.Key,
-                out List<string>? inclKeys,
-                out List<string>? exclKeys
-            )
-        )
-        {
-            filtered = true;
-            output = output.Where(vm =>
-                (inclKeys.Count == 0 || inclKeys.Any(key => vm.Properties.Any(prop => prop.MatchKey(key, wc))))
-                && !exclKeys.Any(classname => vm.Properties.Any(prop => prop.MatchKey(classname, wc)))
-            );
-        }
+        bool hasKeys = EntityEditorFilters.TryParseStringFilters(
+            Filters.Key,
+            out List<string>? inKeys,
+            out List<string>? exKeys
+        );
+        bool hasVals = EntityEditorFilters.TryParseStringFilters(
+            Filters.Value,
+            out List<string>? inVals,
+            out List<string>? exVals
+        );
 
-        if (
-            EntityEditorFilters.TryParseStringFilters(
-                Filters.Value,
-                out List<string>? inclVals,
-                out List<string>? exclVals
-            )
-        )
+        if (hasKeys || hasVals)
         {
             filtered = true;
-            output = output.Where(vm =>
-                (inclVals.Count == 0 || inclVals.All(value => vm.Properties.Any(prop => prop.MatchValue(value, wc))))
-                && !exclVals.Any(classname => vm.Properties.Any(prop => prop.MatchValue(classname, wc)))
-            );
+            if (hasKeys && hasVals)
+            {
+                output = output.Where(vm =>
+                    vm.Properties.Any(prop =>
+                        (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key)))
+                        && !exKeys!.Any(key => prop.MatchKey(key))
+                        && (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val)))
+                        && !exVals!.Any(val => prop.MatchValue(val))
+                    )
+                );
+            }
+            else if (hasKeys)
+            {
+                output = output.Where(vm =>
+                    vm.Properties.Any(prop =>
+                        (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key)))
+                        && !exKeys!.Any(key => prop.MatchKey(key))
+                    )
+                );
+            }
+            else
+            {
+                output = output.Where(vm =>
+                    vm.Properties.Any(prop =>
+                        (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val)))
+                        && !exVals!.Any(val => prop.MatchValue(val))
+                    )
+                );
+            }
         }
 
         if (!Filters.ShowBrushEntities || !Filters.ShowPointEntities)
