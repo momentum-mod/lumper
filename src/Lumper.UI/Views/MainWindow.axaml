@@ -70,6 +70,26 @@
                   </materialIcons:MaterialIcon>
                 </StackPanel>
               </CheckBox>
+              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding StateService.RenameCubemaps}">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <TextBlock Text="Rename Cubemaps" />
+                  <materialIcons:MaterialIcon Kind="QuestionMarkCircle">
+                    <ToolTip.Tip>
+                      <StackPanel>
+                        <TextBlock>When a map is saved to a new filename, renames all cubemaps to the new name.</TextBlock>
+                        <TextBlock>
+                          Cubemaps are stored and loaded based on the BSP filename (because Source is stupid).
+                          Without this checked, saving a map to a different name will break cubemaps.
+                        </TextBlock>
+                        <TextBlock>
+                          Running this modifies the pakfile lump, which will increase save times, even if you haven't otherwise edited it.
+                          When testing maps, you may want to disable this to save time.
+                        </TextBlock>
+                      </StackPanel>
+                    </ToolTip.Tip>
+                  </materialIcons:MaterialIcon>
+                </StackPanel>
+              </CheckBox>
               <Separator />
               <MenuItem Header="_Export JSON Summary" Command="{Binding JsonDumpCommand}" />
               <Separator />
