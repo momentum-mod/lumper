@@ -104,8 +104,6 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         bool filtered = false;
         output = input;
 
-        bool wc = Filters.WildcardWrapping;
-
         if (
             EntityEditorFilters.TryParseStringFilters(
                 Filters.Classname,
@@ -116,8 +114,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
         {
             filtered = true;
             output = output.Where(vm =>
-                (inclClassname.Count == 0 || inclClassname.Any(classname => vm.MatchClassname(classname, wc)))
-                && !exclClassname.Any(classname => vm.MatchClassname(classname, wc))
+                (inclClassname.Count == 0 || inclClassname.Any(classname => vm.MatchClassname(classname, true)))
+                && !exclClassname.Any(classname => vm.MatchClassname(classname, true))
             );
         }
 

@@ -20,9 +20,6 @@ public class EntityEditorFilters : ReactiveObject
     public string Value { get; set; } = "";
 
     [Reactive]
-    public bool WildcardWrapping { get; set; } = true;
-
-    [Reactive]
     public bool ShowBrushEntities { get; set; } = true;
 
     [Reactive]
