@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ctrls="clr-namespace:Lumper.UI.Controls"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:views="clr-namespace:Lumper.UI.Views.Pages.VtfBrowser"
              xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.VtfBrowser"
@@ -84,7 +85,7 @@
 
     <Border Grid.Row="1" BorderBrush="#10FFFFFF" Background="#20000000" Padding="4" BorderThickness="0 1 0 0">
       <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, *, Auto, Auto">
-        <TextBox Grid.Column="0" Height="32" Width="256" Margin="8" Text="{Binding TextureSearch}"
+        <ctrls:ClearableTextBox Grid.Column="0" Height="32" Width="256" Margin="8" Text="{Binding TextureSearch}"
                  Watermark="Search" />
         <CheckBox Grid.Column="1" Margin="4" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                   IsChecked="{Binding StateService.VtfBrowserShowCubemaps, Mode=TwoWay}">

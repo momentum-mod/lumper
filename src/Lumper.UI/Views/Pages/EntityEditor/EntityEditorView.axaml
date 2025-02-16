@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:views="clr-namespace:Lumper.UI.Views.Pages.EntityEditor"
              xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.EntityEditor"
+             xmlns:ctrls="clr-namespace:Lumper.UI.Controls"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:entity="clr-namespace:Lumper.UI.ViewModels.Shared.Entity"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -17,7 +18,7 @@
       <ColumnDefinition Width="*" MinWidth="400" />
     </Grid.ColumnDefinitions>
     <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="*, 6, Auto" Margin="0 0 0 4">
-      <TextBox Grid.Column="0" Text="{Binding Filters.Classname}" Watermark="Entity Type (classname)" />
+      <ctrls:ClearableTextBox Grid.Column="0" Text="{Binding Filters.Classname}" Watermark="Entity Type (classname)" />
       <materialIcons:MaterialIcon Grid.Column="2" Kind="HelpBox" Width="24" Height="24" Foreground="DarkGray">
         <ToolTip.Tip>
           <StackPanel>
@@ -54,8 +55,8 @@
       </materialIcons:MaterialIcon>
     </Grid>
     <Grid Grid.Column="0" Grid.Row="1" Margin="0 0 0 4" ColumnDefinitions="1*, 4, 1*">
-      <TextBox Grid.Column="0" Text="{Binding Filters.Key}" Watermark="Key" />
-      <TextBox Grid.Column="2" Text="{Binding Filters.Value}" Watermark="Value" />
+      <ctrls:ClearableTextBox Grid.Column="0" Text="{Binding Filters.Key}" Watermark="Key" />
+      <ctrls:ClearableTextBox Grid.Column="2" Text="{Binding Filters.Value}" Watermark="Value" />
     </Grid>
     <Grid Grid.Column="0" Grid.Row="2" Margin="0, 0, 0, 4" ColumnDefinitions="3*, 4, 1*">
       <ToolTip.Tip>
@@ -72,8 +73,8 @@
           <TextBlock>Will match any entity who's origin is within 1000 units from X = 0, Y = 0, Z = 0.</TextBlock>
         </StackPanel>
       </ToolTip.Tip>
-      <TextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}" Watermark="In Spherical Region (X Y Z)" />
-      <TextBox Grid.Column="2" Text="{Binding Filters.SphereRadius}" Watermark="Radius" />
+      <ctrls:ClearableTextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}" Watermark="In Spherical Region (X Y Z)" />
+      <ctrls:ClearableTextBox Grid.Column="2" Text="{Binding Filters.SphereRadius}" Watermark="Radius" />
     </Grid>
     <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, 8, Auto, 12, Auto, 8, Auto"
           Margin="4 0 0 4">
