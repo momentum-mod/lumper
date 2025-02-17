@@ -155,21 +155,6 @@
     </Style>
   </Style>
 
-  <Style Selector="Border.JobDescription">
-    <Setter Property="Background" Value="#22000000" />
-    <Setter Property="BorderBrush" Value="#11FFFFFF" />
-    <Setter Property="BorderThickness" Value="0 0 0 1" />
-    <Setter Property="Padding" Value="16" />
-    <Style Selector="^ StackPanel">
-      <Setter Property="Spacing" Value="4" />
-    </Style>
-    <Style Selector="^ TextBlock">
-      <Setter Property="Foreground" Value="#EEE" />
-      <Setter Property="FontSize" Value="14" />
-      <Setter Property="TextWrapping" Value="Wrap" />
-    </Style>
-  </Style>
-
   <!-- Remove the line that AvaloniaEdit places to the right of line numbers. It just looks a bit crap! -->
   <!-- Couldn't find a more specific selector that worked -->
   <Style Selector="aeInternal|TextArea">
@@ -195,5 +180,20 @@
 
   <Style Selector="HyperlinkButton AccessText">
     <Setter Property="TextDecorations" Value="" />
+  </Style>
+
+  <Style Selector="Expander">
+    <Setter Property="CornerRadius" Value="0" />
+    <Style Selector="^ /template/ DockPanel">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="^ /template/ ToggleButton#ExpanderHeader">
+      <Setter Property="Background" Value="#0AFFFFFF" />
+    </Style>
+    <Style Selector="^:down:expanded /template/ Border#ExpanderContent">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Background" Value="#24000000" />
+    </Style>
   </Style>
 </Styles>

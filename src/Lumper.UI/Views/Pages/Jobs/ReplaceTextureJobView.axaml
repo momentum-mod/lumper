@@ -4,63 +4,69 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Lumper.UI.ViewModels.Pages.Jobs"
              xmlns:views="clr-namespace:Lumper.UI.Views.Pages.Jobs"
+             xmlns:local="clr-namespace:Lumper.UI.Views.Pages.Jobs"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Pages.Jobs.ReplaceTextureJobView"
              x:DataType="vm:ReplaceTextureJobViewModel">
 
-  <Grid RowDefinitions="Auto, *, *">
-    <Button Grid.Row="0" Margin="4" Command="{Binding Add}">
-      Add Replacer
-    </Button>
-    <DataGrid Grid.Row="1" ItemsSource="{Binding Replacers}" GridLinesVisibility="All" CanUserSortColumns="False"
-              CanUserReorderColumns="False" CanUserResizeColumns="True" IsReadOnly="False">
-      <DataGrid.Columns>
-        <DataGridTextColumn Width="*" Header="Match" Binding="{Binding Matcher}" IsReadOnly="False" />
-        <DataGridTextColumn Width="*" Header="Replace With" Binding="{Binding ReplaceWith}" IsReadOnly="False" />
-        <DataGridCheckBoxColumn Header="Regex" Binding="{Binding IsRegex}" IsReadOnly="False" />
-        <DataGridTemplateColumn Width="32">
-          <DataGridTemplateColumn.CellTemplate>
-            <DataTemplate>
-              <Button
-                Command="{Binding $parent[views:ReplaceTextureJobView].((vm:ReplaceTextureJobViewModel)DataContext).Delete, FallbackValue=''}"
-                Padding="6" CommandParameter="{Binding}" Height="32">
-                <materialIcons:MaterialIcon Kind="Delete" />
-              </Button>
-            </DataTemplate>
-          </DataGridTemplateColumn.CellTemplate>
-        </DataGridTemplateColumn>
-      </DataGrid.Columns>
-    </DataGrid>
-    <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto">
-      <Border Classes="JobDescription">
-        <StackPanel>
-          <TextBlock>
-            Replaces every matching occurence of a texture with the given string.
-          </TextBlock>
-          <TextBlock>
-            This job only operates on the TexData lumps, and doesn't modify the Pakfile lump in any way.
-          </TextBlock>
-          <TextBlock FontStyle="Italic" FontWeight="Medium">
-            Example 1
-          </TextBlock>
-          <TextBlock FontFamily="{StaticResource Monospace}" xml:space="preserve"><Run
-              FontWeight="Medium">Match            ReplaceWith      Regex</Run>
-<Run>brick/wall_01    brick/wall_02    Off</Run></TextBlock>
-          <TextBlock FontStyle="Italic">
-            Matches exactly "brick/wall_01" and nothing else, replaces with "brick/wall_02".
-          </TextBlock>
-          <TextBlock FontStyle="Italic" FontWeight="Medium">
-            Example 2
-          </TextBlock>
-          <TextBlock FontFamily="{StaticResource Monospace}" xml:space="preserve"><Run
-              FontWeight="Medium">Match            ReplaceWith      Regex</Run>
-<Run>wall             chair            On</Run></TextBlock>
-          <TextBlock FontStyle="Italic">
-            Replaces any occurence of "wall" with chair, "brick/wall_01" would become "brick/chair_01". Uncomfortable!
-          </TextBlock>
-        </StackPanel>
-      </Border>
-    </ScrollViewer>
-  </Grid>
+  <local:JobView>
+    <local:JobView.JobDescription>
+      <StackPanel>
+        <TextBlock>Replaces every matching occurence of a texture with the given string.</TextBlock>
+        <TextBlock>This job only operates on the TexData lumps, and doesn't modify the Pakfile lump in any way.</TextBlock>
+
+        <TextBlock FontStyle="Italic" FontWeight="Medium" Margin="0 8 0 0">Example 1</TextBlock>
+        <Grid Classes="MonoGrid" ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto, Auto">
+          <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="SemiBold">Match</TextBlock>
+          <TextBlock Grid.Column="1" Grid.Row="0" FontWeight="SemiBold">ReplaceWith</TextBlock>
+          <TextBlock Grid.Column="2" Grid.Row="0" FontWeight="SemiBold">Regex</TextBlock>
+          <TextBlock Grid.Column="0" Grid.Row="1">brick/wall_01</TextBlock>
+          <TextBlock Grid.Column="1" Grid.Row="1">brick/wall_02</TextBlock>
+          <TextBlock Grid.Column="2" Grid.Row="1">Off</TextBlock>
+        </Grid>
+        <TextBlock FontStyle="Italic">Matches exactly "brick/wall_01" and nothing else, replaces with "brick/wall_02".</TextBlock>
+
+        <TextBlock FontStyle="Italic" FontWeight="Medium" Margin="0 8 0 0">Example 2</TextBlock>
+        <Grid Classes="MonoGrid" ColumnDefinitions="Auto, Auto, Auto" RowDefinitions="Auto, Auto">
+          <TextBlock Grid.Column="0" Grid.Row="0" FontWeight="SemiBold">Match</TextBlock>
+          <TextBlock Grid.Column="1" Grid.Row="0" FontWeight="SemiBold">ReplaceWith</TextBlock>
+          <TextBlock Grid.Column="2" Grid.Row="0" FontWeight="SemiBold">Regex</TextBlock>
+          <TextBlock Grid.Column="0" Grid.Row="1">wall</TextBlock>
+          <TextBlock Grid.Column="1" Grid.Row="1">chair</TextBlock>
+          <TextBlock Grid.Column="2" Grid.Row="1">On</TextBlock>
+        </Grid>
+        <TextBlock FontStyle="Italic">Replaces any occurence of "wall" with chair, "brick/wall_01" would become "brick/chair_01". Uncomfortable!</TextBlock>
+
+      </StackPanel>
+    </local:JobView.JobDescription>
+
+    <local:JobView.MainContent>
+      <ScrollViewer VerticalAlignment="Stretch">
+        <Grid RowDefinitions="Auto, *">
+          <Button Grid.Row="0" Margin="8" Command="{Binding Add}">Add Replacer</Button>
+          <DataGrid Grid.Row="1" ItemsSource="{Binding Replacers}" GridLinesVisibility="All" CanUserSortColumns="False"
+                    CanUserReorderColumns="False" CanUserResizeColumns="True" IsReadOnly="False"
+                    BorderThickness="0 1 0 0" BorderBrush="#333">
+            <DataGrid.Columns>
+              <DataGridTextColumn Width="*" Header="Match" Binding="{Binding Matcher}" IsReadOnly="False" />
+              <DataGridTextColumn Width="*" Header="Replace With" Binding="{Binding ReplaceWith}" IsReadOnly="False" />
+              <DataGridCheckBoxColumn Header="Regex" Binding="{Binding IsRegex}" IsReadOnly="False" />
+              <DataGridTemplateColumn Width="32">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button
+                      Command="{Binding $parent[views:ReplaceTextureJobView].((vm:ReplaceTextureJobViewModel)DataContext).Delete, FallbackValue=''}"
+                      Padding="6" CommandParameter="{Binding}" Height="32">
+                      <materialIcons:MaterialIcon Kind="Delete" />
+                    </Button>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+      </ScrollViewer>
+    </local:JobView.MainContent>
+  </local:JobView>
 </UserControl>
