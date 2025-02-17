@@ -47,6 +47,9 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
     private GameSyncService() =>
         this.WhenAnyValue(x => x.Status).Select(x => x == SyncStatus.Connected).ToPropertyEx(this, x => x.Connected);
 
+    public void TeleportToOrigin(string origin) =>
+        _ = PostMessage(new Message { Type = MessageType.CTS_TeleportToLocation, Content = origin });
+
     public void ToggleConnection()
     {
         if (Status == SyncStatus.Disconnected)
