@@ -1,0 +1,37 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" x:Class="Lumper.UI.Views.Pages.Jobs.JobView">
+
+  <Grid RowDefinitions="Auto, *">
+    <Expander Grid.Row="0" ExpandDirection="Down" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+      <Expander.Header>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <materialIcons:MaterialIcon Kind="InformationOutline" Width="20" Height="20" />
+          <TextBlock VerticalAlignment="Center" FontWeight="Regular">Usage</TextBlock>
+        </StackPanel>
+      </Expander.Header>
+
+      <Border Padding="16 8" BorderBrush="#333" BorderThickness="0 0 0 1">
+        <Border.Styles>
+          <Style Selector="TextBlock, SelectableTextBlock">
+            <Setter Property="LineHeight" Value="28" />
+          </Style>
+          <Style Selector=".MonoGrid">
+            <Style Selector="^ TextBlock">
+              <Setter Property="LineHeight" Value="20" />
+              <Setter Property="Margin" Value="0 0 24 0" />
+              <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
+            </Style>
+          </Style>
+        </Border.Styles>
+
+        <ContentControl Name="PART_JobDescription" />
+      </Border>
+    </Expander>
+
+    <ContentControl Grid.Row="1" Name="PART_MainContent" />
+  </Grid>
+</UserControl>
