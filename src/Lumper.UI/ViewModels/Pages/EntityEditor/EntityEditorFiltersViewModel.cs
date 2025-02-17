@@ -26,6 +26,12 @@ public class EntityEditorFilters : ReactiveObject
     public bool ShowPointEntities { get; set; } = true;
 
     [Reactive]
+    public bool SyncPlayerPosition { get; set; } = false;
+
+    [Reactive]
+    public bool SyncTargetEntity { get; set; } = false;
+
+    [Reactive]
     public string SpherePosition { get; set; } = "";
 
     [Reactive]

@@ -29,6 +29,12 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
     [ObservableAsProperty]
     public bool Connected { get; set; }
 
+    [Reactive]
+    public string? PlayerPosition { get; private set; }
+
+    [Reactive]
+    public string? TargetEntities { get; private set; }
+
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private ClientWebSocket? _client;
@@ -146,6 +152,12 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
 
         switch (message.Type)
         {
+            case MessageType.STC_CurrentPosition:
+                PlayerPosition = message.Content;
+                break;
+            case MessageType.STC_TargetedEntitiesList:
+                TargetEntities = message.Content;
+                break;
             default:
                 _logger.Error($"Message type {message.Type} not handled by client, discarding.");
                 break;
