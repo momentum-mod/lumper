@@ -28,6 +28,7 @@ public class MainWindowViewModel : ViewModel
     public static PageService PageService => PageService.Instance;
     public static UpdaterService UpdaterService => UpdaterService.Instance;
     public static StateService StateService => StateService.Instance;
+    public static GameSyncService GameSyncService => GameSyncService.Instance;
 
     public LogViewerViewModel LogViewer { get; set; } = new();
 

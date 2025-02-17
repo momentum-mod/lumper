@@ -6,7 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:logView="using:Lumper.UI.Views.LogViewer"
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="450"
         x:Class="Lumper.UI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Closing="Window_OnClosing"
@@ -124,73 +124,92 @@
       </DockPanel>
       <Border Grid.Row="1" HorizontalAlignment="Stretch" Background="#22000000" BorderThickness="0 1"
               BorderBrush="#22FFFFFF">
-        <StackPanel Name="PageButtons" Orientation="Horizontal">
-          <StackPanel.Styles>
-            <Style Selector="ToggleButton">
+        <Grid ColumnDefinitions="Auto, *, Auto">
+          <Grid.Styles>
+            <Style Selector="ToggleButton, Button">
               <Setter Property="FontSize" Value="14" />
               <Setter Property="Padding" Value="12 8" />
               <Setter Property="CornerRadius" Value="0" />
               <Setter Property="Background" Value="#0CFFFFFF" />
               <Setter Property="BorderThickness" Value="0 0 1 0" />
               <Setter Property="BorderBrush" Value="#22FFFFFF" />
+              <Style Selector="^ StackPanel">
+                <Setter Property="Orientation" Value="Horizontal" />
+                <Setter Property="Spacing" Value="4" />
+                <Style Selector="^ TextBlock">
+                  <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+              </Style>
             </Style>
-            <Style Selector="ToggleButton StackPanel">
-              <Setter Property="Orientation" Value="Horizontal" />
-              <Setter Property="Spacing" Value="4" />
-            </Style>
-            <Style Selector="ToggleButton StackPanel TextBlock">
-              <Setter Property="VerticalAlignment" Value="Center" />
-            </Style>
-          </StackPanel.Styles>
+          </Grid.Styles>
 
-          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.EntityEditor}" HotKey="Ctrl+D1">
-            <StackPanel>
-              <materialIcons:MaterialIcon Kind="Lightbulb" />
-              <TextBlock>Entity Editor</TextBlock>
-            </StackPanel>
-          </ToggleButton>
+          <StackPanel Grid.Column="0" Name="PageButtons" Orientation="Horizontal" HorizontalAlignment="Left">
+            <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                          CommandParameter="{x:Static service:Page.EntityEditor}" HotKey="Ctrl+D1">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="Lightbulb" />
+                <TextBlock>Entity Editor</TextBlock>
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                          CommandParameter="{x:Static service:Page.EntityReview}" HotKey="Ctrl+D2">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="ClipboardEdit" />
+                <TextBlock>Entity Review</TextBlock>
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                          CommandParameter="{x:Static service:Page.RawEntities}" HotKey="Ctrl+D3">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="TextLong" />
+                <TextBlock>Raw Entities</TextBlock>
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                          CommandParameter="{x:Static service:Page.PakfileExplorer}" HotKey="Ctrl+D4">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="FolderZipOutline" />
+                <TextBlock>Pakfile Explorer</TextBlock>
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                          CommandParameter="{x:Static service:Page.VtfBrowser}" HotKey="Ctrl+D5">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="ImageMultiple" />
+                <TextBlock>Texture Browser</TextBlock>
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                          CommandParameter="{x:Static service:Page.Jobs}" HotKey="Ctrl+D6">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="FormatListChecks" />
+                <TextBlock>Jobs</TextBlock>
+              </StackPanel>
+            </ToggleButton>
+          </StackPanel>
 
-          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.EntityReview}" HotKey="Ctrl+D2">
+          <Button Grid.Column="2" HorizontalAlignment="Right" BorderThickness="1 0 0 0" Name="SyncButton"
+                  Command="{Binding GameSyncService.ToggleConnection}">
+            <ToolTip.Tip>
+              <StackPanel Orientation="Vertical">
+                <TextBlock FontSize="18" FontWeight="Medium">
+                  Game Sync
+                  <Run FontSize="13" FontStyle="Italic">(Momentum only)</Run>
+                </TextBlock>
+                <TextBlock LineHeight="24">
+                  Allows two-way communication between Lumper and Momentum Mod.
+                  <LineBreak />
+                  To enable, set <Run FontFamily="{StaticResource Monospace}">mom_lumper_sync_enable 1</Run>
+                  via ingame console, then press this button.
+                </TextBlock>
+              </StackPanel>
+            </ToolTip.Tip>
             <StackPanel>
-              <materialIcons:MaterialIcon Kind="ClipboardEdit" />
-              <TextBlock>Entity Review</TextBlock>
+              <TextBlock Name="SyncText" />
+              <materialIcons:MaterialIcon Name="SyncIcon" Kind="Sync" Width="16" Height="16" />
             </StackPanel>
-          </ToggleButton>
-
-          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.RawEntities}" HotKey="Ctrl+D3">
-            <StackPanel>
-              <materialIcons:MaterialIcon Kind="TextLong" />
-              <TextBlock>Raw Entities</TextBlock>
-            </StackPanel>
-          </ToggleButton>
-
-          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.PakfileExplorer}" HotKey="Ctrl+D4">
-            <StackPanel>
-              <materialIcons:MaterialIcon Kind="FolderZipOutline" />
-              <TextBlock>Pakfile Explorer</TextBlock>
-            </StackPanel>
-          </ToggleButton>
-
-          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.VtfBrowser}" HotKey="Ctrl+D5">
-            <StackPanel>
-              <materialIcons:MaterialIcon Kind="ImageMultiple" />
-              <TextBlock>Texture Browser</TextBlock>
-            </StackPanel>
-          </ToggleButton>
-          <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
-                        CommandParameter="{x:Static service:Page.Jobs}" HotKey="Ctrl+D6">
-            <StackPanel>
-              <materialIcons:MaterialIcon Kind="FormatListChecks" />
-              <TextBlock>Jobs</TextBlock>
-            </StackPanel>
-          </ToggleButton>
-
-        </StackPanel>
+          </Button>
+        </Grid>
       </Border>
 
       <ContentControl Grid.Column="0" Grid.Row="2" Content="{Binding PageService.ActivePageVm}" />
