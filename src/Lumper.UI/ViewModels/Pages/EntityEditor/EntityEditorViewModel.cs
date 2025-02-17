@@ -37,6 +37,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
     public static BspService BspService => BspService.Instance;
 
+    public static GameSyncService GameSyncService => GameSyncService.Instance;
+
     public EntityEditorViewModel()
     {
         var u = new Unit();
@@ -97,6 +99,64 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             })
             .ObserveOn(RxApp.MainThreadScheduler)
             .ToPropertyEx(this, x => x.FilteredEntities);
+
+        Filters
+            .WhenAnyValue(x => x.SyncPlayerPosition)
+            .ObserveOn(RxApp.TaskpoolScheduler)
+            .Select(enabled =>
+            {
+                if (!enabled)
+                    return Observable.Empty<string>();
+
+                Filters.SyncTargetEntity = false;
+
+                Filters.Key = string.Empty;
+                Filters.Value = string.Empty;
+
+                return GameSyncService.WhenAnyValue(x => x.PlayerPosition);
+            })
+            .Switch()
+            .Select(pos =>
+                // Remove decimal points, clogs up filter textbox and will never need such high precision.
+                pos is not null
+                    ? string.Join(" ", pos.Split(' ').Select(str => float.TryParse(str, out float val) ? (int)val : 0))
+                    : null
+            )
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(pos =>
+            {
+                if (pos is not null)
+                    Filters.SpherePosition = pos;
+            });
+
+        Filters
+            .WhenAnyValue(x => x.SyncTargetEntity)
+            .ObserveOn(RxApp.TaskpoolScheduler)
+            .Select(enabled =>
+            {
+                if (!enabled)
+                    return Observable.Empty<string>();
+
+                Filters.SyncPlayerPosition = false;
+                Filters.SpherePosition = string.Empty;
+
+                return GameSyncService.WhenAnyValue(x => x.TargetEntities);
+            })
+            .Switch()
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(ents =>
+            {
+                if (!string.IsNullOrWhiteSpace(ents))
+                {
+                    Filters.Key = "hammerid";
+                    Filters.Value = ents;
+                }
+                else
+                {
+                    Filters.Key = string.Empty;
+                    Filters.Value = string.Empty;
+                }
+            });
     }
 
     private bool Filter(IEnumerable<EntityViewModel> input, out IEnumerable<EntityViewModel> output)
