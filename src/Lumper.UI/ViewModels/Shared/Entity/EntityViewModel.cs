@@ -5,6 +5,7 @@ using System.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
+using Lumper.UI.Services;
 using ReactiveUI;
 
 public class EntityViewModel : HierarchicalBspNode
@@ -87,6 +88,15 @@ public class EntityViewModel : HierarchicalBspNode
         }
     }
 
+    public string? Origin =>
+        Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == "origin")?.Value;
+
     public bool MatchClassname(string expr, bool wildcardWrapping) =>
         _classname?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
+
+    public void TeleportToMe()
+    {
+        if (Origin is { } origin)
+            GameSyncService.Instance.TeleportToOrigin(origin);
+    }
 }

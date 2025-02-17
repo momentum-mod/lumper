@@ -137,7 +137,7 @@
         </ListBox.Styles>
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <Grid ColumnDefinitions="Auto, 4, Auto, *, Auto">
+            <Grid ColumnDefinitions="Auto, 4, Auto, *, Auto, Auto">
               <Grid.Styles>
                 <Style Selector="TextBlock">
                   <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
@@ -145,11 +145,17 @@
               </Grid.Styles>
               <TextBlock Grid.Column="0" Text="{Binding Classname}" />
               <TextBlock Grid.Column="2" Text="*" IsVisible="{Binding IsModified}" />
+              <Button Grid.Column="3"
+                      IsVisible="{Binding ViewModel.GameSyncService.Connected, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
+                      Command="{Binding TeleportToMe}" HorizontalAlignment="Right" Background="Transparent"
+                      ToolTip.Tip="Teleport to entity in-game"
+                      BorderBrush="Transparent" Padding="0" Margin="0 0 4 0">
+                <materialIcons:MaterialIcon Kind="NavigationVariantOutline" />
+              </Button>
               <Button Grid.Column="4"
                       Command="{Binding ViewModel.EntityLumpViewModel.RemoveEntity, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
-                      CommandParameter="{Binding}"
-                      HorizontalAlignment="Right"
-                      Background="Transparent" BorderBrush="Transparent" Padding="0">
+                      CommandParameter="{Binding}" HorizontalAlignment="Right" Background="Transparent"
+                      BorderBrush="Transparent" Padding="0">
                 <materialIcons:MaterialIcon Kind="Delete" />
               </Button>
             </Grid>
