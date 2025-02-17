@@ -28,6 +28,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             // Stupid shit to get this to behave like a radiobutton. I miss Angular
             PageService
                 .Instance.WhenAnyValue(x => x.ActivePage)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(pageName =>
                 {
                     foreach (Control control in PageButtons.Children.Where(child => child is ToggleButton))
