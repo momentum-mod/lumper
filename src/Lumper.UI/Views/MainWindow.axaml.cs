@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Avalonia.ReactiveUI;
 using Lumper.UI.Services;
@@ -43,6 +45,29 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
                 .DisposeWith(disposables);
 
             PageService.Instance.ViewPage(Page.EntityEditor);
+
+            GameSyncService
+                .Instance.WhenAnyValue(x => x.Status)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(status =>
+                {
+                    SyncButton.IsEnabled =
+                        status
+                            is not (GameSyncService.SyncStatus.Connecting or GameSyncService.SyncStatus.Disconnecting);
+
+                    SyncIcon.Foreground =
+                        status is GameSyncService.SyncStatus.Connected ? Brushes.LawnGreen : Brushes.LightGray;
+
+                    SyncText.Text = status switch
+                    {
+                        GameSyncService.SyncStatus.Connected => "Connected to Game Sync",
+                        GameSyncService.SyncStatus.Disconnected => "Connect to Game Sync",
+                        GameSyncService.SyncStatus.Connecting => "Connecting...",
+                        GameSyncService.SyncStatus.Disconnecting => "Disconnecting...",
+                        _ => throw new ArgumentOutOfRangeException(nameof(status), status, null),
+                    };
+                })
+                .DisposeWith(disposables);
 
             PopulateRecentFilesList();
             StateService.Instance.RecentFiles.CollectionChanged += (_, _) => PopulateRecentFilesList();
