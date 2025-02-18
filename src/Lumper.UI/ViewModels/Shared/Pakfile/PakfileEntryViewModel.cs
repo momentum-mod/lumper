@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp.Struct;
-using Lumper.Lib.Util;
 using ReactiveUI.Fody.Helpers;
 
 public abstract class PakfileEntryViewModel : HierarchicalBspNode

@@ -2,10 +2,10 @@ namespace Lumper.Lib.Jobs;
 
 using System.Collections.Generic;
 using System.Linq;
+using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;
-using Lumper.Lib.Util;
 using NLog;
 
 public class RemoveAssetJob : Job, IJob
