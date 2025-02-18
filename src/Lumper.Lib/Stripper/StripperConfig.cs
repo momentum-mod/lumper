@@ -29,7 +29,7 @@ public partial class StripperConfig
         {
             lineNr++;
 
-            line = line.Trim();
+            line = line.Trim().ToLowerInvariant();
             if (string.IsNullOrEmpty(line))
                 continue;
 
@@ -60,15 +60,15 @@ public partial class StripperConfig
         return config;
     }
 
-    [GeneratedRegex("\"([^\"]+)\"\\s+\"([^\"]+)\"")]
+    [GeneratedRegex("\"([^\"]+)\"\\s+\"([^\"]+)\"", RegexOptions.IgnoreCase)]
     private static partial Regex PairRegex();
 
     private static bool IsComment(string line) =>
-        line.StartsWith(';') || line.StartsWith("//") || line.StartsWith('#') || line == "";
+        line.StartsWith(';') || line.StartsWith("//", StringComparison.Ordinal) || line.StartsWith('#') || line == "";
 
     private static bool MatchKeyValue(KvPair filter, Entity.EntityProperty property)
     {
-        if (filter.Key != property.Key)
+        if (!filter.Key.Equals(property.Key, StringComparison.OrdinalIgnoreCase))
             return false;
 
         if (property.ValueString is null)
@@ -76,12 +76,12 @@ public partial class StripperConfig
 
         // Match non-regex
         if (!(filter.Value.Length > 2 && filter.Value.StartsWith('/') && filter.Value.EndsWith('/')))
-            return filter.Value == property.ValueString;
+            return filter.Value.Equals(property.ValueString, StringComparison.OrdinalIgnoreCase);
 
         // Match regex
         try
         {
-            var regex = new Regex(filter.Value[1..^2]);
+            var regex = new Regex(filter.Value[1..^2], RegexOptions.IgnoreCase);
             return regex.IsMatch(property.ValueString);
         }
         catch (Exception _) when (_ is ArgumentException or ArgumentNullException)
@@ -191,7 +191,7 @@ public partial class StripperConfig
                 ref lineNr,
                 (line, lNr) =>
                 {
-                    line = line.Trim();
+                    line = line.Trim().ToLowerInvariant();
 
                     bool blockOpenInner = false;
                     if (line == "{")
