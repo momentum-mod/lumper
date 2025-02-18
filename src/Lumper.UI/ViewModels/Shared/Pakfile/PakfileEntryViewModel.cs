@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Lumper.Lib;
+using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp.Struct;
 using ReactiveUI.Fody.Helpers;
 

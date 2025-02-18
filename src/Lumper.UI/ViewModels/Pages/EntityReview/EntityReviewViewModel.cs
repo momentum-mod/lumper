@@ -9,13 +9,13 @@ using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using DynamicData;
 using EntityEditor;
-using Lumper.Lib.Util;
+using Lumper.Lib.EntityRules;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using Lumper.UI.Views.Pages.EntityReview;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using EntityRules = System.Collections.Generic.Dictionary<string, Lib.Util.EntityRule>;
+using EntityRules = System.Collections.Generic.Dictionary<string, Lib.EntityRules.EntityRule>;
 
 public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewModel, EntityReviewView>
 {

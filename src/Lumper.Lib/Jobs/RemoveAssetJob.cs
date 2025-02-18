@@ -2,7 +2,7 @@ namespace Lumper.Lib.Jobs;
 
 using System.Collections.Generic;
 using System.Linq;
-using Lumper.Lib;
+using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;

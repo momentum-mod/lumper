@@ -8,7 +8,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using Lumper.Lib;
+using Lumper.Lib.AssetManifest;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.LogViewer;
 using Lumper.UI.Views;

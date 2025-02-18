@@ -1,4 +1,4 @@
-﻿namespace Lumper.Lib;
+﻿namespace Lumper.Lib.ExtensionMethods;
 
 using System.IO.Enumeration;
 

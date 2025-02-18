@@ -3,7 +3,7 @@ namespace Lumper.UI.ViewModels.Pages.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lumper.Lib;
+using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Jobs;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Pakfile;
