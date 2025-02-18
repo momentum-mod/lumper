@@ -9,12 +9,12 @@ using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
-using Lumper.Lib.Util;
+using Lumper.Lib.EntityRules;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.BspInfo;
 using Lumper.UI.ViewModels.Shared.Pakfile;
 using ReactiveUI;
-using EntityRules = System.Collections.Generic.Dictionary<string, Lib.Util.EntityRule>;
+using EntityRules = System.Collections.Generic.Dictionary<string, Lib.EntityRules.EntityRule>;
 
 public partial class BspInfoView : ReactiveWindow<BspInfoViewModel>
 {

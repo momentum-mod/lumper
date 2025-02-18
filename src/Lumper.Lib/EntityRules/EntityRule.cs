@@ -1,4 +1,4 @@
-﻿namespace Lumper.Lib.Util;
+﻿namespace Lumper.Lib.EntityRules;
 
 using System;
 using System.IO;

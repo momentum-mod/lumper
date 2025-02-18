@@ -1,4 +1,4 @@
-﻿namespace Lumper.Lib.Util;
+﻿namespace Lumper.Lib.AssetManifest;
 
 using System;
 using System.Collections.Generic;
