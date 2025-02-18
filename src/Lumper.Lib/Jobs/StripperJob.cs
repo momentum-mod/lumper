@@ -1,75 +1,19 @@
 namespace Lumper.Lib.Jobs;
 
-using System;
-using System.Collections.Generic;
 using System.IO;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
-using Newtonsoft.Json;
+using Lumper.Lib.Stripper;
 using NLog;
 
-public partial class StripperJob(string? configPath = null) : Job, IJob
+public class StripperJob : Job, IJob
 {
     public static string JobName => "Stripper";
     public override string JobNameInternal => JobName;
 
-    [JsonIgnore]
-    protected List<Block> Blocks { get; } = [];
-
-    public string? ConfigPath { get; set; } = configPath;
+    public string? ConfigPath { get; set; }
 
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
-
-    public StripperJob()
-        : this(null) { }
-
-    private void Load(string configPath)
-    {
-        ConfigPath = configPath;
-        Parse(File.Open(configPath, FileMode.Open, FileAccess.Read, FileShare.Read));
-    }
-
-    // Expects trimmed string
-    private static bool IsComment(string line) =>
-        line.StartsWith(';') || line.StartsWith("//", StringComparison.Ordinal) || line.StartsWith('#') || line == "";
-
-    private void Parse(Stream stream)
-    {
-        var reader = new StreamReader(stream);
-        int lineNr = 0;
-        string prevBlock = "";
-        while (reader.ReadLine() is { } line)
-        {
-            lineNr++;
-
-            line = line.Trim();
-            if (string.IsNullOrEmpty(line))
-                continue;
-
-            bool blockOpen = false;
-            if (line == "{")
-            {
-                line = prevBlock;
-                blockOpen = true;
-            }
-            else if (IsComment(line))
-            {
-                continue;
-            }
-
-            Block block = line switch
-            {
-                "filter:" or "remove:" => new Filter(),
-                "add:" => new Add(),
-                "modify:" => new Modify(),
-                _ => throw new NotImplementedException($"Unknown title '{line}' in line {lineNr}"),
-            };
-            prevBlock = line;
-
-            block.Parse(reader, blockOpen, ref lineNr);
-            Blocks.Add(block);
-        }
-    }
 
     public override bool Run(BspFile bsp)
     {
@@ -79,11 +23,13 @@ public partial class StripperJob(string? configPath = null) : Job, IJob
             return false;
         }
 
-        Load(ConfigPath);
-        Progress.Max = Blocks.Count;
+        using FileStream stream = File.Open(ConfigPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        var config = StripperConfig.Parse(stream);
+
+        Progress.Max = config.Blocks.Count;
         EntityLump entityLump = bsp.GetLump<EntityLump>();
 
-        foreach (Block block in Blocks)
+        foreach (StripperConfig.Block block in config.Blocks)
         {
             block.Apply(entityLump);
             Progress.Count++;
