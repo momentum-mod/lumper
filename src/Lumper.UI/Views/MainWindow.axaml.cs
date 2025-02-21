@@ -97,5 +97,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     }
 
     private List<IStorageFile> FilterDraggedBspFiles(DragEventArgs e) =>
-        e.Data.GetFiles()?.OfType<IStorageFile>().Where(file => file.Name.EndsWith(".bsp")).ToList() ?? [];
+        e.Data.GetFiles()
+            ?.OfType<IStorageFile>()
+            .Where(file => file.Name.EndsWith(".bsp", StringComparison.Ordinal))
+            .ToList() ?? [];
 }
