@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Lumper.UI.ViewModels.Pages.Jobs"
+             xmlns:local="clr-namespace:Lumper.UI.Views.Pages.Jobs"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:avaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.Jobs.StripperTextJobView"
+             x:DataType="vm:StripperTextJobViewModel">
+
+  <local:JobView>
+    <local:JobView.JobDescription>
+      <StackPanel>
+        <TextBlock>Edit a Stripper config directly then apply it to the entity lump.</TextBlock>
+        <TextBlock>When saved to a workflow, the config is stored as text in the JSON file.</TextBlock>
+        <HyperlinkButton NavigateUri="https://www.bailopan.net/stripper/">
+          Stripper Config Reference
+        </HyperlinkButton>
+      </StackPanel>
+    </local:JobView.JobDescription>
+
+    <local:JobView.MainContent>
+      <Panel VerticalAlignment="Stretch">
+        <avaloniaEdit:TextEditor Name="TextEditor" Margin="12 16" ShowLineNumbers="True"
+                                 FontFamily="{StaticResource Monospace}" />
+        <StackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Margin="16 16 32 16" IsVisible="{Binding !IsConfigValid}">
+          <materialIcons:MaterialIcon Kind="Error" Width="24" Height="24" Foreground="IndianRed" />
+          <TextBlock FontFamily="{StaticResource Monospace}" FontWeight="Medium" VerticalAlignment="Center">
+            Invalid config!
+            <LineBreak />
+            <Run Foreground="LightGray" Text="{Binding ErrorMessage}" />
+          </TextBlock>
+        </StackPanel>
+      </Panel>
+    </local:JobView.MainContent>
+  </local:JobView>
+</UserControl>
