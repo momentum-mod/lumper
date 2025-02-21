@@ -11,7 +11,7 @@ data = pandas.read_csv(SHEET_URL, index_col=False)
 output = {}
 
 # Must correspond to EntityRule.AllowLevel
-Levels = { "allow": 3, "warn": 2, "deny": 1 }
+Levels = { "allow": 3, "warn": 2, "deny": 0 }
 
 for line, row in data.iterrows():
     classname = row.get("ClassName")
