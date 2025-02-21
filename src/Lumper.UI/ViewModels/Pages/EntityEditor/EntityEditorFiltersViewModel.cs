@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
-using Lib.Bsp.Struct;
+using Lumper.Lib.Bsp.Struct;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
