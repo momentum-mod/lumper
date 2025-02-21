@@ -6,9 +6,9 @@ using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Stripper;
 using NLog;
 
-public class StripperJob : Job, IJob
+public class StripperFileJob : Job, IJob
 {
-    public static string JobName => "Stripper";
+    public static string JobName => "Stripper (File)";
     public override string JobNameInternal => JobName;
 
     public string? ConfigPath { get; set; }
@@ -19,7 +19,7 @@ public class StripperJob : Job, IJob
     {
         if (string.IsNullOrEmpty(ConfigPath) || !Path.Exists(ConfigPath))
         {
-            Logger.Warn($"Cannot load config \"{ConfigPath}\", ignoring job.");
+            Logger.Warn($"""Cannot load config "{ConfigPath}", ignoring job.""");
             return false;
         }
 

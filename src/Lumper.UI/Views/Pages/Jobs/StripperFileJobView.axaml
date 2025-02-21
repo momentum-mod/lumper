@@ -6,29 +6,30 @@
              xmlns:local="clr-namespace:Lumper.UI.Views.Pages.Jobs"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Lumper.UI.Views.Pages.Jobs.StripperJobView"
-             x:DataType="vm:StripperJobViewModel">
+             x:Class="Lumper.UI.Views.Pages.Jobs.StripperFileJobView"
+             x:DataType="vm:StripperFileJobViewModel">
 
   <local:JobView>
     <local:JobView.JobDescription>
-      <TextBlock>
-        Applies a Stripper:Source config file to the entity lump.
-        <HyperlinkButton NavigateUri="https://www.bailopan.net/stripper/" Margin="0 0 0 -3" Padding="0">
+      <StackPanel>
+        <TextBlock>Load a Stripper:Source config file (.cfg) from file and apply it to the entity lump.</TextBlock>
+        <TextBlock>When saved to a workflow, the path to the file is stored.</TextBlock>
+        <HyperlinkButton NavigateUri="https://www.bailopan.net/stripper/">
           Stripper Config Reference
         </HyperlinkButton>
-      </TextBlock>
+      </StackPanel>
     </local:JobView.JobDescription>
 
     <local:JobView.MainContent>
-      <StackPanel Grid.Row="0" Margin="8" Spacing="8">
-        <TextBox Text="{Binding ConfigPath}" />
-        <Button Command="{Binding ShowFilePickerDialog}">
+      <Grid Grid.Row="0" RowDefinitions="Auto" ColumnDefinitions="*, 8 Auto" Margin="16">
+        <TextBox Grid.Column="0" Text="{Binding ConfigPath}" />
+        <Button Grid.Column="2" Command="{Binding ShowFilePickerDialog}">
           <StackPanel Orientation="Horizontal" Spacing="4">
             <materialIcons:MaterialIcon Kind="FileDocumentOutline" />
             <TextBlock VerticalAlignment="Center">Pick Config</TextBlock>
           </StackPanel>
         </Button>
-      </StackPanel>
+      </Grid>
     </local:JobView.MainContent>
   </local:JobView>
 </UserControl>
