@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -18,6 +19,7 @@ public partial class StripperConfig
 
     private static Logger Logger { get; } = LogManager.GetCurrentClassLogger();
 
+    // Throws if Parse fails, good for jobs
     public static StripperConfig Parse(Stream stream)
     {
         var config = new StripperConfig();
@@ -58,6 +60,26 @@ public partial class StripperConfig
         }
 
         return config;
+    }
+
+    public static bool TryParse(
+        Stream stream,
+        [NotNullWhen(true)] out StripperConfig? config,
+        [NotNullWhen(false)] out string? errorMessage
+    )
+    {
+        try
+        {
+            config = Parse(stream);
+            errorMessage = null;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            config = null;
+            errorMessage = ex.Message;
+            return false;
+        }
     }
 
     [GeneratedRegex("\"([^\"]+)\"\\s+\"([^\"]+)\"", RegexOptions.IgnoreCase)]
