@@ -15,14 +15,14 @@
         "Level": 3
     },
     "commentary_auto": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Only used by commentary system"
     },
     "cycler_actor": {
-        "Level": 1
+        "Level": 0
     },
     "env_ambient_light": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Buggy entity causes ambient light to be carried over between maps"
     },
     "env_beam": {
@@ -89,7 +89,7 @@
         "Level": 3
     },
     "env_global": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Entity carries global state across level transitions"
     },
     "env_glow": {
@@ -99,7 +99,8 @@
         "Level": 3
     },
     "env_hudhint": {
-        "Level": 3
+        "Level": 2,
+        "Comment": "Don't use for stage/bonus numbers"
     },
     "env_instructor_hint": {
         "Level": 3
@@ -124,7 +125,7 @@
         "Level": 3
     },
     "env_particle_performance_monitor": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Debugging entity only used for testing"
     },
     "env_particlelight": {
@@ -215,7 +216,7 @@
         "Level": 3
     },
     "env_tilt": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "This entity does not work"
     },
     "env_tonemap_controller": {
@@ -226,7 +227,7 @@
         "Comment": "Use with care, don't punch the player's view if it affects gameplay"
     },
     "env_wind": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Used with physics entities, wind carries over between maps"
     },
     "env_zoom": {
@@ -260,7 +261,7 @@
         "Level": 3
     },
     "filter_base": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Base class of other filters, no filter logic of its own"
     },
     "filter_damage_type": {
@@ -399,11 +400,11 @@
         "Level": 3
     },
     "func_proprrespawnzone": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Debugging entity only used for testing"
     },
     "func_pushable": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Use func_physbox instead"
     },
     "func_reflective_glass": {
@@ -426,27 +427,27 @@
         "Level": 3
     },
     "func_tank": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
     },
     "func_tanklaser": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
     },
     "func_tankmortar": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
     },
     "func_tankphyscannister": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
     },
     "func_tankpulselaser": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
     },
     "func_tanktrain": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "This entity is unimplemented"
     },
     "func_touch": {
@@ -493,7 +494,7 @@
         "Level": 3
     },
     "game_globalvars": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "game_ragdoll_manager": {
@@ -503,7 +504,7 @@
         "Level": 3
     },
     "game_ui": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "game_zone_player": {
@@ -511,7 +512,7 @@
         "Comment": "This entity counts players but in Momentum Mod there's only ever one player, even in lobbies"
     },
     "generic_actor": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "NPC entity, not relevant to Momentum Mod"
     },
     "gibshooter": {
@@ -532,7 +533,7 @@
         "Comment": "This is for physics entities, use physics entities with care"
     },
     "info_game_event_proxy": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "info_ladder_dismount": {
@@ -566,10 +567,19 @@
     "info_particle_system": {
         "Level": 3
     },
+    "info_player_counterterrorist": {
+        "Level": 3
+    },
     "info_player_deathmatch": {
         "Level": 3
     },
     "info_player_start": {
+        "Level": 3
+    },
+    "info_player_teamspawn": {
+        "Level": 3
+    },
+    "info_player_terrorist": {
         "Level": 3
     },
     "info_projecteddecal": {
@@ -612,7 +622,7 @@
         "Level": 3
     },
     "logic_achievement": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "logic_auto": {
@@ -635,32 +645,32 @@
         "Level": 3
     },
     "logic_console": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Debugging entity only used for testing"
     },
     "logic_context_accessor": {
         "Level": 3
     },
     "logic_convar": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "logic_coop_manager": {
         "Level": 3
     },
     "logic_datadesc_accessor": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "logic_entity_position": {
         "Level": 3
     },
     "logic_eventlistener": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "logic_eventlistener_itemequip": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "logic_format": {
@@ -670,7 +680,7 @@
         "Level": 3
     },
     "logic_keyfield": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "logic_lineto": {
@@ -692,7 +702,7 @@
         "Level": 3
     },
     "logic_playmovie": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Do not play movies in your map"
     },
     "logic_random_outputs": {
@@ -749,7 +759,7 @@
         "Level": 3
     },
     "mom_replay_playback": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Don't play replays in your map"
     },
     "momentary_rot_button": {
@@ -771,7 +781,7 @@
         "Level": 3
     },
     "monster_generic": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "NPC entity, not relevant to Momentum Mod"
     },
     "move_keyframed": {
@@ -784,11 +794,11 @@
         "Level": 3
     },
     "npc_furniture": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "NPC entity, not relevant to Momentum Mod"
     },
     "npc_heardanger": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "NPC entity, not relevant to Momentum Mod"
     },
     "parallax_obb": {
@@ -885,7 +895,7 @@
         "Level": 3
     },
     "point_bonusmaps_accessor": {
-        "Level": 1
+        "Level": 0
     },
     "point_camera": {
         "Level": 3
@@ -894,7 +904,7 @@
         "Level": 2
     },
     "point_commentary_node": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Only used by commentary system"
     },
     "point_devshot_camera": {
@@ -907,7 +917,7 @@
         "Level": 3
     },
     "point_gamestats_counter": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Debugging entity only used for testing"
     },
     "point_hurt": {
@@ -926,7 +936,7 @@
         "Level": 3
     },
     "point_servercommand": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Don't issue server commands in your map. Use zone settings to set the max map velocity."
     },
     "point_spotlight": {
@@ -1017,11 +1027,11 @@
         "Level": 3
     },
     "simple_physics_brush": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Use func_physbox instead"
     },
     "simple_physics_prop": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Use prop_physics or prop_dynamic instead"
     },
     "sky_camera": {
@@ -1037,40 +1047,42 @@
         "Level": 3
     },
     "tanktrain_ai": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Unused entity for func_tanktrain"
     },
     "tanktrain_aitarget": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Unused entity for func_tanktrain"
     },
     "target_changegravity": {
         "Level": 3
     },
     "test_sidelist": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Debugging entity only used for testing"
     },
     "test_traceline": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Debugging entity only used for testing"
     },
     "trigger_bounce_stickybombs": {
         "Level": 3
     },
     "trigger_brush": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Use func_button instead"
     },
     "trigger_catapult": {
-        "Level": 3
+        "Level": 2,
+        "Comment": "Catapults on ported maps that have no target and are pointing directly upwards need to have launch speed multiplied by 1.5 to match original behaviour. (Ignore this warning if map is not a port)."
     },
     "trigger_changelevel": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Do not transition levels in your map"
     },
     "trigger_gravity": {
-        "Level": 3
+        "Level": 2,
+        "Comment": "Map ports from games that aren't CS:GO will need the \"persist 1\" keyvalue added to replicate old behaviour. (Ignore this warning if map is not a port)."
     },
     "trigger_hierarchy": {
         "Level": 3
@@ -1096,7 +1108,7 @@
         "Level": 3
     },
     "trigger_momentum_promptinput": {
-        "Level": 1
+        "Level": 0
     },
     "trigger_momentum_teleport": {
         "Level": 3
@@ -1148,11 +1160,11 @@
         "Level": 3
     },
     "trigger_transition": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Do not transition to other levels from your map"
     },
     "trigger_userinput": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
     "trigger_vphysics_motion": {
@@ -1183,7 +1195,7 @@
         "Level": 3
     },
     "weapon_cubemap": {
-        "Level": 1,
+        "Level": 0,
         "Comment": "Do not give the player the cubemap weapon"
     },
     "weapon_knife": {
@@ -1221,6 +1233,9 @@
     "weapon_momentum_stickybomblauncher": {
         "Level": 2,
         "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "worldspawn": {
+        "Level": 3
     },
     "zone_allowbhop": {
         "Level": 3
