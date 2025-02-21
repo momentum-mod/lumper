@@ -6,6 +6,8 @@ using System.Reactive.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lumper.Lib.Jobs;
+using Lumper.UI.ViewModels.Pages.Jobs;
 using Newtonsoft.Json;
 using NLog;
 using ReactiveUI;
@@ -161,6 +163,9 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
             case MessageType.STC_TargetedEntitiesList:
                 TargetEntities = message.Content;
                 break;
+            case MessageType.CTS_AddStripperConfig:
+                AddStripperConfig(message.Content);
+                break;
             default:
                 _logger.Error($"Message type {message.Type} not handled by client, discarding.");
                 break;
@@ -177,6 +182,16 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
         _logger.Debug($"Sending message: {str}");
 
         await _client.SendAsync(Encoding.UTF8.GetBytes(str), WebSocketMessageType.Text, true, CancellationToken.None);
+    }
+
+    private void AddStripperConfig(string config)
+    {
+        PageService.Instance.ViewPage(Page.Jobs);
+
+        var job = (StripperTextJobViewModel)JobsViewModel.CreateJobViewModel(new StripperTextJob { Config = config });
+        var page = (JobsViewModel)PageService.Instance.Pages[Page.Jobs].Get();
+        page.Jobs.Add(job);
+        page.ActiveJobPage = job;
     }
 
     // Corresponds to LumperSyncMessageType in C++
