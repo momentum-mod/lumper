@@ -32,10 +32,15 @@ public class RemoveAssetJob : Job, IJob
 
         PakfileLump pakfileLump = bsp.GetLump<PakfileLump>();
 
+        Logger.Info("Removing game assets... this may take a while!");
         int numMatches = 0;
 
-        foreach (PakfileEntry entry in pakfileLump.Entries.ToList())
+        var entries = pakfileLump.Entries.ToList();
+        Progress.Max = entries.Count;
+        foreach (PakfileEntry entry in entries)
         {
+            Progress.Count++;
+
             string hash = entry.Hash;
             if (!AssetManifest.Manifest.TryGetValue(hash, out List<AssetManifest.Asset>? assets))
                 continue;
