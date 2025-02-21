@@ -16,17 +16,18 @@
 
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*" MinWidth="230"/>
+      <ColumnDefinition Width="340" MinWidth="300" />
       <ColumnDefinition Width="2" />
-      <ColumnDefinition Width="*"/>
+      <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
+
     <Grid RowDefinitions="Auto, *, Auto" Grid.Row="0" Grid.Column="0" Classes="PageTopBar">
       <Border Grid.Row="0">
         <Grid>
           <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*" MinWidth="4"/>
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" MinWidth="4" />
+            <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
 
           <StackPanel Grid.Column="0" Spacing="4" Orientation="Horizontal">
@@ -43,14 +44,17 @@
                 </MenuFlyout>
               </Button.Flyout>
             </Button>
-            <Button IsEnabled="{Binding !IsRunning}" Command="{Binding ShowLoadJobsFileDialog}" Padding="2"
-                    ToolTip.Tip="Load Workflow">
-              <materialIcons:MaterialIcon Kind="FileImport" />
+            <Button Command="{Binding ShowLoadJobsFileDialog}" IsEnabled="{Binding !IsRunning}">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="FileImport" />
+                <TextBlock>Load</TextBlock>
+              </StackPanel>
             </Button>
-            <Button IsEnabled="{Binding !IsRunning}" Padding="2"
-                    Command="{Binding ShowSaveJobsFileDialog}"
-                    ToolTip.Tip="Save Workflow">
-              <materialIcons:MaterialIcon Kind="FileExport" />
+            <Button Command="{Binding ShowSaveJobsFileDialog}" IsEnabled="{Binding !IsRunning}">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="FileExport" />
+                <TextBlock>Save</TextBlock>
+              </StackPanel>
             </Button>
           </StackPanel>
 
@@ -79,13 +83,12 @@
         <ListBox.ItemTemplate>
           <DataTemplate>
             <Grid ColumnDefinitions="3*, 8, 1*, 8, 40, 8, 24">
-              <TextBlock HorizontalAlignment="Left" Grid.Column="0" Text="{Binding Job.JobNameInternal}" />
+              <TextBlock HorizontalAlignment="Left" Grid.Column="0" Text="{Binding Job.JobNameInternal}"
+                         FontFamily="{StaticResource Monospace}" />
               <ProgressBar MinWidth="0" Grid.Column="2" Value="{Binding ProgressPercent}" />
-              <TextBlock Grid.Column="4"
-                         Text="{Binding ProgressPercent, Converter={StaticResource percent}}"
-                         TextAlignment="Center" />
-              <materialIcons:MaterialIcon Grid.Column="6"
-                                          Kind="{Binding Status, Converter={StaticResource jobStatus}}" />
+              <TextBlock Grid.Column="4" Text="{Binding ProgressPercent, Converter={StaticResource percent}}"
+                         TextAlignment="Center" FontFamily="{StaticResource Monospace}" />
+              <materialIcons:MaterialIcon Grid.Column="6" Kind="{Binding Status, Converter={StaticResource jobStatus}}" />
             </Grid>
           </DataTemplate>
         </ListBox.ItemTemplate>
