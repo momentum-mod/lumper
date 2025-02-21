@@ -25,6 +25,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
             new JobMenuItem<RemoveAssetJob>(this, () => new RemoveAssetJob()),
             new JobMenuItem<ReplaceTextureJob>(this, () => new ReplaceTextureJob()),
             new JobMenuItem<StripperFileJob>(this, () => new StripperFileJob()),
+            new JobMenuItem<StripperTextJob>(this, () => new StripperTextJob()),
             new JobMenuItem<RunExternalToolJob>(this, () => new RunExternalToolJob()),
         ];
 
@@ -60,6 +61,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         job switch
         {
             StripperFileJob stripperFile => new StripperFileJobViewModel(stripperFile),
+            StripperTextJob stripperText => new StripperTextJobViewModel(stripperText),
             RunExternalToolJob runExternal => new RunExternalToolJobViewModel(runExternal),
             ReplaceTextureJob changeTexture => new ReplaceTextureJobViewModel(changeTexture),
             RemoveAssetJob removeAsset => new RemoveAssetJobViewModel(removeAsset),
