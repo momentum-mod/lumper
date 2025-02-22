@@ -11,12 +11,19 @@ using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using NLog;
+using ReactiveUI.Fody.Helpers;
 
 public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 {
     private readonly PakfileLump _pakfile;
 
     public SourceCache<PakfileEntryViewModel, string> Entries { get; } = new(entry => entry.Key);
+
+    [Reactive]
+    public long InMemorySize { get; private set; }
+
+    [Reactive]
+    public long UncompressedSize { get; private set; }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -27,6 +34,14 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
         BspService.Instance.ThrowIfNoLoadedBsp();
 
         _pakfile = bsp.GetLump<PakfileLump>();
+
+        // Zip.TotalSize is not a reliable source of compressed sized, since
+        // when we write the zip out compressed we're just writing to a stream
+        // straight out to disk, not modifying the zip in memory in any way.
+        // DataStreamLength *is* an accurate value for the size though, either
+        // compressed or uncompressed.
+        InMemorySize = _pakfile.DataStreamLength;
+        UncompressedSize = _pakfile.Zip.TotalUncompressSize;
 
         InitEntries();
     }

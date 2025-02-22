@@ -8,10 +8,12 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using BspInfo;
 using Lumper.Lib.Util;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.LogViewer;
 using Lumper.UI.Views;
+using Lumper.UI.Views.BspInfo;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Base;
 using MsBox.Avalonia.Dto;
@@ -185,6 +187,12 @@ public class MainWindowViewModel : ViewModel
     }
 
     public void ExitCommand() => Program.MainWindow.Close();
+
+    public void BspInfoCommand()
+    {
+        var bspInfoWindow = new BspInfoView { DataContext = new BspInfoViewModel() };
+        bspInfoWindow.ShowDialog(Program.MainWindow);
+    }
 
     public void AboutCommand()
     {
