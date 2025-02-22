@@ -148,7 +148,11 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         ActiveJobPage = null;
     }
 
-    public void RemoveAll() => Jobs.Clear();
+    public void RemoveAll()
+    {
+        Jobs.Clear();
+        ActiveJobPage = null;
+    }
 
     public void LoadWorkflow(Stream stream)
     {
