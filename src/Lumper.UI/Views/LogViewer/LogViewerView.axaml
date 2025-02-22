@@ -12,8 +12,14 @@
     <ScrollViewer Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Name="ScrollViewer" VerticalAlignment="Stretch"
                   VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Background="#55000000"
                   MaxHeight="Infinity">
-      <SelectableTextBlock Name="Logs" FontSize="14" FontFamily="{StaticResource Monospace}" ClipToBounds="True"
-                           VerticalAlignment="Stretch" Padding="16" />
+      <ItemsControl Name="LogLines" Padding="4">
+        <ItemsControl.Styles>
+          <Style Selector="SelectableTextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
+            <Setter Property="FontSize" Value="14" />
+          </Style>
+        </ItemsControl.Styles>
+      </ItemsControl>
     </ScrollViewer>
     <Button Click="ScrollToBottom" Margin="4" Grid.Column="1" Grid.Row="0" Padding="0"
             ToolTip.Tip="Scroll to Bottom">
