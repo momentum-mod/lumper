@@ -13,7 +13,7 @@
 
   <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, *" Margin="8">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="360" MinWidth="260" />
+      <ColumnDefinition Width="340" MinWidth="340" />
       <ColumnDefinition Width="2" />
       <ColumnDefinition Width="*" MinWidth="400" />
     </Grid.ColumnDefinitions>
@@ -73,17 +73,33 @@
           <TextBlock>Will match any entity who's origin is within 1000 units from X = 0, Y = 0, Z = 0.</TextBlock>
         </StackPanel>
       </ToolTip.Tip>
-      <ctrls:ClearableTextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}" Watermark="In Spherical Region (X Y Z)" />
+      <ctrls:ClearableTextBox Grid.Column="0" Text="{Binding Filters.SpherePosition}"
+                              Watermark="In Spherical Region (X Y Z)" />
       <ctrls:ClearableTextBox Grid.Column="2" Text="{Binding Filters.SphereRadius}" Watermark="Radius" />
     </Grid>
-    <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, 8, Auto, 12, Auto, 8, Auto"
-          Margin="4 0 0 4">
-      <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="LightGray">Brush</TextBlock>
-      <CheckBox Grid.Column="2" IsChecked="{Binding Filters.ShowBrushEntities}" />
-      <TextBlock Grid.Column="4" VerticalAlignment="Center" Foreground="LightGray">Point</TextBlock>
-      <CheckBox Grid.Column="6" IsChecked="{Binding Filters.ShowPointEntities}" />
+    <Grid Grid.Column="0" Grid.Row="3" ColumnDefinitions="Auto, Auto, Auto, Auto, *, Auto, Auto, Auto, Auto">
+      <Grid.Styles>
+        <Style Selector="TextBlock, CheckBox">
+          <Setter Property="Margin" Value="0 0 4 0"></Setter>
+        </Style>
+      </Grid.Styles>
+      <TextBlock Grid.Column="0" Margin="4 0 4 0" VerticalAlignment="Center" Foreground="LightGray">Brush</TextBlock>
+      <CheckBox Grid.Column="1" IsChecked="{Binding Filters.ShowBrushEntities}" />
+      <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="LightGray">Point</TextBlock>
+      <CheckBox Grid.Column="3" IsChecked="{Binding Filters.ShowPointEntities}" />
+      <TextBlock Grid.Column="5" VerticalAlignment="Center">Sync Pos</TextBlock>
+      <!-- Stupid wrappers because IsEnabled false on the checkbox disables the tooltip -->
+      <Panel Grid.Column="6" ToolTip.ServiceEnabled="{Binding !GameSyncService.Connected}"
+             ToolTip.Tip="Requires Game Sync connection!">
+        <CheckBox IsChecked="{Binding Filters.SyncPlayerPosition}" IsEnabled="{Binding GameSyncService.Connected}" />
+      </Panel>
+      <TextBlock Grid.Column="7" VerticalAlignment="Center">Sync Target</TextBlock>
+      <Panel Grid.Column="8" ToolTip.ServiceEnabled="{Binding !GameSyncService.Connected}"
+             ToolTip.Tip="Requires Game Sync connection!">
+        <CheckBox IsChecked="{Binding Filters.SyncTargetEntity}" IsEnabled="{Binding GameSyncService.Connected}" />
+      </Panel>
     </Grid>
-    <Grid Grid.Column="0" Grid.Row="4" Margin="4 0 0 8" ColumnDefinitions="Auto, *, Auto, 6, Auto, 6, Auto">
+    <Grid Grid.Column="0" Grid.Row="4" Margin="4 4 0 8" ColumnDefinitions="Auto, *, Auto, 6, Auto, 6, Auto">
       <TextBlock Grid.Column="0" FontStyle="Italic" Foreground="LightGray" VerticalAlignment="Center"
                  FontFamily="{StaticResource Monospace}" IsVisible="{Binding IsFiltered}">
         <TextBlock.Text>
@@ -121,7 +137,7 @@
         </ListBox.Styles>
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <Grid ColumnDefinitions="Auto, 4, Auto, *, Auto">
+            <Grid ColumnDefinitions="Auto, 4, Auto, *, Auto, Auto">
               <Grid.Styles>
                 <Style Selector="TextBlock">
                   <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
@@ -129,11 +145,17 @@
               </Grid.Styles>
               <TextBlock Grid.Column="0" Text="{Binding Classname}" />
               <TextBlock Grid.Column="2" Text="*" IsVisible="{Binding IsModified}" />
+              <Button Grid.Column="3"
+                      IsVisible="{Binding ViewModel.GameSyncService.Connected, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
+                      Command="{Binding TeleportToMe}" HorizontalAlignment="Right" Background="Transparent"
+                      ToolTip.Tip="Teleport to entity in-game"
+                      BorderBrush="Transparent" Padding="0" Margin="0 0 4 0">
+                <materialIcons:MaterialIcon Kind="NavigationVariantOutline" />
+              </Button>
               <Button Grid.Column="4"
                       Command="{Binding ViewModel.EntityLumpViewModel.RemoveEntity, RelativeSource={RelativeSource AncestorType=views:EntityEditorView}}"
-                      CommandParameter="{Binding}"
-                      HorizontalAlignment="Right"
-                      Background="Transparent" BorderBrush="Transparent" Padding="0">
+                      CommandParameter="{Binding}" HorizontalAlignment="Right" Background="Transparent"
+                      BorderBrush="Transparent" Padding="0">
                 <materialIcons:MaterialIcon Kind="Delete" />
               </Button>
             </Grid>

@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Lumper.UI.ViewModels.Pages.Jobs"
+             xmlns:local="clr-namespace:Lumper.UI.Views.Pages.Jobs"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Lumper.UI.Views.Pages.Jobs.StripperFileJobView"
+             x:DataType="vm:StripperFileJobViewModel">
+
+  <local:JobView>
+    <local:JobView.JobDescription>
+      <StackPanel>
+        <TextBlock>Load a Stripper:Source config file (.cfg) from file and apply it to the entity lump.</TextBlock>
+        <TextBlock>When saved to a workflow, the path to the file is stored.</TextBlock>
+        <HyperlinkButton NavigateUri="https://www.bailopan.net/stripper/">
+          Stripper Config Reference
+        </HyperlinkButton>
+      </StackPanel>
+    </local:JobView.JobDescription>
+
+    <local:JobView.MainContent>
+      <Grid Grid.Row="0" RowDefinitions="Auto" ColumnDefinitions="*, 8 Auto" Margin="16">
+        <TextBox Grid.Column="0" Text="{Binding ConfigPath}" />
+        <Button Grid.Column="2" Command="{Binding ShowFilePickerDialog}">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <materialIcons:MaterialIcon Kind="FileDocumentOutline" />
+            <TextBlock VerticalAlignment="Center">Pick Config</TextBlock>
+          </StackPanel>
+        </Button>
+      </Grid>
+    </local:JobView.MainContent>
+  </local:JobView>
+</UserControl>

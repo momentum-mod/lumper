@@ -9,17 +9,17 @@ using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-public class StripperJobViewModel : JobViewModel
+public class StripperFileJobViewModel : JobViewModel
 {
-    public override StripperJob Job { get; }
+    public override StripperFileJob Job { get; }
 
     [Reactive]
     public string? ConfigPath { get; set; }
 
-    public StripperJobViewModel(StripperJob job)
+    public StripperFileJobViewModel(StripperFileJob job)
         : base(job)
     {
-        RegisterView<StripperJobViewModel, StripperJobView>();
+        RegisterView<StripperFileJobViewModel, StripperFileJobView>();
 
         Job = job;
         ConfigPath = job.ConfigPath;

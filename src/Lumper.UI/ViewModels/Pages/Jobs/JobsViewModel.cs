@@ -24,7 +24,8 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         [
             new JobMenuItem<RemoveAssetJob>(this, () => new RemoveAssetJob()),
             new JobMenuItem<ReplaceTextureJob>(this, () => new ReplaceTextureJob()),
-            new JobMenuItem<StripperJob>(this, () => new StripperJob()),
+            new JobMenuItem<StripperFileJob>(this, () => new StripperFileJob()),
+            new JobMenuItem<StripperTextJob>(this, () => new StripperTextJob()),
             new JobMenuItem<RunExternalToolJob>(this, () => new RunExternalToolJob()),
         ];
 
@@ -59,7 +60,8 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
     public static JobViewModel CreateJobViewModel(IJob job) =>
         job switch
         {
-            StripperJob stripper => new StripperJobViewModel(stripper),
+            StripperFileJob stripperFile => new StripperFileJobViewModel(stripperFile),
+            StripperTextJob stripperText => new StripperTextJobViewModel(stripperText),
             RunExternalToolJob runExternal => new RunExternalToolJobViewModel(runExternal),
             ReplaceTextureJob changeTexture => new ReplaceTextureJobViewModel(changeTexture),
             RemoveAssetJob removeAsset => new RemoveAssetJobViewModel(removeAsset),
@@ -146,7 +148,11 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         ActiveJobPage = null;
     }
 
-    public void RemoveAll() => Jobs.Clear();
+    public void RemoveAll()
+    {
+        Jobs.Clear();
+        ActiveJobPage = null;
+    }
 
     public void LoadWorkflow(Stream stream)
     {

@@ -3,28 +3,31 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Lumper.UI.ViewModels.Pages.Jobs"
+             xmlns:local="clr-namespace:Lumper.UI.Views.Pages.Jobs"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Pages.Jobs.RemoveAssetJobView"
              x:DataType="vm:RemoveAssetJobViewModel">
-
-  <StackPanel>
-    <Border Classes="JobDescription">
+  <local:JobView>
+    <local:JobView.JobDescription>
       <TextBlock>
         Deletes all matching instances of assets from the BSP for the selected games.
       </TextBlock>
-    </Border>
-    <StackPanel Spacing="4" Margin="16 4">
-      <ItemsControl ItemsSource="{Binding Selection}">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <TextBlock FontWeight="Medium" VerticalAlignment="Center" Width="80"
-                         FontFamily="{StaticResource Monospace}" Text="{Binding Origin}" />
-              <CheckBox IsChecked="{Binding Selected}" />
-            </StackPanel>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-    </StackPanel>
-  </StackPanel>
+    </local:JobView.JobDescription>
+
+    <local:JobView.MainContent>
+      <StackPanel Spacing="4" Margin="16 12">
+        <ItemsControl ItemsSource="{Binding Selection}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock FontWeight="Medium" VerticalAlignment="Center" Width="80"
+                           FontFamily="{StaticResource Monospace}" Text="{Binding Origin}" />
+                <CheckBox IsChecked="{Binding Selected}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </local:JobView.MainContent>
+  </local:JobView>
 </UserControl>

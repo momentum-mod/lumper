@@ -3,90 +3,91 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:Lumper.UI.ViewModels.Pages.Jobs"
+             xmlns:local="clr-namespace:Lumper.UI.Views.Pages.Jobs"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Lumper.UI.Views.Pages.Jobs.RunExternalToolJobView"
              x:DataType="vm:RunExternalToolJobViewModel">
 
-  <Grid RowDefinitions="Auto, *">
-    <Grid Grid.Row="0" ColumnDefinitions="Auto, 16, *, 4, Auto" RowDefinitions="Auto, 4, Auto, 4, Auto, 8, Auto, Auto"
-          Margin="8">
-      <SelectableTextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Text="Executable Path" />
-      <TextBox Grid.Column="2" Grid.Row="0" Text="{Binding Path}" />
-      <Button Grid.Column="4" Grid.Row="0" Command="{Binding ShowFilePickerDialog}">
-        <StackPanel Orientation="Horizontal" Spacing="4">
-          <materialIcons:MaterialIcon Kind="FileOutline" />
-          <SelectableTextBlock VerticalAlignment="Center">Pick</SelectableTextBlock>
-        </StackPanel>
-      </Button>
-      <SelectableTextBlock Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Text="Working Directory" />
-      <TextBox Grid.Column="2" Grid.Row="2" Text="{Binding WorkingDir}" />
-      <Button Grid.Column="4" Grid.Row="2" Command="{Binding ShowFolderPickerDialog}">
-        <StackPanel Orientation="Horizontal" Spacing="4">
-          <materialIcons:MaterialIcon Kind="FolderOutline" />
-          <SelectableTextBlock VerticalAlignment="Center">Pick</SelectableTextBlock>
-        </StackPanel>
-      </Button>
-      <SelectableTextBlock Grid.Column="0" Grid.Row="4" VerticalAlignment="Center" Text="Arguments" />
-      <TextBox Grid.Column="2" Grid.Row="4" Grid.ColumnSpan="3" Text="{Binding Job.Args}" />
-      <CheckBox Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="6" IsChecked="{Binding WritesToInputFile}">
-        Writes to input file
-      </CheckBox>
-      <CheckBox Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="7" IsChecked="{Binding WritesToStdOut}">
-        Writes to stdout
-      </CheckBox>
-    </Grid>
-    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto">
-      <Border Classes="JobDescription">
-        <StackPanel>
-          <SelectableTextBlock>
-            Runs an external program on the current BSP file.
-          </SelectableTextBlock>
-          <SelectableTextBlock>
-            The current BSP is saved to a temporary file, the program ran on it,
-            then the output BSP is loaded back into Lumper.
-          </SelectableTextBlock>
-          <SelectableTextBlock>
-            If "<Run FontWeight="Medium">Writes to input file</Run>" is checked, Lumper will load the
-            <Run FontStyle="Italic">input</Run>
-            file on completion, instead of a separate output file.
-          </SelectableTextBlock>
-          <SelectableTextBlock>
-            If "<Run FontWeight="Medium">Writes to stdout</Run>" is checked, Lumper will load the data
-            written to stdout, instead of a separate output file.
-          </SelectableTextBlock>
-          <SelectableTextBlock Margin="0 8 0 0">
-            The following strings are replaced in the arguments you provide:
-          </SelectableTextBlock>
-          <SelectableTextBlock Margin="8 4 0 0">
-            <Run xml:space="preserve" FontWeight="Medium" FontFamily="{StaticResource Monospace}">%INPUT%   </Run>
-            the temporary input file
-          </SelectableTextBlock>
-          <SelectableTextBlock Margin="8 0 0 0">
-            <Run xml:space="preserve" FontWeight="Medium" FontFamily="{StaticResource Monospace}">%OUTPUT%  </Run>
-            the temporary output file
-          </SelectableTextBlock>
-          <SelectableTextBlock Margin="8 0 0 0">
-            <Run xml:space="preserve" FontWeight="Medium" FontFamily="{StaticResource Monospace}">%DIR%     </Run>
-            the provided working directory
-          </SelectableTextBlock>
-          <SelectableTextBlock FontStyle="Italic" FontWeight="Medium" Margin="0 8 0 0">
-            Example
-          </SelectableTextBlock>
-          <SelectableTextBlock FontFamily="{StaticResource Monospace}">
-            <Run xml:space="preserve" FontWeight="Medium" FontSize="12">Executable Path    </Run> &lt;your Momentum Mod install&gt;/bin/win64/bspfix.exe
-          </SelectableTextBlock>
-          <SelectableTextBlock FontFamily="{StaticResource Monospace}">
-            <Run xml:space="preserve" FontWeight="Medium" FontSize="12">Working Directory  </Run> &lt;your Momentum Mod install&gt;/momentum
-          </SelectableTextBlock>
-          <SelectableTextBlock FontFamily="{StaticResource Monospace}">
-            <Run xml:space="preserve" FontWeight="Medium" FontSize="12">Arguments          </Run> %INPUT% -o %OUTPUT% -game %DIR%
-          </SelectableTextBlock>
-          <SelectableTextBlock Margin="0 4 0 0" FontStyle="Italic">
-            Runs Strata's <Run FontWeight="Medium">bspzip</Run> utility on the loaded BSP, using the gameinfo data from a Momentum Mod install.
-          </SelectableTextBlock>
-        </StackPanel>
-      </Border>
-    </ScrollViewer>
-  </Grid>
+  <local:JobView>
+    <local:JobView.JobDescription>
+      <StackPanel>
+        <SelectableTextBlock>
+          Runs an external program on the current BSP file.
+        </SelectableTextBlock>
+        <SelectableTextBlock>
+          The current BSP is saved to a temporary file, the program ran on it,
+          then the output BSP is loaded back into Lumper.
+        </SelectableTextBlock>
+        <SelectableTextBlock>
+          If "<Run FontWeight="Medium">Writes to input file</Run>" is checked, Lumper will load the
+          <Run FontStyle="Italic">input</Run>
+          file on completion, instead of a separate output file.
+        </SelectableTextBlock>
+        <SelectableTextBlock>
+          If "<Run FontWeight="Medium">Writes to stdout</Run>" is checked, Lumper will load the data
+          written to stdout, instead of a separate output file.
+        </SelectableTextBlock>
+        <SelectableTextBlock Margin="0 8 0 0">
+          The following strings are replaced in the arguments you provide:
+        </SelectableTextBlock>
+        <SelectableTextBlock Margin="8 4 0 0">
+          <Run xml:space="preserve" FontWeight="Medium" FontFamily="{StaticResource Monospace}">%INPUT%   </Run>
+          the temporary input file
+        </SelectableTextBlock>
+        <SelectableTextBlock Margin="8 0 0 0">
+          <Run xml:space="preserve" FontWeight="Medium" FontFamily="{StaticResource Monospace}">%OUTPUT%  </Run>
+          the temporary output file
+        </SelectableTextBlock>
+        <SelectableTextBlock Margin="8 0 0 0">
+          <Run xml:space="preserve" FontWeight="Medium" FontFamily="{StaticResource Monospace}">%DIR%     </Run>
+          the provided working directory
+        </SelectableTextBlock>
+        <SelectableTextBlock FontStyle="Italic" FontWeight="Medium" Margin="0 8 0 0">
+          Example
+        </SelectableTextBlock>
+        <SelectableTextBlock FontFamily="{StaticResource Monospace}">
+          <Run xml:space="preserve" FontWeight="Medium" FontSize="12">Executable Path    </Run> &lt;your Momentum Mod install&gt;/bin/win64/bspfix.exe
+        </SelectableTextBlock>
+        <SelectableTextBlock FontFamily="{StaticResource Monospace}">
+          <Run xml:space="preserve" FontWeight="Medium" FontSize="12">Working Directory  </Run> &lt;your Momentum Mod install&gt;/momentum
+        </SelectableTextBlock>
+        <SelectableTextBlock FontFamily="{StaticResource Monospace}">
+          <Run xml:space="preserve" FontWeight="Medium" FontSize="12">Arguments          </Run> %INPUT% -o %OUTPUT% -game %DIR%
+        </SelectableTextBlock>
+        <SelectableTextBlock Margin="0 4 0 0" FontStyle="Italic">
+          Runs Strata's <Run FontWeight="Medium">bspzip</Run> utility on the loaded BSP, using the gameinfo data from a Momentum Mod install.
+        </SelectableTextBlock>
+      </StackPanel>
+    </local:JobView.JobDescription>
+
+    <local:JobView.MainContent>
+      <Grid ColumnDefinitions="Auto, 16, *, 4, Auto" RowDefinitions="Auto, 4, Auto, 4, Auto, 8, Auto, Auto" Margin="16">
+        <SelectableTextBlock Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Text="Executable Path" />
+        <TextBox Grid.Column="2" Grid.Row="0" Text="{Binding Path}" />
+        <Button Grid.Column="4" Grid.Row="0" Command="{Binding ShowFilePickerDialog}">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <materialIcons:MaterialIcon Kind="FileOutline" />
+            <SelectableTextBlock VerticalAlignment="Center">Pick</SelectableTextBlock>
+          </StackPanel>
+        </Button>
+        <SelectableTextBlock Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Text="Working Directory" />
+        <TextBox Grid.Column="2" Grid.Row="2" Text="{Binding WorkingDir}" />
+        <Button Grid.Column="4" Grid.Row="2" Command="{Binding ShowFolderPickerDialog}">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <materialIcons:MaterialIcon Kind="FolderOutline" />
+            <SelectableTextBlock VerticalAlignment="Center">Pick</SelectableTextBlock>
+          </StackPanel>
+        </Button>
+        <SelectableTextBlock Grid.Column="0" Grid.Row="4" VerticalAlignment="Center" Text="Arguments" />
+        <TextBox Grid.Column="2" Grid.Row="4" Grid.ColumnSpan="3" Text="{Binding Job.Args}" />
+        <CheckBox Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="6" IsChecked="{Binding WritesToInputFile}">
+          Writes to input file
+        </CheckBox>
+        <CheckBox Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="7" IsChecked="{Binding WritesToStdOut}">
+          Writes to stdout
+        </CheckBox>
+      </Grid>
+    </local:JobView.MainContent>
+  </local:JobView>
 </UserControl>

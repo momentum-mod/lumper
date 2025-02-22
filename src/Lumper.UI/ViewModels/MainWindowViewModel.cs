@@ -8,7 +8,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using Lumper.Lib.Util;
+using Lumper.Lib.AssetManifest;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.LogViewer;
 using Lumper.UI.Views;
@@ -26,6 +26,7 @@ public class MainWindowViewModel : ViewModel
     public static PageService PageService => PageService.Instance;
     public static UpdaterService UpdaterService => UpdaterService.Instance;
     public static StateService StateService => StateService.Instance;
+    public static GameSyncService GameSyncService => GameSyncService.Instance;
 
     public LogViewerViewModel LogViewer { get; set; } = new();
 
