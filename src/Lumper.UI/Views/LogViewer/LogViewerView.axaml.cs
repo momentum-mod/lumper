@@ -3,13 +3,14 @@ namespace Lumper.UI.Views.LogViewer;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
+using DynamicData.Binding;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.LogViewer;
 using NLog;
@@ -17,19 +18,22 @@ using ReactiveUI;
 
 public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 {
+    private readonly ObservableCollectionExtended<SelectableTextBlock> _lines = [];
+    private const int MaxMessages = 500;
+    private int _messageCounter;
+    private LogMessage? _lastMessage;
+    private bool _isBatching;
+
     public LogViewerView()
     {
         InitializeComponent();
 
         this.WhenActivated(disposables =>
-            ViewModel?.Messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(AddLogMessage).DisposeWith(disposables)
-        );
+        {
+            LogLines.ItemsSource = _lines;
+            ViewModel?.Messages.ObserveOn(RxApp.MainThreadScheduler).Subscribe(AddLogMessage).DisposeWith(disposables);
+        });
     }
-
-    private const int MaxMessages = 500;
-    private int _messageCounter;
-    private LogMessage? _lastMessage;
-    private bool _isBatching;
 
     private void AddLogMessage(LogMessage logMessage)
     {
@@ -38,21 +42,24 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 
         try
         {
-            if (Logs.Inlines is null)
+            SelectableTextBlock newLine = new();
+            if (LogLines is null || newLine.Inlines is null)
                 return;
 
             if (_lastMessage == logMessage)
             {
                 if (_isBatching)
                 {
-                    var counter = Logs.Inlines.Last() as Run;
-                    if (counter?.Text is null)
+                    SelectableTextBlock counter = _lines[^1];
+                    if (counter.Text is null)
                         return;
                     counter.Text = $" ({int.Parse(counter.Text[2..^1], CultureInfo.InvariantCulture) + 1})";
                 }
                 else
                 {
-                    Logs.Inlines.Add(new Run(" (2)") { FontStyle = FontStyle.Italic, FontWeight = FontWeight.Medium });
+                    newLine.Inlines!.Add(
+                        new Run(" (2)") { FontStyle = FontStyle.Italic, FontWeight = FontWeight.Medium }
+                    );
                     _isBatching = true;
                 }
 
@@ -64,10 +71,10 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 
             // Trim off top half of the logs once we reach a maximum. From some quick testing,
             // having 500 lines slows down noticeably, and trimming itself is very performant.
-            // Inline count might be odd, so half a line gets trimmed, not a big deal if that happens.
             if (_messageCounter >= MaxMessages)
             {
-                Logs.Inlines.RemoveRange(0, Logs.Inlines.Count / 2);
+                using IDisposable _ = _lines.SuspendNotifications();
+                _lines.RemoveRange(0, newLine.Inlines.Count / 2);
                 _messageCounter /= 2;
             }
             else
@@ -75,17 +82,14 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 _messageCounter++;
             }
 
-            if (Logs.Inlines.Count > 0)
-                Logs.Inlines.Add(new LineBreak());
-
-            Logs.Inlines.Add(
+            newLine.Inlines.Add(
                 new Run(logMessage.Level.ToString().PadRight(8)) { Foreground = LogLevelColors[logMessage.Level] }
             );
 
             string origin = logMessage.Origin;
             // Don't split off front stuff if not a lumper thing (e.g. a RunExternalToolTask)
             origin = origin.StartsWith("Lumper", StringComparison.Ordinal) ? origin.Split('.')[^1] : origin;
-            Logs.Inlines.Add(
+            newLine.Inlines.Add(
                 new Run(origin.PadRight(26))
                 {
                     FontStyle = FontStyle.Italic,
@@ -94,7 +98,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 }
             );
 
-            Logs.Inlines.Add(
+            newLine.Inlines.Add(
                 new Run(logMessage.Message)
                 {
                     Foreground = logMessage.Exception is null ? Brushes.White : Brushes.LightPink,
@@ -103,8 +107,8 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 
             if (logMessage.Exception is { } ex)
             {
-                Logs.Inlines.Add(new LineBreak());
-                Logs.Inlines.Add(
+                newLine.Inlines.Add(new LineBreak());
+                newLine.Inlines.Add(
                     new Run($"{new string(' ', 8 + 26)}{ex.GetType().Name}: ")
                     {
                         Foreground = Brushes.Crimson,
@@ -112,16 +116,18 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                     }
                 );
 
-                Logs.Inlines.Add(new Run(ex.Message) { Foreground = Brushes.IndianRed });
+                newLine.Inlines.Add(new Run(ex.Message) { Foreground = Brushes.IndianRed });
                 if (ex.StackTrace is not null)
                 {
-                    Logs.Inlines.Add(new LineBreak());
+                    newLine.Inlines.Add(new LineBreak());
                     string indent = new(' ', 8 + 26);
-                    Logs.Inlines.Add(
+                    newLine.Inlines.Add(
                         new Run(indent + ex.StackTrace.Replace("\n", "\n" + indent)) { Foreground = Brushes.Tomato }
                     );
                 }
             }
+
+            _lines.Add(newLine);
 
             if (StateService.Instance.LogAutoScroll)
                 ScrollToBottom();
