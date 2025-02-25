@@ -1,0 +1,70 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Lumper.UI.ViewModels.BspInfo"
+        xmlns:converters="clr-namespace:Lumper.UI.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Lumper.UI.Views.BspInfo.BspInfoView"
+        x:DataType="vm:BspInfoViewModel"
+        WindowStartupLocation="CenterOwner"
+        SizeToContent="WidthAndHeight"
+        Title="{Binding BspService.FileName, StringFormat='Map Info - {0}', FallbackValue='Lumper', TargetNullValue='Lumper'}"
+        CanResize="False"
+        SystemDecorations="Full"
+        ShowInTaskbar="True"
+        TransparencyLevelHint="AcrylicBlur">
+
+  <Window.Resources>
+    <converters:FileSizeConverter x:Key="FileSize" />
+  </Window.Resources>
+
+  <Border BorderThickness="1" Background="#88111111" BorderBrush="#10FFFFFF" CornerRadius="4" Padding="16"
+          MinWidth="480">
+    <StackPanel Orientation="Vertical" Spacing="8">
+      <SelectableTextBlock Name="Text">
+        <TextBlock.Styles>
+          <Style Selector="SelectableTextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
+            <Setter Property="LineHeight" Value="24" />
+          </Style>
+          <Style Selector="Run.L">
+            <Setter Property="Foreground" Value="LightGray" />
+          </Style>
+          <Style Selector="Run.R">
+            <Setter Property="Foreground" Value="White" />
+          </Style>
+        </TextBlock.Styles>
+
+        <Run Classes="L" Text="Name            " />
+        <Run Classes="R" Text="{Binding BspService.FileName, Mode=OneWay}" />
+        <LineBreak />
+
+        <Run Classes="L" Text="BSP Version     " />
+        <Run Classes="R" Text="{Binding BspService.BspFile.Version, Mode=OneWay, FallbackValue=''}" />
+        <LineBreak />
+
+        <Run Classes="L" Text="Total Size      " />
+        <Run Classes="R"
+             Text="{Binding BspService.FileSize, Mode=OneWay, Converter={StaticResource FileSize}, FallbackValue=''}" />
+        <LineBreak />
+
+        <Run Classes="L" Text="Compression     " />
+        <Run Classes="R" Name="Compression" />
+        <LineBreak />
+
+        <Run Classes="L" Text="Entities        " />
+        <Run Classes="R" Name="Entities" />
+        <Run Classes="R" Name="BadEntities" Foreground="IndianRed" />
+        <LineBreak />
+
+        <Run Classes="L" Text="Pakfile Entries " />
+        <Run Classes="R" Name="PakfileEntries" />
+        <Run Classes="R" Name="OfficialPakfileEntries" Foreground="IndianRed" />
+        <Run Classes="R" Name="PakfileProcessing" Foreground="Gray" />
+
+      </SelectableTextBlock>
+      <Button HorizontalAlignment="Right" Click="CopyText">Copy</Button>
+    </StackPanel>
+  </Border>
+</Window>

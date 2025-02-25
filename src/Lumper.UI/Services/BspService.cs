@@ -4,6 +4,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -15,6 +16,7 @@ using Avalonia.Platform.Storage;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.IO;
+using Lumper.Lib.Bsp.Lumps;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.UI.ViewModels.Shared;
 using Lumper.UI.ViewModels.Shared.Entity;
@@ -56,23 +58,38 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// <summary>
     /// The name of the BSP file, without .bsp extension. null is no BSP is loaded.
     /// </summary>
-    [ObservableAsProperty]
-    public string? FileName { get; }
+    [Reactive]
+    public string? FileName { get; private set; }
 
     /// <summary>
     /// The name of the BSP file, without .bsp extension. null is no BSP is loaded.
     /// </summary>
-    [ObservableAsProperty]
-    public string? FilePath { get; }
+    [Reactive]
+    public string? FilePath { get; private set; }
+
+    /// <summary>
+    /// Size of the BSP file on disk, in bytes.
+    /// </summary>
+    [Reactive]
+    public long? FileSize { get; private set; }
 
     /// <summary>
     /// Whether the service current has a loaded BSP file
     /// </summary>
-    [ObservableAsProperty]
-    public bool HasLoadedBsp { get; }
+    [Reactive]
+    public bool HasLoadedBsp { get; private set; }
 
-    [ObservableAsProperty]
-    public string? CompressionStatus { get; }
+    /// <summary>
+    /// Number of compressed non-empty lumps (including game lumps)
+    /// </summary>
+    [Reactive]
+    public int CompressedLumps { get; private set; }
+
+    /// <summary>
+    /// Number of non empty lumps (including game lumps)
+    /// </summary>
+    [Reactive]
+    public int NonEmptyLumps { get; private set; }
 
     private EntityLumpViewModel? _entityLumpViewModel;
 
@@ -91,16 +108,34 @@ public sealed class BspService : ReactiveObject, IDisposable
     private BspService()
     {
         this.WhenAnyValue(x => x.BspFile).Subscribe(_ => OnBspChanged());
-        _bspSubject.Select(x => x?.Name).ToPropertyEx(this, x => x.FileName);
-        _bspSubject
-            .Select(x => x?.FilePath)
-            .Do(x =>
+
+        _bspSubject.Subscribe(bsp =>
+        {
+            if (bsp?.FilePath is not null)
+                StateService.Instance.UpdateRecentFiles(bsp.FilePath, true);
+
+            FileName = bsp?.Name;
+            FilePath = bsp?.FilePath;
+            FileSize = bsp?.FileSize;
+            HasLoadedBsp = bsp is not null;
+
+            if (bsp is not null)
             {
-                if (x is not null)
-                    StateService.Instance.UpdateRecentFiles(x, true);
-            })
-            .ToPropertyEx(this, x => x.FilePath);
-        _bspSubject.Select(x => x is not null).ToPropertyEx(this, x => x.HasLoadedBsp);
+                IEnumerable<Lump> lumps =
+                [
+                    .. bsp.Lumps.Values.Where(y => y.Type != BspLumpType.GameLump),
+                    .. bsp.GetLump<GameLump>().Lumps.Values.OfType<Lump>(),
+                ];
+                var nonEmpty = lumps.Where(y => !y.Empty).ToList();
+                CompressedLumps = nonEmpty.Sum(y => y.IsCompressed ? 1 : 0);
+                NonEmptyLumps = nonEmpty.Count;
+            }
+            else
+            {
+                CompressedLumps = 0;
+                NonEmptyLumps = 0;
+            }
+        });
     }
 
     // Initial subject to mark BSP changes, can't get RaisePropertyChanged(nameof(BspFile)) to work
