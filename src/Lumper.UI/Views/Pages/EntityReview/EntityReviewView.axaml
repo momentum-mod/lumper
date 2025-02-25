@@ -48,7 +48,7 @@
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
               <Button
-                Command="{Binding $parent[views:EntityReviewView].((vm:EntityReviewViewModel)DataContext).SwitchToEntityEditor, FallbackValue=''}"
+                Command="{Binding $parent[views:EntityReviewView].((vm:EntityReviewViewModel)DataContext).SwitchToEntityEditor}"
                 CommandParameter="{Binding Classname}" Background="Transparent" BorderThickness="0" Padding="0 0 12 0"
                 HorizontalAlignment="Center">
                 <materialIcons:MaterialIcon Kind="Edit" Foreground="#88FFFFFF" Width="20" Height="20" />
