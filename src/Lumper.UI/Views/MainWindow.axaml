@@ -46,7 +46,7 @@
               <!-- This thing is a bastard to right-align due to weird menu styling, don't bother -->
               <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding StateService.SaveCompressed}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">
-                  <TextBlock Text="Save Compressed" />
+                  <TextBlock Text="Save Compressed (bspzip)" />
                   <materialIcons:MaterialIcon Kind="QuestionMarkCircle">
                     <ToolTip.Tip>
                       <StackPanel>
