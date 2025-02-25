@@ -92,8 +92,6 @@
                 </StackPanel>
               </CheckBox>
               <Separator />
-              <MenuItem Header="_Export JSON Summary" Command="{Binding JsonDumpCommand}" />
-              <Separator />
               <MenuItem Header="_Close" Command="{Binding CloseCommand}" IsVisible="{Binding BspService.HasLoadedBsp}" />
               <MenuItem Header="_Exit" Command="{Binding ExitCommand}" />
             </MenuItem>
@@ -110,6 +108,11 @@
                         CommandParameter="{x:Static service:Page.VtfBrowser}" InputGesture="Ctrl+D5" />
               <MenuItem Header="_Jobs" Command="{Binding PageService.ViewPage}"
                         CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D6" />
+            </MenuItem>
+            <MenuItem Header="_Tools">
+              <MenuItem Header="_Map Summary" Command="{Binding BspInfoCommand}"
+                        IsEnabled="{Binding BspService.HasLoadedBsp}" HotKey="Ctrl+H" InputGesture="Ctrl+H" />
+              <MenuItem Header="_Export JSON Map Summary" Command="{Binding JsonDumpCommand}" />
             </MenuItem>
             <MenuItem Header="_About">
               <MenuItem Header="_Check For Updates" Command="{Binding UpdaterService.CheckForUpdates}" />
@@ -189,9 +192,12 @@
 
         </StackPanel>
       </Border>
+
       <ContentControl Grid.Column="0" Grid.Row="2" Content="{Binding PageService.ActivePageVm}" />
+
       <GridSplitter Grid.Row="3" MinHeight="1" Height="1" ResizeDirection="Rows" />
-      <logView:LogViewerView DataContext="{Binding LogViewer}" Grid.Row="4" />
+
+      <logView:LogViewerView Grid.Row="4" DataContext="{Binding LogViewer}" />
     </Grid>
   </Panel>
 </Window>
