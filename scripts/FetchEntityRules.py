@@ -11,23 +11,23 @@ data = pandas.read_csv(SHEET_URL, index_col=False)
 output = {}
 
 # Must correspond to EntityRule.AllowLevel
-Levels = { "allow": 3, "warn": 2, "deny": 1 }
+Levels = { "allow": 3, "warn": 2, "deny": 0 }
 
 for line, row in data.iterrows():
     classname = row.get("ClassName")
     level = row.get("AllowLevel")
     comment = row.get("Comment",)
     if not classname:
-        raise f"empty classname on line {line}"
+        raise Exception(f"empty classname on line {line}")
 
     if classname in output:
-        raise f"duplicate classname {classname} on line {line}"
+        raise Exception(f"duplicate classname {classname} on line {line}")
 
     if not level:
-        raise f"empty level on line {line}"
+        raise Exception(f"empty level on line {line}")
 
     if level not in Levels:
-        raise f"unknown level {level} on line {line}"
+        raise Exception(f"unknown level {level} on line {line}")
 
     ent = {"Level": Levels[level]}
 
