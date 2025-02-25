@@ -18,16 +18,16 @@ for line, row in data.iterrows():
     level = row.get("AllowLevel")
     comment = row.get("Comment",)
     if not classname:
-        raise f"empty classname on line {line}"
+        raise Exception(f"empty classname on line {line}")
 
     if classname in output:
-        raise f"duplicate classname {classname} on line {line}"
+        raise Exception(f"duplicate classname {classname} on line {line}")
 
     if not level:
-        raise f"empty level on line {line}"
+        raise Exception(f"empty level on line {line}")
 
     if level not in Levels:
-        raise f"unknown level {level} on line {line}"
+        raise Exception(f"unknown level {level} on line {line}")
 
     ent = {"Level": Levels[level]}
 
