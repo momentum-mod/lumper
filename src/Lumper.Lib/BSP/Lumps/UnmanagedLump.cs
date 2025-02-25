@@ -72,5 +72,5 @@ public class UnmanagedLump<T>(BspFile parent) : Lump<T>(parent), IUnmanagedLump
         }
     }
 
-    public override bool Empty => DataStream is not { Length: > 0 };
+    public override bool Empty => DataStreamLength == 0;
 }
