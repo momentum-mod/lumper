@@ -31,6 +31,7 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
         // on classname. Switch() unsubscribes the previous changeset pipeline whenever tuple
         // changes.
         this.WhenAnyValue(x => x.RulesFilePath)
+            .ObserveOn(RxApp.TaskpoolScheduler)
             .Select(EntityRule.LoadRules)
             .CombineLatest(BspService.Instance.WhenAnyValue(x => x.EntityLumpViewModel))
             .Select(tuple =>
