@@ -29,7 +29,7 @@
   </Styles.Resources>
 
   <!-- Force dark mode everywhere. Everything is designed with dark mode in mind,
-         too much work to do a -->
+         too much work to do a light mode. -->
   <Style Selector="Window">
     <Setter Property="RequestedThemeVariant" Value="Dark" />
   </Style>

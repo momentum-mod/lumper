@@ -5,11 +5,7 @@ using System.Globalization;
 using Avalonia.Data.Converters;
 
 /// <summary>
-///     Format file size in bytes with rounding and KB/bytes suffix
-///
-///     I'm copying the behaviour of windows explorer here, which I like.
-///     Showing files greater than 1000 KB in terms of KB rather than MB/GB/etc...
-///     is more readable, and pakfile items will rarely exceed 10mb or so.
+/// Format file size in bytes with rounding and GB/MB/.../KB/bytes suffix
 /// </summary>
 public class FileSizeConverter : IValueConverter
 {
@@ -22,9 +18,20 @@ public class FileSizeConverter : IValueConverter
 
         double convertedSize = System.Convert.ToDouble(value, CultureInfo.InvariantCulture);
 
-        return $"{Math.Ceiling(convertedSize / 1024 * 10) / 10:N1} KB";
+        return FormattedFileSize(convertedSize);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotSupportedException();
+
+    public static string FormattedFileSize(double size) =>
+        size switch
+        {
+            < 1024 => $"{size:N0} bytes",
+            < 1024 * 1024 => $"{Math.Ceiling(size / 1024 * 10) / 10:N1} KB",
+            < 1024 * 1024 * 1024 => $"{Math.Ceiling(size / 1024 / 1024 * 10) / 10:N1} MB",
+            _ => $"{Math.Ceiling(size / 1024 / 1024 / 1024 * 10) / 10:N1} GB",
+        };
+
+    public static string FormattedFileSize(int size) => FormattedFileSize((double)size);
 }

@@ -273,8 +273,8 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     /// This method is only helpful for when saving uncompressed, and gives a decent perf
     /// boost in that case.
     ///
-    /// When saving compressed, I can't find a way to avoid reconstructed the zip from scratch
-    /// using a ZipWriter, .
+    /// When saving compressed, I can't find a way to avoid reconstructing the zip from scratch
+    /// using a ZipWriter - see above comments.
     /// </summary>
     private void UpdateZip()
     {
