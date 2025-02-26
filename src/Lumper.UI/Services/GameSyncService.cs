@@ -142,6 +142,8 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
         }
     }
 
+    private string? _lastWarnedHash;
+
     private void HandleMessage(ReadOnlySpan<byte> messageData)
     {
         string messageString = Encoding.UTF8.GetString(messageData);
@@ -151,6 +153,18 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
         {
             _logger.Error($"Received invalid message {messageString}, discarding.");
             return;
+        }
+
+        if (!message.MapHash.Equals(BspService.Instance.FileHash, StringComparison.Ordinal))
+        {
+            if (_lastWarnedHash != message.MapHash)
+            {
+                _logger.Warn(
+                    "Received game message with mismatching map hash! You are probably editing the wrong map."
+                );
+                _logger.Warn($"Lumper map hash: {BspService.Instance.FileHash}, game map hash: {message.MapHash}");
+                _lastWarnedHash = message.MapHash;
+            }
         }
 
         _logger.Debug($"Received message: {messageString}");
@@ -212,6 +226,9 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
 
         [JsonProperty("content")]
         public required string Content { get; set; }
+
+        [JsonProperty("mapHash")]
+        public string MapHash { get; set; } = BspService.Instance.FileHash ?? "";
     }
 
     public void Dispose() => _client?.Dispose();
