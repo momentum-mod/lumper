@@ -91,6 +91,9 @@ public sealed class BspService : ReactiveObject, IDisposable
     [Reactive]
     public int NonEmptyLumps { get; private set; }
 
+    [Reactive]
+    public string? FileHash { get; private set; }
+
     private EntityLumpViewModel? _entityLumpViewModel;
 
     public EntityLumpViewModel? EntityLumpViewModel =>
@@ -136,6 +139,11 @@ public sealed class BspService : ReactiveObject, IDisposable
                 NonEmptyLumps = 0;
             }
         });
+
+        _bspSubject
+            .Select(bsp => Observable.FromAsync(async () => FileHash = bsp is not null ? await bsp.FileHash : ""))
+            .Switch()
+            .Subscribe();
     }
 
     // Initial subject to mark BSP changes, can't get RaisePropertyChanged(nameof(BspFile)) to work

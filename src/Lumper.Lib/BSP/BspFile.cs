@@ -2,10 +2,13 @@ namespace Lumper.Lib.Bsp;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.IO;
 using Lumper.Lib.Bsp.Lumps;
@@ -28,6 +31,9 @@ public sealed partial class BspFile : IDisposable
     public string? FilePath { get; private set; }
 
     public long? FileSize { get; private set; }
+
+    // Set to task returning actual hash during load, "" init for safety
+    public Task<string> FileHash { get; private set; } = Task.FromResult("");
 
     public int Revision { get; set; }
 
@@ -69,7 +75,10 @@ public sealed partial class BspFile : IDisposable
             return null;
         }
 
+        ComputeHash(FileStream);
+
         Logger.Info($"Loaded {Name}.bsp");
+
         return this;
     }
 
@@ -83,8 +92,33 @@ public sealed partial class BspFile : IDisposable
             return null;
         }
 
+        ComputeHash(stream);
+
         Logger.Info("Loaded BSP from stream");
         return this;
+    }
+
+    private void ComputeHash(Stream stream)
+    {
+        var tcs = new TaskCompletionSource<string>();
+        FileHash = tcs.Task;
+
+        // Annoying to do this copy but worth running hash in a separate thread
+        var hashStream = new MemoryStream();
+        stream.Seek(0, SeekOrigin.Begin);
+        stream.CopyTo(hashStream);
+
+        Task.Factory.StartNew(() =>
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+
+            hashStream.Seek(0, SeekOrigin.Begin);
+            tcs.SetResult(Convert.ToHexString(SHA1.HashData(hashStream)));
+
+            sw.Stop();
+            Logger.Debug($"Hashed BSP in {sw.ElapsedMilliseconds}ms");
+        });
     }
 
     public record SaveToFileOptions
