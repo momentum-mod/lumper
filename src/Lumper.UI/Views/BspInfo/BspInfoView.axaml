@@ -20,7 +20,7 @@
   </Window.Resources>
 
   <Border BorderThickness="1" Background="#88111111" BorderBrush="#10FFFFFF" CornerRadius="4" Padding="16"
-          MinWidth="480">
+          MinWidth="520">
     <StackPanel Orientation="Vertical" Spacing="8">
       <SelectableTextBlock Name="Text">
         <TextBlock.Styles>
@@ -38,6 +38,10 @@
 
         <Run Classes="L" Text="Name            " />
         <Run Classes="R" Text="{Binding BspService.FileName, Mode=OneWay}" />
+        <LineBreak />
+
+        <Run Classes="L" Text="Hash (SHA1)     " />
+        <Run Classes="R" Text="{Binding BspService.FileHash, Mode=OneWay}" />
         <LineBreak />
 
         <Run Classes="L" Text="BSP Version     " />
