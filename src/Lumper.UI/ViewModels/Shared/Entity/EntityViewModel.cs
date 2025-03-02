@@ -79,8 +79,11 @@ public class EntityViewModel : HierarchicalBspNode
 
     public string? HammerId => FindProperty("hammerid");
 
+    public string? Targetname => FindProperty("targetname");
 
     public string PresentableName => $"{Classname} (HammerID {HammerId})";
+
+    public string ClassAndTargetname => Targetname is { } tn ? $"{Classname} ({tn})" : Classname;
 
     public bool MatchClassname(string expr, bool wildcardWrapping) =>
         _classname?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
