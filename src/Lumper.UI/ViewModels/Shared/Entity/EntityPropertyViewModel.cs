@@ -1,6 +1,5 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
-using System.Globalization;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
 
@@ -29,10 +28,9 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
 
     public override void UpdateModel() => EntityProperty.Key = Key;
 
-    public bool MatchKey(string expr, bool wildcardWrapping = false) =>
-        Key.MatchesSimpleExpression(expr, wildcardWrapping);
+    public bool MatchKey(string expr, bool wildcardWrapping) => Key.MatchesSimpleExpression(expr, wildcardWrapping);
 
-    public abstract bool MatchValue(string expr, bool trailingWildcard = false);
+    public abstract bool MatchValue(string expr, bool wildcardWrapping);
 
     public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
 }
@@ -60,8 +58,8 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
         entityProperty.Value = Value;
     }
 
-    public override bool MatchValue(string expr, bool trailingWildcard) =>
-        Value?.MatchesSimpleExpression(expr, trailingWildcard) ?? false;
+    public override bool MatchValue(string expr, bool wildcardWrapping) =>
+        Value?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
 }
 
 public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityProperty, BspNode bspNode)
