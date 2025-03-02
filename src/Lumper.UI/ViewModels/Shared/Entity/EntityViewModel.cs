@@ -70,26 +70,20 @@ public class EntityViewModel : HierarchicalBspNode
             prop.UpdateModel();
     }
 
-    public void ResetClassname() =>
-        Classname = Properties
-            .OfType<EntityPropertyStringViewModel>()
-            .FirstOrDefault(x => x.Key == "classname")
-            ?.Value!;
+    public string? FindProperty(string key) =>
+        Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == key)?.Value;
 
-    public string PresentableName
-    {
-        get
-        {
-            string? hammerid = Properties
-                .OfType<EntityPropertyStringViewModel>()
-                .FirstOrDefault(x => x.Key == "hammerid")
-                ?.Value;
-            return $"{Classname} (HammerID {hammerid})";
-        }
-    }
+    public void ResetClassname() => Classname = FindProperty("classname")!;
 
-    public string? Origin =>
-        Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == "origin")?.Value;
+    public string? Origin => FindProperty("origin");
+
+    public string? HammerId => FindProperty("hammerid");
+
+    public string? Targetname => FindProperty("targetname");
+
+    public string PresentableName => $"{Classname} (HammerID {HammerId})";
+
+    public string ClassAndTargetname => Targetname is { } tn ? $"{Classname} ({tn})" : Classname;
 
     public bool MatchClassname(string expr, bool wildcardWrapping) =>
         _classname?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
