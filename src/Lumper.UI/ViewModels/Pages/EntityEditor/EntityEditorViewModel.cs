@@ -190,6 +190,9 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             out List<string>? exVals
         );
 
+        // Using the wildcard wrapping behaviour for everything here (e.g. BCD matches ABCDE),
+        // usage is very unintuitive without wrapping enabled and really don't want to have
+        // a separate checkbox for it.
         if (hasKeys || hasVals)
         {
             filtered = true;
@@ -197,10 +200,10 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             {
                 output = output.Where(vm =>
                     vm.Properties.Any(prop =>
-                        (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key)))
-                        && !exKeys!.Any(key => prop.MatchKey(key))
-                        && (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val)))
-                        && !exVals!.Any(val => prop.MatchValue(val))
+                        (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key, true)))
+                        && !exKeys!.Any(key => prop.MatchKey(key, true))
+                        && (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val, true)))
+                        && !exVals!.Any(val => prop.MatchValue(val, true))
                     )
                 );
             }
@@ -208,8 +211,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             {
                 output = output.Where(vm =>
                     vm.Properties.Any(prop =>
-                        (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key)))
-                        && !exKeys!.Any(key => prop.MatchKey(key))
+                        (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key, true)))
+                        && !exKeys!.Any(key => prop.MatchKey(key, true))
                     )
                 );
             }
@@ -217,8 +220,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             {
                 output = output.Where(vm =>
                     vm.Properties.Any(prop =>
-                        (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val)))
-                        && !exVals!.Any(val => prop.MatchValue(val))
+                        (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val, true)))
+                        && !exVals!.Any(val => prop.MatchValue(val, true))
                     )
                 );
             }

@@ -90,7 +90,15 @@ public partial class EntityIo : ICloneable
     }
 
     public override string ToString() =>
-        TargetEntityName + _separator + Input + _separator + Parameter + _separator + Delay + _separator + TimesToFire;
+        TargetEntityName
+        + _separator
+        + Input
+        + _separator
+        + Parameter
+        + _separator
+        + Delay?.ToString(CultureInfo.InvariantCulture)
+        + _separator
+        + TimesToFire?.ToString(CultureInfo.InvariantCulture);
 
     public object Clone() => MemberwiseClone();
 
