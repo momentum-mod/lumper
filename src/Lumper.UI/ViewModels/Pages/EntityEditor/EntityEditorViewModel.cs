@@ -148,8 +148,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             {
                 if (!string.IsNullOrWhiteSpace(ents))
                 {
-                    Filters.Key = "hammerid";
-                    Filters.Value = ents;
+                    Filters.Key = "model";
+                    Filters.Value = ents.Replace("*", "\\*").Replace(',', '|');
                 }
                 else
                 {
