@@ -14,13 +14,13 @@ public partial class EntityIo : ICloneable
     public float? Delay { get; set; }
     public int? TimesToFire { get; set; }
 
-    private readonly char _separator;
+    public char Separator { get; }
 
-    public EntityIo() { }
+    public EntityIo(char separator) => Separator = separator;
 
     public EntityIo(string value, char separator)
     {
-        _separator = separator;
+        Separator = separator;
         string[] props = value.Split(separator);
 
         TargetEntityName = props[0];
@@ -91,10 +91,10 @@ public partial class EntityIo : ICloneable
 
     // csharpier-ignore
     public override string ToString() =>
-          TargetEntityName + _separator
-        + Input + _separator
-        + Parameter + _separator
-        + Delay?.ToString(CultureInfo.InvariantCulture) + _separator
+          TargetEntityName + Separator
+        + Input + Separator
+        + Parameter + Separator
+        + Delay?.ToString(CultureInfo.InvariantCulture) + Separator
         + TimesToFire?.ToString(CultureInfo.InvariantCulture);
 
     public object Clone() => MemberwiseClone();

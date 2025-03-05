@@ -3,6 +3,7 @@ namespace Lumper.UI.ViewModels.Shared.Entity;
 using System;
 using System.Linq;
 using DynamicData.Binding;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
 using Lumper.UI.Services;
@@ -55,7 +56,26 @@ public class EntityViewModel : HierarchicalBspNode
 
     public void AddString() => AddProperty(new Entity.EntityProperty<string>("newproperty", "newvalue"));
 
-    public void AddIo() => AddProperty(new Entity.EntityProperty<EntityIo>("newproperty", new EntityIo()));
+    public void AddIo()
+    {
+        EntityLump? el = BspService.Instance.BspFile?.GetLump<EntityLump>();
+
+        if (el is null)
+            return;
+
+        // Try to figure out which separator to use. Comma will work in any game, whilst ESC
+        // will be totally broken in some, so use comma unless totally sure ESC is okay: either
+        // entity lump version is 1 (Strata only), or if we have any existing entities using ESC.
+        char separator =
+            el.Version == 1
+            || el.Data.Any(ent =>
+                ent.Properties.Any(prop => prop is Entity.EntityProperty<EntityIo> { Value.Separator: '\u001b' })
+            )
+                ? '\u001b'
+                : ',';
+
+        AddProperty(new Entity.EntityProperty<EntityIo>("newproperty", new EntityIo(separator)));
+    }
 
     public void DeleteProperty(EntityPropertyViewModel propVm)
     {
