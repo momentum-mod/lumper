@@ -24,13 +24,13 @@
           <StackPanel>
             <TextBlock FontSize="18" FontWeight="Medium">Entity Type / Key / Value</TextBlock>
             <TextBlock LineHeight="24">
-              Multiple inputs can be provided at once separated by commas, and entities/properties will match if any
-              value matches. Use <Run FontFamily="{StaticResource Monospace}">-</Run> to exclude on the front of a value
-              to exclude that value.
+              Multiple inputs can be provided at once separated by <Run FontFamily="{StaticResource Monospace}">|</Run>,
+              and entities/properties will match if any value matches.
+              Use <Run FontFamily="{StaticResource Monospace}">-</Run> to exclude on the front of a value to exclude that value.
               <LineBreak />
               <Run FontStyle="Italic" FontWeight="Medium">Example</Run>
               <LineBreak />
-              <Run FontFamily="{StaticResource Monospace}">light, -light_spot</Run> entity type will match any entity
+              <Run FontFamily="{StaticResource Monospace}">light|-light_spot</Run> entity type will match any entity
               with <Run FontFamily="{StaticResource Monospace}">light</Run> in the classname, but not
               <Run FontFamily="{StaticResource Monospace}">light_spot</Run>.
             </TextBlock>
