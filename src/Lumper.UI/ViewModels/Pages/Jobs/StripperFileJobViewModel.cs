@@ -26,6 +26,10 @@ public class StripperFileJobViewModel : JobViewModel
         this.WhenAnyValue(x => x.ConfigPath).BindTo(this, x => x.Job.ConfigPath);
     }
 
+    // Push viewmodel changes to model
+    protected override void Prepare() => BspService.Instance.EntityLumpViewModel?.UpdateModel();
+
+    // Push model changes to viewmodel
     protected override void OnSuccess() => BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
 
     public async Task ShowFilePickerDialog()

@@ -59,6 +59,8 @@ public class RunExternalToolJobViewModel : JobViewModel
             .BindTo(this, x => x.Job.WritesToInputFile);
     }
 
+    protected override void Prepare() => BspService.Instance.UpdateModels();
+
     protected override void OnSuccess()
     {
         // Don't have a way to dynamically reload paklump, just reset it
