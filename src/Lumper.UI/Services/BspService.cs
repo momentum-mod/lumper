@@ -310,8 +310,8 @@ public sealed class BspService : ReactiveObject, IDisposable
             return false;
 
         IsLoading = true;
-        foreach (ILumpViewModel? vm in Lumps)
-            vm?.UpdateModel(); // Null propagation means we do nothing for unloaded lumps VMs
+
+        UpdateModels();
 
         IoProgressWindow? progressWindow = null;
         try
@@ -430,6 +430,15 @@ public sealed class BspService : ReactiveObject, IDisposable
             return;
 
         IsModified = true;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public void UpdateModels()
+    {
+        foreach (ILumpViewModel? vm in Lumps)
+            vm?.UpdateModel(); // Null propagation means we do nothing for unloaded lumps VMs
     }
 
     public void ResetLumpViewModels()

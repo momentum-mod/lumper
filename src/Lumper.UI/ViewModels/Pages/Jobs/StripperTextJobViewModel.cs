@@ -56,5 +56,9 @@ public class StripperTextJobViewModel : JobViewModel
         this.WhenAnyValue(x => x.Config).BindTo(this, x => x.Job.Config);
     }
 
+    // Push viewmodel changes to model
+    protected override void Prepare() => BspService.Instance.EntityLumpViewModel?.UpdateModel();
+
+    // Push model changes to viewmodel
     protected override void OnSuccess() => BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
 }
