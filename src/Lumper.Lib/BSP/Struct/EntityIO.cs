@@ -100,6 +100,6 @@ public partial class EntityIo : ICloneable
     public object Clone() => MemberwiseClone();
 
     // Match string,string,string,number,number where numbers can be decimals, negative, -.xxx
-    [GeneratedRegex(@"^[^,]*," + @"[^,]*," + @"[^,]*" + @"(,(-?\d*\.?\d+)?){2}$")]
+    [GeneratedRegex(@"^[^,]*,[^,]*,[^,]*(,(-?\d*\.?\d+)?){2}$")]
     private static partial Regex EntityIoRegex();
 }
