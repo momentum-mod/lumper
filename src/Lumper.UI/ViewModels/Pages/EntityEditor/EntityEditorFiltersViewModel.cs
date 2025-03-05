@@ -53,7 +53,7 @@ public class EntityEditorFilters : ReactiveObject
         if (string.IsNullOrWhiteSpace(filter))
             return false;
 
-        var split = filter.Split(',').Select(s => s.Trim()).ToList();
+        var split = filter.Split('|').Select(s => s.Trim()).ToList();
         if (split.Count == 0)
             return false;
 
