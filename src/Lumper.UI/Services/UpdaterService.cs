@@ -38,6 +38,9 @@ public sealed partial class UpdaterService : ReactiveObject
 
         if (time - lastCheck > updateCheckInterval)
             _ = CheckForUpdates();
+
+        // Nuke backup executable if exists
+        DeleteBackupExecutable();
     }
 
     /// <summary>
@@ -97,7 +100,6 @@ public sealed partial class UpdaterService : ReactiveObject
     {
         (OSPlatform os, string osPrefix) = GetPlatform();
         bool isWindows = os == OSPlatform.Windows;
-        bool isLinux = !isWindows;
 
         using var zipStream = new MemoryStream();
         var cts = new CancellationTokenSource();
@@ -156,22 +158,10 @@ public sealed partial class UpdaterService : ReactiveObject
 
         handler.UpdateProgress(0, "Extracting release files...");
 
-        string appDir = AppContext.BaseDirectory;
-        string updaterExecutablePath = Path.Combine(appDir, "Lumper.UI" + (os == OSPlatform.Windows ? ".exe" : ""));
-        string tmpPath = updaterExecutablePath + ".bak";
-
         try
         {
-            // Zip stream is downloaded into memory, now need to extract it.
-            // - On Windows, we can't overwrite the running executable, but we can rename it, then delete after
-            //   process exits.
-            // - On Linux, we can delete the executable then overwrite it, but on Ubuntu at least, I can't
-            //   seem to launch a different executable via Process.Start() (running the original executable
-            //   *does* seem to work though??)
-            if (os == OSPlatform.Windows)
-                File.Move(updaterExecutablePath, tmpPath);
-            else if (File.Exists(updaterExecutablePath))
-                File.Delete(updaterExecutablePath);
+            DeleteBackupExecutable(); // Just in case it still exists
+            File.Move(ExecutablePath, BackupExecutablePath);
         }
         catch (Exception ex)
         {
@@ -188,7 +178,15 @@ public sealed partial class UpdaterService : ReactiveObject
         }
         catch (Exception ex)
         {
-            File.Move(tmpPath, updaterExecutablePath);
+            // Try restore original executable if extraction fails
+            if (File.Exists(BackupExecutablePath))
+            {
+                if (File.Exists(ExecutablePath))
+                    File.Delete(ExecutablePath);
+
+                File.Move(BackupExecutablePath, ExecutablePath);
+            }
+
             _logger.Error(ex, "Failed to extract new version, reverting!");
             return;
         }
@@ -277,7 +275,7 @@ public sealed partial class UpdaterService : ReactiveObject
         return true;
     }
 
-    private static (OSPlatform, string) GetPlatform()
+    private static (OSPlatform os, string osPrefix) GetPlatform()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return (OSPlatform.Windows, "win");
@@ -285,6 +283,19 @@ public sealed partial class UpdaterService : ReactiveObject
             return (OSPlatform.Linux, "linux");
 
         throw new InvalidProgramException("OS is not supported");
+    }
+
+    private static string ExecutablePath =>
+        Path.Combine(AppContext.BaseDirectory, "Lumper.UI" + (GetPlatform().os == OSPlatform.Windows ? ".exe" : ""));
+
+    private static string BackupExecutablePath => ExecutablePath + ".bak";
+
+    private static void DeleteBackupExecutable()
+    {
+        LogManager.GetCurrentClassLogger().Info(AppContext.BaseDirectory);
+        LogManager.GetCurrentClassLogger().Info(BackupExecutablePath);
+        if (File.Exists(BackupExecutablePath))
+            File.Delete(BackupExecutablePath);
     }
 
     public record SemVer(int Major, int Minor, int Patch)
