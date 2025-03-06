@@ -115,7 +115,8 @@
               <MenuItem Header="_Export JSON Map Summary" Command="{Binding JsonDumpCommand}" />
             </MenuItem>
             <MenuItem Header="_About">
-              <MenuItem Header="_Check For Updates" Command="{Binding UpdaterService.CheckForUpdates}" />
+              <MenuItem Header="_Check For Updates" Command="{Binding UpdaterService.CheckForUpdates}"
+                        CommandParameter="true" />
               <Separator />
               <MenuItem Header="About" Command="{Binding AboutCommand}" />
             </MenuItem>
