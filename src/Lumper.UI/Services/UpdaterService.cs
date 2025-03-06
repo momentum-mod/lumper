@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -86,6 +85,13 @@ public sealed partial class UpdaterService : ReactiveObject
 
     /// <summary>
     /// Downloads an update for the program, applies it, and then restarts itself with the new version
+    /// Behaviour is different depending on OS:
+    /// - On Windows, we can't overwrite the running executable, but we can rename it, then delete it
+    ///   in a shell process after our process exits.
+    ///   - TODO: Disabled above behaviour for now, just doing the same thing as Linux.
+    /// - On Linux, we can delete the executable then overwrite it, but on Ubuntu at least, I can't
+    ///   seem to launch a different executable via Process.Start() (running the original executable
+    ///   *does* seem to work though??). So we tell the user to relaunch manually, then exit the process.
     /// </summary>
     private async ValueTask Update(GithubRelease release)
     {
@@ -191,28 +197,32 @@ public sealed partial class UpdaterService : ReactiveObject
             progressWindow.Close();
         }
 
-        if (isWindows)
-        {
-            _logger.Info("Update completed, restarting...");
+        // TODO: This code isn't working, even on Windows, on release builds or `dotnet publish` if tweak code above to
+        // always update even in dev builds. At this point it just isn't worth the time debugging, and hate doing these
+        // cmd.exe process hacks anyway. For now just telling the user to relaunch manually, and cleaning up the backup
+        // file on next launch.
+        // if (isWindows)
+        // {
+        //     _logger.Info("Update completed, restarting...");
+        //
+        //     Program.MainWindow.Closed += (_, _) =>
+        //         Process.Start(
+        //             new ProcessStartInfo("cmd.exe", "/c sleep 1 && del Lumper.UI.exe.bak && Lumper.UI.exe")
+        //             {
+        //                 CreateNoWindow = true,
+        //                 UseShellExecute = false,
+        //                 WorkingDirectory = AppContext.BaseDirectory,
+        //             }
+        //         );
+        // }
+        // else
+        // {
+        _logger.Info("Update completed!");
 
-            Program.MainWindow.Closed += (_, _) =>
-                Process.Start(
-                    new ProcessStartInfo("cmd.exe", "/c sleep 1 && del Lumper.UI.exe.bak && Lumper.UI.exe")
-                    {
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        WorkingDirectory = appDir,
-                    }
-                );
-        }
-        else
-        {
-            _logger.Info("Update completed!");
-
-            await MessageBoxManager
-                .GetMessageBoxStandard("Update complete", "Update is complete, please relaunch the application!")
-                .ShowWindowDialogAsync(Program.MainWindow);
-        }
+        await MessageBoxManager
+            .GetMessageBoxStandard("Update complete", "Update is complete, please relaunch the application!")
+            .ShowWindowDialogAsync(Program.MainWindow);
+        // }
 
         Program.Desktop.Shutdown();
     }
