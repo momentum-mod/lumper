@@ -45,7 +45,7 @@ public sealed partial class UpdaterService : ReactiveObject
     /// Check whether the running executable is up-to-date with the latest release on Github
     /// <returns>Tuple of whether new release is available and the latest release</returns>
     /// </summary>
-    public async Task CheckForUpdates()
+    public async Task CheckForUpdates(bool log = false)
     {
         SemVer currentVersion = GetAssemblyVersion();
 
@@ -59,7 +59,11 @@ public sealed partial class UpdaterService : ReactiveObject
 
         if (GetAssemblyVersion() >= latestRelease.Version)
         {
-            _logger.Debug("Current build is up to date");
+            const string upToDate = "Current build is up to date";
+            if (log)
+                _logger.Info(upToDate);
+            else
+                _logger.Debug(upToDate);
             return;
         }
 
