@@ -178,18 +178,7 @@ public sealed partial class UpdaterService : ReactiveObject
         {
             // Using MS ZipArchive because SharpCompress is causing very weird System.Text.Encoding.CodePages errors
             // during ZipArchive.Open calls in release builds.
-            var zip = new ZipArchive(zipStream);
-            int numEntries = zip.Entries.Count;
-            if (numEntries == 0)
-                throw new InvalidDataException("No entries found in downloaded file");
-
-            foreach (ZipArchiveEntry entry in zip.Entries)
-            {
-                entry.ExtractToFile(Path.Combine(appDir, entry.Name), overwrite: true);
-                float prog = (float)(100 - downloadProgressProportion) / numEntries;
-                handler.UpdateProgress(prog, $"Extracting {entry.Name}");
-                _logger.Info($"Extracted {entry.Name}");
-            }
+            ZipFile.ExtractToDirectory(zipStream, AppContext.BaseDirectory, overwriteFiles: true);
         }
         catch (Exception ex)
         {
