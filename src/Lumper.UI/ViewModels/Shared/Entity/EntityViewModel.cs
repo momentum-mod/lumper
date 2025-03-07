@@ -30,29 +30,34 @@ public class EntityViewModel : HierarchicalBspNode
         Entity = entity;
 
         foreach (Entity.EntityProperty property in entity.Properties)
-            AddPropertyViewModel(property);
+            Properties.Add(CreatePropertyViewModel(property));
 
         ResetClassname();
     }
 
-    public EntityPropertyViewModel AddPropertyViewModel(Entity.EntityProperty entityProperty)
+    public EntityPropertyViewModel AddProperty(Entity.EntityProperty prop)
     {
-        EntityPropertyViewModel newProp = entityProperty switch
+        EntityPropertyViewModel vm = CreatePropertyViewModel(prop);
+        Entity.Properties.Add(prop);
+        Properties.Add(vm);
+        MarkAsModified();
+        return vm;
+    }
+
+    public void DeleteProperty(EntityPropertyViewModel propVm)
+    {
+        Entity.Properties.Remove(propVm.EntityProperty);
+        Properties.Remove(propVm);
+        MarkAsModified();
+    }
+
+    private EntityPropertyViewModel CreatePropertyViewModel(Entity.EntityProperty entityProperty) =>
+        entityProperty switch
         {
             Entity.EntityProperty<string> sp => new EntityPropertyStringViewModel(sp, this),
             Entity.EntityProperty<EntityIo> sio => new EntityPropertyIoViewModel(sio, this),
             _ => throw new ArgumentOutOfRangeException(nameof(entityProperty)),
         };
-        Properties.Add(newProp);
-        return newProp;
-    }
-
-    private void AddProperty(Entity.EntityProperty prop)
-    {
-        Entity.Properties.Add(prop);
-        AddPropertyViewModel(prop);
-        MarkAsModified();
-    }
 
     public void AddString() => AddProperty(new Entity.EntityProperty<string>("newproperty", "newvalue"));
 
@@ -75,13 +80,6 @@ public class EntityViewModel : HierarchicalBspNode
                 : ',';
 
         AddProperty(new Entity.EntityProperty<EntityIo>("newproperty", new EntityIo(separator)));
-    }
-
-    public void DeleteProperty(EntityPropertyViewModel propVm)
-    {
-        Entity.Properties.Remove(propVm.EntityProperty);
-        Properties.Remove(propVm);
-        MarkAsModified();
     }
 
     public override void UpdateModel()
