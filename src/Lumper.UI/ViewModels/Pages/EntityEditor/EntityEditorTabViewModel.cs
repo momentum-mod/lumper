@@ -3,7 +3,11 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using DynamicData;
+using DynamicData.Binding;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
@@ -41,7 +45,9 @@ public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabView
 
     private const string DifferentLabel = "<different>";
 
-    private readonly List<IDisposable> _observers;
+    private readonly CompositeDisposable _disposable;
+
+    private bool _isDisposing = false;
 
     public EntityEditorTabMultipleEntityViewModel(List<EntityViewModel> realEntities)
     {
@@ -55,18 +61,34 @@ public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabView
         // do handle IsModified stuff since changes to its values trigger updates to real entities.
         // Refactoring HierarchicalBspNode to allow nullable parents would be a headache, and we really
         // want this "fake entity" system avoid restructuring the shared entity viewmodel system.
-        var fakeEntity = new EntityViewModel(fakeEnt, BspService.Instance.EntityLumpViewModel!);
+        Entity = new EntityViewModel(fakeEnt, BspService.Instance.EntityLumpViewModel!);
+        RealEntities = realEntities;
 
         Name = ComputeName(realEntities);
 
-        // Set up observers binding the fake entity values to the real entities
-        _observers = SetupRealEntityObservables(fakeEntity, realEntities);
+        _disposable = [];
 
-        Entity = fakeEntity;
-        RealEntities = realEntities;
+        // EntityProperties isn't using a SourceList/Cache so need to transform to DynamicData stuff.
+        // Even if it was a SourceCache I'd rather not expose it anyway, and this code doesn't run often.
+        IObservable<IChangeSet<EntityPropertyViewModel>> changeset = Entity.Properties.ToObservableChangeSet();
+
+        _disposable.Add(
+            changeset
+                // MergeMany maps new items to observable handling all the fake -> real property bindings,
+                // and unsubscribing when the fake property is removed.
+                .MergeMany(SetupRealEntityPropertyBindings)
+                .Subscribe()
+        );
+
+        _disposable.Add(
+            changeset
+                // Fake property deletion needs to iterate through all real entities and remove corresponding
+                .OnItemRemoved(HandleFakePropDeletion)
+                .Subscribe()
+        );
     }
 
-    private static Entity CreateFakeEntity(List<EntityViewModel> realEntities)
+    private Entity CreateFakeEntity(List<EntityViewModel> realEntities)
     {
         // Only care about properties shared by each entity, so start with first selected then
         // whittle down using the rest.
@@ -126,117 +148,128 @@ public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabView
         return classnames.Count() == 1 ? $"Multiple {classnames.First()}s" : "Multiple Entities";
     }
 
-    private static List<IDisposable> SetupRealEntityObservables(
-        EntityViewModel fakeEntity,
-        List<EntityViewModel> realEntities
-    ) =>
-        fakeEntity
-            .Properties.SelectMany(fakeProp =>
-            {
-                List<IDisposable> observers = [];
+    private IObservable<Unit> SetupRealEntityPropertyBindings(EntityPropertyViewModel fakeProp)
+    {
+        var realProps = RealEntities
+            .Select(realEnt => realEnt.Properties.FirstOrDefault(realProp => realProp.Key == fakeProp.Key))
+            .OfType<EntityPropertyViewModel>()
+            .ToList();
 
-                IObservable<string> fakeKey = fakeProp.ObservableForProperty(x => x.Key).Select(x => x.Value);
+        // If true, we must be adding a new property via Entity Editor, since by initial setup, all the possible
+        // fakeProps have corresponding real properties. So we need to add the new property to every real entity.
+        if (realProps.Count == 0)
+        {
+            realProps = RealEntities
+                .Select(realEnt => realEnt.AddProperty((Entity.EntityProperty)fakeProp.EntityProperty.Clone()))
+                .ToList();
+        }
 
-                IEnumerable<EntityPropertyViewModel> realProps = realEntities.Select(realEnt =>
-                    realEnt.Properties.FirstOrDefault(realProp => realProp.Key == fakeProp.Key)!
-                );
-
-                observers.Add(
-                    fakeKey.Subscribe(fake =>
+        return Observable.Merge(
+            [
+                fakeProp
+                    .ObservableForProperty(x => x.Key)
+                    .Select(x => x.Value)
+                    .Do(fake =>
                     {
                         foreach (EntityPropertyViewModel realProp in realProps)
                             realProp.Key = fake;
                     })
-                );
-
-                switch (fakeProp)
+                    .Select(_ => Unit.Default),
+                .. fakeProp switch
                 {
-                    case EntityPropertyStringViewModel fakeStringProp:
-                    {
-                        IObservable<string?> fakeValue = fakeStringProp
+                    EntityPropertyStringViewModel fakeStringProp =>
+                    [
+                        fakeStringProp
                             .ObservableForProperty(x => x.Value)
-                            .Select(x => x.Value);
-
-                        observers.Add(
-                            fakeValue.Subscribe(fake =>
+                            .Select(x => x.Value)
+                            .Do(fake =>
                             {
-                                // Cast is safe with how we constructured fake entity
                                 foreach (EntityPropertyViewModel realProp in realProps)
                                     ((EntityPropertyStringViewModel)realProp).Value = fake;
                             })
-                        );
-                        break;
-                    }
-                    case EntityPropertyIoViewModel ioProp:
-                    {
-                        IObservable<string?> fakeTarget = ioProp
-                            .ObservableForProperty(x => x.TargetEntityName)
-                            .Select(x => x.Value);
+                            .Select(_ => Unit.Default),
+                    ],
+                    EntityPropertyIoViewModel fakeIoProp => (IObservable<Unit>[])
+                        [
+                            fakeIoProp
+                                .ObservableForProperty(x => x.TargetEntityName)
+                                .Select(x => x.Value)
+                                .Do(fake =>
+                                {
+                                    foreach (EntityPropertyViewModel realProp in realProps)
+                                        ((EntityPropertyIoViewModel)realProp).TargetEntityName = fake;
+                                })
+                                .Select(_ => Unit.Default),
+                            fakeIoProp
+                                .ObservableForProperty(x => x.Input)
+                                .Select(x => x.Value)
+                                .Do(fake =>
+                                {
+                                    foreach (EntityPropertyViewModel realProp in realProps)
+                                        ((EntityPropertyIoViewModel)realProp).Input = fake;
+                                })
+                                .Select(_ => Unit.Default),
+                            fakeIoProp
+                                .ObservableForProperty(x => x.Parameter)
+                                .Select(x => x.Value)
+                                .Do(fake =>
+                                {
+                                    foreach (EntityPropertyViewModel realProp in realProps)
+                                        ((EntityPropertyIoViewModel)realProp).Parameter = fake;
+                                })
+                                .Select(_ => Unit.Default),
+                            fakeIoProp
+                                .ObservableForProperty(x => x.Delay)
+                                .Select(x => x.Value)
+                                .Do(fake =>
+                                {
+                                    foreach (EntityPropertyViewModel realProp in realProps)
+                                        ((EntityPropertyIoViewModel)realProp).Delay = fake;
+                                })
+                                .Select(_ => Unit.Default),
+                            fakeIoProp
+                                .ObservableForProperty(x => x.TimesToFire)
+                                .Select(x => x.Value)
+                                .Do(fake =>
+                                {
+                                    foreach (EntityPropertyViewModel realProp in realProps)
+                                        ((EntityPropertyIoViewModel)realProp).TimesToFire = fake;
+                                })
+                                .Select(_ => Unit.Default),
+                        ],
+                    _ => [],
+                },
+            ]
+        );
+    }
 
-                        observers.Add(
-                            fakeTarget.Subscribe(fake =>
-                            {
-                                foreach (EntityPropertyViewModel realProp in realProps)
-                                    ((EntityPropertyIoViewModel)realProp).TargetEntityName = fake;
-                            })
-                        );
+    private void HandleFakePropDeletion(EntityPropertyViewModel fakeProp)
+    {
+        // Disposal order of observables is finicky so this can get called during teardown
+        if (_isDisposing)
+            return;
 
-                        IObservable<string?> fakeInput = ioProp
-                            .ObservableForProperty(x => x.Input)
-                            .Select(x => x.Value);
-
-                        observers.Add(
-                            fakeInput.Subscribe(fake =>
-                            {
-                                foreach (EntityPropertyViewModel realProp in realProps)
-                                    ((EntityPropertyIoViewModel)realProp).Input = fake;
-                            })
-                        );
-
-                        IObservable<string?> fakeParam = ioProp
-                            .ObservableForProperty(x => x.Parameter)
-                            .Select(x => x.Value);
-
-                        observers.Add(
-                            fakeParam.Subscribe(fake =>
-                            {
-                                foreach (EntityPropertyViewModel realProp in realProps)
-                                    ((EntityPropertyIoViewModel)realProp).Parameter = fake;
-                            })
-                        );
-
-                        IObservable<float?> fakeDelay = ioProp.ObservableForProperty(x => x.Delay).Select(x => x.Value);
-
-                        observers.Add(
-                            fakeDelay.Subscribe(fake =>
-                            {
-                                foreach (EntityPropertyViewModel realProp in realProps)
-                                    ((EntityPropertyIoViewModel)realProp).Delay = fake;
-                            })
-                        );
-
-                        IObservable<int?> fakeTimes = ioProp
-                            .ObservableForProperty(x => x.TimesToFire)
-                            .Select(x => x.Value);
-
-                        observers.Add(
-                            fakeTimes.Subscribe(fake =>
-                            {
-                                foreach (EntityPropertyViewModel realProp in realProps)
-                                    ((EntityPropertyIoViewModel)realProp).TimesToFire = fake;
-                            })
-                        );
-                        break;
-                    }
-                }
-
-                return observers;
-            })
-            .ToList();
+        foreach (EntityViewModel realEnt in RealEntities)
+        {
+            if (
+                realEnt.Properties.FirstOrDefault(prop =>
+                    // Bit of a gross check, but want to avoid having to track fake -> real property mappings
+                    (
+                        prop.Key == fakeProp.Key
+                        && fakeProp
+                            is EntityPropertyStringViewModel { Value: DifferentLabel }
+                                or EntityPropertyIoViewModel { TargetEntityName: DifferentLabel }
+                    ) || prop.MemberwiseEquals(fakeProp)
+                ) is
+                { } realProp
+            )
+                realEnt.DeleteProperty(realProp);
+        }
+    }
 
     public void Dispose()
     {
-        foreach (IDisposable observer in _observers)
-            observer.Dispose();
+        _isDisposing = true;
+        _disposable.Dispose();
     }
 }
