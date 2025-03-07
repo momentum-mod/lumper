@@ -3,6 +3,7 @@ namespace Lumper.UI.ViewModels.Shared.Entity;
 using System.Globalization;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
+using ReactiveUI;
 
 public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProperty, BspNode bspNode)
     : HierarchicalBspNode(bspNode)
@@ -10,7 +11,6 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
     public Entity.EntityProperty EntityProperty { get; } = entityProperty;
 
     private string _key = entityProperty.Key;
-
     public string Key
     {
         get => _key;
@@ -40,7 +40,6 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
     : EntityPropertyViewModel(entityProperty, bspNode)
 {
     private string? _value = entityProperty.Value;
-
     public string? Value
     {
         get => _value;
@@ -67,43 +66,67 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
     : EntityPropertyViewModel(entityProperty, bspNode)
 {
     private string? _targetEntityName = entityProperty.Value?.TargetEntityName;
-
     public string? TargetEntityName
     {
         get => _targetEntityName;
-        set => UpdateField(ref _targetEntityName, value);
+        set => UpdateFieldInternal(ref _targetEntityName, value);
     }
 
     private string? _input = entityProperty.Value?.Input;
-
     public string? Input
     {
         get => _input;
-        set => UpdateField(ref _input, value);
+        set => UpdateFieldInternal(ref _input, value);
     }
 
     private string? _parameter = entityProperty.Value?.Parameter;
-
     public string? Parameter
     {
         get => _parameter;
-        set => UpdateField(ref _parameter, value);
+        set => UpdateFieldInternal(ref _parameter, value);
     }
 
     private float? _delay = entityProperty.Value?.Delay;
-
     public float? Delay
     {
         get => _delay;
-        set => UpdateField(ref _delay, value);
+        set => UpdateFieldInternal(ref _delay, value);
     }
 
     private int? _timeToFire = entityProperty.Value?.TimesToFire;
-
     public int? TimesToFire
     {
         get => _timeToFire;
-        set => UpdateField(ref _timeToFire, value);
+        set => UpdateFieldInternal(ref _timeToFire, value);
+    }
+
+    public string DisplayValue
+    {
+        get
+        {
+            // TODO: This is a gross copy of EntityIO's ToString() method.
+            // These properties should *really* be get/setters around the model properties,
+            // then this property could just be `=> entityProperty.ValueString`,
+            // instead of duplicating the values here, but then handling IsModified after
+            // job runs becomes a lot more complicated. (See BspNode.UpdateField summary)
+            //
+            // We don't have time for significant refactors at the moment so I'm going
+            // to just leave it, but in the future we could come back and really try to
+            // do the MVVM separation more appropriately.
+            char separator = entityProperty.Value?.Separator ?? ',';
+            // csharpier-ignore
+            return _targetEntityName + separator
+                + _input + separator
+                + _parameter + separator
+                + _delay?.ToString(CultureInfo.InvariantCulture) + separator
+                + _timeToFire?.ToString(CultureInfo.InvariantCulture);
+        }
+    }
+
+    private void UpdateFieldInternal<T>(ref T field, T value)
+    {
+        UpdateField(ref field, value);
+        this.RaisePropertyChanged(nameof(DisplayValue));
     }
 
     public override void UpdateModel()

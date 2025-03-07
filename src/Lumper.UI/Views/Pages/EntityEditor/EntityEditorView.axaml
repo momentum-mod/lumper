@@ -24,7 +24,8 @@
           <StackPanel>
             <TextBlock FontSize="18" FontWeight="Medium">Entity Type / Key / Value</TextBlock>
             <TextBlock LineHeight="24">
-              Multiple inputs can be provided at once separated by <Run FontFamily="{StaticResource Monospace}">|</Run>,
+              Multiple inputs can be provided at once separated by <Run FontFamily="{StaticResource Monospace}">|</Run>
+              ,
               and entities/properties will match if any value matches.
               Use <Run FontFamily="{StaticResource Monospace}">-</Run> to exclude on the front of a value to exclude that value.
               <LineBreak />
@@ -210,7 +211,7 @@
                   </DataTemplate>
                   <DataTemplate DataType="entity:EntityPropertyIoViewModel">
                     <Grid RowDefinitions="32, 4, 32, 4, 32, 4, 32, 4, 32, 4, 32, 4"
-                          ColumnDefinitions="*, 4, 32, 4, 3* ">
+                          ColumnDefinitions="*, 4, 3*, 4, 32">
                       <Grid.Styles>
                         <Style Selector="TextBlock">
                           <Setter Property="VerticalAlignment" Value="Center" />
@@ -219,22 +220,24 @@
                         </Style>
                       </Grid.Styles>
                       <TextBox Text="{Binding Key}" Grid.Row="0" Grid.Column="0" />
-                      <Button Command="{Binding Delete}" Grid.Row="0" Grid.Column="2" Height="32">
+                      <TextBox Text="{Binding DisplayValue}" Grid.Row="0" Grid.Column="2" IsReadOnly="True"
+                               Foreground="Gray" />
+                      <Button Command="{Binding Delete}" Grid.Row="0" Grid.Column="4" Height="32">
                         <materialIcons:MaterialIcon Kind="Delete" />
                       </Button>
-                      <TextBlock Text="Target Entity Name" Grid.Row="2" Grid.Column="0" />
+                      <TextBlock Text="Target Entity Name" Grid.Row="2" Grid.Column="0" Padding="8 0 0 0" />
                       <TextBox Text="{Binding TargetEntityName}" Grid.Row="2" Grid.Column="2"
                                Grid.ColumnSpan="3" />
-                      <TextBlock Text="Input" Grid.Row="4" Grid.Column="0" />
+                      <TextBlock Text="Input" Grid.Row="4" Grid.Column="0" Padding="8 0 0 0" />
                       <TextBox Text="{Binding Input}" Grid.Row="4" Grid.Column="2"
                                Grid.ColumnSpan="3" />
-                      <TextBlock Text="Parameter" Grid.Row="6" Grid.Column="0" />
+                      <TextBlock Text="Parameter" Grid.Row="6" Grid.Column="0" Padding="8 0 0 0" />
                       <TextBox Text="{Binding Parameter}" Grid.Row="6" Grid.Column="2"
                                Grid.ColumnSpan="3" />
-                      <TextBlock Text="Delay" Grid.Row="8" Grid.Column="0" />
+                      <TextBlock Text="Delay" Grid.Row="8" Grid.Column="0" Padding="8 0 0 0" />
                       <NumericUpDown Value="{Binding Delay}" Grid.Row="8" Grid.Column="2"
                                      Grid.ColumnSpan="3" />
-                      <TextBlock Text="TimesToFire" Grid.Row="10" Grid.Column="0" />
+                      <TextBlock Text="TimesToFire" Grid.Row="10" Grid.Column="0" Padding="8 0 0 0" />
                       <NumericUpDown Value="{Binding TimesToFire}" Grid.Row="10" Grid.Column="2"
                                      Grid.ColumnSpan="3" />
                     </Grid>
