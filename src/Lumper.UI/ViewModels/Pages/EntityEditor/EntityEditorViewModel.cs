@@ -41,8 +41,6 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
     public EntityEditorViewModel()
     {
-        var u = new Unit();
-
         BspService.WhenAnyValue(x => x.EntityLumpViewModel).ToPropertyEx(this, x => x.EntityLumpViewModel);
 
         // Switchmap entity lump changes (from BSP loads usually) into observable of changes to all entities,
@@ -61,9 +59,9 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
                     // AutoRefresh() observable on *every* observable, which would be prohibitively expensive.
                     // If we really wanted this, we'd need to do some spaghetti to make property updates raise something
                     // on the parent entity, not bothering for now.
-                    ? entLump.Entities.Connect().Select(_ => u)
+                    ? entLump.Entities.Connect().Select(_ => Unit.Default)
                     // Null if entity lump was closed, just return null which we'll use to generate an empty list below.
-                    : Observable.Return(u)
+                    : Observable.Return(Unit.Default)
             )
             // Cancel previous observable from Connect() when ent lump changes.
             .Switch()
@@ -75,7 +73,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             .CombineLatest(
                 this.WhenAnyValue(x => x.Filters) // Needed to kick this off
                     .Merge(Filters.WhenAnyPropertyChanged().Throttle(TimeSpan.FromMilliseconds(10))),
-                (_, _) => u
+                (_, _) => Unit.Default
             )
             .Select(_ =>
             {
