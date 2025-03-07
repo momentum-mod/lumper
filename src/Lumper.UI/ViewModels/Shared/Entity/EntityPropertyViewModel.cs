@@ -29,6 +29,8 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
 
     public override void UpdateModel() => EntityProperty.Key = Key;
 
+    public abstract bool MemberwiseEquals(EntityPropertyViewModel other);
+
     public bool MatchKey(string expr, bool wildcardWrapping) => Key.MatchesSimpleExpression(expr, wildcardWrapping);
 
     public abstract bool MatchValue(string expr, bool wildcardWrapping);
@@ -57,6 +59,9 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityP
         base.UpdateModel();
         entityProperty.Value = Value;
     }
+
+    public override bool MemberwiseEquals(EntityPropertyViewModel other) =>
+        other is EntityPropertyStringViewModel o && o.Key == Key && o.Value == Value;
 
     public override bool MatchValue(string expr, bool wildcardWrapping) =>
         Value?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
@@ -143,13 +148,15 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityPro
         entityProperty.Value.TimesToFire = TimesToFire;
     }
 
-    // Not bothering with IEquatable cus it's extra faff
-    public bool Equals(EntityPropertyIoViewModel other) =>
-        other.TargetEntityName == TargetEntityName
-        && other.Input == Input
-        && other.Parameter == Parameter
-        && other.Delay == Delay
-        && other.TimesToFire == TimesToFire;
+    public override bool MemberwiseEquals(EntityPropertyViewModel other) =>
+        other is EntityPropertyIoViewModel o
+        && o.Key == Key
+        && o.TargetEntityName == TargetEntityName
+        && o.Input == Input
+        && o.Parameter == Parameter
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
+        && o.Delay == Delay
+        && o.TimesToFire == TimesToFire;
 
     public override bool MatchValue(string expr, bool wildcardWrapping) =>
         // Match against both comma and space separated values
