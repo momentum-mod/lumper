@@ -292,8 +292,6 @@ public sealed partial class UpdaterService : ReactiveObject
 
     private static void DeleteBackupExecutable()
     {
-        LogManager.GetCurrentClassLogger().Info(AppContext.BaseDirectory);
-        LogManager.GetCurrentClassLogger().Info(BackupExecutablePath);
         if (File.Exists(BackupExecutablePath))
             File.Delete(BackupExecutablePath);
     }
