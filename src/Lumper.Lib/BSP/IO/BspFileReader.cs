@@ -115,8 +115,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
 
         SortLumps();
 
-        if (CheckOverlapping())
-            throw new InvalidDataException("Some lumps are overlapping. Check logging for details.");
+        CheckOverlapping();
     }
 
     // Finding the real gamelump length by looking at the next lump
@@ -185,7 +184,9 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
                 long prevEnd = prevHeader!.Offset + prevHeader.Length;
                 if (header.Offset < prevEnd)
                 {
-                    Logger.Warn($"Lumps {prevLump!.Type} and {lump.Type} overlapping");
+                    Logger.Warn(
+                        $"Lumps {prevLump!.Type} and {lump.Type} are overlapping (see https://github.com/momentum-mod/lumper/wiki/Overlapping-Lumps)"
+                    );
                     if (prevLump.Type == BspLumpType.GameLump)
                         Logger.Warn("but the previous lump was GAME_LUMP and the length is a lie");
                     else
