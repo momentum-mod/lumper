@@ -24,7 +24,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 
         this.WhenActivated(disposables =>
         {
-            AddHandler(DragDrop.DragOverEvent, Window_OnDragOver);
             AddHandler(DragDrop.DropEvent, Window_OnDrop);
 
             // Stupid shit to get this to behave like a radiobutton. I miss Angular
@@ -114,12 +113,6 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
     {
         List<IStorageFile> files = FilterDraggedBspFiles(e);
         await ViewModel!.OpenDragDropped(files);
-    }
-
-    private void Window_OnDragOver(object? _, DragEventArgs e)
-    {
-        bool hasBsps = FilterDraggedBspFiles(e).Count > 0;
-        e.DragEffects = hasBsps ? DragDropEffects.Link : DragDropEffects.None;
     }
 
     private List<IStorageFile> FilterDraggedBspFiles(DragEventArgs e) =>
