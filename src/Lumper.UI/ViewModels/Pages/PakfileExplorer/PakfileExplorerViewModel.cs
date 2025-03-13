@@ -169,7 +169,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     }
 
     // Note this doesn't handle deletions, kept in DeleteSelected for now
-    private async ValueTask PushTreeChangesToEntries()
+    private async Task PushTreeChangesToEntries()
     {
         // TODO: size updates?
         if (Tree is null)
@@ -202,14 +202,15 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             }
 
             if (moveReferences)
+            {
                 await Observable.Start(
                     () => _pakfileLump!.UpdatePathReferences(newKey, node.Leaf.Key),
-                    RxApp.TaskpoolScheduler
+                    RxApp.MainThreadScheduler // Must be main thread, calls a bunch of viewmodel setters.
                 );
+            }
 
             // Update the actual key on the PakFileEntry - this is what causes the move to handle on save.
-            node.Leaf.Key = newKey;
-            node.Leaf.MarkAsModified();
+            node.Leaf.Rename(newKey);
         }
     }
 
@@ -218,8 +219,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (!GetSelection(out IReadOnlyList<Node> items, single: true))
             return;
 
-        IReadOnlyList<IStorageFile>? files = await PickFiles();
-        if (files is null || _pakfileLump is null)
+        IReadOnlyList<IStorageFile> files = await PickFiles();
+        if (_pakfileLump is null)
             return;
 
         List<string> branchPath = items[0].Path;
@@ -269,9 +270,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         IMsBox<string> msBox = CreateMessageBox("Create Directory", "Directory Name", "Create");
         await ShowMessageBox(msBox);
 
-        string? name = msBox.InputValue;
-        if (name is null)
-            return;
+        string name = msBox.InputValue;
 
         List<string> pathList = [.. branchPath, name];
         Tree!.Root.AddDirectory(pathList);
@@ -287,7 +286,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         IMsBox<string> msBox = CreateMessageBox("Create File", "File Name", "Create");
         await ShowMessageBox(msBox);
 
-        string name = msBox.InputValue ?? "new file";
+        string name = msBox.InputValue;
         if (name.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase))
         {
             Logger.Error("Creating empty VTFs is not supported, please import one.");
@@ -319,9 +318,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (result == "Cancel")
             return;
 
-        string? name = msBox.InputValue;
-        if (name is null)
-            return;
+        string name = msBox.InputValue;
 
         // This handles both leaf and branch nodes - PushTreeChangesToEntries does all the work.
         item.Name = name;
@@ -373,7 +370,10 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         string rootPath = folder.Path.LocalPath;
         var exportDir = new DirectoryInfo(rootPath);
         if (!exportDir.Exists)
-            throw new DirectoryNotFoundException(rootPath);
+        {
+            Logger.Error($"{rootPath} does not exist, cannot export.");
+            return;
+        }
 
         try
         {
@@ -412,10 +412,13 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (folder is null || _pakfileLump is null)
             return;
 
-        string rootPath = folder.Path.AbsolutePath;
+        string rootPath = folder.Path.LocalPath;
         var exportDir = new DirectoryInfo(rootPath);
         if (!exportDir.Exists)
-            throw new DirectoryNotFoundException(rootPath);
+        {
+            Logger.Error($"{rootPath} does not exist, cannot export.");
+            return;
+        }
 
         string commonParentPath = Node.FindCommonAncestor(nodes).PathString + '/';
         try
