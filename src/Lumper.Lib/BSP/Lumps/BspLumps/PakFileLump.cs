@@ -1,7 +1,6 @@
 namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -190,20 +189,13 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
             DataStream.Seek(DataStreamOffset, SeekOrigin.Begin);
 
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
-            try
+            byte[] buffer = new byte[80 * 1024];
+            int read;
+            long remaining = DataStreamLength;
+            while ((read = DataStream.Read(buffer, 0, int.Min(buffer.Length, (int)remaining))) > 0)
             {
-                int read;
-                long remaining = DataStreamLength;
-                while ((read = DataStream.Read(buffer, 0, int.Min(buffer.Length, (int)remaining))) > 0)
-                {
-                    stream.Write(buffer, 0, read);
-                    remaining -= read;
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
+                stream.Write(buffer, 0, read);
+                remaining -= read;
             }
         }
         else if (compression == DesiredCompression.Uncompressed)
