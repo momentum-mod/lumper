@@ -202,14 +202,15 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             }
 
             if (moveReferences)
+            {
                 await Observable.Start(
                     () => _pakfileLump!.UpdatePathReferences(newKey, node.Leaf.Key),
                     RxApp.TaskpoolScheduler
                 );
+            }
 
             // Update the actual key on the PakFileEntry - this is what causes the move to handle on save.
-            node.Leaf.Key = newKey;
-            node.Leaf.MarkAsModified();
+            node.Leaf.Rename(newKey);
         }
     }
 

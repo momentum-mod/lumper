@@ -144,13 +144,7 @@ public sealed partial class BspFile : IDisposable
             throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
 
         if (path is not null && Path.GetFileName(path) != FilePath && options.RenameCubemaps)
-        {
-            PakfileLump pakfile = GetLump<PakfileLump>();
-
-            Dictionary<string, string> modified = pakfile.RenameCubemapsPath(Path.GetFileName(path));
-            foreach (KeyValuePair<string, string> modifiedPath in modified)
-                pakfile.UpdatePathReferences(modifiedPath.Value, modifiedPath.Key, ".vmt");
-        }
+            RenameCubemaps(path);
 
         string outPath;
         string? backupPath = null;
@@ -369,6 +363,15 @@ public sealed partial class BspFile : IDisposable
         }
 
         return true;
+    }
+
+    private void RenameCubemaps(string path)
+    {
+        PakfileLump pakfile = GetLump<PakfileLump>();
+
+        Dictionary<string, string> modified = pakfile.RenameCubemapPaths(Path.GetFileName(path));
+        foreach ((string oldPath, string newPath) in modified)
+            pakfile.UpdatePathReferences(newPath, oldPath, ".vmt");
     }
 
     public bool SaveToStream(IoHandler handler, Stream stream, DesiredCompression compress)
