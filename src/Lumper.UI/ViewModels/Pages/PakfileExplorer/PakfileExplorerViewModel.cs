@@ -219,8 +219,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (!GetSelection(out IReadOnlyList<Node> items, single: true))
             return;
 
-        IReadOnlyList<IStorageFile>? files = await PickFiles();
-        if (files is null || _pakfileLump is null)
+        IReadOnlyList<IStorageFile> files = await PickFiles();
+        if (_pakfileLump is null)
             return;
 
         List<string> branchPath = items[0].Path;
@@ -270,9 +270,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         IMsBox<string> msBox = CreateMessageBox("Create Directory", "Directory Name", "Create");
         await ShowMessageBox(msBox);
 
-        string? name = msBox.InputValue;
-        if (name is null)
-            return;
+        string name = msBox.InputValue;
 
         List<string> pathList = [.. branchPath, name];
         Tree!.Root.AddDirectory(pathList);
@@ -288,7 +286,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         IMsBox<string> msBox = CreateMessageBox("Create File", "File Name", "Create");
         await ShowMessageBox(msBox);
 
-        string name = msBox.InputValue ?? "new file";
+        string name = msBox.InputValue;
         if (name.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase))
         {
             Logger.Error("Creating empty VTFs is not supported, please import one.");
@@ -320,9 +318,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (result == "Cancel")
             return;
 
-        string? name = msBox.InputValue;
-        if (name is null)
-            return;
+        string name = msBox.InputValue;
 
         // This handles both leaf and branch nodes - PushTreeChangesToEntries does all the work.
         item.Name = name;
