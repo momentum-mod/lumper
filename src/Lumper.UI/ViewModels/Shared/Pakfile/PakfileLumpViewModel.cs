@@ -131,9 +131,13 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     // depend on specific KV1 keys.
     private static readonly Dictionary<string, string[]> IgnorableExtensions = new() { { ".vmt", [".vtf"] } };
 
+    // Chars that are not valid in a path (maybe they are but really shouldn't be). Used to decide if we're at the end
+    // of a string in a common Source file e.g. closing quotes in a VMT value.
+    private static readonly char[] ControlChars = ['\n', '\r', '\t', ' ', '(', ')', '{', '}', '[', ']', '=', '"', '\''];
+
     /// <summary>
-    /// Update references to a path when a file moves, scanning the entity lump and
-    /// text parts of pakfile lump. Could do texdata in future maybe?
+    /// Update references to a path when a file moves, scanning the entity lump, text parts of the
+    /// pakfile lump, and texdata.
     /// </summary>
     public void UpdatePathReferences(string newPath, string oldPath)
     {
@@ -164,8 +168,8 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     // Definitely not a match
                     continue;
 
-                string updatedOp = oldPath;
-                string updatedNp = newPath;
+                string op = oldPath;
+                string np = newPath;
                 // Split this check from above for perf - vast majority of values are misses, move on ASAP.
                 if (directoryMatch is not null && !propValue.StartsWith(directoryMatch, cmp))
                 {
@@ -181,8 +185,8 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     }
 
                     // Old path matched something but it had a recognised prefix on front: remove it
-                    updatedOp = string.Join("/", oldPath.Split('/')[1..]);
-                    updatedNp = string.Join("/", newPath.Split('/')[1..]);
+                    op = string.Join("/", oldPath.Split('/')[1..]);
+                    np = string.Join("/", newPath.Split('/')[1..]);
                 }
                 else if (!propValue.Equals(oldPath, cmp))
                 {
@@ -191,9 +195,9 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     continue;
                 }
 
-                sProp.Value = updatedNp;
+                sProp.Value = np;
                 sProp.MarkAsModified();
-                Logger.Info($"Updated {prop.Key} property of {entity.PresentableName} from {updatedOp} to {updatedNp}");
+                Logger.Info($"Updated {prop.Key} property of {entity.PresentableName} from {op} to {np}");
             }
         }
 
@@ -210,78 +214,68 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             if (entry.Content is null)
                 return;
 
-            string updatedOp = oldPath;
-            string updatedNp = newPath;
-            int matchIndex = -1;
             int changes = 0;
 
+            // Base index that tracks progress iterating through entire file
+            int baseIdx = -1;
             bool tryWithoutExtension = IgnorableExtensions.TryGetValue(
                 Path.GetExtension(entry.Key),
                 out string[]? opNoExtension
             );
+
+            // Outer loop as we traverse the entire file - could have multiple matches.
             while (true)
             {
-                int match = entry.Content.IndexOf(opNoPrefix, startIndex: matchIndex + 1, cmp);
+                string op = oldPath;
+                string np = newPath;
 
-                int sliceFromEnd = 0;
-                if (match == -1 && tryWithoutExtension)
+                // If we matched a directory, we're almost certainly right to omit it unless the pakfile is completely
+                // fucked.
+                if (directoryMatch is not null)
+                {
+                    op = string.Join("/", op.Split('/')[1..]);
+                    np = string.Join("/", np.Split('/')[1..]);
+                }
+
+                // Index used to search forward from baseIdx
+                // Start by searching with extension
+                int searchIdx = entry.Content.IndexOf(op, startIndex: baseIdx + 1, cmp);
+
+                // If that match fails, try with extension omitted if appropriate file
+                if (searchIdx == -1 && tryWithoutExtension)
                 {
                     foreach (string ext in opNoExtension!)
                     {
                         if (!opNoPrefix.EndsWith(ext, cmp))
                             continue;
 
-                        match = entry.Content.IndexOf(
-                            opNoPrefix[..^ext.Length],
-                            startIndex: matchIndex + 1,
-                            comparisonType: cmp
-                        );
-
-                        if (match != -1)
+                        searchIdx = entry.Content.IndexOf(opNoPrefix[..^ext.Length], startIndex: baseIdx + 1, cmp);
+                        if (searchIdx != -1)
                         {
-                            sliceFromEnd = ext.Length;
+                            op = op[..^ext.Length];
+                            np = np[..^ext.Length];
                             break;
                         }
                     }
                 }
 
-                if (match == -1)
+                // No matches
+                if (searchIdx == -1 || searchIdx >= entry.Content.Length - op.Length)
                     break;
 
-                matchIndex = match;
+                // Okay, we matched
+                baseIdx = searchIdx;
 
-                if (directoryMatch is not null)
+                // Make sure we're not matching e.g. foo/bar.vtf with foo/barbaz.vtf
+                char nextChar = entry.Content[baseIdx + op.Length];
+                if (ControlChars.Contains(nextChar))
                 {
-                    updatedOp = string.Join("/", oldPath.Split('/')[1..])[..^sliceFromEnd];
-                    updatedNp = string.Join("/", newPath.Split('/')[1..])[..^sliceFromEnd];
-                    entry.Content =
-                        entry.Content[..matchIndex] + updatedNp + entry.Content[(matchIndex + updatedOp.Length)..];
+                    entry.Content = entry.Content[..baseIdx] + np + entry.Content[(baseIdx + op.Length)..];
                     changes++;
                     entry.IsModified = true;
                 }
-                else
-                {
-                    int wholeMatchIndex = matchIndex - opPrefix.Length - 1;
 
-                    if (
-                        !entry
-                            .Content[wholeMatchIndex..(oldPath.Length - sliceFromEnd)]
-                            .Equals(oldPath[..^sliceFromEnd], cmp)
-                    )
-                    {
-                        continue;
-                    }
-
-                    updatedOp = oldPath;
-                    updatedNp = newPath;
-                    entry.Content =
-                        entry.Content[..wholeMatchIndex]
-                        + updatedNp
-                        + entry.Content[(wholeMatchIndex + updatedOp.Length)..];
-
-                    changes++;
-                    entry.IsModified = true;
-                }
+                baseIdx += np.Length; // Move to end of new path
             }
 
             // Assumption that if a file is omitting the root dir prefix in some cases,
@@ -289,7 +283,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             // It'd be extremely weird in one file was in some cases using both
             // sound/foo/bar.mp3 and foo/bar.mp3.
             if (changes > 0)
-                Logger.Info($"Replaced {changes} instances of {updatedOp} with {updatedNp} in file {entry.Key}");
+                Logger.Info($"Replaced {changes} instances of {oldPath} with {newPath} in file {entry.Key}");
         }
 
         // TexData - doesn't have viewmodels (yay!)
