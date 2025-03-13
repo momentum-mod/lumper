@@ -291,6 +291,22 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
             if (changes > 0)
                 Logger.Info($"Replaced {changes} instances of {updatedOp} with {updatedNp} in file {entry.Key}");
         }
+
+        // TexData - doesn't have viewmodels (yay!)
+        if (oldPath.EndsWith(".vmt", cmp) && opPrefix.Equals("materials", cmp))
+        {
+            string op = opNoPrefix[..^4]; // Trim .vtf
+            string np = string.Join('/', newPath.Split('/')[1..])[..^4]; // Trim materials/ and .vtf
+            TexDataLump? texdataLump = BspService.Instance.BspFile?.GetLump<TexDataLump>();
+            if (texdataLump is null)
+                throw new InvalidDataException("TexDataLump not found (??)");
+
+            foreach (TexData texData in texdataLump.Data)
+            {
+                if (texData.TexName.Equals(op, cmp))
+                    texData.TexName = np;
+            }
+        }
     }
 
     public void Dispose()
