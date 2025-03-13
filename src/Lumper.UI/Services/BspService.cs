@@ -1,7 +1,6 @@
 namespace Lumper.UI.Services;
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -227,7 +226,7 @@ public sealed class BspService : ReactiveObject, IDisposable
     private async Task<Stream?> HttpDownload(string url)
     {
         IoProgressWindow? progressWindow = null;
-        byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+        byte[] buffer = new byte[80 * 1024];
         var cts = new CancellationTokenSource();
         var handler = new IoHandler(cts);
         var stream = new MemoryStream();
