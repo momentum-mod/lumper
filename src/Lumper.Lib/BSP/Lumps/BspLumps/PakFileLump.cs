@@ -72,34 +72,11 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     }
 
     /// <summary>
-    /// Gets the default cubemap path as Source uses the filename when searching.
-    /// Returns a dictionary with the key as the old string
-    /// and the value as the new string
-    /// </summary>
-    public Dictionary<string, string> GetCubemapsToChange(string newFileName)
-    {
-        string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
-        var entriesModified = new Dictionary<string, string>();
-
-        foreach (PakfileEntry entry in Entries)
-        {
-            Match match = CubemapRegex().Match(entry.Key);
-            if (match.Success)
-            {
-                string cubemapName = match.Groups[1].Value;
-                entriesModified.Add(entry.Key, entry.Key.Replace(cubemapName, baseFilename));
-            }
-        }
-
-        return entriesModified;
-    }
-
-    /// <summary>
     /// Renames the cubemap path as Source uses the filename when searching.
     /// Returns a dictionary with the key as the old string
     /// and the value as the new string
     /// </summary>
-    public Dictionary<string, string> RenameCubemapsPath(string newFileName)
+    public Dictionary<string, string> RenameCubemapPaths(string newFileName)
     {
         string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
         var entriesModified = new Dictionary<string, string>();
@@ -116,8 +93,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 string oldString = entry.Key;
 
                 string cubemapName = match.Groups[1].Value;
-                entry.Key = entry.Key.Replace(cubemapName, baseFilename);
-                entry.IsModified = true;
+                entry.Rename(entry.Key.Replace(cubemapName, baseFilename));
 
                 entriesModified.Add(oldString, entry.Key);
             }
@@ -276,7 +252,14 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
         foreach (PakfileEntry entry in Entries)
         {
-            if (entry.IsModified)
+            // Items that've been renamed with PakFileEntry.Rename
+            if (entry.ZipEntry is null)
+            {
+                var mem = new MemoryStream(entry.GetData().ToArray());
+
+                entry.ZipEntry = Zip.AddEntry(entry.Key, mem, true);
+            }
+            else if (entry.IsModified)
             {
                 // Delete existing entry if exists
                 ZipArchiveEntry? existingEntry = Zip.Entries.FirstOrDefault(e => e == entry.ZipEntry);
@@ -291,14 +274,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 // Add new/updated entry. Compressed if we're compressing everything, or Pakfile contains at least one
                 // compressed entry (so map is for an engine build that supports LZMA)
                 // Could expose ReadonlyMemory from entry
-                Zip.AddEntry(entry.Key, mem, true);
-            }
-            // New items that haven't been marked IsModified (they probably should've been, whatever)
-            else if (entry.ZipEntry is null)
-            {
-                var mem = new MemoryStream(entry.GetData().ToArray());
-
-                Zip.AddEntry(entry.Key, mem, true);
+                entry.ZipEntry = Zip.AddEntry(entry.Key, mem, true);
             }
         }
     }

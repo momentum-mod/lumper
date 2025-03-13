@@ -10,7 +10,15 @@ using SharpCompress.Archives.Zip;
 
 /// <summary>
 /// A pakfile entry derived from either a ZipArchiveEntry or just a stream.
-/// We assume one is non-null throughout.
+///
+/// SharpCompress imposes several annoying constraints that makes zip archive handling very difficult.
+/// - You can't change the key of a ZipArchiveEntry, have to delete then re-add
+/// - ZipEntry streams are single-threaded (we encounter very weird behavior when trying to read during multiple threads)
+///
+/// To load a zip entry into memory, call GetData or PrefetchData. This is *SLOW*, and access is locked to a single
+/// thread.
+///
+/// The zip archive itself is only written on save, in PakfileLump.Write.
 /// </summary>
 [JsonObject(MemberSerialization.OptIn)]
 public sealed class PakfileEntry
@@ -37,9 +45,10 @@ public sealed class PakfileEntry
     }
 
     // Probably shouldn't be public but whatever. be careful!
-    public ZipArchiveEntry? ZipEntry { get; }
+    public ZipArchiveEntry? ZipEntry { get; set; }
 
     [JsonProperty]
+    // This setter needs to be exposed, but you almost certainly shouldn't use it; use Rename() instead!
     public string Key { get; set; }
 
     [JsonProperty]
@@ -48,7 +57,6 @@ public sealed class PakfileEntry
     private readonly PakfileLump _parent;
 
     private bool _isModified;
-
     public bool IsModified
     {
         get => _isModified;
@@ -84,8 +92,13 @@ public sealed class PakfileEntry
     /// </summary>
     public ReadOnlySpan<byte> GetData()
     {
-        if (_buffer is null)
-            PrefetchData();
+        if (_buffer is not null)
+            return _buffer!.Value.Span;
+
+        if (ZipEntry is null)
+            throw new InvalidOperationException("Pakfile entry has no data");
+
+        PrefetchData();
 
         return _buffer!.Value.Span;
     }
@@ -95,6 +108,18 @@ public sealed class PakfileEntry
         _buffer = data;
         _hash = null;
         IsModified = true;
+    }
+
+    public void Rename(string newName)
+    {
+        Key = newName;
+        IsModified = true;
+
+        // Prefetch our data and set ZipEntry to null. During PakfileLump.UpdateZip, this will cause the original
+        // entry to be removed, and a new entry with the given key to be added in its place
+        PrefetchData();
+
+        ZipEntry = null;
     }
 
     private string? _hash;

@@ -31,7 +31,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
         InitEntries();
     }
 
-    public void UpdateEntries(bool checkIfModified) =>
+    public void UpdateViewModelFromModel(bool checkIfModified) =>
         Entries.Edit(updater =>
         {
             foreach (PakfileEntry entry in _pakfile.Entries.OrderBy(x => new FileInfo(x.Key).Name))
@@ -39,9 +39,15 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 if (entry.IsModified || !checkIfModified)
                     updater.AddOrUpdate(CreateEntryViewModel(entry));
             }
+
+            foreach (PakfileEntryViewModel entry in Entries.Items.ToList())
+            {
+                if (_pakfile.Entries.All(x => x.Key != entry.Key))
+                    updater.Remove(entry);
+            }
         });
 
-    private void InitEntries() => UpdateEntries(false);
+    private void InitEntries() => UpdateViewModelFromModel(false);
 
     private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry) =>
         entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
