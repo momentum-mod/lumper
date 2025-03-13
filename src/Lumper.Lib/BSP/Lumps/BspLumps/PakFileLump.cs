@@ -49,12 +49,23 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     /// </summary>
     public void UpdatePathReferences(string newPath, string oldPath, string? limitExtension = null)
     {
-        string[] opSplit = oldPath.Split('/');
-        string[] npSplit = newPath.Split('/');
+        UpdatePathReferencesInternal(newPath, oldPath, '/', limitExtension);
+        UpdatePathReferencesInternal(newPath, oldPath, '\\', limitExtension);
+    }
+
+    public void UpdatePathReferencesInternal(
+        string newPath,
+        string oldPath,
+        char separator,
+        string? limitExtension = null
+    )
+    {
+        string[] opSplit = oldPath.Split(separator);
+        string[] npSplit = newPath.Split(separator);
 
         // VMTs can reference VTFs ignoring the root directory and without the extension
-        oldPath = string.Join('/', opSplit[1..]);
-        newPath = string.Join('/', npSplit[1..]);
+        oldPath = string.Join(separator, opSplit[1..]);
+        newPath = string.Join(separator, npSplit[1..]);
         oldPath = Path.ChangeExtension(oldPath, "").TrimEnd('.');
         newPath = Path.ChangeExtension(newPath, "").TrimEnd('.');
 
