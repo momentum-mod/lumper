@@ -34,90 +34,12 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
     public bool IsModified { get; set; }
 
+    public override bool Empty => Entries.Count == 0;
+
     [JsonIgnore]
     public ZipArchive Zip { get; private set; } = null!;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-
-    // As per https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/utils/vbsp/cubemap.cpp
-    [GeneratedRegex(@"materials\/maps\/(.+)?/(?:(?:c-?\d+_-?\d+_-?\d+)|(?:cubemapdefault)(?:\.hdr)?\.vtf)")]
-    private static partial Regex CubemapRegex();
-
-    /// <summary>
-    /// Updates all path references in the PakFileLump from oldPath to newPath,
-    /// i.e. if a VMT references a VTF, it will be updated.
-    /// </summary>
-    public void UpdatePathReferences(string newPath, string oldPath, string? limitExtension = null)
-    {
-        UpdatePathReferencesInternal(newPath, oldPath, '/', limitExtension);
-        UpdatePathReferencesInternal(newPath, oldPath, '\\', limitExtension);
-    }
-
-    public void UpdatePathReferencesInternal(
-        string newPath,
-        string oldPath,
-        char separator,
-        string? limitExtension = null
-    )
-    {
-        string[] opSplit = oldPath.Split(separator);
-        string[] npSplit = newPath.Split(separator);
-
-        // VMTs can reference VTFs ignoring the root directory and without the extension
-        oldPath = string.Join(separator, opSplit[1..]);
-        newPath = string.Join(separator, npSplit[1..]);
-        oldPath = Path.ChangeExtension(oldPath, "").TrimEnd('.');
-        newPath = Path.ChangeExtension(newPath, "").TrimEnd('.');
-
-        foreach (PakfileEntry entry in Entries)
-        {
-            if (limitExtension is null || !entry.Key.EndsWith(limitExtension, StringComparison.Ordinal))
-                continue;
-
-            string entryString = Encoding.UTF8.GetString(entry.GetData());
-            string newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
-
-            if (newString != entryString)
-                entry.UpdateData(Encoding.UTF8.GetBytes(newString));
-        }
-    }
-
-    /// <summary>
-    /// Renames the cubemap path as Source uses the filename when searching.
-    /// Returns a dictionary with the key as the old string
-    /// and the value as the new string
-    /// </summary>
-    public Dictionary<string, string> RenameCubemapPaths(string newFileName)
-    {
-        string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
-        var entriesModified = new Dictionary<string, string>();
-
-        bool matched = false;
-        foreach (PakfileEntry entry in Entries)
-        {
-            Match match = CubemapRegex().Match(entry.Key);
-            if (match.Success)
-            {
-                matched = true;
-
-                // Add the old key so we can update the UI later
-                string oldString = entry.Key;
-
-                string cubemapName = match.Groups[1].Value;
-                entry.Rename(entry.Key.Replace(cubemapName, baseFilename));
-
-                entriesModified.Add(oldString, entry.Key);
-            }
-        }
-
-        if (matched)
-        {
-            IsModified = true;
-            UpdateZip();
-        }
-
-        return entriesModified;
-    }
 
     public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {
@@ -290,5 +212,83 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
         }
     }
 
-    public override bool Empty => Entries.Count == 0;
+    /// <summary>
+    /// Updates all path references in the PakFileLump from oldPath to newPath,
+    /// i.e. if a VMT references a VTF, it will be updated.
+    /// </summary>
+    public void UpdatePathReferences(string newPath, string oldPath, string? limitExtension = null)
+    {
+        UpdatePathReferencesInternal(newPath, oldPath, '/', limitExtension);
+        UpdatePathReferencesInternal(newPath, oldPath, '\\', limitExtension);
+    }
+
+    public void UpdatePathReferencesInternal(
+        string newPath,
+        string oldPath,
+        char separator,
+        string? limitExtension = null
+    )
+    {
+        string[] opSplit = oldPath.Split(separator);
+        string[] npSplit = newPath.Split(separator);
+
+        // VMTs can reference VTFs ignoring the root directory and without the extension
+        oldPath = string.Join(separator, opSplit[1..]);
+        newPath = string.Join(separator, npSplit[1..]);
+        oldPath = Path.ChangeExtension(oldPath, "").TrimEnd('.');
+        newPath = Path.ChangeExtension(newPath, "").TrimEnd('.');
+
+        foreach (PakfileEntry entry in Entries)
+        {
+            if (limitExtension is null || !entry.Key.EndsWith(limitExtension, StringComparison.Ordinal))
+                continue;
+
+            string entryString = Encoding.UTF8.GetString(entry.GetData());
+            string newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
+
+            if (newString != entryString)
+                entry.UpdateData(Encoding.UTF8.GetBytes(newString));
+        }
+    }
+
+    // As per https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/utils/vbsp/cubemap.cpp
+    [GeneratedRegex(@"materials\/maps\/(.+)?/(?:(?:c-?\d+_-?\d+_-?\d+)|(?:cubemapdefault)(?:\.hdr)?\.vtf)")]
+    private static partial Regex CubemapRegex();
+
+    /// <summary>
+    /// Renames the cubemap path as Source uses the filename when searching.
+    /// Returns a dictionary with the key as the old string
+    /// and the value as the new string
+    /// </summary>
+    public Dictionary<string, string> RenameCubemapPaths(string newFileName)
+    {
+        string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
+        var entriesModified = new Dictionary<string, string>();
+
+        bool matched = false;
+        foreach (PakfileEntry entry in Entries)
+        {
+            Match match = CubemapRegex().Match(entry.Key);
+            if (match.Success)
+            {
+                matched = true;
+
+                // Add the old key so we can update the UI later
+                string oldString = entry.Key;
+
+                string cubemapName = match.Groups[1].Value;
+                entry.Rename(entry.Key.Replace(cubemapName, baseFilename));
+
+                entriesModified.Add(oldString, entry.Key);
+            }
+        }
+
+        if (matched)
+        {
+            IsModified = true;
+            UpdateZip();
+        }
+
+        return entriesModified;
+    }
 }
