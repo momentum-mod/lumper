@@ -370,7 +370,10 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         string rootPath = folder.Path.LocalPath;
         var exportDir = new DirectoryInfo(rootPath);
         if (!exportDir.Exists)
-            throw new DirectoryNotFoundException(rootPath);
+        {
+            Logger.Error($"{rootPath} does not exist, cannot export.");
+            return;
+        }
 
         try
         {
@@ -409,10 +412,13 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (folder is null || _pakfileLump is null)
             return;
 
-        string rootPath = folder.Path.AbsolutePath;
+        string rootPath = folder.Path.LocalPath;
         var exportDir = new DirectoryInfo(rootPath);
         if (!exportDir.Exists)
-            throw new DirectoryNotFoundException(rootPath);
+        {
+            Logger.Error($"{rootPath} does not exist, cannot export.");
+            return;
+        }
 
         string commonParentPath = Node.FindCommonAncestor(nodes).PathString + '/';
         try
