@@ -141,6 +141,13 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     /// </summary>
     public void UpdatePathReferences(string newPath, string oldPath)
     {
+        // Source works with both / and \. Fucking Windows!!!
+        UpdatePathReferencesInternal(newPath.Replace('\\', '/'), oldPath.Replace('\\', '/'), '/');
+        UpdatePathReferencesInternal(newPath.Replace('/', '\\'), oldPath.Replace('/', '\\'), '\\');
+    }
+
+    private void UpdatePathReferencesInternal(string newPath, string oldPath, char separator)
+    {
         // Source does case-insensitive comparisons for filenames practically everywhere.
         // Probably because Windows filenames are treated case-insensitively.
         const StringComparison cmp = StringComparison.OrdinalIgnoreCase;
@@ -150,9 +157,9 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 
         // Source sometimes let you omit the topmost directory of a file path, e.g. sound/foo/bar.mp3
         // can be used as just foo/bar.mp3. Quite a lot of faff to handle both cases, with and without prefix.
-        string[] opSplit = oldPath.Split('/');
+        string[] opSplit = oldPath.Split(separator);
         string opPrefix = opSplit[0];
-        string opNoPrefix = string.Join("/", opSplit[1..]);
+        string opNoPrefix = string.Join(separator, opSplit[1..]);
         string? directoryMatch = SourceRootDirectories.FirstOrDefault(s => s == opPrefix);
 
         // Entities
@@ -175,7 +182,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 {
                     // This is case where something moves from sound/foo/bar.mp3 to materials/bar.mp3 and the matching
                     // property with foo/bar.mp3 - they are almost certainly going to break something.
-                    if (!newPath.Split('/')[0].Equals(directoryMatch, cmp))
+                    if (!newPath.Split(separator)[0].Equals(directoryMatch, cmp))
                     {
                         Logger.Warn(
                             $"Could move {prop.Key} property of {entity.PresentableName} from {oldPath} "
@@ -185,8 +192,8 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     }
 
                     // Old path matched something but it had a recognised prefix on front: remove it
-                    op = string.Join("/", oldPath.Split('/')[1..]);
-                    np = string.Join("/", newPath.Split('/')[1..]);
+                    op = string.Join(separator, oldPath.Split(separator)[1..]);
+                    np = string.Join(separator, newPath.Split(separator)[1..]);
                 }
                 else if (!propValue.Equals(oldPath, cmp))
                 {
@@ -233,8 +240,8 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 // fucked.
                 if (directoryMatch is not null)
                 {
-                    op = string.Join("/", op.Split('/')[1..]);
-                    np = string.Join("/", np.Split('/')[1..]);
+                    op = string.Join(separator, op.Split(separator)[1..]);
+                    np = string.Join(separator, np.Split(separator)[1..]);
                 }
 
                 // Index used to search forward from baseIdx
@@ -290,10 +297,10 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
         if (oldPath.EndsWith(".vmt", cmp) && opPrefix.Equals("materials", cmp))
         {
             string op = opNoPrefix[..^4]; // Trim .vtf
-            string np = string.Join('/', newPath.Split('/')[1..])[..^4]; // Trim materials/ and .vtf
-            TexDataLump? texdataLump = BspService.Instance.BspFile?.GetLump<TexDataLump>();
-            if (texdataLump is null)
-                throw new InvalidDataException("TexDataLump not found (??)");
+            string np = string.Join(separator, newPath.Split(separator)[1..])[..^4]; // Trim materials/ and .vtf
+            TexDataLump texdataLump =
+                BspService.Instance.BspFile?.GetLump<TexDataLump>()
+                ?? throw new InvalidDataException("TexDataLump not found (??)");
 
             foreach (TexData texData in texdataLump.Data)
             {
