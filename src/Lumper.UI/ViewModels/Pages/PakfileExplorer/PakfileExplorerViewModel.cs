@@ -169,7 +169,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     }
 
     // Note this doesn't handle deletions, kept in DeleteSelected for now
-    private async ValueTask PushTreeChangesToEntries()
+    private async Task PushTreeChangesToEntries()
     {
         // TODO: size updates?
         if (Tree is null)
