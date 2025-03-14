@@ -3,7 +3,7 @@ namespace Lumper.UI.ViewModels.Pages.Jobs;
 using System;
 using System.IO;
 using System.Reactive.Linq;
-using System.Text;
+using Lumper.Lib.Bsp;
 using Lumper.Lib.Jobs;
 using Lumper.Lib.Stripper;
 using Lumper.UI.Services;
@@ -41,7 +41,7 @@ public class StripperTextJobViewModel : JobViewModel
                 // GetBytes is an extra copy but not that big of a deal, but don't want to refactor
                 // StripperConfig parsing to operate on a regular string. Perf hit is neglible.
                 bool success = StripperConfig.TryParse(
-                    new MemoryStream(Encoding.ASCII.GetBytes(x ?? "")),
+                    new MemoryStream(BspFile.Encoding.GetBytes(x ?? "")),
                     out _,
                     out string? errorMessage
                 );

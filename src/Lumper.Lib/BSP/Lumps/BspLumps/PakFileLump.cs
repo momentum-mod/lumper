@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.IO;
@@ -14,6 +13,7 @@ using Newtonsoft.Json;
 using NLog;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
+using SharpCompress.Readers;
 using SharpCompress.Writers;
 using SharpCompress.Writers.Zip;
 
@@ -38,6 +38,8 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
     [JsonIgnore]
     public ZipArchive Zip { get; private set; } = null!;
+
+    private static readonly ArchiveEncoding ArchiveEncoding = new(BspFile.Encoding, BspFile.Encoding);
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -67,7 +69,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
         }
 
         dataStream.Seek(0, SeekOrigin.Begin);
-        Zip = ZipArchive.Open(dataStream);
+        Zip = ZipArchive.Open(dataStream, new ReaderOptions { ArchiveEncoding = ArchiveEncoding });
         Entries = Zip.Entries.Select(entry => new PakfileEntry(this, entry)).ToList();
 
         // Mark the zip as compressed if we have any LZMA-compressed entries. We won't update an existing
@@ -123,7 +125,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
             handler?.UpdateProgress(0.75f * prog, "Writing pakfile contents");
             using var dataStream = new MemoryStream();
-            Zip.SaveTo(dataStream, new WriterOptions(CompressionType.None));
+            Zip.SaveTo(dataStream, new WriterOptions(CompressionType.None) { ArchiveEncoding = ArchiveEncoding });
             dataStream.Seek(0, SeekOrigin.Begin);
             dataStream.CopyTo(stream);
 
@@ -135,7 +137,11 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             // fought with SharpCompress for hours I can't figure it out.
             using var outStream = new MemoryStream();
             var zipWriter = (ZipWriter)
-                WriterFactory.Open(outStream, ArchiveType.Zip, new ZipWriterOptions(CompressionType.None));
+                WriterFactory.Open(
+                    outStream,
+                    ArchiveType.Zip,
+                    new ZipWriterOptions(CompressionType.None) { ArchiveEncoding = ArchiveEncoding }
+                );
 
             int numEntries = Entries.Count;
             float incr = (float)IoHandler.WriteProgressProportions.Paklump / numEntries;
@@ -243,11 +249,11 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             if (limitExtension is null || !entry.Key.EndsWith(limitExtension, StringComparison.Ordinal))
                 continue;
 
-            string entryString = Encoding.UTF8.GetString(entry.GetData());
+            string entryString = BspFile.Encoding.GetString(entry.GetData());
             string newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
 
             if (newString != entryString)
-                entry.UpdateData(Encoding.UTF8.GetBytes(newString));
+                entry.UpdateData(BspFile.Encoding.GetBytes(newString));
         }
     }
 

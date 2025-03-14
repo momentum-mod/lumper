@@ -2,7 +2,6 @@ namespace Lumper.Lib.Bsp.Lumps.GameLumps;
 
 using System;
 using System.IO;
-using System.Text;
 using Lumper.Lib.Bsp.Enum;
 using NLog;
 
@@ -17,7 +16,7 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
     protected override void WriteItem(BinaryWriter writer, int index)
     {
         byte[] b = new byte[StructureSize];
-        byte[] value = Encoding.ASCII.GetBytes(Data[index]);
+        byte[] value = BspFile.Encoding.GetBytes(Data[index]);
         int count = value.Length;
         if (count > StructureSize)
         {
