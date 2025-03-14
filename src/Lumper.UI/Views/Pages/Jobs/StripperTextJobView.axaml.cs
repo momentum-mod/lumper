@@ -3,10 +3,10 @@ namespace Lumper.UI.Views.Pages.Jobs;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Text;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
+using Lumper.Lib.Bsp;
 using Lumper.UI.ViewModels.Pages.Jobs;
 using ReactiveUI;
 
@@ -32,7 +32,7 @@ public partial class StripperTextJobView : ReactiveUserControl<StripperTextJobVi
                     .ObserveOn(RxApp.MainThreadScheduler)
             );
 
-            TextEditor.Encoding = Encoding.ASCII;
+            TextEditor.Encoding = BspFile.Encoding;
             TextEditor.ContextMenu = new ContextMenu
             {
                 ItemsSource = new List<MenuItem>

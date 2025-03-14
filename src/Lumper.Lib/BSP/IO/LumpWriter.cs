@@ -1,7 +1,6 @@
 namespace Lumper.Lib.Bsp.IO;
 
 using System.IO;
-using System.Text;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.Lumps;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
@@ -15,7 +14,7 @@ using SharpCompress.Compressors.LZMA;
 /// This writer doesn't close its stream when disposed.
 /// </summary>
 [JsonObject(MemberSerialization.OptIn)]
-public abstract class LumpWriter(Stream output) : BinaryWriter(output, Encoding.UTF8, leaveOpen: true)
+public abstract class LumpWriter(Stream output) : BinaryWriter(output, BspFile.Encoding, leaveOpen: true)
 {
     protected abstract IoHandler? Handler { get; set; }
 

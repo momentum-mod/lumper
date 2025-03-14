@@ -3,9 +3,9 @@ namespace Lumper.UI.ViewModels.Shared.Pakfile;
 using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Views.Shared.Pakfile;
 using NLog;
@@ -36,7 +36,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
     {
         try
         {
-            Content = Encoding.ASCII.GetString(GetData());
+            Content = BspFile.Encoding.GetString(GetData());
         }
         catch
         {
@@ -69,6 +69,6 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
         if (!IsModified)
             return;
 
-        UpdateData(Encoding.ASCII.GetBytes(Content ?? ""));
+        UpdateData(BspFile.Encoding.GetBytes(Content ?? ""));
     }
 }

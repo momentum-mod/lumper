@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.Lumps;
 using Lumps.BspLumps;
@@ -106,7 +105,7 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
         TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
 
         // Ensure stringdata lump can fit everything we're about to stuff in
-        texDataStringDataLump.Resize(texData.Sum(x => Encoding.ASCII.GetByteCount(x.TexName) + 1));
+        texDataStringDataLump.Resize(texData.Sum(x => BspFile.Encoding.GetByteCount(x.TexName) + 1));
 
         List<int> stringTable = [];
         int pos = 0;
@@ -117,7 +116,7 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
 
             tex.StringTablePointer = stringTable.Count - 1;
 
-            byte[] bytes = Encoding.ASCII.GetBytes(tex.TexName);
+            byte[] bytes = BspFile.Encoding.GetBytes(tex.TexName);
             Array.Copy(bytes, 0, texDataStringDataLump.Data, pos, bytes.Length);
             pos += bytes.Length;
             texDataStringDataLump.Data[pos] = 0;

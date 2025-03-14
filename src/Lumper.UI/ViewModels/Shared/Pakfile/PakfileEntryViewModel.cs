@@ -17,10 +17,9 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     public string Key
     {
         get => _key;
-        set
+        private set
         {
             _key = value;
-            BaseEntry.Key = value;
             var fi = new FileInfo(value);
             // We often load hundreds of these at once, bad for perf to WhenAnyValue => ToProperty observables for
             // each - just use setters and [Reactive] RaiseAndSetIfChanged.
@@ -51,6 +50,13 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     }
 
     public abstract void Load(CancellationTokenSource? cts = null);
+
+    public void Rename(string newName)
+    {
+        Key = newName;
+        BaseEntry.Rename(newName);
+        MarkAsModified();
+    }
 
     public override void MarkAsModified()
     {

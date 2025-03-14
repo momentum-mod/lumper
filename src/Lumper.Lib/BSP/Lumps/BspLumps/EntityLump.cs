@@ -142,18 +142,15 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
     {
         foreach (Entity ent in Data)
         {
-            // 28591 is extended ASCII - https://en.wikipedia.org/wiki/Extended_ASCII
-            // Encoding.ASCII is *7-bit* whereas 28591 is 8 bit - important as 8-bit ASCII is what the format uses
-            stream.Write(Encoding.GetEncoding(28591).GetBytes("{\n"));
-            foreach (Entity.EntityProperty prop in ent.Properties)
-            {
-                stream.Write(Encoding.GetEncoding(28591).GetBytes($"{prop}\n"));
-            }
+            stream.Write(BspFile.Encoding.GetBytes("{\n"));
 
-            stream.Write(Encoding.GetEncoding(28591).GetBytes("}\n"));
+            foreach (Entity.EntityProperty prop in ent.Properties)
+                stream.Write(BspFile.Encoding.GetBytes($"{prop}\n"));
+
+            stream.Write(BspFile.Encoding.GetBytes("}\n"));
         }
 
-        stream.Write(Encoding.GetEncoding(28591).GetBytes("\0"));
+        stream.Write(BspFile.Encoding.GetBytes("\0"));
     }
 
     public override bool Empty => Data.Count == 0;

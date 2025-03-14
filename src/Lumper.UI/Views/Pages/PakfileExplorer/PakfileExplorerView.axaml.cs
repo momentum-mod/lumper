@@ -2,7 +2,6 @@ namespace Lumper.UI.Views.Pages.PakfileExplorer;
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -12,6 +11,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Selection;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
+using Avalonia.Threading;
 using Lumper.UI.ViewModels.Pages.PakfileExplorer;
 using NLog;
 using ReactiveUI;
@@ -114,20 +114,9 @@ public partial class PakfileExplorerView : ReactiveUserControl<PakfileExplorerVi
             return;
         }
 
-        // This is a HORRIBLE hack because TreeDataGrid doesn't expose event for drag drop completing
-        Observable
-            .FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(
-                h => Grid.Rows.CollectionChanged += h,
-                h => Grid.Rows.CollectionChanged -= h
-            )
-            .Throttle(TimeSpan.FromMilliseconds(50))
-            .Take(1)
-            .ObserveOn(RxApp.MainThreadScheduler)
-            .Timeout(TimeSpan.FromMilliseconds(1000))
-            .Subscribe(
-                _ => ViewModel!.OnMoveFiles(),
-                _ => Logger.Error("Grid.Rows.CollectionChanged hack failed to terminate! Tell Tom!!")
-            );
+        // Schedule update stuff on UI thread after tree has definitely finished updating
+        // (see https://github.com/AvaloniaUI/Avalonia.Controls.TreeDataGrid/pull/199#issuecomment-1674131384)
+        Dispatcher.UIThread.Post(() => ViewModel!.OnMoveFiles(), DispatcherPriority.Background);
     }
 
     private List<PakfileTreeNodeViewModel>? Selected =>

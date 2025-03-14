@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Lumper.Lib.Bsp.Enum;
@@ -24,6 +25,18 @@ public sealed partial class BspFile : IDisposable
     public const int HeaderSize = 1036;
 
     public const int MaxLumps = 128;
+
+    static BspFile()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        Encoding = Encoding.GetEncoding(1252);
+    }
+
+    // Source has little to no support for variable-length encodings like UTF-8, so we use
+    // Windows-1252 as it's the largest superset of all single-byte encodings.
+    // When working with anything encoding-specific, be sure to use this, not UTF-8.
+    // (for example SharpCompress defaults to UTF-8, and can corrupt paths in the pakfile archive).
+    public static readonly Encoding Encoding;
 
     public string? Name { get; private set; }
 
@@ -144,13 +157,7 @@ public sealed partial class BspFile : IDisposable
             throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
 
         if (path is not null && Path.GetFileName(path) != FilePath && options.RenameCubemaps)
-        {
-            PakfileLump pakfile = GetLump<PakfileLump>();
-
-            Dictionary<string, string> modified = pakfile.RenameCubemapsPath(Path.GetFileName(path));
-            foreach (KeyValuePair<string, string> modifiedPath in modified)
-                pakfile.UpdatePathReferences(modifiedPath.Value, modifiedPath.Key, ".vmt");
-        }
+            RenameCubemaps(path);
 
         string outPath;
         string? backupPath = null;
@@ -369,6 +376,15 @@ public sealed partial class BspFile : IDisposable
         }
 
         return true;
+    }
+
+    private void RenameCubemaps(string path)
+    {
+        PakfileLump pakfile = GetLump<PakfileLump>();
+
+        Dictionary<string, string> modified = pakfile.RenameCubemapPaths(Path.GetFileName(path));
+        foreach ((string oldPath, string newPath) in modified)
+            pakfile.UpdatePathReferences(newPath, oldPath, ".vmt");
     }
 
     public bool SaveToStream(IoHandler handler, Stream stream, DesiredCompression compress)

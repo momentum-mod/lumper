@@ -3,11 +3,11 @@ namespace Lumper.UI.Views.Shared.Pakfile;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Text;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using Lumper.Lib.Bsp;
 using Lumper.UI.ViewModels.Shared.Pakfile;
 using ReactiveUI;
 
@@ -37,7 +37,7 @@ public partial class PakfileEntryTextView : ReactiveUserControl<PakfileEntryText
             };
             TextEditor.TextChanged += handler;
 
-            TextEditor.Encoding = Encoding.ASCII;
+            TextEditor.Encoding = BspFile.Encoding;
             TextEditor.ContextMenu = new ContextMenu
             {
                 ItemsSource = new List<MenuItem>

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.Lumps;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
@@ -16,7 +15,7 @@ using SharpCompress.Compressors.LZMA;
 /// Handles decompressing and fills lumps with data
 /// </summary>
 [JsonObject(MemberSerialization.OptIn)]
-public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: Encoding.UTF8, leaveOpen: true)
+public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: BspFile.Encoding, leaveOpen: true)
 {
     public List<Tuple<Lump, LumpHeaderInfo>> Lumps { get; set; } = [];
 
@@ -102,7 +101,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: E
         MemoryStream decompressedStream = new();
 
         const string magic = "LZMA";
-        if (Encoding.ASCII.GetString(ReadBytes(magic.Length)) != magic)
+        if (BspFile.Encoding.GetString(ReadBytes(magic.Length)) != magic)
             throw new InvalidDataException("Failed to decompress: Lump doesn't look like it was LZMA compressed");
 
         uint actualSize = ReadUInt32();

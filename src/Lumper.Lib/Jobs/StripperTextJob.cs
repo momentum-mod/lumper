@@ -1,7 +1,6 @@
 namespace Lumper.Lib.Jobs;
 
 using System.IO;
-using System.Text;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Stripper;
@@ -24,7 +23,7 @@ public class StripperTextJob : Job, IJob
             return false;
         }
 
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(Config));
+        using var stream = new MemoryStream(BspFile.Encoding.GetBytes(Config));
         var config = StripperConfig.Parse(stream);
 
         Progress.Max = config.Blocks.Count;

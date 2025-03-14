@@ -1,7 +1,6 @@
 namespace Lumper.UI.Services;
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -227,7 +226,7 @@ public sealed class BspService : ReactiveObject, IDisposable
     private async Task<Stream?> HttpDownload(string url)
     {
         IoProgressWindow? progressWindow = null;
-        byte[] buffer = ArrayPool<byte>.Shared.Rent(80 * 1024);
+        byte[] buffer = new byte[80 * 1024];
         var cts = new CancellationTokenSource();
         var handler = new IoHandler(cts);
         var stream = new MemoryStream();
@@ -329,9 +328,6 @@ public sealed class BspService : ReactiveObject, IDisposable
             progressWindow = new IoProgressWindow { Title = $"Saving {outName} ({compressString})", Handler = handler };
             _ = progressWindow.ShowDialog(Program.MainWindow);
 
-            // get the cubemaps that will be changed
-
-            Dictionary<string, string> modified = BspFile.GetLump<PakfileLump>().GetCubemapsToChange(outName);
             await Observable.Start(
                 () =>
                     BspFile.SaveToFile(
@@ -347,20 +343,9 @@ public sealed class BspService : ReactiveObject, IDisposable
                 RxApp.TaskpoolScheduler
             );
 
-            if (outName != FileName && PakfileLumpViewModel is not null)
-            {
-                PakfileLumpViewModel.UpdateEntries(false);
-
-                // clean up old outdated keys
-                foreach (KeyValuePair<string, string> entry in modified)
-                {
-                    foreach (PakfileEntryViewModel pk in PakfileLumpViewModel.Entries.Items)
-                    {
-                        if (pk.Key == entry.Key)
-                            PakfileLumpViewModel.DeleteEntry(pk);
-                    }
-                }
-            }
+            // If we've renamed cubemaps, need to refresh the pakfile VM.
+            if (outName != FileName && PakfileLumpViewModel is not null && StateService.Instance.RenameCubemaps)
+                PakfileLumpViewModel?.UpdateViewModelFromModel(false);
 
             if (handler.Cancelled)
                 return false;
