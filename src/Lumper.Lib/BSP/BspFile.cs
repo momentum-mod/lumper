@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Lumper.Lib.Bsp.Enum;
@@ -24,6 +25,18 @@ public sealed partial class BspFile : IDisposable
     public const int HeaderSize = 1036;
 
     public const int MaxLumps = 128;
+
+    static BspFile()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        Encoding = Encoding.GetEncoding(1252);
+    }
+
+    // Source has little to no support for variable-length encodings like UTF-8, so we use
+    // Windows-1252 as it's the largest superset of all single-byte encodings.
+    // When working with anything encoding-specific, be sure to use this, not UTF-8.
+    // (for example SharpCompress defaults to UTF-8, and can corrupt paths in the pakfile archive).
+    public static readonly Encoding Encoding;
 
     public string? Name { get; private set; }
 

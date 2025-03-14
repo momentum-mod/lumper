@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using System.Text;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.ReactiveUI;
 using AvaloniaEdit;
+using Lumper.Lib.Bsp;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Pages.RawEntities;
 using ReactiveUI;
@@ -20,7 +20,7 @@ public partial class RawEntitiesView : ReactiveUserControl<RawEntitiesViewModel>
         InitializeComponent();
 
         TextEditor editor = this.FindControl<TextEditor>("TextEditor")!;
-        editor.Encoding = Encoding.ASCII;
+        editor.Encoding = BspFile.Encoding;
         editor.ShowLineNumbers = true;
         editor.ContextMenu = new ContextMenu
         {

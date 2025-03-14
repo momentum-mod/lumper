@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.Lumps;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
@@ -57,7 +56,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
 
         byte[] ident = ReadBytes(4);
 
-        if (Encoding.ASCII.GetString(ident) != "VBSP")
+        if (BspFile.Encoding.GetString(ident) != "VBSP")
             throw new InvalidDataException("File doesn't look like a VBSP");
 
         _bsp.Version = ReadInt32();
@@ -228,7 +227,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
 
             texture.TexName =
                 end > 0
-                    ? Encoding.ASCII.GetString(texDataStringDataLump.Data, stringTableOffset, end - stringTableOffset)
+                    ? BspFile.Encoding.GetString(texDataStringDataLump.Data, stringTableOffset, end - stringTableOffset)
                     : "";
         }
     }
