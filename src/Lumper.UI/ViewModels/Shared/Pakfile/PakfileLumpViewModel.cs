@@ -50,7 +50,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
     private void InitEntries() => UpdateViewModelFromModel(false);
 
     private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry) =>
-        entry.Key.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase)
+        Path.GetExtension(entry.Key).Equals(".vtf", StringComparison.OrdinalIgnoreCase)
             ? new PakfileEntryVtfViewModel(entry, this)
             : new PakfileEntryTextViewModel(entry, this);
 
@@ -212,7 +212,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
         foreach (
             PakfileEntryTextViewModel entry in Entries
                 .Items.OfType<PakfileEntryTextViewModel>()
-                .Where(item => RefactorablePakfileTypes.Any(type => item.Key.EndsWith(type, cmp)))
+                .Where(item => RefactorablePakfileTypes.Any(type => Path.GetExtension(item.Key).Equals(type, cmp)))
         )
         {
             if (!entry.IsContentLoaded)
@@ -253,7 +253,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                 {
                     foreach (string ext in opNoExtension!)
                     {
-                        if (!opNoPrefix.EndsWith(ext, cmp))
+                        if (!Path.GetExtension(opNoPrefix).Equals(ext, cmp))
                             continue;
 
                         searchIdx = entry.Content.IndexOf(opNoPrefix[..^ext.Length], startIndex: baseIdx + 1, cmp);
@@ -294,7 +294,7 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
         }
 
         // TexData - doesn't have viewmodels (yay!)
-        if (oldPath.EndsWith(".vmt", cmp) && opPrefix.Equals("materials", cmp))
+        if (Path.GetExtension(oldPath).Equals(".vmt", cmp) && opPrefix.Equals("materials", cmp))
         {
             string op = opNoPrefix[..^4]; // Trim .vtf
             string np = string.Join(separator, newPath.Split(separator)[1..])[..^4]; // Trim materials/ and .vtf
