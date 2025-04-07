@@ -78,6 +78,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         if (Jobs.Count == 0)
         {
             Logger.Info("No jobs, exiting");
+            IsRunning = false;
             return;
         }
 
