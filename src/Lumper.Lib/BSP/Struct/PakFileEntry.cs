@@ -80,10 +80,11 @@ public sealed class PakfileEntry
 
         lock (ZipAccessLock)
         {
-            using var mem = new MemoryStream((int)ZipEntry!.Size); // Note MemoryStream disposal doesn't delete underlying buffer
+            int size = (int)ZipEntry!.Size;
+            using var mem = new MemoryStream(size); // Note MemoryStream disposal doesn't delete underlying buffer
             using Stream zipStream = ZipEntry!.OpenEntryStream();
             zipStream.CopyTo(mem);
-            _buffer = mem.GetBuffer();
+            _buffer = mem.GetBuffer().AsMemory(0, size);
         }
     }
 
