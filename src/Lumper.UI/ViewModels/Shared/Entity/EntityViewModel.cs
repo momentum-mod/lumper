@@ -21,7 +21,19 @@ public class EntityViewModel : HierarchicalBspNode
     public string Classname
     {
         get => !string.IsNullOrWhiteSpace(_classname) ? _classname : MissingClassname;
-        set => this.RaiseAndSetIfChanged(ref _classname, value);
+        set
+        {
+            if (_classname == value)
+                return;
+
+            _classname = value;
+
+            this.RaisePropertyChanged();
+
+            // Gross doing this but really don't want the perf hit of registering
+            // a ToPropertyEx observable chain for every entity
+            this.RaisePropertyChanged(nameof(ClassAndTargetname));
+        }
     }
 
     public EntityViewModel(Entity entity, EntityLumpViewModel parent)
