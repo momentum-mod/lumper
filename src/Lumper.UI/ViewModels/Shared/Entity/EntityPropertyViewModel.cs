@@ -5,29 +5,40 @@ using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
 using ReactiveUI;
 
-public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProperty, BspNode bspNode)
+public abstract class EntityPropertyViewModel(Entity.EntityProperty property, BspNode bspNode)
     : HierarchicalBspNode(bspNode)
 {
-    public Entity.EntityProperty EntityProperty { get; } = entityProperty;
+    public Entity.EntityProperty Property { get; } = property;
 
-    private string _key = entityProperty.Key;
+    // Note that EntityPropertyViewModels all store copies of their corresponding model values;
+    // without we'd be unable to tell if a viewmodel has been modified when a job or other
+    // Lumper.Lib code is ran that updates the model. When this happens, calling PullChangesFromModel
+    // can simply try setting the viewmodel value to model value, and only RaisePropertyChanged
+    // if it changed.
+    private string _key = property.Key;
     public string Key
     {
         get => _key;
         set
         {
             bool wasClassname = _key == "classname";
-            if (!UpdateField(ref _key, value) || this is not EntityPropertyStringViewModel vm)
+
+            if (_key == value)
+                return;
+
+            _key = value;
+            Property.Key = value;
+            this.RaisePropertyChanged();
+
+            if (this is not EntityPropertyStringViewModel vm)
                 return;
 
             if (wasClassname)
                 ((EntityViewModel)Parent).ResetClassname();
             else if (value == "classname")
-                ((EntityViewModel)Parent).Classname = vm.Value!;
+                ((EntityViewModel)Parent).Classname = vm.Value;
         }
     }
-
-    public override void UpdateModel() => EntityProperty.Key = Key;
 
     public abstract bool MemberwiseEquals(EntityPropertyViewModel other);
 
@@ -38,114 +49,125 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty entityProper
     public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
 }
 
-public class EntityPropertyStringViewModel(Entity.EntityProperty<string> entityProperty, BspNode bspNode)
-    : EntityPropertyViewModel(entityProperty, bspNode)
+public class EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
+    : EntityPropertyViewModel(property, bspNode)
 {
-    private string? _value = entityProperty.Value;
-    public string? Value
+    private string _value = property.Value;
+    public string Value
     {
-        get => _value;
+        get => property.Value;
         set
         {
-            UpdateField(ref _value, value);
+            if (_value == value)
+                return;
+
+            _value = value;
+            property.Value = value;
+            MarkAsModified();
+            this.RaisePropertyChanged();
 
             if (Key == "classname")
-                ((EntityViewModel)Parent).Classname = value!; // Fine if this is null
+                ((EntityViewModel)Parent).Classname = value;
         }
-    }
-
-    public override void UpdateModel()
-    {
-        base.UpdateModel();
-        entityProperty.Value = Value;
     }
 
     public override bool MemberwiseEquals(EntityPropertyViewModel other) =>
         other is EntityPropertyStringViewModel o && o.Key == Key && o.Value == Value;
 
     public override bool MatchValue(string expr, bool wildcardWrapping) =>
-        Value?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
+        Value.MatchesSimpleExpression(expr, wildcardWrapping);
 }
 
-public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> entityProperty, BspNode bspNode)
-    : EntityPropertyViewModel(entityProperty, bspNode)
+// ReSharper disable CompareOfFloatsByEqualityOperator
+public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> property, BspNode bspNode)
+    : EntityPropertyViewModel(property, bspNode)
 {
-    private string? _targetEntityName = entityProperty.Value?.TargetEntityName;
-    public string? TargetEntityName
+    private string _targetEntityName = property.Value.TargetEntityName;
+    public string TargetEntityName
     {
-        get => _targetEntityName;
-        set => UpdateFieldInternal(ref _targetEntityName, value);
-    }
-
-    private string? _input = entityProperty.Value?.Input;
-    public string? Input
-    {
-        get => _input;
-        set => UpdateFieldInternal(ref _input, value);
-    }
-
-    private string? _parameter = entityProperty.Value?.Parameter;
-    public string? Parameter
-    {
-        get => _parameter;
-        set => UpdateFieldInternal(ref _parameter, value);
-    }
-
-    private float? _delay = entityProperty.Value?.Delay;
-    public float? Delay
-    {
-        get => _delay;
-        set => UpdateFieldInternal(ref _delay, value);
-    }
-
-    private int? _timeToFire = entityProperty.Value?.TimesToFire;
-    public int? TimesToFire
-    {
-        get => _timeToFire;
-        set => UpdateFieldInternal(ref _timeToFire, value);
-    }
-
-    public string DisplayValue
-    {
-        get
+        get => property.Value.TargetEntityName;
+        set
         {
-            // TODO: This is a gross copy of EntityIO's ToString() method.
-            // These properties should *really* be get/setters around the model properties,
-            // then this property could just be `=> entityProperty.ValueString`,
-            // instead of duplicating the values here, but then handling IsModified after
-            // job runs becomes a lot more complicated. (See BspNode.UpdateField summary)
-            //
-            // We don't have time for significant refactors at the moment so I'm going
-            // to just leave it, but in the future we could come back and really try to
-            // do the MVVM separation more appropriately.
-            char separator = entityProperty.Value?.Separator ?? ',';
-            // csharpier-ignore
-            return _targetEntityName + separator
-                + _input + separator
-                + _parameter + separator
-                + _delay?.ToString(CultureInfo.InvariantCulture) + separator
-                + _timeToFire?.ToString(CultureInfo.InvariantCulture);
+            if (_targetEntityName == value)
+                return;
+
+            _targetEntityName = value;
+            property.Value.TargetEntityName = value;
+            this.RaisePropertyChanged();
+            OnValueChanged();
         }
     }
 
-    private void UpdateFieldInternal<T>(ref T field, T value)
+    private string _input = property.Value.Input;
+    public string Input
     {
-        UpdateField(ref field, value);
-        this.RaisePropertyChanged(nameof(DisplayValue));
+        get => _input;
+        set
+        {
+            if (_input == value)
+                return;
+
+            _input = value;
+            property.Value.Input = value;
+            this.RaisePropertyChanged();
+            OnValueChanged();
+        }
     }
 
-    public override void UpdateModel()
+    private string _parameter = property.Value.Parameter;
+    public string Parameter
     {
-        base.UpdateModel();
+        get => property.Value.Parameter;
+        set
+        {
+            if (_parameter == value)
+                return;
 
-        if (entityProperty.Value is null)
-            return;
+            _parameter = value;
+            property.Value.Parameter = value;
+            this.RaisePropertyChanged();
+            OnValueChanged();
+        }
+    }
 
-        entityProperty.Value.TargetEntityName = TargetEntityName;
-        entityProperty.Value.Input = Input;
-        entityProperty.Value.Delay = Delay;
-        entityProperty.Value.Parameter = Parameter;
-        entityProperty.Value.TimesToFire = TimesToFire;
+    private float _delay = property.Value.Delay;
+    public float Delay
+    {
+        get => _delay;
+        set
+        {
+            if (_delay == value)
+                return;
+
+            _delay = value;
+            property.Value.Delay = value;
+            this.RaisePropertyChanged();
+            OnValueChanged();
+        }
+    }
+
+    private int _timesToFire = property.Value.TimesToFire;
+    public int TimesToFire
+    {
+        get => _timesToFire;
+        set
+        {
+            if (_timesToFire == value)
+                return;
+
+            _timesToFire = value;
+            property.Value.TimesToFire = value;
+            this.RaisePropertyChanged();
+            OnValueChanged();
+        }
+    }
+
+    public string DisplayValue => property.Value.ToString();
+
+    private void OnValueChanged()
+    {
+        MarkAsModified();
+        this.RaisePropertyChanged(nameof(DisplayValue));
     }
 
     public override bool MemberwiseEquals(EntityPropertyViewModel other) =>

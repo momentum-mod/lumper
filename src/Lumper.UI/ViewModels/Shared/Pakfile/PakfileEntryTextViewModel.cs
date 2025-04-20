@@ -63,7 +63,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
         }
     }
 
-    public override void UpdateModel()
+    public override void PushChangesToModel()
     {
         if (!IsModified || !IsContentLoaded)
             return;

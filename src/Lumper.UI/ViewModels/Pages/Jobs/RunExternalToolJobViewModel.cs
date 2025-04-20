@@ -55,17 +55,17 @@ public class RunExternalToolJobViewModel : JobViewModel
             {
                 if (x)
                     WritesToStdOut = false;
-            }) // @formatter:on
+            })
             .BindTo(this, x => x.Job.WritesToInputFile);
     }
 
-    protected override void Prepare() => BspService.Instance.UpdateModels();
+    protected override void Prepare() => BspService.Instance.PushChangesToModel();
 
     protected override void OnSuccess()
     {
         // Don't have a way to dynamically reload paklump, just reset it
         BspService.Instance.ResetLumpViewModel(typeof(PakfileLumpViewModel));
-        BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
+        BspService.Instance.EntityLumpViewModel?.PullChangesFromModel();
     }
 
     public async Task ShowFilePickerDialog()
