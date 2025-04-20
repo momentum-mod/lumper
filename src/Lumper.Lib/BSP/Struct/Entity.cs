@@ -90,7 +90,7 @@ public partial class Entity : ICloneable
     {
         public string Key { get; set; } = key;
 
-        public abstract string? ValueString { get; }
+        public abstract string ValueString { get; }
 
         public override string ToString() => $"\"{Key}\" \"{ValueString}\"";
 
@@ -124,13 +124,13 @@ public partial class Entity : ICloneable
     /// <param name="key"></param>
     /// <param name="value"></param>
     /// <typeparam name="T"></typeparam>
-    public class EntityProperty<T>(string key, T? value) : EntityProperty(key)
+    public class EntityProperty<T>(string key, T value) : EntityProperty(key)
         where T : ICloneable
     {
-        public T? Value { get; set; } = value;
+        public T Value { get; set; } = value;
 
-        public override string? ValueString => Value?.ToString();
+        public override string ValueString => Value.ToString() ?? "";
 
-        public override object Clone() => new EntityProperty<T>(Key, (T?)Value?.Clone());
+        public override object Clone() => new EntityProperty<T>(Key, (T)Value.Clone());
     }
 }

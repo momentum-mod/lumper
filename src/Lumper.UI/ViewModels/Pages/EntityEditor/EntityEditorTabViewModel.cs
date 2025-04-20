@@ -144,10 +144,10 @@ public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabView
                         fakeIoProp.Parameter = DifferentLabel;
 
                     if (fakeIoProp.Delay != ioMatch.Delay)
-                        fakeIoProp.Delay = null;
+                        fakeIoProp.Delay = 0;
 
                     if (fakeIoProp.TimesToFire != ioMatch.TimesToFire)
-                        fakeIoProp.TimesToFire = null;
+                        fakeIoProp.TimesToFire = 0;
                 }
             }
         }

@@ -123,7 +123,8 @@ public class PakFileLumpRefactoringTests
         EntityLump entityLump = bspFile.GetLump<EntityLump>();
 
         var entity = new Entity();
-        entity.Properties.Add(new Entity.EntityProperty<EntityIo>("hello", new EntityIo("a,b,c,0,1", ',')));
+        _ = EntityIo.TryParse("a,b,c,0,1", out EntityIo? entityIo);
+        entity.Properties.Add(new Entity.EntityProperty<EntityIo>("hello", entityIo!));
         entityLump.Data.Add(entity);
 
         List<UpdateType> result = pakfileLump.UpdatePathReferences(
@@ -327,30 +328,6 @@ public class PakFileLumpRefactoringTests
         Assert.That(changes, Is.Empty);
         var prop = (Entity.EntityProperty<string>)entity.Properties[0];
         Assert.That(prop.Value, Is.EqualTo("filename.wav"), "Should not update paths without separators");
-    }
-
-    [Test]
-    public void Entities_NullPropertyValue_DoesNotCrash()
-    {
-        BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
-
-        var entity = new Entity();
-        entity.Properties.Add(new Entity.EntityProperty<string>("model", null));
-        entityLump.Data.Add(entity);
-
-        // Act & Assert
-        Assert.DoesNotThrow(() =>
-        {
-            List<UpdateType> changes = pakfileLump.UpdatePathReferences(
-                "models/test/example.mdl",
-                "models/test/renamed.mdl",
-                [UpdateType.Entity]
-            );
-
-            Assert.That(changes, Is.Empty);
-        });
     }
 
     [Test]
