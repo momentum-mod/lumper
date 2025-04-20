@@ -93,9 +93,6 @@ public partial class StripperConfig
         if (!filter.Key.Equals(property.Key, StringComparison.OrdinalIgnoreCase))
             return false;
 
-        if (property.ValueString is null)
-            return false;
-
         // Match non-regex
         if (!(filter.Value.Length > 2 && filter.Value.StartsWith('/') && filter.Value.EndsWith('/')))
             return filter.Value.Equals(property.ValueString, StringComparison.OrdinalIgnoreCase);
