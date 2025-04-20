@@ -8,17 +8,17 @@ using System.Text.RegularExpressions;
 
 public partial class EntityIo : ICloneable
 {
-    public string? TargetEntityName { get; set; }
-    public string? Input { get; set; }
-    public string? Parameter { get; set; }
-    public float? Delay { get; set; }
-    public int? TimesToFire { get; set; }
+    public string TargetEntityName { get; set; } = string.Empty;
+    public string Input { get; set; } = string.Empty;
+    public string Parameter { get; set; } = string.Empty;
+    public float Delay { get; set; } = 0.0f;
+    public int TimesToFire { get; set; } = 0;
 
     public char Separator { get; }
 
     public EntityIo(char separator) => Separator = separator;
 
-    public EntityIo(string value, char separator)
+    private EntityIo(string value, char separator)
     {
         Separator = separator;
         string[] props = value.Split(separator);
@@ -94,8 +94,8 @@ public partial class EntityIo : ICloneable
           TargetEntityName + Separator
         + Input + Separator
         + Parameter + Separator
-        + Delay?.ToString(CultureInfo.InvariantCulture) + Separator
-        + TimesToFire?.ToString(CultureInfo.InvariantCulture);
+        + Delay.ToString(CultureInfo.InvariantCulture) + Separator
+        + TimesToFire.ToString(CultureInfo.InvariantCulture);
 
     public object Clone() => MemberwiseClone();
 
