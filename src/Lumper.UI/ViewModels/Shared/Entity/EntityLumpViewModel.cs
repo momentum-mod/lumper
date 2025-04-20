@@ -16,7 +16,7 @@ using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
+public sealed class EntityLumpViewModel : LumpViewModel
 {
     private readonly EntityLump _entityLump;
 
@@ -88,22 +88,6 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
         });
 
     /// <summary>
-    /// Update the underlying model (EntityLump) with data from the ViewModel
-    /// </summary>
-    public override void UpdateModel()
-    {
-        if (IsEditingStream && RawEntitiesViewModel is not null)
-        {
-            RawEntitiesViewModel.SaveOrDiscardEntityLump();
-        }
-        else
-        {
-            foreach (EntityViewModel ent in Entities.Items)
-                ent.UpdateModel();
-        }
-    }
-
-    /// <summary>
     /// Get a MemoryStream of the lump, as ASCII text data
     /// </summary>
     public MemoryStream GetStream()
@@ -143,52 +127,91 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
         this.RaisePropertyChanged();
     }
 
-    /// <summary>
-    /// Scan the underlying model for changes and update on the viewmodel.
-    ///
-    /// Use this for Jobs that affect this lump. Jobs are part of Lumper.Lib
-    /// so have no effect on the viewmodel, we have figure them out programmatically.
-    ///
-    /// Fortunately since this class and EntityLump use a SourceCache and HashSet respectively,
-    /// with a Entity-based key, we get constant-time lookup. This can handle a map with 10,000
-    /// entities in ~25ms, whilst List-based version was ~3s.
-    /// </summary>
-    public void UpdateViewModelFromModel()
+    public override void PushChangesToModel()
+    {
+        // Entity property viewmodel setters set values on underlying models
+        if (IsEditingStream && RawEntitiesViewModel is not null)
+            RawEntitiesViewModel.SaveOrDiscardEntityLump();
+    }
+
+    public override void PullChangesFromModel()
     {
         List<EntityViewModel> additions = [];
         List<Entity> removals = [];
-        foreach (Entity ent in _entityLump.Data)
+
+        // Pretty hefty iterations here fortunately since this class and EntityLump use a SourceCache and HashSet
+        // respectively, with a Entity-based key, we get constant-time lookup. This can handle a map with 10,000
+        // entities in ~25ms, whilst List-based version was ~3s.
+        foreach (Entity entM in _entityLump.Data)
         {
             // In EL, not in ELVM -> add to ELVM
-            Optional<EntityViewModel> entVm = Entities.Lookup(ent);
-            if (!entVm.HasValue)
+            Optional<EntityViewModel> entVmLookup = Entities.Lookup(entM);
+            if (!entVmLookup.HasValue)
             {
-                var newEntity = new EntityViewModel(ent, this);
+                var newEntity = new EntityViewModel(entM, this);
                 additions.Add(newEntity);
                 continue;
             }
 
-            // Property updates on EL -> update on ELVM
-            foreach (EntityPropertyViewModel propVm in entVm.Value.Properties)
+            EntityViewModel entVm = entVmLookup.Value;
+
+            // Remove old properties
+            foreach (
+                EntityPropertyViewModel propVm in entVm
+                    .Properties.ToList()
+                    .Where(propVm => entM.Properties.All(x => x.Key != propVm.Key))
+            )
             {
-                // Checking both references and underlying values. Jobs should generally
-                // just create an entirely new property (so ref compare is what matters here)
-                // so entityproperty ctor logic runs, but doesn't hurt to test for value
-                // changes as well.
-                switch (propVm)
+                entVm.Properties.Remove(propVm);
+                entVm.MarkAsModified();
+            }
+
+            // Iterating over model properties not viewmodel and searching by key, for all we know a Job could have
+            // removed and recreated a property, can't rely on EntityPropertyViewModel.Property referring to the
+            // right instance.
+            foreach (Entity.EntityProperty propM in entM.Properties)
+            {
+                EntityPropertyViewModel? propVm = entVm.Properties.FirstOrDefault(x => x.Key == propM.Key);
+                if (propVm is not null)
                 {
-                    case EntityPropertyStringViewModel { EntityProperty: Entity.EntityProperty<string> sM } sVm
-                        when sVm.EntityProperty != sM || sVm.Value != sM.Value:
-                        sVm.Value = sM.Value;
-                        break;
-                    case EntityPropertyIoViewModel { EntityProperty: Entity.EntityProperty<EntityIo> ioM } ioVm
-                        when ioVm.EntityProperty != ioM || ioVm.EntityProperty.Equals(ioM):
-                        ioVm.TargetEntityName = ioM.Value?.TargetEntityName;
-                        ioVm.Input = ioM.Value?.Input;
-                        ioVm.Delay = ioM.Value?.Delay;
-                        ioVm.Parameter = ioM.Value?.Parameter;
-                        ioVm.TimesToFire = ioM.Value?.TimesToFire;
-                        break;
+                    if (propVm is EntityPropertyStringViewModel strVm)
+                    {
+                        if (propM is Entity.EntityProperty<string> strM)
+                        {
+                            // Setters here call RaisePropertyChanged, MarkAsModified
+                            strVm.Value = strM.Value;
+                        }
+                        else
+                        {
+                            // Weird case, we became EntityIO - create new viewmodel from scratch.
+                            // Careful not to use EntityViewModel.CreateProperty here, which also creates new models.
+                            entVm.Properties.Remove(propVm);
+                            entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                            entVm.MarkAsModified();
+                        }
+                    }
+                    else if (propVm is EntityPropertyIoViewModel ioVm)
+                    {
+                        if (propM is Entity.EntityProperty<EntityIo> ioM)
+                        {
+                            ioVm.TargetEntityName = ioM.Value.TargetEntityName;
+                            ioVm.Input = ioM.Value.Input;
+                            ioVm.Parameter = ioM.Value.Parameter;
+                            ioVm.Delay = ioM.Value.Delay;
+                            ioVm.TimesToFire = ioM.Value.TimesToFire;
+                        }
+                        else
+                        {
+                            entVm.Properties.Remove(propVm);
+                            entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                            entVm.MarkAsModified();
+                        }
+                    }
+                }
+                else
+                {
+                    // Add new properties
+                    entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
                 }
             }
         }
@@ -210,5 +233,5 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
             newEnt.MarkAsModified(); // Probably best to do this last
     }
 
-    public void Dispose() => Entities.Dispose();
+    public override void Dispose() => Entities.Dispose();
 }

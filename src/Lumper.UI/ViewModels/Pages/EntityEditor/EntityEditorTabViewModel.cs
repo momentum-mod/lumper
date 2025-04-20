@@ -107,10 +107,7 @@ public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabView
         // whittle down using the rest.
         var fakeEnt = new Entity(
             realEntities[0]
-                .Properties.Select(prop => new KeyValuePair<string, string>(
-                    prop.Key,
-                    prop.EntityProperty.ValueString ?? ""
-                ))
+                .Properties.Select(prop => new KeyValuePair<string, string>(prop.Key, prop.Property.ValueString ?? ""))
         );
 
         // Iterating over list is probs faster than hashmap given so few KVs but haven't benched.
@@ -119,7 +116,7 @@ public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabView
             foreach (EntityViewModel entity in realEntities[1..])
             {
                 EntityPropertyViewModel? match = entity.Properties.FirstOrDefault(x => x.Key == fakeProp.Key);
-                if (match is null || match.EntityProperty.GetType() != fakeProp.GetType())
+                if (match is null || match.Property.GetType() != fakeProp.GetType())
                 {
                     fakeEnt.Properties.Remove(fakeProp);
                 }
@@ -173,7 +170,7 @@ public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabView
         if (realProps.Count == 0)
         {
             realProps = RealEntities
-                .Select(realEnt => realEnt.AddProperty((Entity.EntityProperty)fakeProp.EntityProperty.Clone()))
+                .Select(realEnt => realEnt.AddProperty((Entity.EntityProperty)fakeProp.Property.Clone()))
                 .ToList();
         }
 

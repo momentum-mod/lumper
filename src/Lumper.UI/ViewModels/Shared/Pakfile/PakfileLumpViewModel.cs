@@ -10,7 +10,7 @@ using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Services;
 
-public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
+public sealed class PakfileLumpViewModel : LumpViewModel
 {
     private readonly PakfileLump _pakfile;
 
@@ -24,10 +24,10 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
 
         _pakfile = bsp.GetLump<PakfileLump>();
 
-        InitEntries();
+        PullChangesFromModel(); // Initializes everything
     }
 
-    public void UpdateViewModelFromModel() =>
+    public override void PullChangesFromModel() =>
         Entries.Edit(updater =>
         {
             foreach (PakfileEntry model in _pakfile.Entries)
@@ -52,8 +52,6 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
                     updater.Remove(entry);
             }
         });
-
-    private void InitEntries() => UpdateViewModelFromModel();
 
     private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry) =>
         Path.GetExtension(entry.Key).Equals(".vtf", StringComparison.OrdinalIgnoreCase)
@@ -94,17 +92,17 @@ public sealed class PakfileLumpViewModel : BspNode, ILumpViewModel
         MarkAsModified();
     }
 
-    public override void UpdateModel()
+    public override void PushChangesToModel()
     {
         if (!IsModified)
             return;
 
         _pakfile.IsModified = true;
         foreach (PakfileEntryViewModel item in Entries.Items)
-            item.UpdateModel();
+            item.PushChangesToModel();
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         Entries.Clear();
         Entries.Dispose();
