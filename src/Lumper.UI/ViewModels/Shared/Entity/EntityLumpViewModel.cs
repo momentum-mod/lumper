@@ -171,24 +171,33 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
             // Property updates on EL -> update on ELVM
             foreach (EntityPropertyViewModel propVm in entVm.Value.Properties)
             {
-                // Checking both references and underlying values. Jobs should generally
-                // just create an entirely new property (so ref compare is what matters here)
-                // so entityproperty ctor logic runs, but doesn't hurt to test for value
-                // changes as well.
-                switch (propVm)
+                // Checking both references and underlying values. Jobs can either create
+                // an entirely new property (so ref compare), or they can modify the existing
+                // property (so value compare)
+                if (
+                    propVm is EntityPropertyStringViewModel { EntityProperty: Entity.EntityProperty<string> strM } strVm
+                    && (strVm.EntityProperty != strM || strVm.Value != strM.Value)
+                )
                 {
-                    case EntityPropertyStringViewModel { EntityProperty: Entity.EntityProperty<string> sM } sVm
-                        when sVm.EntityProperty != sM || sVm.Value != sM.Value:
-                        sVm.Value = sM.Value;
-                        break;
-                    case EntityPropertyIoViewModel { EntityProperty: Entity.EntityProperty<EntityIo> ioM } ioVm
-                        when ioVm.EntityProperty != ioM || ioVm.EntityProperty.Equals(ioM):
-                        ioVm.TargetEntityName = ioM.Value?.TargetEntityName;
-                        ioVm.Input = ioM.Value?.Input;
-                        ioVm.Delay = ioM.Value?.Delay;
-                        ioVm.Parameter = ioM.Value?.Parameter;
-                        ioVm.TimesToFire = ioM.Value?.TimesToFire;
-                        break;
+                    strVm.Value = strM.Value;
+                }
+                else if (
+                    propVm is EntityPropertyIoViewModel { EntityProperty: Entity.EntityProperty<EntityIo> ioM } ioVm
+                    && (
+                        ioVm.EntityProperty != ioM
+                        || ioVm.TargetEntityName != ioM.Value?.TargetEntityName
+                        || ioVm.Input != ioM.Value?.Input
+                        || ioVm.Delay != ioM.Value?.Delay
+                        || ioVm.Parameter != ioM.Value?.Parameter
+                        || ioVm.TimesToFire != ioM.Value?.TimesToFire
+                    )
+                )
+                {
+                    ioVm.TargetEntityName = ioM.Value?.TargetEntityName;
+                    ioVm.Input = ioM.Value?.Input;
+                    ioVm.Delay = ioM.Value?.Delay;
+                    ioVm.Parameter = ioM.Value?.Parameter;
+                    ioVm.TimesToFire = ioM.Value?.TimesToFire;
                 }
             }
         }
