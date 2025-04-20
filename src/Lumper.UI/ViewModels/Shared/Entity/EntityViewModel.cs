@@ -58,7 +58,7 @@ public class EntityViewModel : HierarchicalBspNode
 
     public void DeleteProperty(EntityPropertyViewModel propVm)
     {
-        Entity.Properties.Remove(propVm.EntityProperty);
+        Entity.Properties.Remove(propVm.Property);
         Properties.Remove(propVm);
         MarkAsModified();
     }
@@ -92,12 +92,6 @@ public class EntityViewModel : HierarchicalBspNode
                 : ',';
 
         AddProperty(new Entity.EntityProperty<EntityIo>("newproperty", new EntityIo(separator)));
-    }
-
-    public override void UpdateModel()
-    {
-        foreach (EntityPropertyViewModel prop in Properties)
-            prop.UpdateModel();
     }
 
     public string? FindProperty(string key) =>

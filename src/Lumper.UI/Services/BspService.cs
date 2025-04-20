@@ -105,7 +105,7 @@ public sealed class BspService : ReactiveObject, IDisposable
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private List<ILumpViewModel?> Lumps => [_entityLumpViewModel, _pakfileLumpViewModel];
+    private List<BspNode?> Lumps => [_entityLumpViewModel, _pakfileLumpViewModel];
 
     private BspService()
     {
@@ -310,7 +310,7 @@ public sealed class BspService : ReactiveObject, IDisposable
 
         IsLoading = true;
 
-        UpdateModels();
+        PushChangesToModel();
 
         IoProgressWindow? progressWindow = null;
         try
@@ -345,7 +345,7 @@ public sealed class BspService : ReactiveObject, IDisposable
 
             // If we've renamed cubemaps, need to refresh the pakfile VM.
             if (outName != FileName && PakfileLumpViewModel is not null && StateService.Instance.RenameCubemaps)
-                PakfileLumpViewModel?.UpdateViewModelFromModel();
+                PakfileLumpViewModel?.PullChangesFromModel();
 
             if (handler.Cancelled)
                 return false;
@@ -417,16 +417,13 @@ public sealed class BspService : ReactiveObject, IDisposable
         IsModified = true;
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    public void UpdateModels()
+    public void PushChangesToModel()
     {
-        foreach (ILumpViewModel? vm in Lumps)
-            vm?.UpdateModel(); // Null propagation means we do nothing for unloaded lumps VMs
+        foreach (BspNode? lump in Lumps)
+            lump?.PushChangesToModel();
     }
 
-    public void ResetLumpViewModels()
+    private void ResetLumpViewModels()
     {
         ResetLumpViewModel(typeof(EntityLumpViewModel));
         ResetLumpViewModel(typeof(PakfileLumpViewModel));

@@ -228,10 +228,10 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             );
 
             if (updated.Contains(PakfileLump.PathReferenceUpdateType.Entity))
-                BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
+                BspService.Instance.EntityLumpViewModel?.PullChangesFromModel();
 
             if (updated.Contains(PakfileLump.PathReferenceUpdateType.Pakfile))
-                BspService.Instance.PakfileLumpViewModel?.UpdateViewModelFromModel();
+                BspService.Instance.PakfileLumpViewModel?.PullChangesFromModel();
         }
     }
 
