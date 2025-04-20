@@ -57,8 +57,8 @@ public class StripperTextJobViewModel : JobViewModel
     }
 
     // Push viewmodel changes to model
-    protected override void Prepare() => BspService.Instance.EntityLumpViewModel?.UpdateModel();
+    protected override void Prepare() => BspService.Instance.EntityLumpViewModel?.PushChangesToModel();
 
     // Push model changes to viewmodel
-    protected override void OnSuccess() => BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
+    protected override void OnSuccess() => BspService.Instance.EntityLumpViewModel?.PullChangesFromModel();
 }

@@ -16,7 +16,7 @@ using NLog;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
+public sealed class EntityLumpViewModel : LumpViewModel
 {
     private readonly EntityLump _entityLump;
 
@@ -88,22 +88,6 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
         });
 
     /// <summary>
-    /// Update the underlying model (EntityLump) with data from the ViewModel
-    /// </summary>
-    public override void UpdateModel()
-    {
-        if (IsEditingStream && RawEntitiesViewModel is not null)
-        {
-            RawEntitiesViewModel.SaveOrDiscardEntityLump();
-        }
-        else
-        {
-            foreach (EntityViewModel ent in Entities.Items)
-                ent.UpdateModel();
-        }
-    }
-
-    /// <summary>
     /// Get a MemoryStream of the lump, as ASCII text data
     /// </summary>
     public MemoryStream GetStream()
@@ -143,20 +127,20 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
         this.RaisePropertyChanged();
     }
 
-    /// <summary>
-    /// Scan the underlying model for changes and update on the viewmodel.
-    ///
-    /// Use this for Jobs that affect this lump. Jobs are part of Lumper.Lib
-    /// so have no effect on the viewmodel, we have figure them out programmatically.
-    ///
-    /// Fortunately since this class and EntityLump use a SourceCache and HashSet respectively,
-    /// with a Entity-based key, we get constant-time lookup. This can handle a map with 10,000
-    /// entities in ~25ms, whilst List-based version was ~3s.
-    /// </summary>
-    public void UpdateViewModelFromModel()
+    public override void PushChangesToModel()
+    {
+        if (IsEditingStream && RawEntitiesViewModel is not null)
+            RawEntitiesViewModel.SaveOrDiscardEntityLump();
+    }
+
+    public override void PullChangesFromModel()
     {
         List<EntityViewModel> additions = [];
         List<Entity> removals = [];
+
+        // Pretty hefty iterations here fortunately since this class and EntityLump use a SourceCache and HashSet
+        // respectively, with a Entity-based key, we get constant-time lookup. This can handle a map with 10,000
+        // entities in ~25ms, whilst List-based version was ~3s.
         foreach (Entity ent in _entityLump.Data)
         {
             // In EL, not in ELVM -> add to ELVM
@@ -171,23 +155,19 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
             // Property updates on EL -> update on ELVM
             foreach (EntityPropertyViewModel propVm in entVm.Value.Properties)
             {
-                // Checking both references and underlying values. Jobs should generally
-                // just create an entirely new property (so ref compare is what matters here)
-                // so entityproperty ctor logic runs, but doesn't hurt to test for value
-                // changes as well.
+                propVm.Key = propVm.Property.Key;
                 switch (propVm)
                 {
-                    case EntityPropertyStringViewModel { EntityProperty: Entity.EntityProperty<string> sM } sVm
-                        when sVm.EntityProperty != sM || sVm.Value != sM.Value:
+                    // Setters here call RaisePropertyChanged, MarkAsModified
+                    case EntityPropertyStringViewModel { Property: Entity.EntityProperty<string> sM } sVm:
                         sVm.Value = sM.Value;
                         break;
-                    case EntityPropertyIoViewModel { EntityProperty: Entity.EntityProperty<EntityIo> ioM } ioVm
-                        when ioVm.EntityProperty != ioM || ioVm.EntityProperty.Equals(ioM):
-                        ioVm.TargetEntityName = ioM.Value?.TargetEntityName;
-                        ioVm.Input = ioM.Value?.Input;
-                        ioVm.Delay = ioM.Value?.Delay;
-                        ioVm.Parameter = ioM.Value?.Parameter;
-                        ioVm.TimesToFire = ioM.Value?.TimesToFire;
+                    case EntityPropertyIoViewModel { Property: Entity.EntityProperty<EntityIo> ioM } ioVm:
+                        ioVm.TargetEntityName = ioM.Value.TargetEntityName;
+                        ioVm.Input = ioM.Value.Input;
+                        ioVm.Parameter = ioM.Value.Parameter;
+                        ioVm.Delay = ioM.Value.Delay;
+                        ioVm.TimesToFire = ioM.Value.TimesToFire;
                         break;
                 }
             }
@@ -210,5 +190,5 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
             newEnt.MarkAsModified(); // Probably best to do this last
     }
 
-    public void Dispose() => Entities.Dispose();
+    public override void Dispose() => Entities.Dispose();
 }

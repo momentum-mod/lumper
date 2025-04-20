@@ -27,9 +27,6 @@ public sealed class RawEntitiesViewModel : ViewModelWithView<RawEntitiesViewMode
 
         _editor = editor;
 
-        if (entLump.IsModified)
-            entLump.UpdateModel();
-
         using MemoryStream stream = entLump.GetStream();
         // Remove NULL byte from end of stream, don't want user to see it
         stream.SetLength(stream.Length - 1);

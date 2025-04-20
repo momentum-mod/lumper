@@ -125,8 +125,6 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     ///
     /// For viewmodels that store their contents on the model (this is important if we care about hashing that
     /// information), this can be a noop.
-    ///
-    /// <see cref="BspNode">See BspNode comments for architectural overview</see>
     /// </summary>
-    public override void UpdateModel() { }
+    public override void PushChangesToModel() { }
 }
