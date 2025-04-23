@@ -327,7 +327,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
     public void DeleteSelected()
     {
-        if (!GetSelection(out IReadOnlyList<Node> items, single: true))
+        if (!GetSelection(out IReadOnlyList<Node> items, single: false))
             return;
 
         foreach (Node node in items.ToList())
