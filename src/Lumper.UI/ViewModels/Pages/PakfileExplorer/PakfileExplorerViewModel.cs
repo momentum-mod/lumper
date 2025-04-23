@@ -420,7 +420,10 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             return;
         }
 
-        string commonParentPath = Node.FindCommonAncestor(nodes).PathString + '/';
+        string commonParentPath = Node.FindCommonAncestor(nodes).PathString;
+        if (!string.IsNullOrEmpty(commonParentPath))
+            commonParentPath += '/';
+
         try
         {
             foreach (
