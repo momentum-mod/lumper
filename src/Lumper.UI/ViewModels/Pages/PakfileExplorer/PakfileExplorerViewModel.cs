@@ -172,8 +172,6 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     // Note this doesn't handle deletions, kept in DeleteSelected for now
     private async Task PushTreeChangesToEntries()
     {
-        // TODO: recursive size updates -- need to iterate over all directory node from bottom up calling
-        // RecalculateSize.
         if (Tree is null)
             return;
 
