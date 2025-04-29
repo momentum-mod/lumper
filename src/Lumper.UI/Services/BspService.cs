@@ -345,7 +345,7 @@ public sealed class BspService : ReactiveObject, IDisposable
 
             // If we've renamed cubemaps, need to refresh the pakfile VM.
             if (outName != FileName && PakfileLumpViewModel is not null && StateService.Instance.RenameCubemaps)
-                PakfileLumpViewModel?.UpdateViewModelFromModel(false);
+                PakfileLumpViewModel?.UpdateViewModelFromModel();
 
             if (handler.Cancelled)
                 return false;
