@@ -122,6 +122,11 @@ public partial class PakfileLump
                 updatedTypes.Add(PathReferenceUpdateType.TexData);
         }
 
+        if (updateTypes is null || updateTypes.Contains(PathReferenceUpdateType.StaticProp))
+        {
+            if (UpdateStaticPropPathReferences(oldPath, newPath, opPrefix))
+                updatedTypes.Add(PathReferenceUpdateType.StaticProp);
+        }
 
         return updatedTypes;
     }
@@ -291,6 +296,24 @@ public partial class PakfileLump
         return count > 0;
     }
 
+    private bool UpdateStaticPropPathReferences(string oldPath, string newPath, string opPrefix)
+    {
+        if (!Path.GetExtension(oldPath).Equals(".mdl", Comparison) || !opPrefix.Equals("models", Comparison))
+            return false;
+
+        List<string>? pathList = Parent.GetLump<GameLump>().GetLump<Sprp>()?.StaticPropsDict?.Data;
+
+        if (pathList is null)
+            return false;
+
+        int match = pathList.FindIndex(name => name.StartsWith(oldPath, Comparison));
+        if (match != -1)
+            return false;
+
+        pathList[match] = newPath;
+        Logger.Info($"Updated static prop path from {oldPath} to {pathList[match]}");
+        return true;
+    }
 
     // As per https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/utils/vbsp/cubemap.cpp
     [GeneratedRegex(@"materials\/maps\/(.+)?/(?:(?:c-?\d+_-?\d+_-?\d+)|(?:cubemapdefault)(?:\.hdr)?\.vtf)")]
