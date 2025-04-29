@@ -171,10 +171,14 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     // Note this doesn't handle deletions, kept in DeleteSelected for now
     private async Task PushTreeChangesToEntries()
     {
-        // TODO: size updates?
+        // TODO: recursive size updates -- need to iterate over all directory node from bottom up calling
+        // RecalculateSize.
         if (Tree is null)
             return;
 
+        // By the time this called, TreeDataGrid has moved all nodes around in the tree
+        // according to how user drag-dropped. So each node correctly below to its parents
+        // Children list, but the node's Parent property needs to be updated.
         PakfileTreeViewModel.FixParentsRecursive(Tree.Root);
 
         bool queriedUser = false;
@@ -211,6 +215,12 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             }
 
             // Update the actual key on the PakFileEntry - this is what causes the move to handle on save.
+
+            // TreeDataGrid drag-drop already moved this node in the tree internally, but because the Key
+            // of the node has changed, Rename(newKey) has to remove and re-add itself to the
+            // PakfileLumpViewModel.Entries SourceCache. Easiest to just remove this node from
+            // the tree, then it'll get added back during renaming.
+            node.RemoveSelf();
             node.Leaf.Rename(newKey);
         }
     }
