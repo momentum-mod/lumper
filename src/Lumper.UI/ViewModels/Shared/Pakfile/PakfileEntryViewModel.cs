@@ -51,7 +51,7 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
         Key = BaseEntry.Key;
     }
 
-    public abstract void Load(CancellationTokenSource? cts = null);
+    public virtual void Load(CancellationTokenSource? cts = null) { }
 
     public void Rename(string newName)
     {
@@ -80,12 +80,22 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public ReadOnlySpan<byte> GetData()
     {
+        string? oldHash = BaseEntry.HasLoadedData ? Hash : null;
+
         ReadOnlySpan<byte> data = BaseEntry.GetData();
-        OnDataUpdate();
+
+        if (BaseEntry.Hash != oldHash)
+            OnDataUpdate();
+
         return data;
     }
 
-    private void OnDataUpdate()
+    /// <summary>
+    /// Called whenever unique new data is loaded by viewmodel code. Note this is *not* called the if BaseEntry is
+    /// modified by non-viewmodel code, e.g. during Jobs. If a job has potentially modified the entry, you need to call
+    /// UpdateViewModelFromModel() on the Pakfile lump to detect changes.
+    /// </summary>
+    public virtual void OnDataUpdate()
     {
         // Hashes need to read the entire ZipArchive contents to be calculated, and we can only read one zip entry at a
         // time. If we use a getter that calls GetData() we massively degrade performance in the texture browser, since

@@ -78,6 +78,8 @@ public sealed class PakfileEntry
     // Static lock for access to zip archive - SharpCompress's OpenEntryStream is not thread-safe.
     private static readonly Lock ZipAccessLock = new();
 
+    public bool HasLoadedData => _buffer is not null;
+
     public void PrefetchData()
     {
         if (_buffer is not null)
