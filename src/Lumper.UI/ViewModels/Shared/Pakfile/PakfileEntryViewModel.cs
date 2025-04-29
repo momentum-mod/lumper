@@ -36,6 +36,8 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public long? CompressedSize => BaseEntry.CompressedSize;
 
+    public long? UncompressedSize => BaseEntry.UncompressedSize;
+
     [Reactive]
     public string? Hash { get; set; }
 

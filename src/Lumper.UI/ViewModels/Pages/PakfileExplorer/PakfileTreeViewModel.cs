@@ -96,7 +96,7 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public string? Extension => Leaf?.Extension;
 
-    public PakfileTreeNodeViewModel() => Size = Leaf?.CompressedSize ?? 0;
+    public PakfileTreeNodeViewModel() => Size = Leaf?.UncompressedSize ?? 0;
 
     // Note that this is the entire path, INCLUDING name.extension
     public PathList Path
@@ -124,7 +124,7 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     private void AddInternal(PakfileEntryViewModel? value, PathList path)
     {
-        long size = value?.CompressedSize ?? 0;
+        long size = value?.UncompressedSize ?? 0;
 
         // Processing directory paths of the path, recursing down the tree and creating new nodes where needed
         if (path.Count > 1)

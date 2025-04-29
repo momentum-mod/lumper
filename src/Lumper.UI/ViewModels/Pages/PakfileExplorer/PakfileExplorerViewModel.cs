@@ -87,7 +87,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                             }
                         ),
                         new TemplateColumn<Node>(
-                            "Size (Compressed)",
+                            "Size (uncompressed)",
                             "EntrySizeCell",
                             null,
                             new GridLength(1, GridUnitType.Star),
