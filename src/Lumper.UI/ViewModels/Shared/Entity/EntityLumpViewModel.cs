@@ -129,6 +129,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
 
     public override void PushChangesToModel()
     {
+        // Entity property viewmodel setters set values on underlying models
         if (IsEditingStream && RawEntitiesViewModel is not null)
             RawEntitiesViewModel.SaveOrDiscardEntityLump();
     }
@@ -141,34 +142,77 @@ public sealed class EntityLumpViewModel : LumpViewModel
         // Pretty hefty iterations here fortunately since this class and EntityLump use a SourceCache and HashSet
         // respectively, with a Entity-based key, we get constant-time lookup. This can handle a map with 10,000
         // entities in ~25ms, whilst List-based version was ~3s.
-        foreach (Entity ent in _entityLump.Data)
+        foreach (Entity entM in _entityLump.Data)
         {
             // In EL, not in ELVM -> add to ELVM
-            Optional<EntityViewModel> entVm = Entities.Lookup(ent);
-            if (!entVm.HasValue)
+            Optional<EntityViewModel> entVmLookup = Entities.Lookup(entM);
+            if (!entVmLookup.HasValue)
             {
-                var newEntity = new EntityViewModel(ent, this);
+                var newEntity = new EntityViewModel(entM, this);
                 additions.Add(newEntity);
                 continue;
             }
 
-            // Property updates on EL -> update on ELVM
-            foreach (EntityPropertyViewModel propVm in entVm.Value.Properties)
+            EntityViewModel entVm = entVmLookup.Value;
+
+            // Remove old properties
+            foreach (
+                EntityPropertyViewModel propVm in entVm
+                    .Properties.ToList()
+                    .Where(propVm => entM.Properties.All(x => x.Key != propVm.Key))
+            )
             {
-                propVm.Key = propVm.Property.Key;
-                switch (propVm)
+                entVm.Properties.Remove(propVm);
+                entVm.MarkAsModified();
+            }
+
+            // Iterating over model properties not viewmodel and searching by key, for all we know a Job could have
+            // removed and recreated a property, can't rely on EntityPropertyViewModel.Property referring to the
+            // right instance.
+            foreach (Entity.EntityProperty propM in entM.Properties)
+            {
+                // TODO: Doesn't work reliably, try do a stripper config "replace" and it won't update a string.
+                EntityPropertyViewModel? propVm = entVm.Properties.FirstOrDefault(x => x.Key == propM.Key);
+                if (propVm is not null)
                 {
-                    // Setters here call RaisePropertyChanged, MarkAsModified
-                    case EntityPropertyStringViewModel { Property: Entity.EntityProperty<string> sM } sVm:
-                        sVm.Value = sM.Value;
-                        break;
-                    case EntityPropertyIoViewModel { Property: Entity.EntityProperty<EntityIo> ioM } ioVm:
-                        ioVm.TargetEntityName = ioM.Value.TargetEntityName;
-                        ioVm.Input = ioM.Value.Input;
-                        ioVm.Parameter = ioM.Value.Parameter;
-                        ioVm.Delay = ioM.Value.Delay;
-                        ioVm.TimesToFire = ioM.Value.TimesToFire;
-                        break;
+                    if (propVm is EntityPropertyStringViewModel strVm)
+                    {
+                        if (propVm.Property is Entity.EntityProperty<string> strM)
+                        {
+                            // Setters here call RaisePropertyChanged, MarkAsModified
+                            strVm.Value = strM.Value;
+                        }
+                        else
+                        {
+                            // Weird case, we became EntityIO - create new viewmodel from scratch.
+                            // Careful not to use EntityViewModel.CreateProperty here, which also creates new models.
+                            entVm.Properties.Remove(propVm);
+                            entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                            entVm.MarkAsModified();
+                        }
+                    }
+                    else if (propVm is EntityPropertyIoViewModel ioVm)
+                    {
+                        if (propVm.Property is Entity.EntityProperty<EntityIo> ioM)
+                        {
+                            ioVm.TargetEntityName = ioM.Value.TargetEntityName;
+                            ioVm.Input = ioM.Value.Input;
+                            ioVm.Parameter = ioM.Value.Parameter;
+                            ioVm.Delay = ioM.Value.Delay;
+                            ioVm.TimesToFire = ioM.Value.TimesToFire;
+                        }
+                        else
+                        {
+                            entVm.Properties.Remove(propVm);
+                            entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                            entVm.MarkAsModified();
+                        }
+                    }
+                }
+                else
+                {
+                    // Add new properties
+                    entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
                 }
             }
         }
