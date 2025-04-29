@@ -149,7 +149,7 @@ public sealed class EntityLumpViewModel : BspNode, ILumpViewModel
     /// Use this for Jobs that affect this lump. Jobs are part of Lumper.Lib
     /// so have no effect on the viewmodel, we have figure them out programmatically.
     ///
-    /// Fortunately since this class and EntityLump use a SourceCache and HasSet respectively,
+    /// Fortunately since this class and EntityLump use a SourceCache and HashSet respectively,
     /// with a Entity-based key, we get constant-time lookup. This can handle a map with 10,000
     /// entities in ~25ms, whilst List-based version was ~3s.
     /// </summary>
