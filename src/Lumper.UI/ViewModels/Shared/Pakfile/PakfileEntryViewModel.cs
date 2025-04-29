@@ -53,10 +53,17 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public virtual void Load(CancellationTokenSource? cts = null) { }
 
-    public void Rename(string newName)
+    public void Rename(string newKey)
     {
-        Key = newName;
-        BaseEntry.Rename(newName);
+        var pakfileLump = (PakfileLumpViewModel)Parent;
+        pakfileLump.Entries.Edit(updater =>
+        {
+            updater.Remove(Key);
+            Key = newKey;
+            updater.AddOrUpdate(this);
+        });
+
+        BaseEntry.Rename(newKey);
         MarkAsModified();
     }
 
