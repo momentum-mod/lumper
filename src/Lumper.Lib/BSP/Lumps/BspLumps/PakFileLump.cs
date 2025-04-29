@@ -1,10 +1,8 @@
 namespace Lumper.Lib.Bsp.Lumps.BspLumps;
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.IO;
 using Lumper.Lib.Bsp.Lumps;
@@ -23,6 +21,12 @@ using SharpCompress.Writers.Zip;
 /// </summary>
 public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(parent), IFileBackedLump
 {
+    /// <summary>
+    /// File extensions commonly in pakfile that we expect to be text data, displaying in text editor
+    /// UI, and scanning during path reference refactoring.
+    /// </summary>
+    public static readonly string[] TextFileTypes = [".txt", ".vmt", ".cfg"];
+
     public List<PakfileEntry> Entries { get; private set; } = [];
 
     [JsonIgnore]
@@ -216,88 +220,5 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
                 entry.ZipEntry = Zip.AddEntry(entry.Key, mem, true);
             }
         }
-    }
-
-    /// <summary>
-    /// Updates all path references in the PakFileLump from oldPath to newPath,
-    /// i.e. if a VMT references a VTF, it will be updated.
-    /// </summary>
-    public void UpdatePathReferences(string newPath, string oldPath, string? limitExtension = null)
-    {
-        UpdatePathReferencesInternal(newPath, oldPath, '/', limitExtension);
-        UpdatePathReferencesInternal(newPath, oldPath, '\\', limitExtension);
-    }
-
-    public void UpdatePathReferencesInternal(
-        string newPath,
-        string oldPath,
-        char separator,
-        string? limitExtension = null
-    )
-    {
-        string[] opSplit = oldPath.Split(separator);
-        string[] npSplit = newPath.Split(separator);
-
-        // VMTs can reference VTFs ignoring the root directory and without the extension
-        oldPath = string.Join(separator, opSplit[1..]);
-        newPath = string.Join(separator, npSplit[1..]);
-        oldPath = Path.ChangeExtension(oldPath, "").TrimEnd('.');
-        newPath = Path.ChangeExtension(newPath, "").TrimEnd('.');
-
-        foreach (PakfileEntry entry in Entries)
-        {
-            if (
-                limitExtension is null
-                || !Path.GetExtension(entry.Key).Equals(limitExtension, StringComparison.Ordinal)
-            )
-                continue;
-
-            string entryString = BspFile.Encoding.GetString(entry.GetData());
-            string newString = entryString.Replace(oldPath, newPath, StringComparison.OrdinalIgnoreCase);
-
-            if (newString != entryString)
-                entry.UpdateData(BspFile.Encoding.GetBytes(newString));
-        }
-    }
-
-    // As per https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/utils/vbsp/cubemap.cpp
-    [GeneratedRegex(@"materials\/maps\/(.+)?/(?:(?:c-?\d+_-?\d+_-?\d+)|(?:cubemapdefault)(?:\.hdr)?\.vtf)")]
-    private static partial Regex CubemapRegex();
-
-    /// <summary>
-    /// Renames the cubemap path as Source uses the filename when searching.
-    /// Returns a dictionary with the key as the old string
-    /// and the value as the new string
-    /// </summary>
-    public Dictionary<string, string> RenameCubemapPaths(string newFileName)
-    {
-        string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
-        var entriesModified = new Dictionary<string, string>();
-
-        bool matched = false;
-        foreach (PakfileEntry entry in Entries)
-        {
-            Match match = CubemapRegex().Match(entry.Key);
-            if (match.Success)
-            {
-                matched = true;
-
-                // Add the old key so we can update the UI later
-                string oldString = entry.Key;
-
-                string cubemapName = match.Groups[1].Value;
-                entry.Rename(entry.Key.Replace(cubemapName, baseFilename));
-
-                entriesModified.Add(oldString, entry.Key);
-            }
-        }
-
-        if (matched)
-        {
-            IsModified = true;
-            UpdateZip();
-        }
-
-        return entriesModified;
     }
 }
