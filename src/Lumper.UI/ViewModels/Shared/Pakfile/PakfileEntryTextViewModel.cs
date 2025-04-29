@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Views.Shared.Pakfile;
 using NLog;
@@ -64,9 +65,18 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
 
     public override void UpdateModel()
     {
-        if (!IsModified)
+        if (!IsModified || !IsContentLoaded)
             return;
 
         UpdateData(BspFile.Encoding.GetBytes(Content ?? ""));
+    }
+
+    public override void OnDataUpdate()
+    {
+        // If we had data loaded into Content previously and the model data updates, update Content.
+        if (IsContentLoaded)
+            LoadContent();
+
+        base.OnDataUpdate();
     }
 }
