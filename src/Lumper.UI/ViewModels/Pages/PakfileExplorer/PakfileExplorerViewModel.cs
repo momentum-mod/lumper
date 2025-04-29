@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Platform.Storage;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Pakfile;
 using Lumper.UI.Views.Pages.PakfileExplorer;
@@ -205,16 +206,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 queriedUser = true;
             }
 
-            if (moveReferences)
-            {
-                await Observable.Start(
-                    () =>
-                        BspService.Instance.BspFile!.GetLump<PakfileLump>().UpdatePathReferences(newKey, node.Leaf.Key),
-                    RxApp.MainThreadScheduler // Must be main thread, calls a bunch of viewmodel setters.
-                );
-            }
-
-            // Update the actual key on the PakFileEntry - this is what causes the move to handle on save.
+            Logger.Info($"Moved {node.Leaf.Key} to {newKey}");
+            string oldKey = node.Leaf.Key;
 
             // TreeDataGrid drag-drop already moved this node in the tree internally, but because the Key
             // of the node has changed, Rename(newKey) has to remove and re-add itself to the
@@ -222,6 +215,23 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             // the tree, then it'll get added back during renaming.
             node.RemoveSelf();
             node.Leaf.Rename(newKey);
+
+            if (!moveReferences)
+                continue;
+
+            // Running this on the main thread since we want to block users from modifying pakfile, entity lump,
+            // basically anything modifyable in the UI whilst refactor is ongoing. Would prefer to avoid to UI
+            // lag, but too much work blocking modification everywhere.
+            List<PakfileLump.PathReferenceUpdateType> updated = await Observable.Start(
+                () => BspService.Instance.BspFile!.GetLump<PakfileLump>().UpdatePathReferences(oldKey, newKey),
+                RxApp.MainThreadScheduler
+            );
+
+            if (updated.Contains(PakfileLump.PathReferenceUpdateType.Entity))
+                BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
+
+            if (updated.Contains(PakfileLump.PathReferenceUpdateType.Pakfile))
+                BspService.Instance.PakfileLumpViewModel?.UpdateViewModelFromModel();
         }
     }
 
