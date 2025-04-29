@@ -204,7 +204,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             if (moveReferences)
             {
                 await Observable.Start(
-                    () => _pakfileLump!.UpdatePathReferences(newKey, node.Leaf.Key),
+                    () =>
+                        BspService.Instance.BspFile!.GetLump<PakfileLump>().UpdatePathReferences(newKey, node.Leaf.Key),
                     RxApp.MainThreadScheduler // Must be main thread, calls a bunch of viewmodel setters.
                 );
             }
