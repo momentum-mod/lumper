@@ -19,8 +19,6 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
     [Reactive]
     public bool IsContentLoaded { get; set; }
 
-    private static readonly string[] KnownFileTypes = [".txt", ".vbsp", ".vmt"];
-
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public PakfileEntryTextViewModel(PakfileEntry entry, BspNode parent)
@@ -28,7 +26,7 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
 
     public override void Load(CancellationTokenSource? cts = null)
     {
-        if (!IsContentLoaded && KnownFileTypes.Contains(Extension))
+        if (!IsContentLoaded && PakfileLump.TextFileTypes.Contains(Extension))
             LoadContent();
     }
 
