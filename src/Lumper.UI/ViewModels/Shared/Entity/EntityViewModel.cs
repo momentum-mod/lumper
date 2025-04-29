@@ -1,6 +1,5 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
-using System;
 using System.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
@@ -42,14 +41,14 @@ public class EntityViewModel : HierarchicalBspNode
         Entity = entity;
 
         foreach (Entity.EntityProperty property in entity.Properties)
-            Properties.Add(CreatePropertyViewModel(property));
+            Properties.Add(EntityPropertyViewModel.Create(property, this));
 
         ResetClassname();
     }
 
     public EntityPropertyViewModel AddProperty(Entity.EntityProperty prop)
     {
-        EntityPropertyViewModel vm = CreatePropertyViewModel(prop);
+        var vm = EntityPropertyViewModel.Create(prop, this);
         Entity.Properties.Add(prop);
         Properties.Add(vm);
         MarkAsModified();
@@ -62,14 +61,6 @@ public class EntityViewModel : HierarchicalBspNode
         Properties.Remove(propVm);
         MarkAsModified();
     }
-
-    private EntityPropertyViewModel CreatePropertyViewModel(Entity.EntityProperty entityProperty) =>
-        entityProperty switch
-        {
-            Entity.EntityProperty<string> sp => new EntityPropertyStringViewModel(sp, this),
-            Entity.EntityProperty<EntityIo> sio => new EntityPropertyIoViewModel(sio, this),
-            _ => throw new ArgumentOutOfRangeException(nameof(entityProperty)),
-        };
 
     public void AddString() => AddProperty(new Entity.EntityProperty<string>("newproperty", "newvalue"));
 
