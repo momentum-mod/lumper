@@ -54,6 +54,11 @@ public sealed class PakfileEntry
     [JsonProperty]
     public long? CompressedSize => ZipEntry?.CompressedSize ?? null;
 
+    [JsonProperty]
+    // Use length of buffer if we're read already so we get sizes for imported/updated
+    // entries, fallback to ZipEntry.Size if we haven't read it yet.
+    public long? UncompressedSize => _buffer?.Length ?? ZipEntry?.Size;
+
     private readonly PakfileLump _parent;
 
     private bool _isModified;
