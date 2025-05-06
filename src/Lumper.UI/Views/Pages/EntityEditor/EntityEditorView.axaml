@@ -244,10 +244,13 @@
                   </DataTemplate>
                 </ItemsControl.DataTemplates>
               </ItemsControl>
-              <StackPanel Orientation="Horizontal" Spacing="4">
-                <Button Command="{Binding Entity.AddString}">Add KeyValue</Button>
-                <Button Command="{Binding Entity.AddIo}">Add IO</Button>
-              </StackPanel>
+              <DockPanel>
+                <Button Command="{Binding Entity.AddString}" HorizontalAlignment="Left" Margin="4 0 ">Add KeyValue</Button>
+                <Button Command="{Binding Entity.AddIo}" HorizontalAlignment="Left" Margin="4 0">Add IO</Button>
+                <HyperlinkButton NavigateUri="{Binding DocumentationUri}" HorizontalAlignment="Right"
+                                 Content="VDC Reference" Margin="4 0 0 0"
+                                 IsVisible="{Binding DocumentationUri, Converter={x:Static ObjectConverters.IsNotNull}}" />
+              </DockPanel>
             </StackPanel>
           </ScrollViewer>
         </DataTemplate>

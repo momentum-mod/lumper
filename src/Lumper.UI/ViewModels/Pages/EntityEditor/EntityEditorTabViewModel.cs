@@ -19,7 +19,10 @@ public abstract class EntityEditorTabViewModel : ViewModel
     public EntityViewModel Entity { get; protected init; } = null!;
 
     [Reactive]
-    public string Name { get; protected set; } = null!;
+    public string Name { get; protected set; } = EntityViewModel.MissingClassname;
+
+    [Reactive]
+    public string? DocumentationUri { get; protected set; } = null;
 
     public bool IsPinned { get; set; }
 
@@ -30,12 +33,20 @@ public class EntityEditorTabSingleEntityViewModel : EntityEditorTabViewModel
 {
     public override bool Pinnable => true;
 
-    // public override string DocumentationUri => "https://developer.valvesoftware.com/wiki/" + Entity.Classname;
     public EntityEditorTabSingleEntityViewModel(EntityViewModel entity)
     {
         Entity = entity;
 
-        entity.WhenAnyValue(x => x.Classname).Do(x => Name = x).Subscribe();
+        entity
+            .WhenAnyValue(x => x.Classname)
+            .Subscribe(classname =>
+            {
+                Name = classname;
+                DocumentationUri =
+                    classname != EntityViewModel.MissingClassname
+                        ? $"https://developer.valvesoftware.com/wiki/{classname}"
+                        : null;
+            });
     }
 }
 
