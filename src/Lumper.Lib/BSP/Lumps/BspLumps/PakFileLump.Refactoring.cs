@@ -26,7 +26,7 @@ public partial class PakfileLump
     // havent't spent much time looking. When adding new entries be *very* careful -
     // it may be that for some files, the cases where the extensions can be omitted
     // depend on specific KV1 keys.
-    private static readonly Dictionary<string, string[]> IgnorableExtensions = new() { { ".vmt", [".vtf"] } };
+    private static readonly Dictionary<string, string[]> IgnorableExtensions = new() { { ".vmt", [".vtf", ".vmt"] } };
 
     // Directories in Source that are sometimes omitted from a property, e.g. an
     // ambient_generic's "message" (sound file) doesn't need sound/ on the front,
@@ -41,10 +41,6 @@ public partial class PakfileLump
         "models",
         "resource",
     ];
-
-    // Chars that are not valid in a path (maybe they are but really shouldn't be). Used to decide if we're at the end
-    // of a string in a common Source file e.g. closing quotes in a VMT value.
-    private static readonly char[] ControlChars = ['\n', '\r', '\t', ' ', '(', ')', '{', '}', '[', ']', '=', '"', '\''];
 
     // Far as we can tell, Source allows both / and \ as separators everywhere, and can even handle paths using
     // a combination of the two (fuck's sake).
@@ -112,7 +108,7 @@ public partial class PakfileLump
 
         if (updateTypes is null || updateTypes.Contains(PathReferenceUpdateType.Pakfile))
         {
-            if (UpdatePakfilePathReferences(oldPath, newPath, limitPakfileExtensions, opNoPrefix, directoryMatch))
+            if (UpdateKv1PathReferences(oldPath, newPath, limitPakfileExtensions, opNoPrefix, directoryMatch))
                 updatedTypes.Add(PathReferenceUpdateType.Pakfile);
         }
 
@@ -142,7 +138,7 @@ public partial class PakfileLump
                 if (prop is not Entity.EntityProperty<string> { Value: not null } sProp)
                     continue;
 
-                string propValue = sProp.Value;
+                string propValue = sProp.Value.Replace('\\', '/');
                 if (!propValue.EndsWith(opNoPrefix, Comparison))
                     // Definitely not a match
                     continue;
@@ -172,7 +168,7 @@ public partial class PakfileLump
         return updated;
     }
 
-    private bool UpdatePakfilePathReferences(
+    private bool UpdateKv1PathReferences(
         string oldPath,
         string newPath,
         string[] limitExtensions,
@@ -210,10 +206,11 @@ public partial class PakfileLump
                 string np = newPath;
 
                 // If we matched a directory, we're almost certainly right to omit it.
+                // UpdatePathReferences has already checked that the new path also starts with it.
                 if (directoryMatch is not null)
                 {
-                    op = op[(op.IndexOf('/') + 1)..];
-                    np = np[(op.IndexOf('/') + 1)..];
+                    op = op[(directoryMatch.Length + 1)..];
+                    np = np[(directoryMatch.Length + 1)..];
                 }
 
                 // Index used to search forward from baseIdx
@@ -245,9 +242,33 @@ public partial class PakfileLump
                 // Okay, we matched
                 baseIdx = searchIdx;
 
-                // Make sure we're not matching e.g. foo/bar.vtf with foo/barbaz.vtf
+                // Need to check a bunch of cases:
+                // - we're not matching foo/bar.vtf with foo/barbaz.vtf
+                // - we're not matching foo/bar.vtf with baz/foo/bar.vtf
+                //
+                // It'd be really nice if we could use a KV1 parser here, but we want to preserve comments and generally
+                // leave files as unchanged as possible. ValveKeyValue unfortunately doesn't expose the reader we could
+                // use to do this... Unit tests for this are a pretty good at least.
+                //
+                // We can tolerate some very unusual edge cases of a found value actually being a key, or a potentially
+                // invalid KV1 file. If value is quoted properly, or has whitespace to left and
+                // whitespace/newline/comment to right, we can assume it's a valid match.
                 char nextChar = text[baseIdx + op.Length];
-                if (ControlChars.Contains(nextChar))
+                char prevChar = text[baseIdx - 1];
+
+                bool valid = false;
+                if (prevChar == '"')
+                {
+                    if (nextChar == '"')
+                        valid = true;
+                }
+                else if (IsWhitespace(prevChar))
+                {
+                    if (IsWhitespace(nextChar) || nextChar is '\r' or '\n' or '/') //
+                        valid = true;
+                }
+
+                if (valid)
                 {
                     text = text[..baseIdx] + np + text[(baseIdx + op.Length)..];
                     changes++;
@@ -272,6 +293,19 @@ public partial class PakfileLump
 
         return updated;
     }
+
+    // C isspace https://en.cppreference.com/w/c/string/byte/isspace
+    private static bool IsWhitespace(char c) =>
+        c switch
+        {
+            ' ' => true,
+            '\t' => true,
+            '\r' => true,
+            '\n' => true,
+            '\v' => true,
+            '\f' => true,
+            _ => false,
+        };
 
     private bool UpdateTexDataPathReferences(string oldPath, string newPath, string opPrefix, string opNoPrefix)
     {

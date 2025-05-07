@@ -73,10 +73,12 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
 
     public override void OnDataUpdate()
     {
+        // Run first so vm hash is set update and equal to model hash, otherwise
+        // LoadContent -> GetData -> OnDataUpdate calls will stack overflow.
+        base.OnDataUpdate();
+
         // If we had data loaded into Content previously and the model data updates, update Content.
         if (IsContentLoaded)
             LoadContent();
-
-        base.OnDataUpdate();
     }
 }
