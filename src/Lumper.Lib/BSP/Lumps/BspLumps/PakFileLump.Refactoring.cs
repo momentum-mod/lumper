@@ -264,7 +264,7 @@ public partial class PakfileLump
                 }
                 else if (IsWhitespace(prevChar))
                 {
-                    if (IsWhitespace(nextChar) || nextChar is '\r' or '\n' or '/') //
+                    if (IsWhitespace(nextChar) || nextChar is '\r' or '\n' or '/')
                         valid = true;
                 }
 
@@ -340,8 +340,8 @@ public partial class PakfileLump
         if (pathList is null)
             return false;
 
-        int match = pathList.FindIndex(name => name.StartsWith(oldPath, Comparison));
-        if (match != -1)
+        int match = pathList.FindIndex(name => name.Equals(oldPath, Comparison));
+        if (match == -1)
             return false;
 
         pathList[match] = newPath;
@@ -349,43 +349,56 @@ public partial class PakfileLump
         return true;
     }
 
-    // As per https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/utils/vbsp/cubemap.cpp
-    [GeneratedRegex(@"materials\/maps\/(.+)?/(?:(?:c-?\d+_-?\d+_-?\d+)|(?:cubemapdefault)(?:\.hdr)?\.vtf)")]
-    private static partial Regex CubemapRegex();
+    // Matches stuff stored in materials/maps/<mapname>/, if we we're renaming and have option enabled
+    // we'll move everything.
+    [GeneratedRegex("^materials/maps/([^/]+)/.*$")]
+    private static partial Regex MapFileMaterialsRegex();
 
-    /// <summary>
-    /// Renames the cubemap path as Source uses the filename when searching.
-    /// Returns a dictionary with the key as the old string and the value as the new string.
-    /// </summary>
-    public List<(string oldPath, string newPath)> RenameCubemapPaths(string newFileName)
+    // Matches soundscapes stored in scripts/soundscapes_<mapname>.txt
+    [GeneratedRegex(@"^scripts/soundscapes_([^/]+)\.(?:txt|vsc)$")] // Strata supports .vsc, dunno why!
+    private static partial Regex MapFileSoundscapeRegex();
+
+    // Matches soundscripts stored in maps/<mapname>_level_sounds.txt
+    [GeneratedRegex(@"^maps/([^/]+)_level_sounds\.txt$")]
+    private static partial Regex MapFileSoundscriptRegex();
+
+    // Matches particle manifest stored in maps/<mapname>_particles.txt
+    [GeneratedRegex(@"^maps/([^/]+)_particles\.txt")]
+    private static partial Regex MapFileParticlesRegex();
+
+    private static readonly Regex[] MapFileRegexes =
+    [
+        MapFileMaterialsRegex(),
+        MapFileSoundscapeRegex(),
+        MapFileSoundscriptRegex(),
+        MapFileParticlesRegex(),
+    ];
+
+    public void ProcessMapRename(string oldFileName, string newFileName)
     {
         string baseFilename = Path.GetFileNameWithoutExtension(newFileName);
-        var entriesModified = new List<(string, string)>();
 
-        bool matched = false;
         foreach (PakfileEntry entry in Entries)
         {
-            Match match = CubemapRegex().Match(entry.Key);
-            if (match.Success)
+            foreach (Regex regex in MapFileRegexes)
             {
-                matched = true;
+                Match match = regex.Match(entry.Key);
+                if (!match.Success)
+                    continue;
 
-                // Add the old key so we can update the UI later
-                string oldString = entry.Key;
+                string mapName = match.Groups[1].Value;
+                if (!mapName.Equals(oldFileName, Comparison))
+                    continue;
 
-                string cubemapName = match.Groups[1].Value;
-                entry.Rename(entry.Key.Replace(cubemapName, baseFilename));
+                string oldKey = entry.Key;
+                string newKey = entry.Key.Replace(mapName, baseFilename);
+                entry.Rename(newKey);
 
-                entriesModified.Add((oldString, entry.Key));
+                Logger.Info($"Renamed pakfile entry {oldKey} to {newKey}");
+                IsModified = true;
+
+                UpdatePathReferences(oldKey, newKey);
             }
         }
-
-        if (matched)
-        {
-            IsModified = true;
-            UpdateZip();
-        }
-
-        return entriesModified;
     }
 }

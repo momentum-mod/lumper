@@ -11,12 +11,14 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    protected override void ReadItem(BinaryReader reader) => Data.Add(new string(reader.ReadChars(StructureSize)));
+    protected override void ReadItem(BinaryReader reader) =>
+        Data.Add(new string(reader.ReadChars(StructureSize)).TrimEnd('\0'));
 
     protected override void WriteItem(BinaryWriter writer, int index)
     {
-        byte[] b = new byte[StructureSize];
+        byte[] bytes = new byte[StructureSize];
         byte[] value = BspFile.Encoding.GetBytes(Data[index]);
+
         int count = value.Length;
         if (count > StructureSize)
         {
@@ -24,7 +26,7 @@ public class StaticPropDictLump(BspFile parent) : FixedLump<GameLumpType, string
             count = StructureSize;
         }
 
-        Array.Copy(value, b, count);
-        writer.Write(b);
+        Array.Copy(value, bytes, count);
+        writer.Write(bytes);
     }
 }

@@ -90,12 +90,12 @@ public class CommandLineOptions
 
     [Option(
         'u',
-        "renameCubemaps",
+        "renameMapFiles",
         Default = true,
         Required = false,
         HelpText = "Rename cubemap textures to match the BSP file name, if the name has changed. May make saving a lot slower!"
     )]
-    public bool RenameCubemaps { get; set; } = true;
+    public bool RenameMapFiles { get; set; } = true;
 
     [Option(
         'a',

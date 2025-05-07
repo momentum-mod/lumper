@@ -44,7 +44,7 @@ jobs:
       run: dotnet tool restore && dotnet csharpier . --check
 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --verbosity normal
 
     - name: Make dirs
       run: mkdir out_linux out_windows
