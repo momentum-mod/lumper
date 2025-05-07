@@ -12,34 +12,36 @@ using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Entity;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
-public abstract class EntityEditorTabViewModel
+public abstract class EntityEditorTabViewModel : ViewModel
 {
-    public abstract EntityViewModel Entity { get; }
+    public EntityViewModel Entity { get; protected init; } = null!;
 
-    public abstract string Name { get; protected set; }
+    [Reactive]
+    public string Name { get; protected set; } = null!;
 
     public bool IsPinned { get; set; }
 
     public abstract bool Pinnable { get; }
 }
 
-public class EntityEditorTabSingleEntityViewModel(EntityViewModel entity) : EntityEditorTabViewModel
+public class EntityEditorTabSingleEntityViewModel : EntityEditorTabViewModel
 {
-    public override EntityViewModel Entity { get; } = entity;
-
-    public override string Name { get; protected set; } = entity.Classname;
-
     public override bool Pinnable => true;
+
+    // public override string DocumentationUri => "https://developer.valvesoftware.com/wiki/" + Entity.Classname;
+    public EntityEditorTabSingleEntityViewModel(EntityViewModel entity)
+    {
+        Entity = entity;
+
+        entity.WhenAnyValue(x => x.Classname).Do(x => Name = x).Subscribe();
+    }
 }
 
 public sealed class EntityEditorTabMultipleEntityViewModel : EntityEditorTabViewModel, IDisposable
 {
-    public override EntityViewModel Entity { get; }
-
     public List<EntityViewModel> RealEntities { get; }
-
-    public override string Name { get; protected set; }
 
     public override bool Pinnable => false;
 
