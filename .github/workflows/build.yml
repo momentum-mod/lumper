@@ -43,8 +43,8 @@ jobs:
     - name: Check csharpier formatting
       run: dotnet tool restore && dotnet csharpier . --check
 
-#    - name: Test
-#      run: dotnet test --no-build --verbosity normal
+    - name: Test
+      run: dotnet test --verbosity normal
 
     - name: Make dirs
       run: mkdir out_linux out_windows

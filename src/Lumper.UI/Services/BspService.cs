@@ -337,15 +337,15 @@ public sealed class BspService : ReactiveObject, IDisposable
                             Compression = compress,
                             Handler = handler,
                             MakeBackup = StateService.Instance.MakeBackup,
-                            RenameCubemaps = StateService.Instance.RenameCubemaps,
+                            RenameMapFiles = StateService.Instance.RenameMapFiles,
                         }
                     ),
                 RxApp.TaskpoolScheduler
             );
 
             // If we've renamed cubemaps, need to refresh the pakfile VM.
-            if (outName != FileName && PakfileLumpViewModel is not null && StateService.Instance.RenameCubemaps)
-                PakfileLumpViewModel?.UpdateViewModelFromModel(false);
+            if (outName != FileName && PakfileLumpViewModel is not null && StateService.Instance.RenameMapFiles)
+                PakfileLumpViewModel?.UpdateViewModelFromModel();
 
             if (handler.Cancelled)
                 return false;

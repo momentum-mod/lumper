@@ -126,7 +126,7 @@ internal sealed class Program
                     Compression = compression,
                     Handler = null,
                     MakeBackup = !options.SkipBackup,
-                    RenameCubemaps = options.RenameCubemaps,
+                    RenameMapFiles = options.RenameMapFiles,
                 }
             );
         }
