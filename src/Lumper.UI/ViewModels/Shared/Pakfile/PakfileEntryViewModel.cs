@@ -36,6 +36,8 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public long? CompressedSize => BaseEntry.CompressedSize;
 
+    public long? UncompressedSize => BaseEntry.UncompressedSize;
+
     [Reactive]
     public string? Hash { get; set; }
 
@@ -49,12 +51,19 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
         Key = BaseEntry.Key;
     }
 
-    public abstract void Load(CancellationTokenSource? cts = null);
+    public virtual void Load(CancellationTokenSource? cts = null) { }
 
-    public void Rename(string newName)
+    public void Rename(string newKey)
     {
-        Key = newName;
-        BaseEntry.Rename(newName);
+        var pakfileLump = (PakfileLumpViewModel)Parent;
+        pakfileLump.Entries.Edit(updater =>
+        {
+            updater.Remove(Key);
+            Key = newKey;
+            updater.AddOrUpdate(this);
+        });
+
+        BaseEntry.Rename(newKey);
         MarkAsModified();
     }
 
@@ -78,12 +87,22 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public ReadOnlySpan<byte> GetData()
     {
+        string? oldHash = BaseEntry.HasLoadedData ? Hash : null;
+
         ReadOnlySpan<byte> data = BaseEntry.GetData();
-        OnDataUpdate();
+
+        if (BaseEntry.Hash != oldHash)
+            OnDataUpdate();
+
         return data;
     }
 
-    private void OnDataUpdate()
+    /// <summary>
+    /// Called whenever unique new data is loaded by viewmodel code. Note this is *not* called the if BaseEntry is
+    /// modified by non-viewmodel code, e.g. during Jobs. If a job has potentially modified the entry, you need to call
+    /// UpdateViewModelFromModel() on the Pakfile lump to detect changes.
+    /// </summary>
+    public virtual void OnDataUpdate()
     {
         // Hashes need to read the entire ZipArchive contents to be calculated, and we can only read one zip entry at a
         // time. If we use a getter that calls GetData() we massively degrade performance in the texture browser, since

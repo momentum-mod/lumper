@@ -54,6 +54,11 @@ public sealed class PakfileEntry
     [JsonProperty]
     public long? CompressedSize => ZipEntry?.CompressedSize ?? null;
 
+    [JsonProperty]
+    // Use length of buffer if we're read already so we get sizes for imported/updated
+    // entries, fallback to ZipEntry.Size if we haven't read it yet.
+    public long? UncompressedSize => _buffer?.Length ?? ZipEntry?.Size;
+
     private readonly PakfileLump _parent;
 
     private bool _isModified;
@@ -73,6 +78,8 @@ public sealed class PakfileEntry
     // Static lock for access to zip archive - SharpCompress's OpenEntryStream is not thread-safe.
     private static readonly Lock ZipAccessLock = new();
 
+    public bool HasLoadedData => _buffer is not null;
+
     public void PrefetchData()
     {
         if (_buffer is not null)
@@ -80,10 +87,11 @@ public sealed class PakfileEntry
 
         lock (ZipAccessLock)
         {
-            using var mem = new MemoryStream((int)ZipEntry!.Size); // Note MemoryStream disposal doesn't delete underlying buffer
+            int size = (int)ZipEntry!.Size;
+            using var mem = new MemoryStream(size); // Note MemoryStream disposal doesn't delete underlying buffer
             using Stream zipStream = ZipEntry!.OpenEntryStream();
             zipStream.CopyTo(mem);
-            _buffer = mem.GetBuffer();
+            _buffer = mem.GetBuffer().AsMemory(0, size);
         }
     }
 

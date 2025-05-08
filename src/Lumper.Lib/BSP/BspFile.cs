@@ -382,9 +382,9 @@ public sealed partial class BspFile : IDisposable
     {
         PakfileLump pakfile = GetLump<PakfileLump>();
 
-        Dictionary<string, string> modified = pakfile.RenameCubemapPaths(Path.GetFileName(path));
+        List<(string, string)> modified = pakfile.RenameCubemapPaths(Path.GetFileName(path));
         foreach ((string oldPath, string newPath) in modified)
-            pakfile.UpdatePathReferences(newPath, oldPath, ".vmt");
+            pakfile.UpdatePathReferences(newPath, oldPath, limitPakfileExtensions: [".vmt"]);
     }
 
     public bool SaveToStream(IoHandler handler, Stream stream, DesiredCompression compress)
