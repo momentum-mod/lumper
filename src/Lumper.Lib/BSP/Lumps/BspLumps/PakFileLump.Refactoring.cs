@@ -26,7 +26,7 @@ public partial class PakfileLump
     // havent't spent much time looking. When adding new entries be *very* careful -
     // it may be that for some files, the cases where the extensions can be omitted
     // depend on specific KV1 keys.
-    private static readonly Dictionary<string, string[]> IgnorableExtensions = new() { { ".vmt", [".vtf"] } };
+    private static readonly Dictionary<string, string[]> IgnorableExtensions = new() { { ".vmt", [".vtf", ".vmt"] } };
 
     // Directories in Source that are sometimes omitted from a property, e.g. an
     // ambient_generic's "message" (sound file) doesn't need sound/ on the front,
@@ -41,10 +41,6 @@ public partial class PakfileLump
         "models",
         "resource",
     ];
-
-    // Chars that are not valid in a path (maybe they are but really shouldn't be). Used to decide if we're at the end
-    // of a string in a common Source file e.g. closing quotes in a VMT value.
-    private static readonly char[] ControlChars = ['\n', '\r', '\t', ' ', '(', ')', '{', '}', '[', ']', '=', '"', '\''];
 
     // Far as we can tell, Source allows both / and \ as separators everywhere, and can even handle paths using
     // a combination of the two (fuck's sake).
@@ -112,7 +108,7 @@ public partial class PakfileLump
 
         if (updateTypes is null || updateTypes.Contains(PathReferenceUpdateType.Pakfile))
         {
-            if (UpdatePakfilePathReferences(oldPath, newPath, limitPakfileExtensions, opNoPrefix, directoryMatch))
+            if (UpdateKv1PathReferences(oldPath, newPath, limitPakfileExtensions, opNoPrefix, directoryMatch))
                 updatedTypes.Add(PathReferenceUpdateType.Pakfile);
         }
 
@@ -142,7 +138,7 @@ public partial class PakfileLump
                 if (prop is not Entity.EntityProperty<string> { Value: not null } sProp)
                     continue;
 
-                string propValue = sProp.Value;
+                string propValue = sProp.Value.Replace('\\', '/');
                 if (!propValue.EndsWith(opNoPrefix, Comparison))
                     // Definitely not a match
                     continue;
@@ -172,7 +168,7 @@ public partial class PakfileLump
         return updated;
     }
 
-    private bool UpdatePakfilePathReferences(
+    private bool UpdateKv1PathReferences(
         string oldPath,
         string newPath,
         string[] limitExtensions,
@@ -203,58 +199,54 @@ public partial class PakfileLump
                 out string[]? extensions
             );
 
-            // Outer loop as we traverse the entire file - could have multiple matches.
-            while (true)
+            string op = oldPath;
+            string np = newPath;
+
+            // If we matched a directory, we're almost certainly right to omit it.
+            // UpdatePathReferences has already checked that the new path also starts with it.
+            if (directoryMatch is not null)
             {
-                string op = oldPath;
-                string np = newPath;
+                op = op[(directoryMatch.Length + 1)..];
+                np = np[(directoryMatch.Length + 1)..];
+            }
 
-                // If we matched a directory, we're almost certainly right to omit it.
-                if (directoryMatch is not null)
-                {
-                    op = op[(op.IndexOf('/') + 1)..];
-                    np = np[(op.IndexOf('/') + 1)..];
-                }
-
-                // Index used to search forward from baseIdx
-                // Start by searching with extension
-                int searchIdx = text.IndexOf(op, startIndex: baseIdx + 1, Comparison);
-
-                // If that match fails, try with extension omitted if appropriate file
-                if (searchIdx == -1 && tryWithoutExtension)
-                {
-                    foreach (string ext in extensions!)
-                    {
-                        if (!Path.GetExtension(opNoPrefix).Equals(ext, Comparison))
-                            continue;
-
-                        searchIdx = text.IndexOf(opNoPrefix[..^ext.Length], startIndex: baseIdx + 1, Comparison);
-                        if (searchIdx != -1)
-                        {
-                            op = op[..^ext.Length];
-                            np = np[..^ext.Length];
-                            break;
-                        }
-                    }
-                }
+            // Outer loop as we traverse the entire file - could have multiple matches.
+            while (baseIdx < text.Length)
+            {
+                // Try to find a match, first with full path
+                (int matchIdx, string matchedOp, string matchedNp) = FindPathMatch(
+                    text,
+                    baseIdx,
+                    op,
+                    np,
+                    tryWithoutExtension,
+                    extensions,
+                    opNoPrefix
+                );
 
                 // No matches
-                if (searchIdx == -1 || searchIdx >= text.Length - op.Length)
+                if (matchIdx == -1)
                     break;
 
-                // Okay, we matched
-                baseIdx = searchIdx;
+                // We found a match at matchIdx
+                baseIdx = matchIdx;
 
-                // Make sure we're not matching e.g. foo/bar.vtf with foo/barbaz.vtf
-                char nextChar = text[baseIdx + op.Length];
-                if (ControlChars.Contains(nextChar))
+                // Check if it's a valid standalone path by examining surrounding characters
+                if (IsValidPathMatch(text, baseIdx, matchedOp.Length))
                 {
-                    text = text[..baseIdx] + np + text[(baseIdx + op.Length)..];
+                    // Replace the match with the new path
+                    text = text[..baseIdx] + matchedNp + text[(baseIdx + matchedOp.Length)..];
                     changes++;
                     entry.IsModified = true;
-                }
 
-                baseIdx += np.Length; // Move to end of new path
+                    // Skip past what we just inserted
+                    baseIdx += matchedNp.Length;
+                }
+                else
+                {
+                    // Not a valid match, move ahead one character
+                    baseIdx += 1;
+                }
             }
 
             // Assumption that if a file is omitting the root dir prefix in some cases,
@@ -272,6 +264,126 @@ public partial class PakfileLump
 
         return updated;
     }
+
+    // Helper method to find a path match, handling both regular and extension-less cases
+    private static (int matchIndex, string matchedOp, string matchedNp) FindPathMatch(
+        string text,
+        int startIdx,
+        string op,
+        string np,
+        bool tryWithoutExtension,
+        string[]? extensions,
+        string opNoPrefix
+    )
+    {
+        // First try matching with the full path
+        int matchIndex = FindSlashAgnosticMatch(text, startIdx, op);
+
+        if (matchIndex != -1)
+            return (matchIndex, op, np);
+
+        // If that match fails, try with extension omitted if appropriate file
+        if (tryWithoutExtension)
+        {
+            foreach (string ext in extensions!)
+            {
+                if (!Path.GetExtension(opNoPrefix).Equals(ext, Comparison))
+                    continue;
+
+                string opWithoutExt = op[..^ext.Length];
+                string npWithoutExt = np[..^ext.Length];
+
+                matchIndex = FindSlashAgnosticMatch(text, startIdx, opWithoutExt);
+
+                if (matchIndex != -1)
+                    return (matchIndex, opWithoutExt, npWithoutExt);
+            }
+        }
+
+        return (-1, string.Empty, string.Empty);
+    }
+
+    // Find a match that allows mixed forward/backslashes. Really gross to do, but we've genuinely
+    // seen "$basetexture"	"_css/de_train\train_metalceiling_02" in the wild.
+    private static int FindSlashAgnosticMatch(string text, int startIdx, string pattern)
+    {
+        if (startIdx < 0)
+            startIdx = 0;
+
+        for (int i = startIdx; i <= text.Length - pattern.Length; i++)
+        {
+            bool isMatch = true;
+            for (int j = 0; j < pattern.Length; j++)
+            {
+                char textChar = text[i + j];
+                char patternChar = pattern[j];
+
+                // If we're at a separator position in the pattern, match either separator
+                if (patternChar is '/' or '\\')
+                {
+                    if (textChar is not '/' and not '\\')
+                    {
+                        isMatch = false;
+                        break;
+                    }
+                }
+                // Otherwise case-insensitive match
+                else if (char.ToUpperInvariant(textChar) != char.ToUpperInvariant(patternChar))
+                {
+                    isMatch = false;
+                    break;
+                }
+            }
+
+            if (isMatch)
+                return i;
+        }
+
+        return -1;
+    }
+
+    // Check if the match is a standalone path by examining surrounding characters
+    // Need to check a bunch of cases:
+    // - we're not matching foo/bar.vtf with foo/barbaz.vtf
+    // - we're not matching foo/bar.vtf with baz/foo/bar.vtf
+    //
+    // It'd be really nice if we could use a KV1 parser here, but we want to preserve comments and generally
+    // leave files as unchanged as possible. ValveKeyValue unfortunately doesn't expose the reader we could
+    // use to do this... Unit tests for this are a pretty good at least.
+    //
+    // We can tolerate some very unusual edge cases of a found value actually being a key, or a potentially
+    // invalid KV1 file. If value is quoted properly, or has whitespace to left and
+    // whitespace/newline/comment to right, we can assume it's a valid match.
+    private static bool IsValidPathMatch(string text, int matchIdx, int matchLength)
+    {
+        // Ensure we don't go out of bounds
+        if (matchIdx <= 0 || matchIdx + matchLength >= text.Length)
+            return false;
+
+        char prevChar = text[matchIdx - 1];
+        char nextChar = text[matchIdx + matchLength];
+
+        if (prevChar == '"')
+            return nextChar == '"';
+
+        if (IsWhitespace(prevChar))
+            return IsWhitespace(nextChar) || nextChar is '\r' or '\n' or '/';
+
+        return false;
+    }
+
+    // C isspace https://en.cppreference.com/w/c/string/byte/isspace
+    private static bool IsWhitespace(char c) =>
+        c switch
+        {
+            ' ' => true,
+            '\t' => true,
+            '\r' => true,
+            '\n' => true,
+            '\v' => true,
+            '\f' => true,
+            _ => false,
+        };
 
     private bool UpdateTexDataPathReferences(string oldPath, string newPath, string opPrefix, string opNoPrefix)
     {
@@ -306,8 +418,8 @@ public partial class PakfileLump
         if (pathList is null)
             return false;
 
-        int match = pathList.FindIndex(name => name.StartsWith(oldPath, Comparison));
-        if (match != -1)
+        int match = pathList.FindIndex(name => name.Equals(oldPath, Comparison));
+        if (match == -1)
             return false;
 
         pathList[match] = newPath;
