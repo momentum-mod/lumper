@@ -41,7 +41,7 @@ public sealed class PakfileEntry
 
         using var mem = new MemoryStream();
         stream.CopyTo(mem);
-        _buffer = mem.GetBuffer();
+        _buffer = mem.GetBuffer().AsMemory(0, (int)stream.Length);
     }
 
     // Probably shouldn't be public but whatever. be careful!
