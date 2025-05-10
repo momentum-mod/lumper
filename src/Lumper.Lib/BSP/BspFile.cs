@@ -138,7 +138,7 @@ public sealed partial class BspFile : IDisposable
     {
         public required DesiredCompression Compression { get; init; }
         public required bool MakeBackup { get; init; }
-        public required bool RenameCubemaps { get; init; }
+        public required bool RenameMapFiles { get; init; }
         public IoHandler? Handler { get; init; } = null;
     }
 
@@ -156,8 +156,23 @@ public sealed partial class BspFile : IDisposable
         if (path is null && FilePath is null)
             throw new ArgumentException("Not given a path to write to, and current BSP doesn't have a path");
 
-        if (path is not null && Path.GetFileName(path) != FilePath && options.RenameCubemaps)
-            RenameCubemaps(path);
+        if (path is not null)
+        {
+            string newFileName = Path.GetFileName(path);
+            if (newFileName != FilePath && options.RenameMapFiles)
+            {
+                if (Name is null)
+                {
+                    throw new ArgumentException(
+                        "BSP name is null, probably because loaded from a stream, we don't know how to rename map files. \n"
+                            + "To rename map files, you need to save to the map's original name first with RenameMapFiles disabled."
+                    );
+                }
+
+                PakfileLump pakfile = GetLump<PakfileLump>();
+                pakfile.ProcessMapRename(Name, newFileName);
+            }
+        }
 
         string outPath;
         string? backupPath = null;
@@ -376,15 +391,6 @@ public sealed partial class BspFile : IDisposable
         }
 
         return true;
-    }
-
-    private void RenameCubemaps(string path)
-    {
-        PakfileLump pakfile = GetLump<PakfileLump>();
-
-        List<(string, string)> modified = pakfile.RenameCubemapPaths(Path.GetFileName(path));
-        foreach ((string oldPath, string newPath) in modified)
-            pakfile.UpdatePathReferences(newPath, oldPath, limitPakfileExtensions: [".vmt"]);
     }
 
     public bool SaveToStream(IoHandler handler, Stream stream, DesiredCompression compress)

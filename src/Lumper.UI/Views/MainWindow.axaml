@@ -71,20 +71,25 @@
                   </materialIcons:MaterialIcon>
                 </StackPanel>
               </CheckBox>
-              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding StateService.RenameCubemaps}">
+              <CheckBox Padding="12 0" Margin="0 -8" IsChecked="{Binding StateService.RenameMapFiles}">
                 <StackPanel Orientation="Horizontal" Spacing="4">
-                  <TextBlock Text="Rename Cubemaps" />
+                  <TextBlock Text="Update filename-specific content" />
                   <materialIcons:MaterialIcon Kind="QuestionMarkCircle">
                     <ToolTip.Tip>
                       <StackPanel>
-                        <TextBlock>When a map is saved to a new filename, renames all cubemaps to the new name.</TextBlock>
+                        <TextBlock>When a map is saved to a new filename, renames cubemaps, map soundscapes and particles to the new name.</TextBlock>
                         <TextBlock>
-                          Cubemaps are stored and loaded based on the BSP filename (because Source is stupid).
-                          Without this checked, saving a map to a different name will break cubemaps.
+                          Cubemaps, map soundscapes and particles are stored and loaded based on the BSP filename.
+                          Without this checked, saving a map to a different name will break cubemaps and other things.
                         </TextBlock>
                         <TextBlock>
                           Running this modifies the pakfile lump, which will increase save times, even if you haven't otherwise edited it.
                           When testing maps, you may want to disable this to save time.
+                        </TextBlock>
+                        <TextBlock>
+                          For this to work, the current BSP name must correspond to filenames used in the pakfile.
+                          E.g. to rename the cubemaps in materials/maps/surf_utopia, the BSP *must* be called surf_utopia.
+                          This will error if used from a stream e.g. Open from URL..., you'll need to save out to the original map name first.
                         </TextBlock>
                       </StackPanel>
                     </ToolTip.Tip>
