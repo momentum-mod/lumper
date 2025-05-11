@@ -50,16 +50,9 @@ public class StateService : ReactiveObject
 
     public ObservableCollectionExtended<string> RecentFiles { get; set; } = [];
 
-    public void UpdateRecentFiles(string bspPath, bool opened)
+    public void UpdateRecentFiles(string bspPath)
     {
         using IDisposable suspend = RecentFiles.SuspendNotifications();
-
-        // If we just opened a new BSP, remove from recent list if in there
-        if (opened)
-        {
-            RecentFiles.Remove(bspPath);
-            return;
-        }
 
         // Otherwise add closed BSP to the top of the list, removing any duplicates,
         // and capping the list at 5 entries.
