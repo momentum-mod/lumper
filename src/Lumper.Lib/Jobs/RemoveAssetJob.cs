@@ -22,6 +22,15 @@ public class RemoveAssetJob : Job, IJob
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+    /// <summary>
+    /// Origins we prioritise when renaming assets that match a hash but not the original filename,
+    /// or there's multiple officials with the same hash, where one path matches but a more
+    /// accessible game has the same asset with a different path.
+    /// In both case, we update references to the most accessible path everywhere to avoid missing
+    /// textures as best we can. This is biased towards Momentum!
+    /// </summary>
+    private static readonly string[] RenamedOriginPriority = ["hl2", "tf2", "css", "csgo"];
+
     public override bool Run(BspFile bsp)
     {
         if (OriginFilter?.Count == 0)
@@ -33,7 +42,7 @@ public class RemoveAssetJob : Job, IJob
         PakfileLump pakfileLump = bsp.GetLump<PakfileLump>();
 
         Logger.Info("Removing game assets... this may take a while!");
-        int numMatches = 0;
+        int totalMatches = 0;
 
         var entries = pakfileLump.Entries.ToList();
         Progress.Max = entries.Count;
@@ -49,14 +58,38 @@ public class RemoveAssetJob : Job, IJob
                 continue;
 
             pakfileLump.Entries.Remove(entry);
-            numMatches++;
+            totalMatches++;
             string matches = string.Join(", ", assets.Select(asset => $"{asset.Origin} asset {asset.Path}"));
-            Logger.Info($"Removed {entry.Key} which matched {matches}");
+
+            int numMatches = assets.Count(match => match.Path == entry.Key);
+            if (numMatches == 1)
+            {
+                Logger.Info($"Removed {entry.Key} which matched {matches}");
+            }
+            else if (numMatches > 1)
+            {
+                // Try find matching asset with preferred origin, in order
+                AssetManifest.Asset? bestAsset = null;
+                foreach (string origin in RenamedOriginPriority)
+                {
+                    bestAsset = assets.FirstOrDefault(asset => asset.Origin == origin);
+                    if (bestAsset != null)
+                        break;
+                }
+
+                // If we didn't find a preferred origin, use anything.
+                bestAsset ??= assets[0];
+
+                Logger.Info($"Removed {entry.Key} which matched {matches}, updating references to {bestAsset.Path}");
+
+                if (entry.Key != bestAsset.Path)
+                    pakfileLump.UpdatePathReferences(entry.Key, bestAsset.Path);
+            }
         }
 
-        if (numMatches > 0)
+        if (totalMatches > 0)
         {
-            Logger.Info($"Removed {numMatches} game assets!");
+            Logger.Info($"Removed {totalMatches} game assets!");
             pakfileLump.IsModified = true;
             return true;
         }
