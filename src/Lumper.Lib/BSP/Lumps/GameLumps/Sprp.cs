@@ -80,8 +80,5 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
         }
     }
 
-    public override bool Empty =>
-        (StaticProps is null || StaticProps.Empty)
-        && (StaticPropsDict is null || StaticPropsDict.Empty)
-        && (StaticPropsLeaf is null || StaticPropsLeaf.Empty);
+    public override bool Empty => StaticProps is null && StaticPropsDict is null && StaticPropsLeaf is null;
 }
