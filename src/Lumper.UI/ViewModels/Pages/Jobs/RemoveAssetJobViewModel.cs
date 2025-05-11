@@ -45,5 +45,11 @@ public sealed class RemoveAssetJobViewModel : JobViewModel
                 });
     }
 
-    protected override void OnSuccess() => BspService.Instance.ResetLumpViewModel(typeof(PakfileLumpViewModel));
+    protected override void OnSuccess()
+    {
+        // TODO: should be able to do this better with new MVVM stuff
+        BspService.Instance.ResetLumpViewModel(typeof(PakfileLumpViewModel));
+        // Removing assets with altered names will cause pakfile refactors, which can affect the entity lump.
+        BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
+    }
 }

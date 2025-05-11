@@ -64,6 +64,7 @@ public class RunExternalToolJobViewModel : JobViewModel
     protected override void OnSuccess()
     {
         // Don't have a way to dynamically reload paklump, just reset it
+        // TODO: should be able to do this better with new MVVM stuff
         BspService.Instance.ResetLumpViewModel(typeof(PakfileLumpViewModel));
         BspService.Instance.EntityLumpViewModel?.PullChangesFromModel();
     }
