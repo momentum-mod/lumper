@@ -60,12 +60,11 @@ public sealed class GameLumpReader(GameLump gamelump, Stream input, long length,
 
             var header = new LumpHeaderInfo { Offset = ReadInt32(), UncompressedLength = ReadInt32() };
 
+            // Get the actual size on disk for the previous lump, based on the current lump's offset.
+            // If the offset is 0, it's a null entry, use the remaining length of the gamelump instead.
             if (prevHeader != null)
             {
-                long actualLength = header.Offset - prevHeader.Offset;
-                if (actualLength < 0)
-                    actualLength = length - (prevHeader.Offset + prevHeader.Length - startPos);
-
+                long actualLength = (header.Offset > 0 ? header.Offset : startPos + length) - prevHeader.Offset;
                 prevHeader.CompressedLength = prevCompressed ? actualLength : -1;
             }
 
