@@ -37,6 +37,14 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
                 (selectedJob, isRunning) => selectedJob is not null && !isRunning
             )
             .ToPropertyEx(this, x => x.IsNotRunningAndHasSelection);
+
+        BspService
+            .Instance.WhenAnyValue(x => x.BspFile)
+            .Subscribe(_ =>
+            {
+                foreach (JobViewModel job in Jobs)
+                    job.Reset();
+            });
     }
 
     [Reactive]
