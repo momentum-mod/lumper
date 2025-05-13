@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Platform.Storage;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Pakfile;
 using Lumper.UI.Views.Pages.PakfileExplorer;
@@ -26,7 +27,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 {
     private PakfileTreeViewModel? Tree { get; set; }
 
-    private PakfileLumpViewModel? _pakfileLump;
+    private PakfileLumpViewModel? _pakfileLumpViewModel;
 
     [Reactive]
     public HierarchicalTreeDataGridSource<Node>? DataGridSource { get; set; }
@@ -50,7 +51,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                     return;
                 }
 
-                _pakfileLump = pakfile;
+                _pakfileLumpViewModel = pakfile;
                 Tree = new PakfileTreeViewModel(pakfile.Entries);
 
                 DataGridSource = new HierarchicalTreeDataGridSource<Node>(Tree.Root)
@@ -87,7 +88,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                             }
                         ),
                         new TemplateColumn<Node>(
-                            "Size (Compressed)",
+                            "Size (uncompressed)",
                             "EntrySizeCell",
                             null,
                             new GridLength(1, GridUnitType.Star),
@@ -164,17 +165,21 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         {
             // This *does* live in SourceCache (which DeleteEntry removes this from),
             // so no need to update tree.
-            _pakfileLump!.DeleteEntry(node.Leaf!);
+            _pakfileLumpViewModel!.DeleteEntry(node.Leaf!);
         }
     }
 
     // Note this doesn't handle deletions, kept in DeleteSelected for now
     private async Task PushTreeChangesToEntries()
     {
-        // TODO: size updates?
+        // TODO: recursive size updates -- need to iterate over all directory node from bottom up calling
+        // RecalculateSize.
         if (Tree is null)
             return;
 
+        // By the time this called, TreeDataGrid has moved all nodes around in the tree
+        // according to how user drag-dropped. So each node correctly below to its parents
+        // Children list, but the node's Parent property needs to be updated.
         PakfileTreeViewModel.FixParentsRecursive(Tree.Root);
 
         bool queriedUser = false;
@@ -201,16 +206,32 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 queriedUser = true;
             }
 
-            if (moveReferences)
-            {
-                await Observable.Start(
-                    () => _pakfileLump!.UpdatePathReferences(newKey, node.Leaf.Key),
-                    RxApp.MainThreadScheduler // Must be main thread, calls a bunch of viewmodel setters.
-                );
-            }
+            Logger.Info($"Moved {node.Leaf.Key} to {newKey}");
+            string oldKey = node.Leaf.Key;
 
-            // Update the actual key on the PakFileEntry - this is what causes the move to handle on save.
+            // TreeDataGrid drag-drop already moved this node in the tree internally, but because the Key
+            // of the node has changed, Rename(newKey) has to remove and re-add itself to the
+            // PakfileLumpViewModel.Entries SourceCache. Easiest to just remove this node from
+            // the tree, then it'll get added back during renaming.
+            node.RemoveSelf();
             node.Leaf.Rename(newKey);
+
+            if (!moveReferences)
+                continue;
+
+            // Running this on the main thread since we want to block users from modifying pakfile, entity lump,
+            // basically anything modifyable in the UI whilst refactor is ongoing. Would prefer to avoid to UI
+            // lag, but too much work blocking modification everywhere.
+            List<PakfileLump.PathReferenceUpdateType> updated = await Observable.Start(
+                () => BspService.Instance.BspFile!.GetLump<PakfileLump>().UpdatePathReferences(oldKey, newKey),
+                RxApp.MainThreadScheduler
+            );
+
+            if (updated.Contains(PakfileLump.PathReferenceUpdateType.Entity))
+                BspService.Instance.EntityLumpViewModel?.UpdateViewModelFromModel();
+
+            if (updated.Contains(PakfileLump.PathReferenceUpdateType.Pakfile))
+                BspService.Instance.PakfileLumpViewModel?.UpdateViewModelFromModel();
         }
     }
 
@@ -220,16 +241,16 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             return;
 
         IReadOnlyList<IStorageFile> files = await PickFiles();
-        if (_pakfileLump is null)
+        if (_pakfileLumpViewModel is null)
             return;
 
         List<string> branchPath = items[0].Path;
         (string, Stream)[] streams = await Task.WhenAll(files.Select(async x => (x.Name, await x.OpenReadAsync())));
-        _pakfileLump.Entries.Edit(updater =>
+        _pakfileLumpViewModel.Entries.Edit(updater =>
         {
             foreach ((string? name, Stream stream) in streams)
             {
-                _pakfileLump!.AddEntry(string.Join("/", [.. branchPath, name]), stream, updater);
+                _pakfileLumpViewModel!.AddEntry(string.Join("/", [.. branchPath, name]), stream, updater);
                 stream.Dispose();
             }
         });
@@ -242,16 +263,16 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         List<string> branchPath = items[0].Path;
 
         IStorageFolder? folder = await PickFolder();
-        if (folder is null || _pakfileLump is null)
+        if (folder is null || _pakfileLumpViewModel is null)
             return;
 
         string rootPath = folder.Path.LocalPath;
-        _pakfileLump.Entries.Edit(updater =>
+        _pakfileLumpViewModel.Entries.Edit(updater =>
         {
             foreach (string path in Directory.EnumerateFiles(folder.Path.LocalPath, "*.*", SearchOption.AllDirectories))
             {
                 FileStream stream = File.OpenRead(path);
-                _pakfileLump!.AddEntry(
+                _pakfileLumpViewModel!.AddEntry(
                     string.Join("/", [.. branchPath, Path.GetRelativePath(rootPath, path).Replace('\\', '/')]),
                     stream,
                     updater
@@ -279,7 +300,10 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
     public async Task CreateEmptyFile()
     {
-        if (!GetSelection(out IReadOnlyList<Node> items, single: true, onlyDirectory: true) || _pakfileLump is null)
+        if (
+            !GetSelection(out IReadOnlyList<Node> items, single: true, onlyDirectory: true)
+            || _pakfileLumpViewModel is null
+        )
             return;
 
         List<string> branchPath = items[0].Path;
@@ -297,7 +321,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         string path = string.Join("/", pathList);
 
         using var stream = new MemoryStream();
-        var entry = (PakfileEntryTextViewModel)_pakfileLump.AddEntry(string.Join("/", path), stream);
+        var entry = (PakfileEntryTextViewModel)_pakfileLumpViewModel.AddEntry(string.Join("/", path), stream);
         SetActiveFile(Tree!.Find(pathList));
         entry.LoadContent();
 
@@ -337,7 +361,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     public async Task ReplaceContents()
     {
         IStorageFolder? folder = await PickFolder("Replace Pakfile Contents with Directory Contents");
-        if (folder is null || _pakfileLump is null)
+        if (folder is null || _pakfileLumpViewModel is null)
             return;
 
         string rootPath = folder.Path.LocalPath;
@@ -346,7 +370,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         if (!importDir.Exists)
             throw new DirectoryNotFoundException(rootPath);
 
-        _pakfileLump.Entries.Edit(updater =>
+        _pakfileLumpViewModel.Entries.Edit(updater =>
         {
             updater.Clear();
 
@@ -356,7 +380,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 new FileStream(path, FileMode.Open).CopyTo(stream);
 
                 string entryPath = Path.GetRelativePath(rootPath, path).Replace('\\', '/');
-                _pakfileLump.AddEntry(entryPath, stream, updater);
+                _pakfileLumpViewModel.AddEntry(entryPath, stream, updater);
             }
         });
     }
@@ -364,7 +388,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     public async Task ExportContents()
     {
         IStorageFolder? folder = await PickFolder("Export Pakfile Contents to Directory");
-        if (folder is null || _pakfileLump is null)
+        if (folder is null || _pakfileLumpViewModel is null)
             return;
 
         string rootPath = folder.Path.LocalPath;
@@ -377,7 +401,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
         try
         {
-            foreach (PakfileEntryViewModel entry in _pakfileLump.Entries.Items)
+            foreach (PakfileEntryViewModel entry in _pakfileLumpViewModel.Entries.Items)
             {
                 FileInfo fi = new(Path.Join(exportDir.FullName, entry.Key));
                 if (fi.Exists)
@@ -409,7 +433,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             return;
 
         IStorageFolder? folder = await PickFolder("Pick Export Directory");
-        if (folder is null || _pakfileLump is null)
+        if (folder is null || _pakfileLumpViewModel is null)
             return;
 
         string rootPath = folder.Path.LocalPath;

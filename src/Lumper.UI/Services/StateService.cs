@@ -33,7 +33,7 @@ public class StateService : ReactiveObject
     public ushort GameSyncPort { get; set; }
 
     [Reactive]
-    public bool RenameCubemaps { get; set; } = true;
+    public bool RenameMapFiles { get; set; } = true;
 
     [Reactive]
     public bool LogShowDebug { get; set; } = false;
