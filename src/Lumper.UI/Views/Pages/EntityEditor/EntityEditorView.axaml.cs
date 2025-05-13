@@ -17,6 +17,11 @@ public partial class EntityEditorView : ReactiveUserControl<EntityEditorViewMode
 
     private void OpenSelectedListItem()
     {
+        // Avalonia seems to still list SelectedItems be non-null even after the items collection is cleared,
+        // we have an empty list if so, don't try to open a tab otherwise we can get a zombie tab from a closed BSP.
+        if (EntityList.Items.Count == 0)
+            return;
+
         var selected = EntityList?.SelectedItems?.OfType<EntityViewModel>().ToList();
 
         if (selected is not null)
