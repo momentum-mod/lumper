@@ -114,7 +114,7 @@ public sealed class BspService : ReactiveObject, IDisposable
         _bspSubject.Subscribe(bsp =>
         {
             if (bsp?.FilePath is not null)
-                StateService.Instance.UpdateRecentFiles(bsp.FilePath, true);
+                StateService.Instance.UpdateRecentFiles(bsp.FilePath);
 
             FileName = bsp?.Name;
             FilePath = bsp?.FilePath;
@@ -380,7 +380,7 @@ public sealed class BspService : ReactiveObject, IDisposable
             return;
 
         if (FilePath is not null)
-            StateService.Instance.UpdateRecentFiles(FilePath, false);
+            StateService.Instance.UpdateRecentFiles(FilePath);
 
         BspFile?.Dispose();
         BspFile = null;
