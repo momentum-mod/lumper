@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Jobs;
 using Lumper.Lib.Stripper;
-using Lumper.UI.Services;
 using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -55,10 +54,4 @@ public class StripperTextJobViewModel : JobViewModel
 
         this.WhenAnyValue(x => x.Config).BindTo(this, x => x.Job.Config);
     }
-
-    // Push viewmodel changes to model
-    protected override void Prepare() => BspService.Instance.EntityLumpViewModel?.PushChangesToModel();
-
-    // Push model changes to viewmodel
-    protected override void OnSuccess() => BspService.Instance.EntityLumpViewModel?.PullChangesFromModel();
 }

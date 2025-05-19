@@ -5,8 +5,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Lumper.Lib.Jobs;
-using Lumper.UI.Services;
-using Lumper.UI.ViewModels.Shared.Pakfile;
 using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -57,15 +55,6 @@ public class RunExternalToolJobViewModel : JobViewModel
                     WritesToStdOut = false;
             })
             .BindTo(this, x => x.Job.WritesToInputFile);
-    }
-
-    protected override void Prepare() => BspService.Instance.PushChangesToModel();
-
-    protected override void OnSuccess()
-    {
-        // Don't have a way to dynamically reload paklump, just reset it
-        BspService.Instance.ResetLumpViewModel(typeof(PakfileLumpViewModel));
-        BspService.Instance.EntityLumpViewModel?.PullChangesFromModel();
     }
 
     public async Task ShowFilePickerDialog()

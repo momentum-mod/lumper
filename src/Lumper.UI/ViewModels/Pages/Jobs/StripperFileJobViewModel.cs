@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
 using Lumper.Lib.Jobs;
-using Lumper.UI.Services;
 using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -25,12 +24,6 @@ public class StripperFileJobViewModel : JobViewModel
         ConfigPath = job.ConfigPath;
         this.WhenAnyValue(x => x.ConfigPath).BindTo(this, x => x.Job.ConfigPath);
     }
-
-    // Push viewmodel changes to model
-    protected override void Prepare() => BspService.Instance.EntityLumpViewModel?.PushChangesToModel();
-
-    // Push model changes to viewmodel
-    protected override void OnSuccess() => BspService.Instance.EntityLumpViewModel?.PullChangesFromModel();
 
     public async Task ShowFilePickerDialog()
     {
