@@ -35,14 +35,11 @@ public abstract class JobViewModel : ViewModel
     {
         Status = JobStatus.Running;
 
-        Prepare();
-
         bool status = Job.Run(bsp);
 
         if (status)
         {
             Status = JobStatus.Success;
-            OnSuccess();
             return true;
         }
         else
@@ -51,10 +48,6 @@ public abstract class JobViewModel : ViewModel
             return false;
         }
     }
-
-    protected virtual void Prepare() { }
-
-    protected virtual void OnSuccess() { }
 
     public void Reset()
     {

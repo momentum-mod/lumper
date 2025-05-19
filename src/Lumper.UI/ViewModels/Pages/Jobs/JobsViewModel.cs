@@ -93,6 +93,12 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         await Observable.Start(
             () =>
             {
+                // Push changes to model for loaded lumps. There could be some job for which either lump is
+                // unnecessary, but code is a lot simpler this way, and pakfile refactoring tends to touch
+                // a lot of stuff.
+                BspService.Instance.EntityLumpViewModelLazy?.PushChangesToModel();
+                BspService.Instance.PakfileLumpViewModelLazy?.PushChangesToModel();
+
                 Logger.Info("Running job queue");
 
                 foreach (JobViewModel job in Jobs)
@@ -110,6 +116,9 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
                         );
                     }
                 }
+
+                BspService.Instance.EntityLumpViewModelLazy?.PullChangesFromModel();
+                BspService.Instance.PakfileLumpViewModelLazy?.PullChangesFromModel();
 
                 IsRunning = false;
 

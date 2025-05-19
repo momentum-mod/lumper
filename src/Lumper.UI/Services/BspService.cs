@@ -95,13 +95,29 @@ public sealed class BspService : ReactiveObject, IDisposable
 
     private EntityLumpViewModel? _entityLumpViewModel;
 
+    /// <summary>
+    /// Get the entity lump viewmodel. If this is the first time it's being accessed, it will be initialized.
+    /// </summary>
     public EntityLumpViewModel? EntityLumpViewModel =>
         LazyLoadLump(ref _entityLumpViewModel, () => new EntityLumpViewModel(BspFile!));
 
+    /// <summary>
+    /// Get the entity lump viewmodel if it's been initialized, otherwise returns null.
+    /// </summary>
+    public EntityLumpViewModel? EntityLumpViewModelLazy => _entityLumpViewModel;
+
     private PakfileLumpViewModel? _pakfileLumpViewModel;
 
+    /// <summary>
+    /// Get the pakfile lump viewmodel. If this is the first time it's being accessed, it will be initialized.
+    /// </summary>
     public PakfileLumpViewModel? PakfileLumpViewModel =>
         LazyLoadLump(ref _pakfileLumpViewModel, () => new PakfileLumpViewModel(BspFile!));
+
+    /// <summary>
+    /// Get the pakfile lump viewmodel if it's been initialized, otherwise return null.
+    /// </summary>
+    public PakfileLumpViewModel? PakfileLumpViewModelLazy => _pakfileLumpViewModel;
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Jobs;
-using Lumper.UI.Services;
-using Lumper.UI.ViewModels.Shared.Pakfile;
 using Lumper.UI.Views.Pages.Jobs;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -34,6 +32,7 @@ public sealed class RemoveAssetJobViewModel : JobViewModel
         Job = job;
 
         foreach (GameSelection selection in Selection)
+        {
             selection
                 .WhenAnyValue(x => x.Selected)
                 .Subscribe(_ =>
@@ -43,7 +42,6 @@ public sealed class RemoveAssetJobViewModel : JobViewModel
                     Job.OriginFilter =
                         selected.Count == AssetManifest.Origins.Count ? null : selected.Select(x => x.Origin).ToList();
                 });
+        }
     }
-
-    protected override void OnSuccess() => BspService.Instance.ResetLumpViewModel(typeof(PakfileLumpViewModel));
 }
