@@ -20,7 +20,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
 {
     private readonly EntityLump _entityLump;
 
-    public SourceCache<EntityViewModel, Entity> Entities { get; } = new(ent => ent.Entity);
+    public SourceCache<EntityViewModel, int> Entities { get; } = new(ent => ent.Entity.GetHashCode());
 
     [ObservableAsProperty]
     public int EntityCount { get; }
@@ -145,7 +145,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
         foreach (Entity entM in _entityLump.Data)
         {
             // In EL, not in ELVM -> add to ELVM
-            Optional<EntityViewModel> entVmLookup = Entities.Lookup(entM);
+            Optional<EntityViewModel> entVmLookup = Entities.Lookup(entM.GetHashCode());
             if (!entVmLookup.HasValue)
             {
                 var newEntity = new EntityViewModel(entM, this);
@@ -226,7 +226,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
         Entities.Edit(innerCache =>
         {
             innerCache.AddOrUpdate(additions);
-            innerCache.Remove(removals);
+            innerCache.Remove(removals.Select(x => x.GetHashCode()));
         });
 
         foreach (EntityViewModel newEnt in additions)
