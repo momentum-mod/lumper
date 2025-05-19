@@ -14,8 +14,16 @@
     <PublishSingleFile>true</PublishSingleFile>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
-    <!-- Disable trim warnings - these are prooooobably okay -->
-    <NoWarn>IL2026,IL2104</NoWarn>
+    <!--
+      Disable trim warnings, Avalonia and ReactiveUI produce some.
+      So far we've not seen any reflection-related bugs; it seems quite common for
+      libraries to annotate classes with RequiresUnreferencedCode etc. when not
+      necessary (see https://github.com/reactiveui/ReactiveUI/issues/4018).
+
+      We get a ~80% reduction in file size by trimming, so far now leaving it on, and
+      if we ever encounter reflection-related bugs, try withouit it
+    -->
+    <NoWarn>IL2026,IL2104,IL2109,IL2046</NoWarn>
     <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
