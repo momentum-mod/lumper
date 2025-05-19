@@ -270,7 +270,7 @@ public partial class StripperConfig
 
                         entity.Properties[entity.Properties.IndexOf(prop)] = newProp;
                         Logger.Info(
-                            $"Set value of {prop.Key} to {prop.ValueString} on entity {entity.PresentableName}"
+                            $"Set value of {prop.Key} to {newProp.ValueString} on entity {entity.PresentableName}"
                         );
                     }
                 }
