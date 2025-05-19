@@ -42,7 +42,7 @@ public sealed class PakfileLumpViewModel : LumpViewModel
                 }
                 else
                 {
-                    updater.AddOrUpdate(CreateEntryViewModel(model));
+                    updater.AddOrUpdate(PakfileEntryViewModel.Create(model, this));
                 }
             }
 
@@ -53,14 +53,6 @@ public sealed class PakfileLumpViewModel : LumpViewModel
             }
         });
 
-    private PakfileEntryViewModel CreateEntryViewModel(PakfileEntry entry) =>
-        Path.GetExtension(entry.Key).Equals(".vtf", StringComparison.OrdinalIgnoreCase)
-            ? new PakfileEntryVtfViewModel(entry, this)
-            // Treat anything that isn't a VTF as a text file. If it's not a file we recognise as text,
-            // the UI shows a warning, but does allow editing -- may be some file extensions that we
-            // don't recognise but are still text.
-            : new PakfileEntryTextViewModel(entry, this);
-
     public PakfileEntryViewModel AddEntry(
         string key,
         Stream stream,
@@ -70,7 +62,7 @@ public sealed class PakfileLumpViewModel : LumpViewModel
         var entry = new PakfileEntry(_pakfile, key, stream) { IsModified = true };
         _pakfile.Entries.Add(entry);
 
-        PakfileEntryViewModel vm = CreateEntryViewModel(entry);
+        var vm = PakfileEntryViewModel.Create(entry, this);
         if (updater is not null)
             updater.AddOrUpdate(vm);
         else

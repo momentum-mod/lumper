@@ -1,5 +1,6 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
+using System;
 using System.Globalization;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
@@ -39,6 +40,14 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty property, Bs
                 ((EntityViewModel)Parent).Classname = vm.Value;
         }
     }
+
+    public static EntityPropertyViewModel Create(Entity.EntityProperty entityProperty, EntityViewModel parent) =>
+        entityProperty switch
+        {
+            Entity.EntityProperty<string> sp => new EntityPropertyStringViewModel(sp, parent),
+            Entity.EntityProperty<EntityIo> sio => new EntityPropertyIoViewModel(sio, parent),
+            _ => throw new ArgumentOutOfRangeException(nameof(entityProperty)),
+        };
 
     public abstract bool MemberwiseEquals(EntityPropertyViewModel other);
 

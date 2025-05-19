@@ -53,6 +53,14 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
 
     public virtual void Load(CancellationTokenSource? cts = null) { }
 
+    public static PakfileEntryViewModel Create(PakfileEntry entry, PakfileLumpViewModel parent) =>
+        Path.GetExtension(entry.Key).Equals(".vtf", StringComparison.OrdinalIgnoreCase)
+            ? new PakfileEntryVtfViewModel(entry, parent)
+            // Treat anything that isn't a VTF as a text file. If it's not a file we recognise as text,
+            // the UI shows a warning, but does allow editing -- may be some file extensions that we
+            // don't recognise but are still text.
+            : new PakfileEntryTextViewModel(entry, parent);
+
     public void Rename(string newKey)
     {
         var pakfileLump = (PakfileLumpViewModel)Parent;
