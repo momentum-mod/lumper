@@ -1,5 +1,7 @@
 namespace Lumper.UI;
 
+using System;
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -40,11 +42,13 @@ public class App : Application
         // StateService.Instance property. `() => StateService.Instance()` doesn't work
         // unfortunately.
         RxApp.SuspensionHost.CreateNewAppState = () => new StateService();
-        RxApp.SuspensionHost.SetupDefaultSuspendResume(new JsonSuspensionDriver("appstate.json"));
+        RxApp.SuspensionHost.SetupDefaultSuspendResume(new JsonSuspensionDriver(AppStatePath));
         suspension.OnFrameworkInitializationCompleted();
 
         // Init main window
         desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
         base.OnFrameworkInitializationCompleted();
     }
+
+    private static string AppStatePath => Path.Combine(AppContext.BaseDirectory, "appstate.json");
 }
