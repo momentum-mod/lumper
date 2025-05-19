@@ -169,7 +169,13 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// </summary>
     public async Task<bool> Load(string pathOrUrl)
     {
-        pathOrUrl = new Regex("^lumper://").Replace(pathOrUrl, "");
+        if (pathOrUrl.StartsWith("lumper://", StringComparison.Ordinal))
+        {
+            pathOrUrl = pathOrUrl[9..];
+            // Sanitised URL produced by the dashboard is in form lumper://https//cdn.momentum..., (missing colon),
+            // add it back.
+            pathOrUrl = new Regex("(?<=http|https)//").Replace(pathOrUrl, "://");
+        }
 
         if (HasLoadedBsp)
             CloseCurrentBsp();
