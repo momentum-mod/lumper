@@ -1,7 +1,7 @@
 ﻿namespace Lumper.Test;
 
-using Lib.Bsp.Enum;
 using Lumper.Lib.Bsp;
+using Lumper.Lib.Bsp.Enum;
 
 public static class TestUtils
 {
