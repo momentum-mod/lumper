@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Newtonsoft.Json;
+using NLog;
 using SharpCompress.Archives.Zip;
 
 /// <summary>
@@ -28,6 +29,14 @@ public sealed class PakfileEntry
         _parent = parent;
         ZipEntry = zipEntry;
         Key = zipEntry.Key ?? throw new InvalidDataException("Pakfile contains an item without a key");
+
+        if (Key.Contains('\\'))
+        {
+            Logger.Warn($"Pakfile entry key {Key} contains a backslash, replacing with forward slashes.");
+            // Replacing backslashes here should be okay, Source appears to be agnostic to back/forward slashes
+            // everywhere, so need for path referece refactor.
+            Rename(Key.Replace('\\', '/'));
+        }
     }
 
     public PakfileEntry(PakfileLump parent, string key, Stream stream)
@@ -58,6 +67,8 @@ public sealed class PakfileEntry
     // Use length of buffer if we're read already so we get sizes for imported/updated
     // entries, fallback to ZipEntry.Size if we haven't read it yet.
     public long? UncompressedSize => _buffer?.Length ?? ZipEntry?.Size;
+
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     private readonly PakfileLump _parent;
 
