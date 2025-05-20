@@ -57,8 +57,8 @@ public class EntityEditorFilters : ReactiveObject
         if (split.Count == 0)
             return false;
 
-        incl = split.Where(s => !s.StartsWith('-')).ToList();
-        excl = split.Where(s => s.StartsWith('-')).Select(s => s[1..]).ToList();
+        incl = split.Where(s => !s.StartsWith('^')).ToList();
+        excl = split.Where(s => s.StartsWith('^')).Select(s => s[1..]).ToList();
 
         return true;
     }
