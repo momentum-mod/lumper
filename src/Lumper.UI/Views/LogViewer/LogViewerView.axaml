@@ -17,11 +17,12 @@
           <Style Selector="SelectableTextBlock">
             <Setter Property="FontFamily" Value="{StaticResource Monospace}" />
             <Setter Property="FontSize" Value="14" />
+            <Setter Property="Padding" Value="16 1" />
           </Style>
         </ItemsControl.Styles>
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
-            <StackPanel Orientation="Vertical" Margin="16" Spacing="0" />
+            <StackPanel Orientation="Vertical" Spacing="0" />
           </ItemsPanelTemplate>
         </ItemsControl.ItemsPanel>
       </ItemsControl>
