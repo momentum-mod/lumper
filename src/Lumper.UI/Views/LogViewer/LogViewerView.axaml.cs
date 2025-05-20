@@ -24,6 +24,10 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
     private LogMessage? _lastMessage;
     private bool _isBatching;
 
+    private readonly SolidColorBrush _bgBrush1 = new(new Color(0, 255, 255, 255));
+    private readonly SolidColorBrush _bgBrush2 = new(new Color(8, 255, 255, 255));
+    private bool _alternator = true;
+
     public LogViewerView()
     {
         InitializeComponent();
@@ -42,7 +46,9 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
 
         try
         {
-            SelectableTextBlock newLine = new();
+            _alternator = !_alternator;
+            SelectableTextBlock newLine = new() { Background = _alternator ? _bgBrush1 : _bgBrush2 };
+
             if (LogLines is null || newLine.Inlines is null)
                 return;
 

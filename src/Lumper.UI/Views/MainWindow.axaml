@@ -24,7 +24,14 @@
                                      MaterialOpacity="0.9" />
       </ExperimentalAcrylicBorder.Material>
     </ExperimentalAcrylicBorder>
-    <Grid ColumnDefinitions="*" RowDefinitions="Auto, Auto, 3*, 1, 1*" ClipToBounds="True">
+    <Grid ColumnDefinitions="*" ClipToBounds="True">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="3*" />
+        <RowDefinition Height="1" />
+        <RowDefinition Height="1*" MinHeight="16" />
+        </Grid.RowDefinitions>
       <DockPanel Grid.Column="0" HorizontalAlignment="Left" ClipToBounds="True">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="4">
           <TextBlock VerticalAlignment="Center" FontWeight="Bold"
@@ -220,7 +227,7 @@
 
       <ContentControl Grid.Column="0" Grid.Row="2" Content="{Binding PageService.ActivePageVm}" />
 
-      <GridSplitter Grid.Row="3" MinHeight="1" Height="1" ResizeDirection="Rows" />
+      <GridSplitter Grid.Row="3" MinHeight="1" Height="1" ResizeDirection="Rows" Padding="8 0 8 0" />
 
       <logView:LogViewerView Grid.Row="4" DataContext="{Binding LogViewer}" />
     </Grid>
