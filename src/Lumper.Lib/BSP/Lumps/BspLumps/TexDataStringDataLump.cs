@@ -20,15 +20,22 @@ public class TexDataStringDataLump(BspFile parent) : ManagedLump<BspLumpType>(pa
         private set => _data = value;
     }
 
-    public override void Read(BinaryReader reader, long length, IoHandler? handler = null) =>
+    public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
+    {
         Data = reader.ReadBytes((int)length);
+    }
 
-    public override void Write(Stream stream, IoHandler? handler = null, DesiredCompression? compression = null) =>
+    public override void Write(Stream stream, IoHandler? handler = null, DesiredCompression? compression = null)
+    {
         stream.Write(Data, 0, Data.Length);
+    }
 
     public override bool Empty => Data.Length <= 0;
 
-    public void Resize(int newSize) => Array.Resize(ref _data, newSize);
+    public void Resize(int newSize)
+    {
+        Array.Resize(ref _data, newSize);
+    }
 }
 
 public class ByteArrayJsonConverter : JsonConverter<byte[]>
@@ -47,7 +54,10 @@ public class ByteArrayJsonConverter : JsonConverter<byte[]>
         byte[]? existingValue,
         bool hasExistingValue,
         JsonSerializer serializer
-    ) => throw new NotImplementedException("Unnecessary because CanRead is false. The type will skip the converter.");
+    )
+    {
+        throw new NotImplementedException("Unnecessary because CanRead is false. The type will skip the converter.");
+    }
 
     public override bool CanRead => false;
 }

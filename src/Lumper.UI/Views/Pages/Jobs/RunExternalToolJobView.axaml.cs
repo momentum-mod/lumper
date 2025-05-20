@@ -5,5 +5,8 @@ using Lumper.UI.ViewModels.Pages.Jobs;
 
 public partial class RunExternalToolJobView : ReactiveUserControl<RunExternalToolJobViewModel>
 {
-    public RunExternalToolJobView() => InitializeComponent();
+    public RunExternalToolJobView()
+    {
+        InitializeComponent();
+    }
 }

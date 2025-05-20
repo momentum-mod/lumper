@@ -5,5 +5,8 @@ using Lumper.UI.ViewModels.Pages.Jobs;
 
 public partial class StripperFileJobView : ReactiveUserControl<StripperFileJobViewModel>
 {
-    public StripperFileJobView() => InitializeComponent();
+    public StripperFileJobView()
+    {
+        InitializeComponent();
+    }
 }

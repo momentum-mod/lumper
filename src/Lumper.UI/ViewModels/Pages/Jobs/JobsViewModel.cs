@@ -65,8 +65,9 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public static JobViewModel CreateJobViewModel(IJob job) =>
-        job switch
+    public static JobViewModel CreateJobViewModel(IJob job)
+    {
+        return job switch
         {
             StripperFileJob stripperFile => new StripperFileJobViewModel(stripperFile),
             StripperTextJob stripperText => new StripperTextJobViewModel(stripperText),
@@ -75,6 +76,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
             RemoveAssetJob removeAsset => new RemoveAssetJobViewModel(removeAsset),
             _ => throw new ArgumentException("Invalid job"),
         };
+    }
 
     public async Task Run()
     {
@@ -134,9 +136,15 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         Down = 1,
     }
 
-    public void MoveSelectedUp() => MoveSelectedInDirection(MoveDir.Up);
+    public void MoveSelectedUp()
+    {
+        MoveSelectedInDirection(MoveDir.Up);
+    }
 
-    public void MoveSelectedDown() => MoveSelectedInDirection(MoveDir.Down);
+    public void MoveSelectedDown()
+    {
+        MoveSelectedInDirection(MoveDir.Down);
+    }
 
     private void MoveSelectedInDirection(MoveDir dir)
     {
@@ -224,9 +232,12 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
         SaveWorkflow(await result.OpenWriteAsync());
     }
 
-    private static FilePickerFileType[] GenerateJsonFileFilter() =>
+    private static FilePickerFileType[] GenerateJsonFileFilter()
+    {
+        return
         [
             new FilePickerFileType("JSON Files") { Patterns = ["*.json"] },
             new FilePickerFileType("All Files") { Patterns = ["*"] },
         ];
+    }
 }

@@ -15,8 +15,10 @@ public class EntityLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public override void Read(BinaryReader reader, long length, IoHandler? handler = null) =>
+    public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
+    {
         Read(reader, length, false);
+    }
 
     /// <summary>
     /// Parse an entity lump using a BinaryReader on a stream.

@@ -19,12 +19,15 @@ public sealed class LogViewerViewModel : ViewModelWithView<LogViewerViewModel, L
     private readonly ReplaySubject<LogMessage> _messageSubject = new();
     public IObservable<LogMessage> Messages => _messageSubject.AsObservable();
 
-    public LogViewerViewModel() =>
+    public LogViewerViewModel()
+    {
         LogManager
             .Setup()
             .LoadConfiguration(builder => builder.ForLogger().WriteToMethodCall((logEvent, _) => AddLog(logEvent)));
+    }
 
-    private void AddLog(LogEventInfo e) =>
+    private void AddLog(LogEventInfo e)
+    {
         _messageSubject.OnNext(
             new LogMessage
             {
@@ -34,8 +37,12 @@ public sealed class LogViewerViewModel : ViewModelWithView<LogViewerViewModel, L
                 Exception = e.Exception,
             }
         );
+    }
 
-    public void Dispose() => _messageSubject.Dispose();
+    public void Dispose()
+    {
+        _messageSubject.Dispose();
+    }
 }
 
 public record LogMessage

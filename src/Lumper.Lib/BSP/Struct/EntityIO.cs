@@ -16,7 +16,10 @@ public partial class EntityIo : ICloneable
 
     public char Separator { get; }
 
-    public EntityIo(char separator) => Separator = separator;
+    public EntityIo(char separator)
+    {
+        Separator = separator;
+    }
 
     private EntityIo(string value, char separator)
     {
@@ -90,14 +93,19 @@ public partial class EntityIo : ICloneable
     }
 
     // csharpier-ignore
-    public override string ToString() =>
-          TargetEntityName + Separator
+    public override string ToString()
+    {
+        return TargetEntityName + Separator
         + Input + Separator
         + Parameter + Separator
         + Delay.ToString(CultureInfo.InvariantCulture) + Separator
         + TimesToFire.ToString(CultureInfo.InvariantCulture);
+    }
 
-    public object Clone() => MemberwiseClone();
+    public object Clone()
+    {
+        return MemberwiseClone();
+    }
 
     // Match string,string,string,number,number where numbers can be decimals, negative, -.xxx
     [GeneratedRegex(@"^[^,]*,[^,]*,[^,]*(,(-?\d*\.?\d+)?){2}$")]

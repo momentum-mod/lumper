@@ -16,7 +16,10 @@ public sealed class PakfileLumpViewModel : LumpViewModel
 
     public SourceCache<PakfileEntryViewModel, string> Entries { get; } = new(entry => entry.Key);
 
-    public PakfileLumpViewModel() => throw new NotImplementedException();
+    public PakfileLumpViewModel()
+    {
+        throw new NotImplementedException();
+    }
 
     public PakfileLumpViewModel(BspFile bsp)
     {
@@ -27,7 +30,8 @@ public sealed class PakfileLumpViewModel : LumpViewModel
         PullChangesFromModel(); // Initializes everything
     }
 
-    public override void PullChangesFromModel() =>
+    public override void PullChangesFromModel()
+    {
         Entries.Edit(updater =>
         {
             foreach (PakfileEntry model in _pakfile.Entries)
@@ -52,6 +56,7 @@ public sealed class PakfileLumpViewModel : LumpViewModel
                     updater.Remove(entry);
             }
         });
+    }
 
     public PakfileEntryViewModel AddEntry(
         string key,

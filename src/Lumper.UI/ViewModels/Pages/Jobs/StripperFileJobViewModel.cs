@@ -37,11 +37,13 @@ public class StripperFileJobViewModel : JobViewModel
         ConfigPath = result[0].Path.LocalPath;
     }
 
-    private static FilePickerOpenOptions GenerateFilePickerOptions() =>
-        new()
+    private static FilePickerOpenOptions GenerateFilePickerOptions()
+    {
+        return new()
         {
             Title = "Pick Stripper Config",
             AllowMultiple = false,
             FileTypeFilter = [new FilePickerFileType("Stripper Config") { Patterns = ["*.cfg"] }],
         };
+    }
 }

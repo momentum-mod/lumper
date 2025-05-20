@@ -17,7 +17,10 @@ public class ViewLocator : IDataTemplate
 
     public static void Register<TViewModel, TView>(Func<TView> factory)
         where TViewModel : ViewModel
-        where TView : Control, IViewFor<TViewModel> => Registration.TryAdd(typeof(TViewModel), factory);
+        where TView : Control, IViewFor<TViewModel>
+    {
+        Registration.TryAdd(typeof(TViewModel), factory);
+    }
 
     public Control Build(object? param)
     {
@@ -30,5 +33,8 @@ public class ViewLocator : IDataTemplate
             : new TextBlock { Text = "Not Found: " + type };
     }
 
-    public bool Match(object? data) => data is ViewModel;
+    public bool Match(object? data)
+    {
+        return data is ViewModel;
+    }
 }

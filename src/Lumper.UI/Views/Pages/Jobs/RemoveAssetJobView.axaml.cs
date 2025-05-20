@@ -5,5 +5,8 @@ using Lumper.UI.ViewModels.Pages.Jobs;
 
 public partial class RemoveAssetJobView : ReactiveUserControl<RemoveAssetJobViewModel>
 {
-    public RemoveAssetJobView() => InitializeComponent();
+    public RemoveAssetJobView()
+    {
+        InitializeComponent();
+    }
 }

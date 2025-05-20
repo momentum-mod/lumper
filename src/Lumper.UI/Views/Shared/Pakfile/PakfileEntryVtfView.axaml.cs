@@ -6,7 +6,13 @@ using Lumper.UI.ViewModels.Shared.Pakfile;
 
 public partial class PakfileEntryVtfView : ReactiveUserControl<PakfileEntryVtfViewModel>
 {
-    public PakfileEntryVtfView() => InitializeComponent();
+    public PakfileEntryVtfView()
+    {
+        InitializeComponent();
+    }
 
-    private void Image_OnPointerPressed(object? _, PointerPressedEventArgs __) => ViewModel!.OpenVtfImageWindow();
+    private void Image_OnPointerPressed(object? _, PointerPressedEventArgs __)
+    {
+        ViewModel!.OpenVtfImageWindow();
+    }
 }

@@ -85,8 +85,13 @@ public partial class StripperConfig
     [GeneratedRegex("\"([^\"]+)\"\\s+\"([^\"]+)\"", RegexOptions.IgnoreCase)]
     private static partial Regex PairRegex();
 
-    private static bool IsComment(string line) =>
-        line.StartsWith(';') || line.StartsWith("//", StringComparison.Ordinal) || line.StartsWith('#') || line == "";
+    private static bool IsComment(string line)
+    {
+        return line.StartsWith(';')
+            || line.StartsWith("//", StringComparison.Ordinal)
+            || line.StartsWith('#')
+            || line == "";
+    }
 
     private static bool MatchKeyValue(KvPair filter, Entity.EntityProperty property)
     {
@@ -160,8 +165,10 @@ public partial class StripperConfig
     {
         public List<KvPair> Properties { get; set; } = [];
 
-        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr) =>
+        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr)
+        {
             ParseBlock(reader, blockOpen, ref lineNr, (line, lNr) => Properties.Add(ParseProperty(line, lNr)));
+        }
 
         public override void Apply(EntityLump lump)
         {
@@ -175,8 +182,10 @@ public partial class StripperConfig
     {
         public List<KvPair> Properties { get; set; } = [];
 
-        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr) =>
+        public override void Parse(StreamReader reader, bool blockOpen, ref int lineNr)
+        {
             ParseBlock(reader, blockOpen, ref lineNr, (line, lNr) => Properties.Add(ParseProperty(line, lNr)));
+        }
 
         public override void Apply(EntityLump lump)
         {

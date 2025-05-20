@@ -41,9 +41,15 @@ public sealed class ReplaceTextureJobViewModel : JobViewModel, IDisposable
         _source.Connect().Transform(x => x.Model).ToCollection().Subscribe(x => job.Replacers = [.. x]);
     }
 
-    public void Add() => _source.Add(new ReplacerViewModel());
+    public void Add()
+    {
+        _source.Add(new ReplacerViewModel());
+    }
 
-    public void Delete(ReplacerViewModel replacer) => _source.Remove(replacer);
+    public void Delete(ReplacerViewModel replacer)
+    {
+        _source.Remove(replacer);
+    }
 
     public class ReplacerViewModel : ViewModel
     {
@@ -67,5 +73,8 @@ public sealed class ReplaceTextureJobViewModel : JobViewModel, IDisposable
         }
     }
 
-    public void Dispose() => _source.Dispose();
+    public void Dispose()
+    {
+        _source.Dispose();
+    }
 }

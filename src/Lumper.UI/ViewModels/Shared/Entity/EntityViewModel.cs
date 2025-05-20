@@ -62,7 +62,10 @@ public class EntityViewModel : HierarchicalBspNode
         MarkAsModified();
     }
 
-    public void AddString() => AddProperty(new Entity.EntityProperty<string>("newproperty", "newvalue"));
+    public void AddString()
+    {
+        AddProperty(new Entity.EntityProperty<string>("newproperty", "newvalue"));
+    }
 
     public void AddIo()
     {
@@ -85,10 +88,15 @@ public class EntityViewModel : HierarchicalBspNode
         AddProperty(new Entity.EntityProperty<EntityIo>("newproperty", new EntityIo(separator)));
     }
 
-    public string? FindProperty(string key) =>
-        Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == key)?.Value;
+    public string? FindProperty(string key)
+    {
+        return Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == key)?.Value;
+    }
 
-    public void ResetClassname() => Classname = FindProperty("classname")!;
+    public void ResetClassname()
+    {
+        Classname = FindProperty("classname")!;
+    }
 
     public string? Origin => FindProperty("origin");
 
@@ -100,8 +108,10 @@ public class EntityViewModel : HierarchicalBspNode
 
     public string ClassAndTargetname => Targetname is { } tn ? $"{Classname} ({tn})" : Classname;
 
-    public bool MatchClassname(string expr, bool wildcardWrapping) =>
-        _classname?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
+    public bool MatchClassname(string expr, bool wildcardWrapping)
+    {
+        return _classname?.MatchesSimpleExpression(expr, wildcardWrapping) ?? false;
+    }
 
     public void TeleportToMe()
     {

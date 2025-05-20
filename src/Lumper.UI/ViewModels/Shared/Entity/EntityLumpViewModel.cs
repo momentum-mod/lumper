@@ -33,7 +33,10 @@ public sealed class EntityLumpViewModel : LumpViewModel
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     // Required by BspService.LazyLoadLump
-    public EntityLumpViewModel() => throw new NotImplementedException();
+    public EntityLumpViewModel()
+    {
+        throw new NotImplementedException();
+    }
 
     // This class is created the first time something requests this lump from BspService,
     // and discarded when that BSP file is closed.
@@ -48,12 +51,14 @@ public sealed class EntityLumpViewModel : LumpViewModel
         Entities.CountChanged.ObserveOn(RxApp.MainThreadScheduler).ToPropertyEx(this, x => x.EntityCount);
     }
 
-    private void LoadEntityList() =>
+    private void LoadEntityList()
+    {
         Entities.Edit(innerCache =>
         {
             innerCache.Clear();
             innerCache.AddOrUpdate(_entityLump.Data.Select(ent => new EntityViewModel(ent, this)));
         });
+    }
 
     // Note: don't use this for doing large inserts, you'll make the SourceCache fire a billion
     // update notifications. Use .Edit to batch all changes together:
@@ -77,7 +82,8 @@ public sealed class EntityLumpViewModel : LumpViewModel
         MarkAsModified();
     }
 
-    public void RemoveMultiple(IEnumerable<EntityViewModel> entities) =>
+    public void RemoveMultiple(IEnumerable<EntityViewModel> entities)
+    {
         Entities.Edit(innerCache =>
         {
             foreach (EntityViewModel entity in entities)
@@ -86,6 +92,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
                 innerCache.Remove(entity);
             }
         });
+    }
 
     /// <summary>
     /// Get a MemoryStream of the lump, as ASCII text data
@@ -233,5 +240,8 @@ public sealed class EntityLumpViewModel : LumpViewModel
             newEnt.MarkAsModified(); // Probably best to do this last
     }
 
-    public override void Dispose() => Entities.Dispose();
+    public override void Dispose()
+    {
+        Entities.Dispose();
+    }
 }

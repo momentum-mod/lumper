@@ -72,7 +72,10 @@ public class PakfileTreeViewModel
         }
     }
 
-    public IEnumerable<Node> EnumerateLeaves() => Root.EnumerateLeaves();
+    public IEnumerable<Node> EnumerateLeaves()
+    {
+        return Root.EnumerateLeaves();
+    }
 }
 
 public class PakfileTreeNodeViewModel : ViewModel
@@ -96,7 +99,10 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public string? Extension => Leaf?.Extension;
 
-    public PakfileTreeNodeViewModel() => Size = Leaf?.UncompressedSize ?? 0;
+    public PakfileTreeNodeViewModel()
+    {
+        Size = Leaf?.UncompressedSize ?? 0;
+    }
 
     // Note that this is the entire path, INCLUDING name.extension
     public PathList Path
@@ -118,9 +124,15 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public string PathString => string.Join("/", Path);
 
-    public void Add(PakfileEntryViewModel value, PathList path) => AddInternal(value, path);
+    public void Add(PakfileEntryViewModel value, PathList path)
+    {
+        AddInternal(value, path);
+    }
 
-    public void AddDirectory(PathList path) => AddInternal(null, path);
+    public void AddDirectory(PathList path)
+    {
+        AddInternal(null, path);
+    }
 
     private void AddInternal(PakfileEntryViewModel? value, PathList path)
     {
@@ -168,7 +180,10 @@ public class PakfileTreeNodeViewModel : ViewModel
         (Children ??= []).Add(newNode);
     }
 
-    public void RemoveSelf() => Parent?.Children?.Remove(this);
+    public void RemoveSelf()
+    {
+        Parent?.Children?.Remove(this);
+    }
 
     public void RemoveRecursive(PathList path)
     {
@@ -243,10 +258,14 @@ public class PakfileTreeNodeViewModel : ViewModel
         return previous!;
     }
 
-    public void RecalculateSize() => Size = Children?.Sum(child => child.Size) ?? 0;
+    public void RecalculateSize()
+    {
+        Size = Children?.Sum(child => child.Size) ?? 0;
+    }
 
-    public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector) =>
-        (x, y) =>
+    public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector)
+    {
+        return (x, y) =>
         {
             if (x is null && y is null)
                 return 0;
@@ -256,9 +275,11 @@ public class PakfileTreeNodeViewModel : ViewModel
                 return 1;
             return Comparer<T>.Default.Compare(selector(x), selector(y));
         };
+    }
 
-    public static Comparison<Node?> SortDescending<T>(Func<Node, T> selector) =>
-        (x, y) =>
+    public static Comparison<Node?> SortDescending<T>(Func<Node, T> selector)
+    {
+        return (x, y) =>
         {
             if (x is null && y is null)
                 return 0;
@@ -268,4 +289,5 @@ public class PakfileTreeNodeViewModel : ViewModel
                 return -1;
             return Comparer<T>.Default.Compare(selector(y), selector(x));
         };
+    }
 }

@@ -5,5 +5,8 @@ using Lumper.UI.ViewModels.Pages.Jobs;
 
 public partial class JobsView : ReactiveUserControl<JobsViewModel>
 {
-    public JobsView() => InitializeComponent();
+    public JobsView()
+    {
+        InitializeComponent();
+    }
 }

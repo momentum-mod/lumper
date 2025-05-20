@@ -37,7 +37,8 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    public PakfileExplorerViewModel() =>
+    public PakfileExplorerViewModel()
+    {
         BspService
             .Instance.WhenAnyValue(x => x.PakfileLumpViewModel)
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -113,6 +114,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                             : null
                     );
             });
+    }
 
     // Null here is fine, just closes RHS pane.
     private void SetActiveFile(Node? node)
@@ -130,13 +132,25 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         ActiveFile = node.Leaf;
     }
 
-    public void Unsort() => DataGridSource?.Sort(null);
+    public void Unsort()
+    {
+        DataGridSource?.Sort(null);
+    }
 
-    public void ExpandAll() => DataGridSource?.ExpandAll();
+    public void ExpandAll()
+    {
+        DataGridSource?.ExpandAll();
+    }
 
-    public void CollapseAll() => DataGridSource?.CollapseAll();
+    public void CollapseAll()
+    {
+        DataGridSource?.CollapseAll();
+    }
 
-    public void OnMoveFiles() => Observable.Start(PushTreeChangesToEntries, RxApp.MainThreadScheduler);
+    public void OnMoveFiles()
+    {
+        Observable.Start(PushTreeChangesToEntries, RxApp.MainThreadScheduler);
+    }
 
     // Stores current treegrid selection in out var returns if it's valid,
     // including if only one is selected if single is true
@@ -485,8 +499,9 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         string inputLabel,
         string buttonLabel,
         string defaultInput = ""
-    ) =>
-        MessageBoxManager.GetMessageBoxCustom(
+    )
+    {
+        return MessageBoxManager.GetMessageBoxCustom(
             new MessageBoxCustomParams
             {
                 ContentTitle = title,
@@ -501,8 +516,12 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 ],
             }
         );
+    }
 
-    private static Task<string> ShowMessageBox(IMsBox<string> msBox) => msBox.ShowWindowDialogAsync(Program.MainWindow);
+    private static Task<string> ShowMessageBox(IMsBox<string> msBox)
+    {
+        return msBox.ShowWindowDialogAsync(Program.MainWindow);
+    }
 
     private static async ValueTask<IStorageFolder?> PickFolder(string title = "Pick folder")
     {
@@ -516,8 +535,10 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         return result[0];
     }
 
-    private static Task<IReadOnlyList<IStorageFile>> PickFiles(string title = "Pick file(s)") =>
-        Program.MainWindow.StorageProvider.OpenFilePickerAsync(
+    private static Task<IReadOnlyList<IStorageFile>> PickFiles(string title = "Pick file(s)")
+    {
+        return Program.MainWindow.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions { Title = title, AllowMultiple = true }
         );
+    }
 }

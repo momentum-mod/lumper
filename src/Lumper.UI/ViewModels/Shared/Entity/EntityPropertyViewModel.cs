@@ -41,21 +41,29 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty property, Bs
         }
     }
 
-    public static EntityPropertyViewModel Create(Entity.EntityProperty entityProperty, EntityViewModel parent) =>
-        entityProperty switch
+    public static EntityPropertyViewModel Create(Entity.EntityProperty entityProperty, EntityViewModel parent)
+    {
+        return entityProperty switch
         {
             Entity.EntityProperty<string> sp => new EntityPropertyStringViewModel(sp, parent),
             Entity.EntityProperty<EntityIo> sio => new EntityPropertyIoViewModel(sio, parent),
             _ => throw new ArgumentOutOfRangeException(nameof(entityProperty)),
         };
+    }
 
     public abstract bool MemberwiseEquals(EntityPropertyViewModel other);
 
-    public bool MatchKey(string expr, bool wildcardWrapping) => Key.MatchesSimpleExpression(expr, wildcardWrapping);
+    public bool MatchKey(string expr, bool wildcardWrapping)
+    {
+        return Key.MatchesSimpleExpression(expr, wildcardWrapping);
+    }
 
     public abstract bool MatchValue(string expr, bool wildcardWrapping);
 
-    public void Delete() => ((EntityViewModel)Parent).DeleteProperty(this);
+    public void Delete()
+    {
+        ((EntityViewModel)Parent).DeleteProperty(this);
+    }
 }
 
 public class EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
@@ -80,11 +88,15 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> propert
         }
     }
 
-    public override bool MemberwiseEquals(EntityPropertyViewModel other) =>
-        other is EntityPropertyStringViewModel o && o.Key == Key && o.Value == Value;
+    public override bool MemberwiseEquals(EntityPropertyViewModel other)
+    {
+        return other is EntityPropertyStringViewModel o && o.Key == Key && o.Value == Value;
+    }
 
-    public override bool MatchValue(string expr, bool wildcardWrapping) =>
-        Value.MatchesSimpleExpression(expr, wildcardWrapping);
+    public override bool MatchValue(string expr, bool wildcardWrapping)
+    {
+        return Value.MatchesSimpleExpression(expr, wildcardWrapping);
+    }
 }
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -179,20 +191,30 @@ public class EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> property,
         this.RaisePropertyChanged(nameof(DisplayValue));
     }
 
-    public override bool MemberwiseEquals(EntityPropertyViewModel other) =>
-        other is EntityPropertyIoViewModel o
-        && o.Key == Key
-        && o.TargetEntityName == TargetEntityName
-        && o.Input == Input
-        && o.Parameter == Parameter
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        && o.Delay == Delay
-        && o.TimesToFire == TimesToFire;
+    public override bool MemberwiseEquals(EntityPropertyViewModel other)
+    {
+        return other is EntityPropertyIoViewModel o
+            && o.Key == Key
+            && o.TargetEntityName == TargetEntityName
+            && o.Input == Input
+            && o.Parameter == Parameter
+            // ReSharper disable once CompareOfFloatsByEqualityOperator
+            && o.Delay == Delay
+            && o.TimesToFire == TimesToFire;
+    }
 
-    public override bool MatchValue(string expr, bool wildcardWrapping) =>
+    public override bool MatchValue(string expr, bool wildcardWrapping)
+    {
         // Match against both comma and space separated values
-        string.Create(CultureInfo.InvariantCulture, $"{TargetEntityName} {Input} {Parameter} {Delay} {TimesToFire}")
-            .MatchesSimpleExpression(expr, wildcardWrapping)
-        || string.Create(CultureInfo.InvariantCulture, $"{TargetEntityName},{Input},{Parameter},{Delay},{TimesToFire}")
-            .MatchesSimpleExpression(expr, wildcardWrapping);
+        return string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"{TargetEntityName} {Input} {Parameter} {Delay} {TimesToFire}"
+                )
+                .MatchesSimpleExpression(expr, wildcardWrapping)
+            || string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"{TargetEntityName},{Input},{Parameter},{Delay},{TimesToFire}"
+                )
+                .MatchesSimpleExpression(expr, wildcardWrapping);
+    }
 }

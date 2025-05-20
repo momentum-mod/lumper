@@ -46,11 +46,15 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
     // Very large (1MB) message size so we never have to handle multi-frame messages. Same constant in C++.
     private const uint MaxMessageLength = 1024 * 1024;
 
-    private GameSyncService() =>
+    private GameSyncService()
+    {
         this.WhenAnyValue(x => x.Status).Select(x => x == SyncStatus.Connected).ToPropertyEx(this, x => x.Connected);
+    }
 
-    public void TeleportToOrigin(string origin) =>
+    public void TeleportToOrigin(string origin)
+    {
         _ = PostMessage(new Message { Type = MessageType.CTS_TeleportToLocation, Content = origin });
+    }
 
     public void ToggleConnection()
     {
@@ -231,5 +235,8 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
         public string MapHash { get; set; } = BspService.Instance.FileHash ?? "";
     }
 
-    public void Dispose() => _client?.Dispose();
+    public void Dispose()
+    {
+        _client?.Dispose();
+    }
 }

@@ -44,7 +44,10 @@ public static class AssetManifest
     /// <summary>
     /// Preload the asset manifest. UI wants this, CLI doesn't. Don't call from the UI thread!
     /// </summary>
-    public static void Preload() => _ = Manifest;
+    public static void Preload()
+    {
+        _ = Manifest;
+    }
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 

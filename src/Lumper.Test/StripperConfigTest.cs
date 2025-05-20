@@ -26,7 +26,10 @@ public class StripperConfigTests
     }
 
     [TearDown]
-    public void TearDown() => _bspFile.Dispose();
+    public void TearDown()
+    {
+        _bspFile.Dispose();
+    }
 
     [Test]
     public void TestAddBlock()
@@ -495,6 +498,8 @@ public class StripperConfigTests
         _entityLump.Data.Add(entity);
     }
 
-    private static string? GetPropertyValue(Entity entity, string key) =>
-        entity.Properties.FirstOrDefault(p => p.Key == key)?.ValueString;
+    private static string? GetPropertyValue(Entity entity, string key)
+    {
+        return entity.Properties.FirstOrDefault(p => p.Key == key)?.ValueString;
+    }
 }
