@@ -187,7 +187,10 @@ public class MainWindowViewModel : ViewModel
         BspService.Instance.CloseCurrentBsp();
     }
 
-    public void ExitCommand() => Program.MainWindow.Close();
+    public void ExitCommand()
+    {
+        Program.MainWindow.Close();
+    }
 
     public void BspInfoCommand()
     {
@@ -213,13 +216,17 @@ public class MainWindowViewModel : ViewModel
             Program.Desktop.Shutdown();
     }
 
-    private static Task<bool> ShowUnsavedChangesDialog(string message) =>
-        MessageBoxManager
+    private static Task<bool> ShowUnsavedChangesDialog(string message)
+    {
+        return MessageBoxManager
             .GetMessageBoxStandard("Unsaved changes", message, ButtonEnum.YesNo)
             .ShowWindowDialogAsync(Program.MainWindow)
             .ContinueWith(result => result.Result == ButtonResult.Yes);
+    }
 
-    private static FilePickerFileType[] GenerateBspFileFilter() =>
+    private static FilePickerFileType[] GenerateBspFileFilter()
+    {
+        return
         [
             new("BSP Files")
             {
@@ -232,4 +239,5 @@ public class MainWindowViewModel : ViewModel
             },
             new("All Files") { Patterns = ["*"] },
         ];
+    }
 }

@@ -62,7 +62,8 @@ public sealed class PageService : ReactiveObject
 
     private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private PageService() =>
+    private PageService()
+    {
         BspService
             .Instance.WhenAnyValue(x => x.BspFile)
             .ObserveOn(RxApp.MainThreadScheduler)
@@ -85,6 +86,7 @@ public sealed class PageService : ReactiveObject
                         pageVm.Reset();
                 }
             });
+    }
 
     public void ViewPage(Page page)
     {
@@ -126,10 +128,19 @@ public sealed class PageService : ReactiveObject
         public bool Ephemeral { get; } = ephemeral;
         private Lazy<T> _lazyWrapper = new();
 
-        public T Get() => _lazyWrapper.Value;
+        public T Get()
+        {
+            return _lazyWrapper.Value;
+        }
 
-        public bool IsLoaded() => _lazyWrapper.IsValueCreated;
+        public bool IsLoaded()
+        {
+            return _lazyWrapper.IsValueCreated;
+        }
 
-        public void Reset() => _lazyWrapper = new Lazy<T>();
+        public void Reset()
+        {
+            _lazyWrapper = new Lazy<T>();
+        }
     }
 }

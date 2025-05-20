@@ -164,7 +164,10 @@ public sealed class BspService : ReactiveObject, IDisposable
     // Initial subject to mark BSP changes, can't get RaisePropertyChanged(nameof(BspFile)) to work
     private readonly Subject<BspFile?> _bspSubject = new();
 
-    private void OnBspChanged() => _bspSubject.OnNext(BspFile);
+    private void OnBspChanged()
+    {
+        _bspSubject.OnNext(BspFile);
+    }
 
     /// <summary>
     /// Load a BSP file from a system file
@@ -317,7 +320,10 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// <summary>
     /// Save the currently loaded BSP to it's original file path
     /// </summary>
-    public async Task<bool> Save() => await Save(null);
+    public async Task<bool> Save()
+    {
+        return await Save(null);
+    }
 
     /// <summary>
     /// Save the currently loaded BSP to the given system file
@@ -415,7 +421,8 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// <summary>
     /// Writes a JSON summary of the file out to {filename}.json
     /// </summary>
-    public void JsonDump(IStorageFile file) =>
+    public void JsonDump(IStorageFile file)
+    {
         Observable.Start(
             () =>
                 BspFile?.JsonDump(
@@ -427,6 +434,7 @@ public sealed class BspService : ReactiveObject, IDisposable
                 ),
             RxApp.TaskpoolScheduler
         );
+    }
 
     /// <summary>
     /// Mark the currently loaded BSP file as modified

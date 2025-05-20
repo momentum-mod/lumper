@@ -80,11 +80,13 @@ public sealed partial class UpdaterService : ReactiveObject
     /// to the Git tag used to build the Github release. For dev builds it's always 0.0.0
     /// </summary>
     /// <exception cref="InvalidProgramException"></exception>
-    public static SemVer GetAssemblyVersion() =>
-        SemVer.Parse(
+    public static SemVer GetAssemblyVersion()
+    {
+        return SemVer.Parse(
             Assembly.GetExecutingAssembly().GetName().Version?.ToString()
                 ?? throw new InvalidProgramException("Could not determine version of current assembly!")
         );
+    }
 
     /// <summary>
     /// Downloads an update for the program, applies it, and then restarts itself with the new version
@@ -313,7 +315,10 @@ public sealed partial class UpdaterService : ReactiveObject
 
         public bool IsDevBuild => Major == 0 && Minor == 0 && Patch == 0;
 
-        public override string ToString() => $"{Major}.{Minor}.{Patch}";
+        public override string ToString()
+        {
+            return $"{Major}.{Minor}.{Patch}";
+        }
 
         public static SemVer Parse(string s)
         {
@@ -346,9 +351,11 @@ public sealed partial class UpdaterService : ReactiveObject
 
         public SemVer Version => SemVer.Parse(TagName);
 
-        public string GetDownloadUrl(string osPrefix) =>
-            Assets.FirstOrDefault(a => a.Name.Contains(osPrefix))?.BrowserDownloadUrl
-            ?? throw new InvalidDataException($"Could not find download link for {osPrefix}");
+        public string GetDownloadUrl(string osPrefix)
+        {
+            return Assets.FirstOrDefault(a => a.Name.Contains(osPrefix))?.BrowserDownloadUrl
+                ?? throw new InvalidDataException($"Could not find download link for {osPrefix}");
+        }
     }
 
     public record GithubAsset

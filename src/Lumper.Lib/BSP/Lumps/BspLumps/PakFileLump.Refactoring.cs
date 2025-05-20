@@ -373,8 +373,9 @@ public partial class PakfileLump
     }
 
     // C isspace https://en.cppreference.com/w/c/string/byte/isspace
-    private static bool IsWhitespace(char c) =>
-        c switch
+    private static bool IsWhitespace(char c)
+    {
+        return c switch
         {
             ' ' => true,
             '\t' => true,
@@ -384,6 +385,7 @@ public partial class PakfileLump
             '\f' => true,
             _ => false,
         };
+    }
 
     private bool UpdateTexDataPathReferences(string oldPath, string newPath, string opPrefix, string opNoPrefix)
     {

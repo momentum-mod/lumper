@@ -65,10 +65,15 @@ public sealed partial class BspFile : IDisposable
     // creating a BspFile instance without loading an actual BSP.
     private BspFile() { }
 
-    public static BspFile? FromPath(string path, IoHandler? handler) =>
-        new BspFile { Name = Path.GetFileNameWithoutExtension(path) }.Load(path, handler);
+    public static BspFile? FromPath(string path, IoHandler? handler)
+    {
+        return new BspFile { Name = Path.GetFileNameWithoutExtension(path) }.Load(path, handler);
+    }
 
-    public static BspFile? FromStream(Stream stream, IoHandler? handler) => new BspFile().Load(stream, handler);
+    public static BspFile? FromStream(Stream stream, IoHandler? handler)
+    {
+        return new BspFile().Load(stream, handler);
+    }
 
     public BspFile? Load(string path, IoHandler? handler)
     {
@@ -408,13 +413,22 @@ public sealed partial class BspFile : IDisposable
     }
 
     public T GetLump<T>()
-        where T : Lump<BspLumpType> => Lumps.Values.OfType<T>().First();
+        where T : Lump<BspLumpType>
+    {
+        return Lumps.Values.OfType<T>().First();
+    }
 
-    public Lump<BspLumpType> GetLump(BspLumpType lumpType) => Lumps[lumpType];
+    public Lump<BspLumpType> GetLump(BspLumpType lumpType)
+    {
+        return Lumps[lumpType];
+    }
 
     // I tried to refactor a bunch of code to use URIs everywhere but was a big hassle and Uri ctor apparently
     // doesn't handle escaped stuff well... just sticking with strings
-    private static string GetUnescapedFilePathString(string path) => Uri.UnescapeDataString(Path.GetFullPath(path));
+    private static string GetUnescapedFilePathString(string path)
+    {
+        return Uri.UnescapeDataString(Path.GetFullPath(path));
+    }
 
     public void JsonDump(string? path, IoHandler? handler, bool sortLumps, bool sortProperties, bool ignoreOffset)
     {
@@ -457,5 +471,8 @@ public sealed partial class BspFile : IDisposable
     [GeneratedRegex("\\.bsp$")]
     public static partial Regex BspExtensionRegex();
 
-    public void Dispose() => FileStream?.Dispose();
+    public void Dispose()
+    {
+        FileStream?.Dispose();
+    }
 }

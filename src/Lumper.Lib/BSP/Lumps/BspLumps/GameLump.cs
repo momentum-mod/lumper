@@ -19,9 +19,15 @@ public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
     }
 
     public T? GetLump<T>()
-        where T : Lump<GameLumpType> => (T?)Lumps.Values.First(x => x?.GetType() == typeof(T));
+        where T : Lump<GameLumpType>
+    {
+        return (T?)Lumps.Values.First(x => x?.GetType() == typeof(T));
+    }
 
-    public Lump<GameLumpType>? GetLump(GameLumpType lumpType) => Lumps[lumpType];
+    public Lump<GameLumpType>? GetLump(GameLumpType lumpType)
+    {
+        return Lumps[lumpType];
+    }
 
     public override void Read(BinaryReader reader, long length, IoHandler? handler = null)
     {

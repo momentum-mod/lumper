@@ -9,11 +9,20 @@ using Lumper.UI.ViewModels.Shared.Entity;
 
 public partial class EntityEditorView : ReactiveUserControl<EntityEditorViewModel>
 {
-    public EntityEditorView() => InitializeComponent();
+    public EntityEditorView()
+    {
+        InitializeComponent();
+    }
 
-    private void SelectAll(object? sender, RoutedEventArgs e) => EntityList?.SelectAll();
+    private void SelectAll(object? sender, RoutedEventArgs e)
+    {
+        EntityList?.SelectAll();
+    }
 
-    private void EntityList_OnSelectionChanged(object? _, SelectionChangedEventArgs __) => OpenSelectedListItem();
+    private void EntityList_OnSelectionChanged(object? _, SelectionChangedEventArgs __)
+    {
+        OpenSelectedListItem();
+    }
 
     private void OpenSelectedListItem()
     {

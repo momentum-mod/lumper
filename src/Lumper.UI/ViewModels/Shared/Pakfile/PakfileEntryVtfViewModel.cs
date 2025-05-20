@@ -167,9 +167,12 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         SkipMetadata = false,
     };
 
-    private static FilePickerFileType[] GenerateImageFileFilter() =>
+    private static FilePickerFileType[] GenerateImageFileFilter()
+    {
+        return
         [
             new FilePickerFileType("Image files") { Patterns = ["*.bmp", "*.jpeg", "*.jpg", "*.png"] },
             new FilePickerFileType("All files") { Patterns = ["*"] },
         ];
+    }
 }

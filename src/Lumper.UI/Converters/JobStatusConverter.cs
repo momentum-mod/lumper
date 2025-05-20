@@ -31,6 +31,11 @@ public class JobStatusConverter : IValueConverter
         };
     }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
-        new BindingNotification(new ArgumentOutOfRangeException(nameof(value)), BindingErrorType.DataValidationError);
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        return new BindingNotification(
+            new ArgumentOutOfRangeException(nameof(value)),
+            BindingErrorType.DataValidationError
+        );
+    }
 }

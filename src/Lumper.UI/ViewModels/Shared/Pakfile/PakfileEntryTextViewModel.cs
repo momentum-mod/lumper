@@ -23,7 +23,10 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public PakfileEntryTextViewModel(PakfileEntry entry, BspNode parent)
-        : base(entry, parent) => RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+        : base(entry, parent)
+    {
+        RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+    }
 
     public override void Load(CancellationTokenSource? cts = null)
     {

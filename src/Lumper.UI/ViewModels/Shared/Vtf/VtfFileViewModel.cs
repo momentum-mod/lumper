@@ -134,7 +134,8 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         return Image.LoadPixelData<Rgba32>(rgba.AsSpan(), (int)ImageWidth, (int)ImageHeight);
     }
 
-    public async Task SetImageData(Image<Rgba32> image, uint frame, uint face, uint slice, uint mipmapLevel) =>
+    public async Task SetImageData(Image<Rgba32> image, uint frame, uint face, uint slice, uint mipmapLevel)
+    {
         await VtfLibQueue.Run(() =>
         {
             Prepare();
@@ -155,8 +156,10 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
             VTFFile.ImageSetData(frame, face, slice, mipmapLevel, vtfImageData);
             SaveVtf();
         });
+    }
 
-    public async Task SetNewImage(Image<Rgba32> image) =>
+    public async Task SetNewImage(Image<Rgba32> image)
+    {
         await VtfLibQueue.Run(() =>
         {
             Prepare();
@@ -182,6 +185,7 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
 
             SaveVtf();
         });
+    }
 
     private void Prepare()
     {
@@ -278,9 +282,13 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         private static readonly Lock Lock = new();
         private static bool _isRunning;
 
-        public static Task Run(Action fn) => Run(fn, null);
+        public static Task Run(Action fn)
+        {
+            return Run(fn, null);
+        }
 
-        public static async Task Run(Action fn, CancellationTokenSource? cts) =>
+        public static async Task Run(Action fn, CancellationTokenSource? cts)
+        {
             await Run<object>(
                 () =>
                 {
@@ -289,8 +297,12 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
                 },
                 cts
             );
+        }
 
-        public static Task<T> Run<T>(Func<object> fn) => Run<T>(fn, null)!;
+        public static Task<T> Run<T>(Func<object> fn)
+        {
+            return Run<T>(fn, null)!;
+        }
 
         public static async Task<T?> Run<T>(Func<object> fn, CancellationTokenSource? cts)
         {

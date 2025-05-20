@@ -331,7 +331,8 @@ public class PakFileLumpRefactoringTests
     }
 
     [Test]
-    public void Pakfile_ExactMatch_UpdatesPath() =>
+    public void Pakfile_ExactMatch_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -349,9 +350,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_NoMatch_ReturnsEmpty() =>
+    public void Pakfile_NoMatch_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.vtf",
@@ -369,9 +372,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_HandlesMultiplePathsInSameFile_UpdatesAllMatches() =>
+    public void Pakfile_HandlesMultiplePathsInSameFile_UpdatesAllMatches()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -395,9 +400,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_CaseInsensitiveMatching_UpdatesPath() =>
+    public void Pakfile_CaseInsensitiveMatching_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -415,9 +422,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_WithExtension_UpdatesPath() =>
+    public void Pakfile_WithExtension_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -435,9 +444,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_WithDirectory_ReturnsEmpty() =>
+    public void Pakfile_WithDirectory_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.vtf",
@@ -455,9 +466,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_WithDirectoryAndExtension_ReturnsEmpty() =>
+    public void Pakfile_WithDirectoryAndExtension_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.vtf",
@@ -475,9 +488,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_GenericTextFile_UpdatesPath() =>
+    public void Pakfile_GenericTextFile_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -492,9 +507,11 @@ public class PakFileLumpRefactoringTests
             """,
             "readme.txt"
         );
+    }
 
     [Test]
-    public void Pakfile_GenericTextFileWithoutExtension_ReturnsEmpty() =>
+    public void Pakfile_GenericTextFileWithoutExtension_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.vtf",
@@ -509,9 +526,11 @@ public class PakFileLumpRefactoringTests
             """,
             "readme.txt"
         );
+    }
 
     [Test]
-    public void Pakfile_VmtWithMissingQuotes_UpdatesPath() =>
+    public void Pakfile_VmtWithMissingQuotes_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -529,9 +548,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_VmtWithMissingQuotesWithExtension_UpdatesPath() =>
+    public void Pakfile_VmtWithMissingQuotesWithExtension_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -549,9 +570,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_WorksIfContainsIgnorableExtension_UpdatesPath() =>
+    public void Pakfile_WorksIfContainsIgnorableExtension_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -569,9 +592,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_DifferentExtensionDoesntMatch_ReturnsEmpty() =>
+    public void Pakfile_DifferentExtensionDoesntMatch_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.mdl",
@@ -589,9 +614,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_PartialNameDoesntMatch_ReturnsEmpty() =>
+    public void Pakfile_PartialNameDoesntMatch_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.vtf",
@@ -609,9 +636,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_PartialNameNoQuotesDoesntMatch_ReturnsEmpty() =>
+    public void Pakfile_PartialNameNoQuotesDoesntMatch_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.vtf",
@@ -629,9 +658,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_MatchesBracedPath_UpdatesPath() =>
+    public void Pakfile_MatchesBracedPath_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/{foo}.vtf",
@@ -649,9 +680,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_MatchesBracedPathNoQuotes_UpdatesPath() =>
+    public void Pakfile_MatchesBracedPathNoQuotes_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/{foo}.vtf",
@@ -669,9 +702,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_MatchesPathWithSpaces_UpdatesPath() =>
+    public void Pakfile_MatchesPathWithSpaces_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo baz.vtf",
@@ -689,11 +724,13 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     // This is weird behaviour that we'd probably rather avoid, but requires a lot
     // more KV1 parsing to avoid, keeping this test for clarify.
     [Test]
-    public void Pakfile_PathWithSpacesNoQuotes_UpdatesPath() =>
+    public void Pakfile_PathWithSpacesNoQuotes_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo bar.vtf",
@@ -711,9 +748,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_WithMultipleSpacesNoQuotes_UpdatesPath() =>
+    public void Pakfile_WithMultipleSpacesNoQuotes_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -731,9 +770,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_NoQuotesWithDirectory_ReturnsEmpty() =>
+    public void Pakfile_NoQuotesWithDirectory_ReturnsEmpty()
+    {
         TestPakfile(
             false,
             "materials/test/foo.vtf",
@@ -751,9 +792,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_CRLF_UpdatesPath() =>
+    public void Pakfile_CRLF_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -771,9 +814,11 @@ public class PakFileLumpRefactoringTests
             }
             """.Replace("\n", "\r\n")
         );
+    }
 
     [Test]
-    public void Pakfile_NoQuotesCRLF_UpdatesPath() =>
+    public void Pakfile_NoQuotesCRLF_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -791,9 +836,11 @@ public class PakFileLumpRefactoringTests
             }
             """.Replace("\n", "\r\n")
         );
+    }
 
     [Test]
-    public void Pakfile_NoQuotesMultipleSpaces_UpdatesPath() =>
+    public void Pakfile_NoQuotesMultipleSpaces_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -811,9 +858,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_NoQuotesTabChar_UpdatesPath() =>
+    public void Pakfile_NoQuotesTabChar_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -831,9 +880,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_NoQuotesCombinedTabsAndSpaces_UpdatesPath() =>
+    public void Pakfile_NoQuotesCombinedTabsAndSpaces_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -851,9 +902,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_MaterialsMaterials_UpdatesPath() =>
+    public void Pakfile_MaterialsMaterials_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/materials/test/foo.vtf",
@@ -871,9 +924,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_CommentsInFile_PreservesComments() =>
+    public void Pakfile_CommentsInFile_PreservesComments()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -897,9 +952,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_MatchBackslash_UpdatesPath() =>
+    public void Pakfile_MatchBackslash_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo.vtf",
@@ -917,9 +974,11 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     [Test]
-    public void Pakfile_MixedSeparators_UpdatesPath() =>
+    public void Pakfile_MixedSeparators_UpdatesPath()
+    {
         TestPakfile(
             true,
             "materials/test/foo/baz.vtf",
@@ -937,6 +996,7 @@ public class PakFileLumpRefactoringTests
             }
             """
         );
+    }
 
     private static void TestPakfile(
         bool shouldChange,

@@ -301,7 +301,10 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             Tabs.Remove(tab);
     }
 
-    public void CloseSelectedTab() => CloseTab(SelectedTab);
+    public void CloseSelectedTab()
+    {
+        CloseTab(SelectedTab);
+    }
 
     public void CloseTab(EntityEditorTabViewModel? tab)
     {

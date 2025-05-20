@@ -21,17 +21,24 @@ public class FileSizeConverter : IValueConverter
         return FormattedFileSize(convertedSize);
     }
 
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
         throw new NotSupportedException();
+    }
 
-    public static string FormattedFileSize(double size) =>
-        size switch
+    public static string FormattedFileSize(double size)
+    {
+        return size switch
         {
             < 1024 => $"{size:N0} bytes",
             < 1024 * 1024 => $"{Math.Ceiling(size / 1024 * 10) / 10:N1} KB",
             < 1024 * 1024 * 1024 => $"{Math.Ceiling(size / 1024 / 1024 * 10) / 10:N1} MB",
             _ => $"{Math.Ceiling(size / 1024 / 1024 / 1024 * 10) / 10:N1} GB",
         };
+    }
 
-    public static string FormattedFileSize(int size) => FormattedFileSize((double)size);
+    public static string FormattedFileSize(int size)
+    {
+        return FormattedFileSize((double)size);
+    }
 }

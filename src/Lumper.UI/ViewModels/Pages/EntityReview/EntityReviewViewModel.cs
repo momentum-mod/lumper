@@ -25,7 +25,8 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
     private readonly ReadOnlyObservableCollection<EntityReviewResult> _results;
     public ReadOnlyObservableCollection<EntityReviewResult> Results => _results;
 
-    public EntityReviewViewModel() =>
+    public EntityReviewViewModel()
+    {
         // Map tuple of ent lumps (handles BSP changes) and rulesets (handle rule file changes)
         // into changesets of EntityViewResults, where we group every entity into a result based
         // on classname. Switch() unsubscribes the previous changeset pipeline whenever tuple
@@ -50,6 +51,7 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
             .Switch()
             .Bind(out _results)
             .Subscribe();
+    }
 
     public void SwitchToEntityEditor(string classname)
     {
@@ -74,13 +76,15 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
         RulesFilePath = result[0].Path.LocalPath;
     }
 
-    private static FilePickerOpenOptions GenerateFilePickerOptions() =>
-        new()
+    private static FilePickerOpenOptions GenerateFilePickerOptions()
+    {
+        return new()
         {
             Title = "Pick Entity Rule File",
             AllowMultiple = false,
             FileTypeFilter = [new FilePickerFileType("Entity Rule File") { Patterns = ["*.json"] }],
         };
+    }
 
     public class EntityReviewResult
     {

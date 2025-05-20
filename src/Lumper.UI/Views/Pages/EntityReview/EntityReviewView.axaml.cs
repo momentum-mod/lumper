@@ -5,5 +5,8 @@ using Lumper.UI.ViewModels.Pages.EntityReview;
 
 public partial class EntityReviewView : ReactiveUserControl<EntityReviewViewModel>
 {
-    public EntityReviewView() => InitializeComponent();
+    public EntityReviewView()
+    {
+        InitializeComponent();
+    }
 }

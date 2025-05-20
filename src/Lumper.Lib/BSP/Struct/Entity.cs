@@ -18,10 +18,12 @@ public partial class Entity : ICloneable
 
     public List<EntityProperty> Properties { get; set; }
 
-    public Entity(IEnumerable<KeyValuePair<string, string>>? kv) =>
+    public Entity(IEnumerable<KeyValuePair<string, string>>? kv)
+    {
         Properties = kv is not null
             ? kv.Select(x => EntityProperty.Create(x, EntityLumpVersion)).OfType<EntityProperty>().ToList()
             : [];
+    }
 
     /// <summary>
     /// Provides a user-friendly name for the entity. classnames aren't unique and hammerids
@@ -84,7 +86,10 @@ public partial class Entity : ICloneable
         return Vector3.DistanceSquared(origin.Value, position) <= Math.Pow(radius, 2);
     }
 
-    public object Clone() => new Entity { Properties = Properties.Select(x => (EntityProperty)x.Clone()).ToList() };
+    public object Clone()
+    {
+        return new Entity { Properties = Properties.Select(x => (EntityProperty)x.Clone()).ToList() };
+    }
 
     public abstract class EntityProperty(string key) : ICloneable
     {
@@ -92,12 +97,17 @@ public partial class Entity : ICloneable
 
         public abstract string ValueString { get; }
 
-        public override string ToString() => $"\"{Key}\" \"{ValueString}\"";
+        public override string ToString()
+        {
+            return $"\"{Key}\" \"{ValueString}\"";
+        }
 
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public static EntityProperty? Create(KeyValuePair<string, string> kv, int elVersion = 0) =>
-            Create(kv.Key, kv.Value, elVersion);
+        public static EntityProperty? Create(KeyValuePair<string, string> kv, int elVersion = 0)
+        {
+            return Create(kv.Key, kv.Value, elVersion);
+        }
 
         public static EntityProperty? Create(string key, string value, int elVersion = 0)
         {
@@ -131,6 +141,9 @@ public partial class Entity : ICloneable
 
         public override string ValueString => Value.ToString() ?? "";
 
-        public override object Clone() => new EntityProperty<T>(Key, (T)Value.Clone());
+        public override object Clone()
+        {
+            return new EntityProperty<T>(Key, (T)Value.Clone());
+        }
     }
 }

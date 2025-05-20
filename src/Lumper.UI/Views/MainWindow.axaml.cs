@@ -73,7 +73,8 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         });
     }
 
-    private void PopulateRecentFilesList() =>
+    private void PopulateRecentFilesList()
+    {
         RecentFiles.ItemsSource = StateService
             .Instance.RecentFiles.Select(path =>
             {
@@ -91,6 +92,7 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
             })
             .Reverse()
             .ToList();
+    }
 
     // ReSharper disable once AsyncVoidMethod - Needed for event binding
     private async void Window_OnClosing(object? _, WindowClosingEventArgs e)
@@ -115,9 +117,11 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
         await ViewModel!.OpenDragDropped(files);
     }
 
-    private List<IStorageFile> FilterDraggedBspFiles(DragEventArgs e) =>
-        e.Data.GetFiles()
-            ?.OfType<IStorageFile>()
-            .Where(file => file.Name.EndsWith(".bsp", StringComparison.Ordinal))
-            .ToList() ?? [];
+    private List<IStorageFile> FilterDraggedBspFiles(DragEventArgs e)
+    {
+        return e.Data.GetFiles()
+                ?.OfType<IStorageFile>()
+                .Where(file => file.Name.EndsWith(".bsp", StringComparison.Ordinal))
+                .ToList() ?? [];
+    }
 }

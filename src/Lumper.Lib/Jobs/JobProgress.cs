@@ -30,7 +30,10 @@ public class JobProgress
 
     public event PercentChangedHandler? OnPercentChanged;
 
-    public JobProgress(long max = -1) => Max = max;
+    public JobProgress(long max = -1)
+    {
+        Max = max;
+    }
 
     private void UpdatePercent()
     {

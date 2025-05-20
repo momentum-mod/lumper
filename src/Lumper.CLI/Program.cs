@@ -137,7 +137,8 @@ internal sealed class Program
         return true;
     }
 
-    private static void JsonDump(BspFile bspFile, CommandLineOptions options) =>
+    private static void JsonDump(BspFile bspFile, CommandLineOptions options)
+    {
         bspFile.JsonDump(
             options.JsonPath ?? null,
             null,
@@ -145,6 +146,7 @@ internal sealed class Program
             sortProperties: options.JsonOptions.HasFlag(JsonOptions.SortProperties),
             ignoreOffset: options.JsonOptions.HasFlag(JsonOptions.IgnoreOffset)
         );
+    }
 
     private static void RunWorkflow(BspFile bspFile, string workflowPath)
     {

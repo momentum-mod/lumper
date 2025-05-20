@@ -149,7 +149,13 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
         { LogLevel.Off, Brushes.Gray },
     };
 
-    private void ScrollToBottom(object? _, RoutedEventArgs __) => ScrollToBottom();
+    private void ScrollToBottom(object? _, RoutedEventArgs __)
+    {
+        ScrollToBottom();
+    }
 
-    private void ScrollToBottom() => ScrollViewer.ScrollToEnd();
+    private void ScrollToBottom()
+    {
+        ScrollViewer.ScrollToEnd();
+    }
 }

@@ -5,5 +5,8 @@ using Lumper.UI.ViewModels.Pages.Jobs;
 
 public partial class ReplaceTextureJobView : ReactiveUserControl<ReplaceTextureJobViewModel>
 {
-    public ReplaceTextureJobView() => InitializeComponent();
+    public ReplaceTextureJobView()
+    {
+        InitializeComponent();
+    }
 }

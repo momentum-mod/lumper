@@ -30,7 +30,8 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             _ => 1,
         };
 
-    public void SetVersion(int version) =>
+    public void SetVersion(int version)
+    {
         ActualVersion = version switch
         {
             4 => StaticPropVersion.V4,
@@ -45,9 +46,11 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             13 => StaticPropVersion.V13,
             _ => StaticPropVersion.Unknown,
         };
+    }
 
-    public int GetVersion() =>
-        ActualVersion switch
+    public int GetVersion()
+    {
+        return ActualVersion switch
         {
             StaticPropVersion.V4 => 4,
             StaticPropVersion.V5 => 5,
@@ -62,6 +65,7 @@ public class StaticPropLump(BspFile parent) : FixedLump<GameLumpType, StaticProp
             StaticPropVersion.V13 => 13,
             _ => 0,
         };
+    }
 
     protected override void ReadItem(BinaryReader reader)
     {

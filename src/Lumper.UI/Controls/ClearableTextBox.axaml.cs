@@ -29,7 +29,13 @@ public partial class ClearableTextBox : UserControl
         set => SetValue(WatermarkProperty, value);
     }
 
-    public ClearableTextBox() => InitializeComponent();
+    public ClearableTextBox()
+    {
+        InitializeComponent();
+    }
 
-    private void ClearButton_OnClick(object? sender, RoutedEventArgs e) => Text = string.Empty;
+    private void ClearButton_OnClick(object? sender, RoutedEventArgs e)
+    {
+        Text = string.Empty;
+    }
 }

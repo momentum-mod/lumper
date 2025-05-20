@@ -1,12 +1,6 @@
 # Copied from https://github.com/RehanSaeed/EditorConfig on 19/03/2024
 # Modified by Tom quite a bit.
 # Don't ignore warnings, they'll fail QA CI for your PR. Bring it up in Discord if there are rules you can't tolerate.
-
-# Version: 4.1.1 (Using https://semver.org/)
-# Updated: 2022-05-23
-# See https://github.com/RehanSaeed/EditorConfig/releases for release notes.
-# See https://github.com/RehanSaeed/EditorConfig for updates to this file.
-# See http://EditorConfig.org for more information about .editorconfig files.
 # @formatter:off
 
 [src/Dependencies/**/*.cs]
@@ -142,9 +136,9 @@ csharp_style_var_for_built_in_types = false:warning
 csharp_style_var_when_type_is_apparent = true:warning
 csharp_style_var_elsewhere = false:warning
 
-# Expression-bodied members
-csharp_style_expression_bodied_methods = true:warning
-csharp_style_expression_bodied_constructors = true:warning
+# Expression-bodied members can be hard to read when you have a lot in one class, especially constructors.
+csharp_style_expression_bodied_methods = false:warning
+csharp_style_expression_bodied_constructors = false:warning
 csharp_style_expression_bodied_operators = true:warning
 csharp_style_expression_bodied_properties = true:warning
 csharp_style_expression_bodied_indexers = true:warning
@@ -411,39 +405,3 @@ dotnet_naming_symbols.parameters_group.applicable_kinds = parameter
 dotnet_naming_rule.parameters_rule.symbols              = parameters_group
 dotnet_naming_rule.parameters_rule.style                = camel_case_style
 dotnet_naming_rule.parameters_rule.severity             = warning
-
-# Why does an .editorconfig need a copyright and license? Fuck knows!
-##########################################
-# License
-##########################################
-# The following applies as to the .editorconfig file ONLY, and is
-# included below for reference, per the requirements of the license
-# corresponding to this .editorconfig file.
-# See: https://github.com/RehanSaeed/EditorConfig
-#
-# MIT License
-#
-# Copyright (c) 2017-2019 Muhammad Rehan Saeed
-# Copyright (c) 2019 Henry Gabryjelski
-#
-# Permission is hereby granted, free of charge, to any
-# person obtaining a copy of this software and associated
-# documentation files (the "Software"), to deal in the
-# Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute,
-# sublicense, and/or sell copies of the Software, and to permit
-# persons to whom the Software is furnished to do so, subject
-# to the following conditions:
-#
-# The above copyright notice and this permission notice shall be
-# included in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-# OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
-##########################################

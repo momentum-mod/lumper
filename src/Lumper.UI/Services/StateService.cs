@@ -18,7 +18,10 @@ public class StateService : ReactiveObject
     // Nasty public ctor needed for RxApp.SuspensionHost.CreateNewAppState
     // `() => StateService.Instance` seems to result in multiple instances
     // somehow??
-    public StateService() => Instance = this;
+    public StateService()
+    {
+        Instance = this;
+    }
 
     [Reactive]
     public long LastUpdateCheck { get; set; } = 0;

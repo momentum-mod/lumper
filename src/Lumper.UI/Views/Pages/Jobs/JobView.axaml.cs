@@ -25,7 +25,10 @@ public partial class JobView : UserControl
         set => SetValue(MainContentProperty, value);
     }
 
-    public JobView() => InitializeComponent();
+    public JobView()
+    {
+        InitializeComponent();
+    }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
