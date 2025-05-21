@@ -36,6 +36,13 @@ public static class AssetManifest
     /// </summary>
     public static Dictionary<string, List<Asset>> Manifest => LazyManifest.Value;
 
+    private static readonly Lazy<Dictionary<string, List<string>>> LazyPathManifest = new(LoadPathManifest);
+
+    /// <summary>
+    /// TODO
+    /// </summary>
+    public static Dictionary<string, List<string>> PathManifest => LazyPathManifest.Value;
+
     /// <summary>
     /// Every game or asset pack that has assets in the manifest.
     /// </summary>
@@ -48,6 +55,7 @@ public static class AssetManifest
     {
         _ = Manifest;
     }
+
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -106,7 +114,7 @@ public static class AssetManifest
                     continue;
 
                 string vpk = decoder.GetString(buffers[0], 0, bufferLengths[0]);
-                string path = decoder.GetString(buffers[1], 0, bufferLengths[1]);
+                string path = decoder.GetString(buffers[1], 0, bufferLengths[1]).ToLowerInvariant();
                 string hash = decoder.GetString(buffers[3], 0, bufferLengths[3]);
 
                 int vpkFirstSlash = vpk.IndexOf('/');
@@ -145,5 +153,26 @@ public static class AssetManifest
             // Just return an empty manifest if something goes wrong.
             return [];
         }
+    }
+
+    private static Dictionary<string, List<string>> LoadPathManifest()
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        var pathManifest = new Dictionary<string, List<string>>();
+        foreach (List<Asset> assets in Manifest.Values)
+        {
+            foreach (Asset asset in assets)
+            {
+                if (!pathManifest.TryAdd(asset.Path, [asset.Origin]))
+                    pathManifest[asset.Path].Add(asset.Origin);
+            }
+        }
+
+        stopwatch.Stop();
+        Logger.Debug($"Computed path-based asset manifest in {stopwatch.ElapsedMilliseconds}ms");
+
+        return pathManifest;
     }
 }
