@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -19,6 +18,9 @@ using MsBox.Avalonia.Enums;
 using Newtonsoft.Json;
 using NLog;
 using ReactiveUI;
+using SharpCompress.Archives;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Common;
 
 public sealed partial class UpdaterService : ReactiveObject
 {
@@ -176,9 +178,24 @@ public sealed partial class UpdaterService : ReactiveObject
 
         try
         {
-            // Using MS ZipArchive because SharpCompress is causing very weird System.Text.Encoding.CodePages errors
-            // during ZipArchive.Open calls in release builds.
-            ZipFile.ExtractToDirectory(zipStream, AppContext.BaseDirectory, overwriteFiles: true);
+            // Register code pages to avoid encoding issues with SharpCompress
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            // Reset stream position to beginning
+            zipStream.Position = 0;
+
+            using var archive = ZipArchive.Open(zipStream);
+
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                if (!entry.IsDirectory)
+                {
+                    entry.WriteToDirectory(
+                        Path.Combine(AppContext.BaseDirectory, "downloads"),
+                        new ExtractionOptions { ExtractFullPath = true, Overwrite = true }
+                    );
+                }
+            }
         }
         catch (Exception ex)
         {
