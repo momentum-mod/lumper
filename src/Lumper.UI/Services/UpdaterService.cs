@@ -51,11 +51,11 @@ public sealed partial class UpdaterService : ReactiveObject
     {
         SemVer currentVersion = GetAssemblyVersion();
 
-        if (currentVersion.IsDevBuild)
-        {
-            _logger.Debug("Running a development build, skipping update check");
-            return;
-        }
+        // if (currentVersion.IsDevBuild)
+        // {
+        //     _logger.Debug("Running a development build, skipping update check");
+        //     return;
+        // }
 
         GithubRelease latestRelease = await FetchGithubUpdates();
 
@@ -171,6 +171,8 @@ public sealed partial class UpdaterService : ReactiveObject
             progressWindow.Close();
             return;
         }
+
+        _logger.Info(AppContext.BaseDirectory);
 
         try
         {

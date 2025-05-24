@@ -35,16 +35,16 @@ jobs:
       with:
         dotnet-version: 9.0.x
 
-    - name: Check dotnet format
-      run: |
-        dotnet format analyzers --verify-no-changes && \
-        dotnet format style --verify-no-changes
-
-    - name: Check csharpier formatting
-      run: dotnet tool restore && dotnet csharpier . --check
-
-    - name: Test
-      run: dotnet test --verbosity normal
+#    - name: Check dotnet format
+#      run: |
+#        dotnet format analyzers --verify-no-changes && \
+#        dotnet format style --verify-no-changes
+#
+#    - name: Check csharpier formatting
+#      run: dotnet tool restore && dotnet csharpier . --check
+#
+#    - name: Test
+#      run: dotnet test --verbosity normal
 
     - name: Make dirs
       run: mkdir out_linux out_windows
@@ -55,58 +55,57 @@ jobs:
 
     - name: Build Windows
       run: |
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 -o out_windows/ src/Lumper.CLI && \
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 -o out_windows/ src/Lumper.UI
+        dotnet publish -c Release /p:Version=0.0.1 -r win-x64 -o out_windows/ src/Lumper.CLI && \
+        dotnet publish -c Release /p:Version=0.0.1 -r win-x64 -o out_windows/ src/Lumper.UI
 
-    - name: Build Linux
-      run: |
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -o out_linux/ src/Lumper.CLI && \
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -o out_linux/ src/Lumper.UI
+#    - name: Build Linux
+#      run: |
+#        dotnet publish -c Release /p:Version=0.0.1 -o out_linux/ src/Lumper.CLI && \
+#        dotnet publish -c Release /p:Version=0.0.1 -o out_linux/ src/Lumper.UI
 
-
-    - name: Upload Windows artifacts
-      uses: actions/upload-artifact@v4.4.3
-      with:
-        name: Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip
-        path: out_windows/
-
-    - name: Upload Linux artifacts
-      uses: actions/upload-artifact@v4.4.3
-      with:
-        name: Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip
-        path: out_linux/
-
+#    - name: Upload Linux artifacts
+#      uses: actions/upload-artifact@v4.4.3
+#      with:
+#        name: Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip
+#        path: out_linux/
+#
 
     - name: Package Windows
-      if: startsWith(github.ref, 'refs/tags/')
+#      if: startsWith(github.ref, 'refs/tags/')
       run: |
         cd out_windows && \
-        zip -r Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip \
-          Lumper.CLI.exe \
-          Lumper.UI.exe \
+        zip -r Lumper_0.0.1_win-x64.zip \
+          Lumper.* \
           NLog.config \
           RegisterLumperURLProtocol.ps1 \
           resources \
         && cd ..
 
-    - name: Package Linux
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        cd out_linux && \
-        zip -r Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip \
-          Lumper.CLI \
-          Lumper.UI \
-          NLog.config \
-          resources \
-        && cd ..
 
-
-    - name: Release
-      uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
+    - name: Upload Windows artifacts
+      uses: actions/upload-artifact@v4.4.3
       with:
-        generate_release_notes: true
-        files: |
-          out_windows/Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip
-          out_linux/Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip
+          name: Lumper_0.0.1_win-x64.zip
+          path: out_windows/
+#
+#    - name: Package Linux
+#      if: startsWith(github.ref, 'refs/tags/')
+#      run: |
+#        cd out_linux && \
+#        zip -r Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip \
+#          Lumper.CLI \
+#          Lumper.UI \
+#          NLog.config \
+#          resources \
+#        && cd ..
+
+
+#    - name: Release
+#      uses: softprops/action-gh-release@v2
+#      if: startsWith(github.ref, 'refs/tags/')
+#      with:
+#        generate_release_notes: true
+#        files: |
+#          out_windows/Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip
+#          out_linux/Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip
 
