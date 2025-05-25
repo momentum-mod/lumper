@@ -33,7 +33,7 @@ public class RemoveAssetJob : Job, IJob
 
     public override bool Run(BspFile bsp)
     {
-        if (OriginFilter?.Count == 0)
+        if (OriginFilter is { Count: 0 })
         {
             Logger.Warn("No games selected.");
             return false;
