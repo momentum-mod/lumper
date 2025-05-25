@@ -54,6 +54,9 @@ public class RemoveAssetJob : Job, IJob
             if (!AssetManifest.Manifest.TryGetValue(hash, out List<AssetManifest.Asset>? assets))
                 continue;
 
+            if (assets.Count == 0)
+                continue;
+
             if (OriginFilter is not null && !assets.Any(asset => OriginFilter.Contains(asset.Origin)))
                 continue;
 
@@ -61,29 +64,27 @@ public class RemoveAssetJob : Job, IJob
             totalMatches++;
             string matches = string.Join(", ", assets.Select(asset => $"{asset.Origin} asset {asset.Path}"));
 
-            int numMatches = assets.Count(match => match.Path == entry.Key);
-            if (numMatches == 1)
+            AssetManifest.Asset? bestAsset = null;
+            if (assets.Count > 1)
             {
-                Logger.Info($"Removed {entry.Key} which matched {matches}");
-            }
-            else if (numMatches > 1)
-            {
-                // Try find matching asset with preferred origin, in order
-                AssetManifest.Asset? bestAsset = null;
                 foreach (string origin in RenamedOriginPriority)
                 {
                     bestAsset = assets.FirstOrDefault(asset => asset.Origin == origin);
                     if (bestAsset != null)
                         break;
                 }
+            }
 
-                // If we didn't find a preferred origin, use anything.
-                bestAsset ??= assets[0];
+            bestAsset ??= assets[0];
 
+            if (entry.Key != bestAsset.Path)
+            {
+                pakfileLump.UpdatePathReferences(entry.Key, bestAsset.Path);
                 Logger.Info($"Removed {entry.Key} which matched {matches}, updating references to {bestAsset.Path}");
-
-                if (entry.Key != bestAsset.Path)
-                    pakfileLump.UpdatePathReferences(entry.Key, bestAsset.Path);
+            }
+            else
+            {
+                Logger.Info($"Removed {entry.Key} which matched {matches}");
             }
         }
 
