@@ -1,8 +1,20 @@
 ﻿namespace Lumper.Test;
 
+using System.Reflection;
+using Lib.AssetManifest;
+using Lib.Bsp.Lumps.BspLumps;
+using Lib.Bsp.Struct;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Enum;
 
+/// <summary>
+/// Collection of utility methods for unit/integration testing purposes.
+///
+/// We're using actual instances here rather than mocks, patching the instances using reflection
+/// when necessary. Mocking everything using Moq causes endless issues with non-virtual
+/// methods/properties, private constructors etc. and I'd rather use reflection than modify
+/// accessiblity just for the sake of unit testing.
+/// </summary>
 public static class TestUtils
 {
     /// <summary>
@@ -61,5 +73,88 @@ public static class TestUtils
         writer.Write(0); // Static prop entries
 
         return BspFile.FromStream(stream, null)!;
+    }
+
+    /// <summary>
+    /// Create an instance of the underlying AssetManifest.Manifest dictionary,
+    /// patch it into the static asset manifest, and return it.
+    /// </summary>
+    public static Dictionary<string, List<AssetManifest.Asset>> GetMutableAssetManifest()
+    {
+        // Create test dictionary
+        var testManifest = new Dictionary<string, List<AssetManifest.Asset>>();
+
+        // Get the LazyManifest field
+        FieldInfo? lazyManifestField =
+            typeof(AssetManifest).GetField("LazyManifest", BindingFlags.Static | BindingFlags.NonPublic)
+            ?? throw new InvalidOperationException("Could not find LazyManifest field");
+
+        // Get the Lazy<> instance
+        object? lazyInstance = lazyManifestField.GetValue(null);
+
+        // Patch the lazy value
+        PatchLazyValue(lazyInstance!, testManifest);
+
+        return testManifest;
+    }
+
+    public static PakfileEntry AddPakfileEntry(PakfileLump pakfileLump, string path, string data = "")
+    {
+        // Create a new PakfileEntry with the given path and data
+        var entry = new PakfileEntry(pakfileLump, path, new MemoryStream(BspFile.Encoding.GetBytes(data)));
+
+        // Add the entry to the PakfileLump's entries
+        pakfileLump.Entries.Add(entry);
+
+        return entry;
+    }
+
+    /// <summary>
+    /// Add a PakfileEntry to the given PakfileLump and patch its hash.
+    /// </summary>
+    public static PakfileEntry AddPakfileEntryWithHash(
+        PakfileLump pakfileLump,
+        string hash,
+        string path,
+        string data = ""
+    )
+    {
+        var entry = new PakfileEntry(pakfileLump, path, new MemoryStream(BspFile.Encoding.GetBytes(data)));
+        pakfileLump.Entries.Add(entry);
+
+        typeof(PakfileEntry).GetField("_hash", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(entry, hash);
+
+        return entry;
+    }
+
+    /// <summary>
+    /// Patches the underlying value of a Lazy of T instance.
+    /// </summary>
+    /// <typeparam name="T">The type contained in the Lazy instance</typeparam>
+    /// <param name="lazyInstance">The Lazy instance to patch</param>
+    /// <param name="newValue">The new value to inject</param>
+    /// <returns>The new value that was set</returns>
+    public static T PatchLazyValue<T>(object lazyInstance, T newValue)
+    {
+        // Access the _value field
+        FieldInfo? valueField = lazyInstance
+            .GetType()
+            .GetField("_value", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        // Access the _isValueCreated field (or _state field depending on implementation)
+        FieldInfo? isValueCreatedField = lazyInstance
+            .GetType()
+            .GetField("_state", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        if (valueField == null)
+            throw new InvalidOperationException("Could not find _value field in Lazy<T>");
+
+        // Set the value
+        valueField.SetValue(lazyInstance, newValue);
+
+        // Mark as initialized by setting _state to null
+        isValueCreatedField?.SetValue(lazyInstance, null);
+
+        return newValue;
     }
 }
