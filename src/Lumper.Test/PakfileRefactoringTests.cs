@@ -1011,9 +1011,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, fileName, new MemoryStream(BspFile.Encoding.GetBytes(inData)))
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, fileName, inData);
 
         List<UpdateType> changes = pakfileLump.UpdatePathReferences(
             oldPath,
@@ -1058,15 +1056,9 @@ public class PakFileLumpRefactoringTests
             }
             """;
 
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "test1.vmt", new MemoryStream(BspFile.Encoding.GetBytes(content1)))
-        );
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "test2.vmt", new MemoryStream(BspFile.Encoding.GetBytes(content2)))
-        );
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "test3.vmt", new MemoryStream(BspFile.Encoding.GetBytes(content3)))
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "test1.vmt", content1);
+        TestUtils.AddPakfileEntry(pakfileLump, "test2.vmt", content2);
+        TestUtils.AddPakfileEntry(pakfileLump, "test3.vmt", content3);
 
         List<UpdateType> changes = pakfileLump.UpdatePathReferences(
             "materials/test/foo.vtf",
@@ -1170,8 +1162,8 @@ public class PakFileLumpRefactoringTests
         texDataLump.Data.Add(texData);
 
         List<UpdateType> changes = pakfileLump.UpdatePathReferences(
-            "materials/test/example.vtf",
-            "materials/test/renamed.vtf",
+            "materials/test/example.vmt",
+            "materials/test/renamed.vmt",
             [UpdateType.TexData]
         );
 
@@ -1518,9 +1510,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "materials/maps/surf_utopia/cubemapdefault.vmt", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_utopia/cubemapdefault.vmt");
         pakfileLump.IsModified = false; // Creating new PakFileEntry from stream sets IsModified to true, so we reset it.
 
         pakfileLump.ProcessMapRename("surf_utopia", "surf_newname");
@@ -1538,9 +1528,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "scripts/soundscapes_kz_example.txt", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "scripts/soundscapes_kz_example.txt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("kz_example", "kz_renamed");
@@ -1558,9 +1546,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "scripts/soundscapes_bhop_forest.vsc", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "scripts/soundscapes_bhop_forest.vsc");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("bhop_forest", "bhop_jungle");
@@ -1578,7 +1564,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "maps/surf_mesa_level_sounds.txt", new MemoryStream()));
+        TestUtils.AddPakfileEntry(pakfileLump, "maps/surf_mesa_level_sounds.txt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_mesa", "surf_plateau");
@@ -1596,7 +1582,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "maps/kz_climb_particles.txt", new MemoryStream()));
+        TestUtils.AddPakfileEntry(pakfileLump, "maps/kz_climb_particles.txt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("kz_climb", "kz_ascent");
@@ -1615,11 +1601,11 @@ public class PakFileLumpRefactoringTests
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
         // Add multiple different types of files
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "materials/maps/surf_y/texture.vmt", new MemoryStream()));
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "scripts/soundscapes_surf_y.txt", new MemoryStream()));
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "maps/surf_y_level_sounds.txt", new MemoryStream()));
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "maps/surf_y_particles.txt", new MemoryStream()));
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "materials/models/props/barrel.vmt", new MemoryStream())); // Shouldn't be changed
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_y/texture.vmt");
+        TestUtils.AddPakfileEntry(pakfileLump, "scripts/soundscapes_surf_y.txt");
+        TestUtils.AddPakfileEntry(pakfileLump, "maps/surf_y_level_sounds.txt");
+        TestUtils.AddPakfileEntry(pakfileLump, "maps/surf_y_particles.txt");
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/models/props/barrel.vmt"); // Shouldn't be changed
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_y", "surf_mastery");
@@ -1642,9 +1628,7 @@ public class PakFileLumpRefactoringTests
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
         // Add pakfile entry with differently cased map name
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "materials/maps/SURF_UTOPIA/texture.vmt", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/SURF_UTOPIA/texture.vmt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_utopia", "surf_paradise");
@@ -1662,7 +1646,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(new PakfileEntry(pakfileLump, "materials/models/props/barrel.vmt", new MemoryStream()));
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/models/props/barrel.vmt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_utopia", "surf_paradise");
@@ -1680,9 +1664,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "materials/maps/surf_utopia/subfolder/texture.vmt", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_utopia/subfolder/texture.vmt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_utopia", "surf_paradise");
@@ -1701,9 +1683,7 @@ public class PakFileLumpRefactoringTests
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
         // Add entry with a name that contains the map name as a substring
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "materials/maps/surf_utopia2/texture.vmt", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_utopia2/texture.vmt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_utopia", "surf_paradise");
@@ -1721,9 +1701,7 @@ public class PakFileLumpRefactoringTests
         BspFile bspFile = TestUtils.CreateMockBspFile();
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "materials/maps/surf_different/texture.vmt", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_different/texture.vmt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_utopia", "surf_paradise");
@@ -1742,15 +1720,9 @@ public class PakFileLumpRefactoringTests
         PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
 
         // Add entries with similar but different paths
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "materials/maps_custom/surf_utopia/texture.vmt", new MemoryStream())
-        );
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "scripts/soundscape_surf_utopia.txt", new MemoryStream())
-        );
-        pakfileLump.Entries.Add(
-            new PakfileEntry(pakfileLump, "maps/surf_utopia_particles_custom.txt", new MemoryStream())
-        );
+        TestUtils.AddPakfileEntry(pakfileLump, "materials/maps_custom/surf_utopia/texture.vmt");
+        TestUtils.AddPakfileEntry(pakfileLump, "scripts/soundscape_surf_utopia.txt");
+        TestUtils.AddPakfileEntry(pakfileLump, "maps/surf_utopia_particles_custom.txt");
         pakfileLump.IsModified = false;
 
         pakfileLump.ProcessMapRename("surf_utopia", "surf_paradise");
