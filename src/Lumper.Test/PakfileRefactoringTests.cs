@@ -1162,8 +1162,8 @@ public class PakFileLumpRefactoringTests
         texDataLump.Data.Add(texData);
 
         List<UpdateType> changes = pakfileLump.UpdatePathReferences(
-            "materials/test/example.vmt",
-            "materials/test/renamed.vmt",
+            "materials/test/example",
+            "materials/test/renamed",
             [UpdateType.TexData]
         );
 
