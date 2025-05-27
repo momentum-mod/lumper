@@ -57,6 +57,10 @@
         <Run Classes="R" Name="Compression" />
         <LineBreak />
 
+        <Run Classes="L" Text="Required Games  " />
+        <Run Classes="R" Name="RequiredGamesStr" />
+        <LineBreak />
+
         <Run Classes="L" Text="Entities        " />
         <Run Classes="R" Name="Entities" />
         <Run Classes="R" Name="BadEntities" Foreground="IndianRed" />

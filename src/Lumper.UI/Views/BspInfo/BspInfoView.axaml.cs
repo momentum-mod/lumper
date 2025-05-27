@@ -9,6 +9,7 @@ using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
+using Lib.RequiredGames;
 using Lumper.Lib.EntityRules;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.BspInfo;
@@ -27,6 +28,7 @@ public partial class BspInfoView : ReactiveWindow<BspInfoViewModel>
             InitCompression();
             InitEntities(disposables);
             InitPakfile(disposables);
+            InitRequiredGames(disposables);
         });
     }
 
@@ -47,6 +49,19 @@ public partial class BspInfoView : ReactiveWindow<BspInfoViewModel>
             Compression.Foreground = Brushes.GreenYellow;
             Compression.Text = "Compressed";
         }
+    }
+
+    private void InitRequiredGames(CompositeDisposable disposables)
+    {
+        RequiredGamesStr.Text = "Checking required games...";
+
+        BspService
+            .Instance.WhenAnyValue(x => x.BspFile)
+            .ObserveOn(RxApp.TaskpoolScheduler)
+            .Select(bsp => bsp != null ? RequiredGames.GetRequiredGames(bsp).summary : "")
+            .ObserveOn(RxApp.MainThreadScheduler)
+            .Subscribe(requiredGames => RequiredGamesStr.Text = requiredGames)
+            .DisposeWith(disposables);
     }
 
     private void InitEntities(CompositeDisposable disposables)
