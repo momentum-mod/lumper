@@ -99,7 +99,7 @@ public class CommandLineOptions
 
     [Option(
         'a',
-        "check-assets",
+        "checkAssets",
         Default = false,
         Required = false,
         HelpText = "[VALIDATOR] Check whether the paklump contains official Valve assets, exits with 1 if so."
@@ -121,4 +121,13 @@ public class CommandLineOptions
         HelpText = "[VALIDATOR] Check the BSP file against a set of entity rules at a given path."
     )]
     public string? CustomEntityRules { get; set; }
+
+    [Option(
+        'g',
+        "requiredGames",
+        Default = false,
+        Required = false,
+        HelpText = "Prints list of required games for the BSP file. Not technically a validator."
+    )]
+    public bool RequiredGames { get; set; }
 }
