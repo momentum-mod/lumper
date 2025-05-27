@@ -120,6 +120,8 @@
                         CommandParameter="{x:Static service:Page.VtfBrowser}" InputGesture="Ctrl+D5" />
               <MenuItem Header="_Jobs" Command="{Binding PageService.ViewPage}"
                         CommandParameter="{x:Static service:Page.Jobs}" InputGesture="Ctrl+D6" />
+              <MenuItem Header="Required Games" Command="{Binding PageService.ViewPage}"
+                        CommandParameter="{x:Static service:Page.RequiredGames}" InputGesture="Ctrl+D7" />
             </MenuItem>
             <MenuItem Header="_Tools">
               <MenuItem Header="_Map Summary" Command="{Binding BspInfoCommand}"
@@ -148,7 +150,7 @@
               <Setter Property="BorderBrush" Value="#22FFFFFF" />
               <Style Selector="^ StackPanel">
                 <Setter Property="Orientation" Value="Horizontal" />
-                <Setter Property="Spacing" Value="4" />
+                <Setter Property="Spacing" Value="6" />
                 <Style Selector="^ TextBlock">
                   <Setter Property="VerticalAlignment" Value="Center" />
                 </Style>
@@ -197,6 +199,13 @@
               <StackPanel>
                 <materialIcons:MaterialIcon Kind="FormatListChecks" />
                 <TextBlock>Jobs</TextBlock>
+              </StackPanel>
+            </ToggleButton>
+            <ToggleButton Command="{Binding PageService.ViewPage}" Click="PageButton_OnClick"
+                          CommandParameter="{x:Static service:Page.RequiredGames}" HotKey="Ctrl+D7">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="HorsebackRiding" />
+                <TextBlock>Required Games</TextBlock>
               </StackPanel>
             </ToggleButton>
           </StackPanel>

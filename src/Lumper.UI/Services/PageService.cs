@@ -9,6 +9,7 @@ using Lumper.UI.ViewModels.Pages.EntityReview;
 using Lumper.UI.ViewModels.Pages.Jobs;
 using Lumper.UI.ViewModels.Pages.PakfileExplorer;
 using Lumper.UI.ViewModels.Pages.RawEntities;
+using Lumper.UI.ViewModels.Pages.RequiredGames;
 using Lumper.UI.ViewModels.Pages.VtfBrowser;
 using NLog;
 using ReactiveUI;
@@ -24,6 +25,7 @@ public enum Page
     Jobs,
     RawEntities,
     EntityReview,
+    RequiredGames,
 }
 
 /// <summary>
@@ -49,6 +51,7 @@ public sealed class PageService : ReactiveObject
             { Page.Jobs, new LazyPage<JobsViewModel>(false) },
             { Page.RawEntities, new LazyPage<RawEntitiesViewModel>(true) },
             { Page.EntityReview, new LazyPage<EntityReviewViewModel>(true) },
+            { Page.RequiredGames, new LazyPage<RequiredGamesViewModel>(true) },
         };
 
     [Reactive]
