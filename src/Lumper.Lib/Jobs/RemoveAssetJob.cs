@@ -22,15 +22,6 @@ public class RemoveAssetJob : Job, IJob
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    /// <summary>
-    /// Origins we prioritise when renaming assets that match a hash but not the original filename,
-    /// or there's multiple officials with the same hash, where one path matches but a more
-    /// accessible game has the same asset with a different path.
-    /// In both case, we update references to the most accessible path everywhere to avoid missing
-    /// textures as best we can. This is biased towards Momentum!
-    /// </summary>
-    private static readonly string[] RenamedOriginPriority = ["hl2", "tf2", "css", "csgo"];
-
     public override bool Run(BspFile bsp)
     {
         if (OriginFilter is { Count: 0 })
@@ -67,7 +58,7 @@ public class RemoveAssetJob : Job, IJob
             AssetManifest.Asset? bestAsset = null;
             if (assets.Count > 1)
             {
-                foreach (string origin in RenamedOriginPriority)
+                foreach (string origin in AssetManifest.RenamedOriginPriority)
                 {
                     bestAsset = assets.FirstOrDefault(asset => asset.Origin == origin);
                     if (bestAsset != null)
