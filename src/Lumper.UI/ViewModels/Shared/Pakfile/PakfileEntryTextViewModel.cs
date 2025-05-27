@@ -3,6 +3,7 @@ namespace Lumper.UI.ViewModels.Shared.Pakfile;
 using System;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lumper.Lib.Bsp;
@@ -10,6 +11,7 @@ using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.UI.Views.Shared.Pakfile;
 using NLog;
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 public class PakfileEntryTextViewModel : PakfileEntryViewModel
@@ -26,6 +28,9 @@ public class PakfileEntryTextViewModel : PakfileEntryViewModel
         : base(entry, parent)
     {
         RegisterView<PakfileEntryTextViewModel, PakfileEntryTextView>();
+
+        // Mark as modified once we get an actual change after content is loaded
+        this.WhenAnyValue(x => x.Content).Where(_ => IsContentLoaded).Take(1).Subscribe(_ => MarkAsModified());
     }
 
     public override void Load(CancellationTokenSource? cts = null)
