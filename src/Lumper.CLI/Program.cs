@@ -10,6 +10,7 @@ using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.EntityRules;
 using Lumper.Lib.Jobs;
+using Lumper.Lib.RequiredGames;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -77,6 +78,9 @@ internal sealed class Program
         // If this is ever true, the application is being used to perform validations, then exit with 0 or 1.
         bool inValidationMode = false;
         bool validationSuccess = true;
+
+        if (options.RequiredGames)
+            PrintRequiredGames(bspFile);
 
         if (options.CheckAssets)
         {
@@ -173,6 +177,12 @@ internal sealed class Program
             stopwatch.Stop();
             Logger.Info($"Job completed in {stopwatch.ElapsedMilliseconds}ms");
         }
+    }
+
+    private static void PrintRequiredGames(BspFile bspFile)
+    {
+        (List<RequiredGames.PackedAsset> _, string summary) = RequiredGames.GetRequiredGames(bspFile);
+        Logger.Info(summary.Length > 0 ? $"Required games: {summary}" : "No required games found in BSP file");
     }
 
     private static bool CheckAssets(BspFile bspFile)
