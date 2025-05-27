@@ -29,14 +29,6 @@ public partial class PakfileEntryTextView : ReactiveUserControl<PakfileEntryText
                 )
             );
 
-            EventHandler handler = null!;
-            handler = (_, _) =>
-            {
-                ViewModel!.MarkAsModified();
-                TextEditor.TextChanged -= handler;
-            };
-            TextEditor.TextChanged += handler;
-
             TextEditor.Encoding = BspFile.Encoding;
             TextEditor.ContextMenu = new ContextMenu
             {
