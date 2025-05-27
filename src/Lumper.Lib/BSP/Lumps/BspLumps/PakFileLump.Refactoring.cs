@@ -454,10 +454,8 @@ public partial class PakfileLump
         MapFileParticlesRegex(),
     ];
 
-    public void ProcessMapRename(string oldFileName, string newFileName)
+    public void ProcessMapRename(string oldName, string newName)
     {
-        string newName = Path.GetFileNameWithoutExtension(newFileName);
-
         foreach (PakfileEntry entry in Entries)
         {
             foreach (Regex regex in MapFileRegexes)
@@ -467,7 +465,7 @@ public partial class PakfileLump
                     continue;
 
                 string mapName = match.Groups[1].Value;
-                if (!mapName.Equals(oldFileName, Comparison))
+                if (!mapName.Equals(oldName, Comparison))
                     continue;
 
                 string oldKey = entry.Key;
