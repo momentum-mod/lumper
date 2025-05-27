@@ -39,7 +39,7 @@ public class Sprp(BspFile parent) : ManagedLump<GameLumpType>(parent)
             if (Math.Abs(((float)remainingLength / StaticProps.StructureSize) - entries) > 0.0000001)
             {
                 StaticProps.ActualVersion = StaticPropVersion.V7s;
-                Logger.Debug($"Remaining length of staticprop lumpdoesn't fit version {Version}, trying V7s");
+                Logger.Debug($"Remaining length of staticprop lump doesn't fit version {Version}, trying V7s");
             }
         }
 
