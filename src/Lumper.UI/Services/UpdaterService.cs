@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -19,6 +18,9 @@ using MsBox.Avalonia.Enums;
 using Newtonsoft.Json;
 using NLog;
 using ReactiveUI;
+using SharpCompress.Archives;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Common;
 
 public sealed partial class UpdaterService : ReactiveObject
 {
@@ -162,21 +164,37 @@ public sealed partial class UpdaterService : ReactiveObject
 
         try
         {
-            DeleteBackupExecutable(); // Just in case it still exists
-            File.Move(ExecutablePath, BackupExecutablePath);
-        }
-        catch (Exception ex)
-        {
-            _logger.Error(ex, "Failed to move updater executable!");
-            progressWindow.Close();
-            return;
-        }
+            // Register code pages to avoid encoding issues with SharpCompress
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
 
-        try
-        {
-            // Using MS ZipArchive because SharpCompress is causing very weird System.Text.Encoding.CodePages errors
-            // during ZipArchive.Open calls in release builds.
-            ZipFile.ExtractToDirectory(zipStream, AppContext.BaseDirectory, overwriteFiles: true);
+            // Reset stream position to beginning
+            zipStream.Position = 0;
+
+            DeleteBackupExecutable(); // Delete backup executable in case it still exists
+
+            using var archive = ZipArchive.Open(zipStream);
+            foreach (ZipArchiveEntry entry in archive.Entries)
+            {
+                if (!entry.IsDirectory)
+                {
+                    if (entry.Key == ExecutableName)
+                    {
+                        entry.WriteToFile(
+                            Path.Combine(AppContext.BaseDirectory, NewExecutablePath),
+                            new ExtractionOptions { ExtractFullPath = true, Overwrite = true }
+                        );
+                    }
+                    else
+                    {
+                        entry.WriteToDirectory(
+                            AppContext.BaseDirectory,
+                            new ExtractionOptions { ExtractFullPath = true, Overwrite = true }
+                        );
+                    }
+                }
+            }
+
+            File.Replace(NewExecutablePath, ExecutablePath, BackupExecutablePath);
         }
         catch (Exception ex)
         {
@@ -287,10 +305,12 @@ public sealed partial class UpdaterService : ReactiveObject
         throw new InvalidProgramException("OS is not supported");
     }
 
-    private static string ExecutablePath =>
-        Path.Combine(AppContext.BaseDirectory, "Lumper.UI" + (GetPlatform().os == OSPlatform.Windows ? ".exe" : ""));
+    private static string ExecutableName => "Lumper.UI" + (GetPlatform().os == OSPlatform.Windows ? ".exe" : "");
+
+    private static string ExecutablePath => Path.Combine(AppContext.BaseDirectory, ExecutableName);
 
     private static string BackupExecutablePath => ExecutablePath + ".bak";
+    private static string NewExecutablePath => ExecutablePath + ".new";
 
     private static void DeleteBackupExecutable()
     {
