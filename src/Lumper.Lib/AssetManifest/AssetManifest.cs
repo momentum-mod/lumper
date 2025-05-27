@@ -30,11 +30,20 @@ public static class AssetManifest
     private static readonly Lazy<Dictionary<string, List<Asset>>> LazyManifest = new(Load);
 
     /// <summary>
-    /// Dictionary of assets loaded from the asset.manifest file, keyed by SHA1 hash of the asset.
+    /// Dictionary of assets loaded from the AssetManifest.rsv file, keyed by SHA1 hash of the asset.
     /// Valve games contain a surprising number of duplicate assets (i.e. matching hashes) so we store a list
     /// of assets rather than single assets.
     /// </summary>
     public static Dictionary<string, List<Asset>> Manifest => LazyManifest.Value;
+
+    private static readonly Lazy<Dictionary<string, List<string>>> LazyPathManifest = new(LoadPathManifest);
+
+    /// <summary>
+    /// Dictionary of assets loaded from the AssetManifest.RSV file, keyed by the path of the asset.
+    /// This is lazily loaded from the main manifest, takes ~500ms on my machine plus requires the
+    /// main manifest to be loaded first.
+    /// </summary>
+    public static Dictionary<string, List<string>> PathManifest => LazyPathManifest.Value;
 
     /// <summary>
     /// Every game or asset pack that has assets in the manifest.
@@ -115,7 +124,7 @@ public static class AssetManifest
                     continue;
 
                 string vpk = decoder.GetString(buffers[0], 0, bufferLengths[0]);
-                string path = decoder.GetString(buffers[1], 0, bufferLengths[1]);
+                string path = decoder.GetString(buffers[1], 0, bufferLengths[1]).ToLowerInvariant();
                 string hash = decoder.GetString(buffers[3], 0, bufferLengths[3]);
 
                 int vpkFirstSlash = vpk.IndexOf('/');
@@ -154,5 +163,26 @@ public static class AssetManifest
             // Just return an empty manifest if something goes wrong.
             return [];
         }
+    }
+
+    private static Dictionary<string, List<string>> LoadPathManifest()
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        var pathManifest = new Dictionary<string, List<string>>();
+        foreach (List<Asset> assets in Manifest.Values)
+        {
+            foreach (Asset asset in assets)
+            {
+                if (!pathManifest.TryAdd(asset.Path, [asset.Origin]))
+                    pathManifest[asset.Path].Add(asset.Origin);
+            }
+        }
+
+        stopwatch.Stop();
+        Logger.Debug($"Computed path-based asset manifest in {stopwatch.ElapsedMilliseconds}ms");
+
+        return pathManifest;
     }
 }
