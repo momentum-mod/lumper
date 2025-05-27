@@ -1,11 +1,10 @@
 namespace Lumper.UI.Views.Shared.Pakfile;
 
-using System;
 using System.Collections.Generic;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
 using Lumper.Lib.Bsp;
 using Lumper.UI.ViewModels.Shared.Pakfile;
@@ -17,17 +16,18 @@ public partial class PakfileEntryTextView : ReactiveUserControl<PakfileEntryText
     {
         InitializeComponent();
 
-        this.WhenActivated(_ =>
+        this.WhenActivated(disposables =>
         {
             this.Bind(
-                ViewModel,
-                viewModel => viewModel.Content,
-                view => view.TextEditor.Text,
-                Observable.FromEventPattern<RoutedEventArgs>(
-                    handler => TextEditor.LostFocus += handler,
-                    handler => TextEditor.LostFocus -= handler
+                    ViewModel,
+                    viewModel => viewModel.Content,
+                    view => view.TextEditor.Text,
+                    Observable.FromEventPattern(
+                        handler => TextEditor.TextChanged += handler,
+                        handler => TextEditor.TextChanged -= handler
+                    )
                 )
-            );
+                .DisposeWith(disposables);
 
             TextEditor.Encoding = BspFile.Encoding;
             TextEditor.ContextMenu = new ContextMenu
