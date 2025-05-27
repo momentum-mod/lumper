@@ -1,7 +1,7 @@
 namespace Lumper.UI.Views.Pages.Jobs;
 
-using System;
 using System.Collections.Generic;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -16,21 +16,20 @@ public partial class StripperTextJobView : ReactiveUserControl<StripperTextJobVi
     {
         InitializeComponent();
 
-        this.WhenActivated(_ =>
+        this.WhenActivated(disposables =>
         {
             this.Bind(
-                ViewModel,
-                viewModel => viewModel.Config,
-                view => view.TextEditor.Text,
-                // Probably quite inefficent getting this entire string every change, perf is acceptable though.
-                Observable
-                    .FromEventPattern(
-                        handler => TextEditor.TextChanged += handler,
-                        handler => TextEditor.TextChanged -= handler
-                    )
-                    .Throttle(TimeSpan.FromMilliseconds(50))
-                    .ObserveOn(RxApp.MainThreadScheduler)
-            );
+                    ViewModel,
+                    viewModel => viewModel.Config,
+                    view => view.TextEditor.Text,
+                    Observable
+                        .FromEventPattern(
+                            handler => TextEditor.TextChanged += handler,
+                            handler => TextEditor.TextChanged -= handler
+                        )
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                )
+                .DisposeWith(disposables);
 
             TextEditor.Encoding = BspFile.Encoding;
             TextEditor.ContextMenu = new ContextMenu
