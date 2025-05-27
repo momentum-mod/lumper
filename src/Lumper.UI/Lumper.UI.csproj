@@ -7,6 +7,11 @@
     <ApplicationIcon>Assets\Images\Lumper.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <PublishDir>../../publish/Lumper.UI</PublishDir>
+    <BeautyAppHostEntry>Lumper.UI/Lumper.UI.dll</BeautyAppHostEntry>
+  </PropertyGroup>
 
   <ItemGroup>
     <!-- Mark Fluent theme as trimmable for when building in self-contained mode -->
@@ -24,6 +29,7 @@
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.0" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
     <PackageReference Include="MessageBox.Avalonia" Version="3.2.0" />
+    <PackageReference Include="nulastudio.NetBeauty" Version="2.1.5" />
     <PackageReference Include="ReactiveUI" Version="20.2.45" />
     <PackageReference Include="ReactiveUI.Fody" Version="19.5.41"/>
     <PackageReference Include="Material.Icons.Avalonia" Version="2.4.1" />

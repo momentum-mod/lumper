@@ -8,9 +8,15 @@
     <ApplicationIcon>..\Lumper.UI\Assets\Images\Lumper.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PublishDir>../../publish/Lumper.CLI</PublishDir>
+    <BeautyAppHostEntry>Lumper.CLI/Lumper.CLI.dll</BeautyAppHostEntry>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1"/>
     <PackageReference Include="NLog" Version="5.4.0" />
+    <PackageReference Include="nulastudio.NetBeauty" Version="2.1.5" />
   </ItemGroup>
 
   <ItemGroup>

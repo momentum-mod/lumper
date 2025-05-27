@@ -55,13 +55,19 @@ jobs:
 
     - name: Build Windows
       run: |
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 -o out_windows/ src/Lumper.CLI && \
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 -o out_windows/ src/Lumper.UI
+        cd src/Lumper.CLI && \
+        dotnet build -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 && \
+        cd ../Lumper.UI && \
+        dotnet build -c Release /p:Version=${{ steps.version.outputs.version-name }} -r win-x64 && \
+        cd ../..
 
     - name: Build Linux
       run: |
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -o out_linux/ src/Lumper.CLI && \
-        dotnet publish -c Release /p:Version=${{ steps.version.outputs.version-name }} -o out_linux/ src/Lumper.UI
+        cd src/Lumper.CLI && \
+        dotnet build -c Release /p:Version=${{ steps.version.outputs.version-name }} -r linux-x64 && \
+        cd ../Lumper.UI && \
+        dotnet build -c Release /p:Version=${{ steps.version.outputs.version-name }} -r linux-x64 && \
+        cd ../..
 
 
     - name: Upload Windows artifacts
@@ -81,12 +87,12 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/')
       run: |
         cd out_windows && \
-        zip -r Lumper_${{ steps.version.outputs.ref-name }}_win-x64.zip \
-          Lumper.CLI.exe \
-          Lumper.UI.exe \
+        zip -r Lumper_0.0.1_win-x64.zip \
+          Lumper.* \
+          resources \
+          libraries \
           NLog.config \
           RegisterLumperURLProtocol.ps1 \
-          resources \
         && cd ..
 
     - name: Package Linux
@@ -94,10 +100,10 @@ jobs:
       run: |
         cd out_linux && \
         zip -r Lumper_${{ steps.version.outputs.ref-name }}_linux-x64.zip \
-          Lumper.CLI \
-          Lumper.UI \
-          NLog.config \
+          Lumper.* \
           resources \
+          libraries \
+          NLog.config \
         && cd ..
 
 

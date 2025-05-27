@@ -22,7 +22,7 @@ public class EntityRule
     public string? Comment { get; set; }
 
     public static string DefaultRulesPath { get; } =
-        Path.Combine(AppContext.BaseDirectory, "resources", "EntityRules_Momentum.json");
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../resources", "EntityRules_Momentum.json"));
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
