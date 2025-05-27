@@ -163,8 +163,8 @@ public sealed partial class BspFile : IDisposable
 
         if (path is not null)
         {
-            string newFileName = Path.GetFileName(path);
-            if (newFileName != FilePath && options.RenameMapFiles)
+            string newFileName = Path.GetFileNameWithoutExtension(path);
+            if (newFileName != Name && options.RenameMapFiles)
             {
                 if (Name is null)
                 {
