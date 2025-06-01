@@ -178,7 +178,21 @@ public sealed class EntityLumpViewModel : LumpViewModel
             // right instance.
             foreach (Entity.EntityProperty propM in entM.Properties)
             {
-                EntityPropertyViewModel? propVm = entVm.Properties.FirstOrDefault(x => x.Key == propM.Key);
+                EntityPropertyViewModel? propVm = null;
+                var props = entVm.Properties.Where(x => x.Key == propM.Key).ToList();
+                if (props.Count == 1)
+                {
+                    propVm = props[0];
+                }
+                else if (props.Count > 1)
+                {
+                    // Model can potentially have multiple properties with same key, in that case
+                    // pick based on index.
+                    int idx = entM.Properties.Where(x => x.Key == propM.Key).ToList().IndexOf(propM);
+                    if (idx < props.Count)
+                        propVm = props[idx];
+                }
+
                 if (propVm is not null)
                 {
                     if (propVm is EntityPropertyStringViewModel strVm)
