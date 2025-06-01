@@ -1,6 +1,8 @@
 namespace Lumper.Lib.Jobs;
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp;
@@ -19,6 +21,12 @@ public class RemoveAssetJob : Job, IJob
     /// every current origin, existing workflows would become incomplete as if new origins were added.
     /// </summary>
     public List<string>? OriginFilter { get; set; } = [];
+
+    /// <summary>
+    /// Whether to skip removing VMT files. These are notoriously problematic and would require
+    /// MDL file parsing to get working for props.
+    /// </summary>
+    public bool SkipVmts { get; set; } = true;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -40,6 +48,9 @@ public class RemoveAssetJob : Job, IJob
         foreach (PakfileEntry entry in entries)
         {
             Progress.Count++;
+
+            if (SkipVmts && Path.GetExtension(entry.Key).Equals(".vmt", StringComparison.OrdinalIgnoreCase))
+                continue;
 
             string hash = entry.Hash;
             if (!AssetManifest.Manifest.TryGetValue(hash, out List<AssetManifest.Asset>? assets))
