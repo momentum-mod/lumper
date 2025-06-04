@@ -23,6 +23,12 @@
           <DataTemplate>
             <Button BorderBrush="#10FFFFFF" Background="#08FFFFFF" BorderThickness="1" Margin="4"
                     CornerRadius="4" Cursor="Hand" Command="{Binding OpenVtfImageWindow}" Padding="0">
+              <Button.ContextMenu>
+                <ContextMenu>
+                  <MenuItem Header="Copy Path to Clipboard" Command="{Binding CopyKeyToClipboard}" />
+                  <MenuItem Header="Remove" Command="{Binding RemoveFromPakfile}" />
+                </ContextMenu>
+              </Button.ContextMenu>
               <Panel>
                 <StackPanel ZIndex="10" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
                             Orientation="Horizontal" IsVisible="{Binding !!MatchingGameAssets.Count}" Background="#88000000">
