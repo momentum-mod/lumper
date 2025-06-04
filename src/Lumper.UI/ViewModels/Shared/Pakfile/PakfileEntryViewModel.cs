@@ -107,6 +107,16 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
         return data;
     }
 
+    public void CopyKeyToClipboard()
+    {
+        _ = Program.MainWindow.Clipboard?.SetTextAsync(Key);
+    }
+
+    public void RemoveFromPakfile()
+    {
+        ((PakfileLumpViewModel)Parent).DeleteEntry(this);
+    }
+
     /// <summary>
     /// Called whenever unique new data is loaded by viewmodel code. Note this is *not* called the if BaseEntry is
     /// modified by non-viewmodel code, e.g. during Jobs. If a job has potentially modified the entry, you need to call
