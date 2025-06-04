@@ -29,6 +29,15 @@ public class RemoveAssetJob : Job, IJob
     /// </summary>
     public bool SkipVmts { get; set; } = true;
 
+    /// <summary>
+    /// Whether to remove static prop lump entries for props that were removed.
+    ///
+    /// NOTE: Disabled for now since the collision of these props can be essential to gameplay.
+    /// In the future, we'll be including outlined collision meshes in the place of the original props
+    /// for official Valve assets.
+    /// </summary>
+    public bool RemoveStaticProps { get; set; } = false;
+
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public override bool Run(BspFile bsp)
@@ -66,7 +75,7 @@ public class RemoveAssetJob : Job, IJob
             pakfileLump.Entries.Remove(entry);
             totalMatches++;
 
-            if (Path.GetExtension(entry.Key).Equals(".mdl", StringComparison.OrdinalIgnoreCase))
+            if (RemoveStaticProps && Path.GetExtension(entry.Key).Equals(".mdl", StringComparison.OrdinalIgnoreCase))
                 RemoveStaticProp(bsp, entry.Key);
 
             string matches = string.Join(", ", assets.Select(asset => $"{asset.Origin} asset {asset.Path}"));
