@@ -7,6 +7,7 @@ using System.Linq;
 using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Lumps.GameLumps;
 using Lumper.Lib.Bsp.Struct;
 using NLog;
 
@@ -27,6 +28,15 @@ public class RemoveAssetJob : Job, IJob
     /// MDL file parsing to get working for props.
     /// </summary>
     public bool SkipVmts { get; set; } = true;
+
+    /// <summary>
+    /// Whether to remove static prop lump entries for props that were removed.
+    ///
+    /// NOTE: Disabled for now since the collision of these props can be essential to gameplay.
+    /// In the future, we'll be including outlined collision meshes in the place of the original props
+    /// for official Valve assets.
+    /// </summary>
+    public bool RemoveStaticProps { get; set; } = false;
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -64,6 +74,10 @@ public class RemoveAssetJob : Job, IJob
 
             pakfileLump.Entries.Remove(entry);
             totalMatches++;
+
+            if (RemoveStaticProps && Path.GetExtension(entry.Key).Equals(".mdl", StringComparison.OrdinalIgnoreCase))
+                RemoveStaticProp(bsp, entry.Key);
+
             string matches = string.Join(", ", assets.Select(asset => $"{asset.Origin} asset {asset.Path}"));
 
             AssetManifest.Asset? bestAsset = null;
@@ -101,5 +115,23 @@ public class RemoveAssetJob : Job, IJob
             Logger.Info("Did not find any game assets to remove.");
             return false;
         }
+    }
+
+    private static void RemoveStaticProp(BspFile bsp, string path)
+    {
+        Sprp? sprp = bsp.GetLump<GameLump>().GetLump<Sprp>();
+        if (sprp is null)
+            return;
+
+        int idx =
+            sprp.StaticPropsDict?.Data.FindIndex(name => name.Equals(path, StringComparison.OrdinalIgnoreCase)) ?? -1;
+
+        if (idx == -1)
+            return;
+
+        int removed = sprp.StaticProps?.Data.RemoveAll(x => x.PropType == idx) ?? 0;
+
+        if (removed > 0)
+            Logger.Info($"Removed {removed} static props for {path}. This may affect lighting!");
     }
 }
