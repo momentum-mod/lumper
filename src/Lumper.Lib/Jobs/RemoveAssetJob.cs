@@ -7,6 +7,7 @@ using System.Linq;
 using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Lumps.GameLumps;
 using Lumper.Lib.Bsp.Struct;
 using NLog;
 
@@ -64,6 +65,10 @@ public class RemoveAssetJob : Job, IJob
 
             pakfileLump.Entries.Remove(entry);
             totalMatches++;
+
+            if (Path.GetExtension(entry.Key).Equals(".mdl", StringComparison.OrdinalIgnoreCase))
+                RemoveStaticProp(bsp, entry.Key);
+
             string matches = string.Join(", ", assets.Select(asset => $"{asset.Origin} asset {asset.Path}"));
 
             AssetManifest.Asset? bestAsset = null;
@@ -101,5 +106,23 @@ public class RemoveAssetJob : Job, IJob
             Logger.Info("Did not find any game assets to remove.");
             return false;
         }
+    }
+
+    private static void RemoveStaticProp(BspFile bsp, string path)
+    {
+        Sprp? sprp = bsp.GetLump<GameLump>().GetLump<Sprp>();
+        if (sprp is null)
+            return;
+
+        int idx =
+            sprp.StaticPropsDict?.Data.FindIndex(name => name.Equals(path, StringComparison.OrdinalIgnoreCase)) ?? -1;
+
+        if (idx == -1)
+            return;
+
+        int removed = sprp.StaticProps?.Data.RemoveAll(x => x.PropType == idx) ?? 0;
+
+        if (removed > 0)
+            Logger.Info($"Removed {removed} static props for {path}. This may affect lighting!");
     }
 }
