@@ -22,8 +22,7 @@
         "Level": 0
     },
     "env_ambient_light": {
-        "Level": 0,
-        "Comment": "Buggy entity causes ambient light to be carried over between maps"
+        "Level": 3
     },
     "env_beam": {
         "Level": 3
@@ -113,7 +112,7 @@
     },
     "env_message": {
         "Level": 2,
-        "Comment": "This entity reads from /scripts/titles.txt, override this in your map if you want custom messages"
+        "Comment": "Don't use for stage/bonus numbers"
     },
     "env_microphone": {
         "Level": 3
@@ -212,6 +211,10 @@
     "env_sun": {
         "Level": 3
     },
+    "env_surface_teleport": {
+        "Level": 0,
+        "Comment": "Deprecated and removed. Replace with filter_momentum_surface_collision."
+    },
     "env_texturetoggle": {
         "Level": 3
     },
@@ -272,6 +275,10 @@
     },
     "filter_momentum_collectibles": {
         "Level": 3
+    },
+    "filter_momentum_progress": {
+        "Level": 0,
+        "Comment": "Can be accomplished with other filter entities"
     },
     "filter_momentum_surface_collision": {
         "Level": 3
@@ -370,6 +377,10 @@
     "func_lookdoor": {
         "Level": 3
     },
+    "func_monitor": {
+        "Level": 3,
+        "Comment": "Not sure if this actually works"
+    },
     "func_movelinear": {
         "Level": 3
     },
@@ -417,6 +428,10 @@
     "func_rotating": {
         "Level": 3
     },
+    "func_shootboost": {
+        "Level": 0,
+        "Comment": "Deprecated and removed, gimmicky and few maps use it. Use original approach those map used if really needed."
+    },
     "func_slick": {
         "Level": 3
     },
@@ -447,8 +462,8 @@
         "Comment": "HL2 specific interactable turrent, not relevant to Momentum Mod"
     },
     "func_tanktrain": {
-        "Level": 0,
-        "Comment": "This entity is unimplemented"
+        "Level": 2,
+        "Comment": "Identical to func_tracktrain, but with non-functional health/damage behavior"
     },
     "func_touch": {
         "Level": 3
@@ -497,6 +512,10 @@
         "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
+    "game_player_equip": {
+        "Level": 2,
+        "Comment": "Remove if weapons/entities are irrelevant to gameplay (e.g. jails)"
+    },
     "game_ragdoll_manager": {
         "Level": 3
     },
@@ -536,6 +555,10 @@
         "Level": 0,
         "Comment": "Not relevant to Momentum Mod"
     },
+    "info_ladder": {
+        "Level": 3,
+        "Comment": "Non-functional but harmless"
+    },
     "info_ladder_dismount": {
         "Level": 3
     },
@@ -568,7 +591,8 @@
         "Level": 3
     },
     "info_player_counterterrorist": {
-        "Level": 3
+        "Level": 3,
+        "Comment": "info_player_spawn is preferred but not required"
     },
     "info_player_deathmatch": {
         "Level": 3
@@ -577,12 +601,17 @@
         "Level": 3
     },
     "info_player_teamspawn": {
-        "Level": 3
+        "Level": 3,
+        "Comment": "info_player_spawn is preferred but not required"
     },
     "info_player_terrorist": {
-        "Level": 3
+        "Level": 3,
+        "Comment": "info_player_spawn is preferred but not required"
     },
     "info_projecteddecal": {
+        "Level": 3
+    },
+    "info_suit": {
         "Level": 3
     },
     "info_target": {
@@ -1104,14 +1133,30 @@
         "Level": 2,
         "Comment": "Do not disable movement directions unless all are disabled together."
     },
+    "trigger_momentum_multihop": {
+        "Level": 0,
+        "Comment": "Deprecated and removed. Replace with func_bhop."
+    },
     "trigger_momentum_progress": {
         "Level": 3
     },
     "trigger_momentum_promptinput": {
         "Level": 0
     },
+    "trigger_momentum_push": {
+        "Level": 0,
+        "Comment": "Deprecated and removed. Replace with trigger_push/trigger_setspeed."
+    },
+    "trigger_momentum_slide": {
+        "Level": 0,
+        "Comment": "Deprecated and removed. Replace with func_slide."
+    },
     "trigger_momentum_teleport": {
         "Level": 3
+    },
+    "trigger_momentum_teleport_progress": {
+        "Level": 0,
+        "Comment": "Use trigger_momentum_progress and trigger_momentum_teleport instead"
     },
     "trigger_multiple": {
         "Level": 3
@@ -1131,6 +1176,10 @@
     },
     "trigger_remove": {
         "Level": 3
+    },
+    "trigger_reversespeed": {
+        "Level": 0,
+        "Comment": "Deprecated and removed, too gimmicky and niche. May be replaced in future."
     },
     "trigger_setspeed": {
         "Level": 3
@@ -1194,19 +1243,90 @@
     "water_lod_control": {
         "Level": 3
     },
+    "weapon_ak47": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_aug": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_awp": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_c4": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
     "weapon_cubemap": {
         "Level": 0,
         "Comment": "Do not give the player the cubemap weapon"
     },
+    "weapon_deagle": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_elite": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_famas": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_fiveseven": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_flashbang": {
+        "Level": 0
+    },
+    "weapon_g3sg1": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_galil": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_glock": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_hegrenade": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
     "weapon_knife": {
         "Level": 2,
-        "Comment": "Consider using momentum_weapon_spawner instead"
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_m249": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_m3": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_m4a1": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_mac10": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
     },
     "weapon_momentum_concgrenade": {
         "Level": 2,
         "Comment": "Consider using momentum_weapon_spawner instead"
     },
     "weapon_momentum_grenade": {
+        "Level": 2,
+        "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_momentum_knife": {
         "Level": 2,
         "Comment": "Consider using momentum_weapon_spawner instead"
     },
@@ -1233,6 +1353,49 @@
     "weapon_momentum_stickybomblauncher": {
         "Level": 2,
         "Comment": "Consider using momentum_weapon_spawner instead"
+    },
+    "weapon_mp5navy": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_p228": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_p90": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_scout": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_sg550": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_sg552": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_smokegrenade": {
+        "Level": 0
+    },
+    "weapon_tmp": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_ump45": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_usp": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
+    },
+    "weapon_xm1014": {
+        "Level": 2,
+        "Comment": "Remove if irrelevant to gameplay (e.g. jails). Consider using momentum_weapon_spawner otherwise."
     },
     "worldspawn": {
         "Level": 3

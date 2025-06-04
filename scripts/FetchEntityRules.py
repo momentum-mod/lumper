@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# Usage: python3 FetchEntityRules.py (from this directory)
 # Requires `pip install pandas`!
 
 import pandas
