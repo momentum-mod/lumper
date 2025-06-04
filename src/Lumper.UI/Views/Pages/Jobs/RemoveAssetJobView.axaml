@@ -27,6 +27,12 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <TextBlock FontWeight="Medium" VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
+                     Text="Remove Static Props" />
+          <CheckBox IsChecked="{Binding Job.RemoveStaticProps}" />
+        </StackPanel>
+        <TextBlock FontSize="12" Foreground="LightGray">Warning: Do NOT use if map contains props with collision that affects gameplay!</TextBlock>
       </StackPanel>
     </local:JobView.MainContent>
   </local:JobView>
