@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="512" d:DesignHeight="512"
         x:Class="Lumper.UI.Views.Shared.VtfImageWindow"
         x:DataType="vm:PakfileEntryVtfViewModel"
-        Title="{Binding Name}">
+        Title="{Binding Key}">
 
   <pakfileViews:PakfileEntryVtfView />
 
