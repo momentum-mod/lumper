@@ -21,7 +21,7 @@ public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
     public T? GetLump<T>()
         where T : Lump<GameLumpType>
     {
-        return (T?)Lumps.Values.First(x => x?.GetType() == typeof(T));
+        return Lumps.Values.OfType<T>().FirstOrDefault();
     }
 
     public Lump<GameLumpType>? GetLump(GameLumpType lumpType)
