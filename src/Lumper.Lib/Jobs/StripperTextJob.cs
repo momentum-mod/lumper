@@ -27,7 +27,13 @@ public class StripperTextJob : Job, IJob
         var config = StripperConfig.Parse(stream);
 
         Progress.Max = config.Blocks.Count;
-        EntityLump entityLump = bsp.GetLump<EntityLump>();
+
+        EntityLump? entityLump = bsp.GetLump<EntityLump>();
+        if (entityLump == null)
+        {
+            Logger.Warn("No entity lump found, ignoring job.");
+            return false;
+        }
 
         foreach (StripperConfig.Block block in config.Blocks)
         {

@@ -7,6 +7,7 @@ using System.Linq;
 using Lumper.Lib.Bsp.Enum;
 using Lumper.Lib.Bsp.Lumps;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
+using Lumper.Lib.Bsp.Struct;
 using Newtonsoft.Json;
 using NLog;
 
@@ -211,12 +212,16 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
 
     private void ResolveTexNames()
     {
-        TexDataLump texDataLump = _bsp.GetLump<TexDataLump>();
-        foreach (Struct.TexData texture in texDataLump.Data)
+        TexDataLump? texDataLump = _bsp.GetLump<TexDataLump>();
+        TexDataStringTableLump? texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
+        TexDataStringDataLump? texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
+
+        if (texDataLump == null || texDataStringTableLump == null || texDataStringDataLump == null)
+            return;
+
+        foreach (TexData texture in texDataLump.Data)
         {
-            TexDataStringTableLump texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
             int stringTableOffset = texDataStringTableLump.Data[texture.StringTablePointer];
-            TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
 
             int end = Array.FindIndex(texDataStringDataLump.Data, stringTableOffset, x => x == 0);
             if (end < 0)
@@ -234,10 +239,14 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
 
     private void ResolveTexData()
     {
-        TexInfoLump texInfoLump = _bsp.GetLump<TexInfoLump>();
-        foreach (Struct.TexInfo texInfo in texInfoLump.Data)
+        TexInfoLump? texInfoLump = _bsp.GetLump<TexInfoLump>();
+        TexDataLump? texDataLump = _bsp.GetLump<TexDataLump>();
+
+        if (texInfoLump == null || texDataLump == null)
+            return;
+
+        foreach (TexInfo texInfo in texInfoLump.Data)
         {
-            TexDataLump texDataLump = _bsp.GetLump<TexDataLump>();
             if (texInfo.TexDataPointer >= 0)
                 texInfo.TexData = texDataLump.Data[texInfo.TexDataPointer];
         }

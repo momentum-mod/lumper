@@ -12,8 +12,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_ExactMatch_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", "models/test/example.mdl"));
@@ -38,8 +38,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_WithoutDirectoryMatch_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("sound", "test/sound.wav"));
@@ -64,8 +64,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_NoMatches_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", "models/different/example.mdl"));
@@ -84,8 +84,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_MultipleEntities_UpdatesAllMatches()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity1 = new Entity();
         entity1.Properties.Add(new Entity.EntityProperty<string>("model", "models/test/example.mdl"));
@@ -119,8 +119,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_NonStringProperty_DoesNotUpdate()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         _ = EntityIo.TryParse("a,b,c,0,1", out EntityIo? entityIo);
@@ -140,8 +140,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_CrossDirectoryMove_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", "models/test/example.mdl"));
@@ -162,8 +162,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_BackSlash_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", @"models\test\example.mdl"));
@@ -187,8 +187,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_MixedSlash_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", @"models\test/example.mdl"));
@@ -212,8 +212,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_CaseInsensitiveMatch_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", "Models/Test/Example.mdl"));
@@ -237,8 +237,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_MultipleProperties_UpdatesAllMatches()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", "models/test/example.mdl"));
@@ -269,8 +269,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_PartialPathMatch_DoesNotUpdate()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("model", "models/test/example_extra.mdl"));
@@ -291,8 +291,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_SoundPathWithoutPrefix_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("message", "ambient/water/drip1.wav"));
@@ -316,8 +316,8 @@ public class PakFileLumpRefactoringTests
     public void Entities_NoSeparators_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         var entity = new Entity();
         entity.Properties.Add(new Entity.EntityProperty<string>("message", "filename.wav"));
@@ -1009,7 +1009,7 @@ public class PakFileLumpRefactoringTests
     )
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, fileName, inData);
 
@@ -1033,7 +1033,7 @@ public class PakFileLumpRefactoringTests
     public void Pakfile_MultiplePakfileEntries_UpdatesAllMatches()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         const string content1 = """
             "VertexLitGeneric"
@@ -1086,8 +1086,8 @@ public class PakFileLumpRefactoringTests
     public void TexData_ExactMatch_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>()!;
 
         var texData = new TexData { TexName = "test/example" };
         texDataLump.Data.Add(texData);
@@ -1109,8 +1109,8 @@ public class PakFileLumpRefactoringTests
     public void TexData_NoMatch_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>()!;
 
         var texData = new TexData { TexName = "test/different" };
         texDataLump.Data.Add(texData);
@@ -1132,8 +1132,8 @@ public class PakFileLumpRefactoringTests
     public void TexData_CaseInsensitiveMatch_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>()!;
 
         var texData = new TexData { TexName = "TEST/EXAMPLE" };
         texDataLump.Data.Add(texData);
@@ -1155,8 +1155,8 @@ public class PakFileLumpRefactoringTests
     public void TexData_NonVmtExtension_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>()!;
 
         var texData = new TexData { TexName = "test/example" };
         texDataLump.Data.Add(texData);
@@ -1178,8 +1178,8 @@ public class PakFileLumpRefactoringTests
     public void TexData_NonMaterialsPrefix_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>()!;
 
         var texData = new TexData { TexName = "test/example" };
         texDataLump.Data.Add(texData);
@@ -1201,8 +1201,8 @@ public class PakFileLumpRefactoringTests
     public void TexData_MultipleMatches_UpdatesAllPaths()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>()!;
 
         var texData1 = new TexData { TexName = "test/example" };
         var texData2 = new TexData { TexName = "test/example" };
@@ -1230,9 +1230,9 @@ public class PakFileLumpRefactoringTests
     public void TexData_UpdatesPathAlongWithOtherTypes()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        TexDataLump texDataLump = bspFile.GetLump<TexDataLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         // Add TexData entry
         var texData = new TexData { TexName = "test/example" };
@@ -1296,8 +1296,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_ExactMatch_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict!.Data.Add("models/test/example.mdl");
 
@@ -1318,8 +1318,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_NoMatch_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict!.Data.Add("models/test/different.mdl");
 
@@ -1340,8 +1340,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_CaseInsensitiveMatch_UpdatesPath()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict!.Data.Add("MODELS/TEST/EXAMPLE.MDL");
 
@@ -1362,8 +1362,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_NonMdlExtension_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict!.Data.Add("models/test/example.mdl");
 
@@ -1384,8 +1384,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_NonModelsPrefix_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict!.Data.Add("models/test/example.mdl");
 
@@ -1408,8 +1408,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_MultipleModels_UpdatesMatchingOne()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict!.Data.Add("models/test/example.mdl");
         sprpLump.StaticPropsDict.Data.Add("models/test/different.mdl");
@@ -1435,8 +1435,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_BackslashInPath_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict!.Data.Add(@"models\test\example.mdl");
 
@@ -1457,8 +1457,8 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_NullStaticPropDict_ReturnsEmpty()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
         sprpLump.StaticPropsDict = null;
 
@@ -1475,9 +1475,9 @@ public class PakFileLumpRefactoringTests
     public void StaticProp_UpdatesPathAlongWithOtherTypes()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
-        GameLump gameLump = bspFile.GetLump<GameLump>();
-        EntityLump entityLump = bspFile.GetLump<EntityLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
+        GameLump gameLump = bspFile.GetLump<GameLump>()!;
+        EntityLump entityLump = bspFile.GetLump<EntityLump>()!;
 
         // Add StaticProp entry
         Sprp sprpLump = gameLump.GetLump<Sprp>()!;
@@ -1508,7 +1508,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_MaterialsMapsPath_RenamesFile()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_utopia/cubemapdefault.vmt");
         pakfileLump.IsModified = false; // Creating new PakFileEntry from stream sets IsModified to true, so we reset it.
@@ -1526,7 +1526,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_SoundscapesTxtFile_RenamesFile()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "scripts/soundscapes_kz_example.txt");
         pakfileLump.IsModified = false;
@@ -1544,7 +1544,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_SoundscapesVscFile_RenamesFile()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "scripts/soundscapes_bhop_forest.vsc");
         pakfileLump.IsModified = false;
@@ -1562,7 +1562,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_LevelSoundsFile_RenamesFile()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "maps/surf_mesa_level_sounds.txt");
         pakfileLump.IsModified = false;
@@ -1580,7 +1580,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_ParticlesFile_RenamesFile()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "maps/kz_climb_particles.txt");
         pakfileLump.IsModified = false;
@@ -1598,7 +1598,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_MultipleDifferentFiles_RenamesAllMatchingFiles()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         // Add multiple different types of files
         TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_y/texture.vmt");
@@ -1625,7 +1625,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_CaseInsensitiveMapName_RenamesFile()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         // Add pakfile entry with differently cased map name
         TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/SURF_UTOPIA/texture.vmt");
@@ -1644,7 +1644,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_NoMatchingFiles_DoesNothing()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "materials/models/props/barrel.vmt");
         pakfileLump.IsModified = false;
@@ -1662,7 +1662,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_MaterialsWithSubfolders_RenamesFile()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_utopia/subfolder/texture.vmt");
         pakfileLump.IsModified = false;
@@ -1680,7 +1680,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_PartialMapNameMatch_DoesNotRename()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         // Add entry with a name that contains the map name as a substring
         TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_utopia2/texture.vmt");
@@ -1699,7 +1699,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_DifferentMapName_DoesNotRename()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         TestUtils.AddPakfileEntry(pakfileLump, "materials/maps/surf_different/texture.vmt");
         pakfileLump.IsModified = false;
@@ -1717,7 +1717,7 @@ public class PakFileLumpRefactoringTests
     public void ProcessMapRename_SimilarButDifferentPaths_DoesNotRename()
     {
         BspFile bspFile = TestUtils.CreateMockBspFile();
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>()!;
 
         // Add entries with similar but different paths
         TestUtils.AddPakfileEntry(pakfileLump, "materials/maps_custom/surf_utopia/texture.vmt");

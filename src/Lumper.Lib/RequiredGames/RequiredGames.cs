@@ -139,7 +139,7 @@ public static class RequiredGames
     {
         List<PackedAsset> matches = [];
 
-        List<string>? props = bspFile.GetLump<GameLump>().GetLump<Sprp>()?.StaticPropsDict?.Data;
+        List<string>? props = bspFile.GetLump<GameLump>()?.GetLump<Sprp>()?.StaticPropsDict?.Data;
 
         if (props == null)
             return [];

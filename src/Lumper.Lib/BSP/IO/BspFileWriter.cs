@@ -101,15 +101,19 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
 
     private void ConstructTexDataLumps()
     {
-        List<TexData> texData = _bsp.GetLump<TexDataLump>().Data;
-        TexDataStringDataLump texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
+        TexDataLump? texDataLump = _bsp.GetLump<TexDataLump>();
+        TexDataStringTableLump? texDataStringTableLump = _bsp.GetLump<TexDataStringTableLump>();
+        TexDataStringDataLump? texDataStringDataLump = _bsp.GetLump<TexDataStringDataLump>();
+
+        if (texDataLump == null || texDataStringDataLump == null || texDataStringTableLump == null)
+            return;
 
         // Ensure stringdata lump can fit everything we're about to stuff in
-        texDataStringDataLump.Resize(texData.Sum(x => BspFile.Encoding.GetByteCount(x.TexName) + 1));
+        texDataStringDataLump.Resize(texDataLump.Data.Sum(x => BspFile.Encoding.GetByteCount(x.TexName) + 1));
 
         List<int> stringTable = [];
         int pos = 0;
-        foreach (TexData tex in texData)
+        foreach (TexData tex in texDataLump.Data)
         {
             // At start of texture string, put its loc in stringtable
             stringTable.Add(pos);
@@ -123,6 +127,6 @@ public sealed class BspFileWriter(BspFile file, Stream output, IoHandler? handle
             pos++;
         }
 
-        _bsp.GetLump<TexDataStringTableLump>().Data = stringTable;
+        texDataStringTableLump.Data = stringTable;
     }
 }

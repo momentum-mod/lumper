@@ -142,7 +142,7 @@ public sealed class BspService : ReactiveObject, IDisposable
                 IEnumerable<Lump> lumps =
                 [
                     .. bsp.Lumps.Values.Where(y => y.Type != BspLumpType.GameLump),
-                    .. bsp.GetLump<GameLump>().Lumps.Values.OfType<Lump>(),
+                    .. bsp.GetLump<GameLump>()?.Lumps.Values.OfType<Lump>() ?? [],
                 ];
                 var nonEmpty = lumps.Where(y => !y.Empty).ToList();
                 CompressedLumps = nonEmpty.Sum(y => y.IsCompressed ? 1 : 0);

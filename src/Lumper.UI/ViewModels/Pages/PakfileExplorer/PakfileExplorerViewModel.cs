@@ -235,7 +235,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             // basically anything modifyable in the UI whilst refactor is ongoing. Would prefer to avoid to UI
             // lag, but too much work blocking modification everywhere.
             List<PakfileLump.PathReferenceUpdateType> updated = await Observable.Start(
-                () => BspService.Instance.BspFile!.GetLump<PakfileLump>().UpdatePathReferences(oldKey, newKey),
+                () => BspService.Instance.BspFile!.GetLump<PakfileLump>()!.UpdatePathReferences(oldKey, newKey),
                 RxApp.MainThreadScheduler
             );
 
