@@ -20,7 +20,13 @@ public class ReplaceTextureJob : Job, IJob
 
     public override bool Run(BspFile bsp)
     {
-        TexDataLump texDataLump = bsp.GetLump<TexDataLump>();
+        TexDataLump? texDataLump = bsp.GetLump<TexDataLump>();
+
+        if (texDataLump == null)
+        {
+            Logger.Warn("No TexData lump found in BSP file, ignoring job.");
+            return false;
+        }
 
         Progress.Max = texDataLump.Data.Count;
 

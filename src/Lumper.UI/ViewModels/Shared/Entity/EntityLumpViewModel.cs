@@ -44,7 +44,9 @@ public sealed class EntityLumpViewModel : LumpViewModel
     {
         BspService.Instance.ThrowIfNoLoadedBsp();
 
-        _entityLump = bsp.GetLump<EntityLump>();
+        _entityLump =
+            bsp.GetLump<EntityLump>()
+            ?? throw new InvalidOperationException("BSP file does not contain an Entity lump somehow!");
 
         LoadEntityList();
 
