@@ -18,7 +18,7 @@ public class RemoveAssetJobTests
     {
         // Create mock BSP file
         _bspFile = TestUtils.CreateMockBspFile();
-        _pakfileLump = _bspFile.GetLump<PakfileLump>();
+        _pakfileLump = _bspFile.GetLump<PakfileLump>()!;
 
         // Clear any existing entries
         _pakfileLump.Entries.Clear();

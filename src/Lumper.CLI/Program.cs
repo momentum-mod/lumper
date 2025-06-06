@@ -188,7 +188,12 @@ internal sealed class Program
     private static bool CheckAssets(BspFile bspFile)
     {
         // Not bother with OriginFilter stuff, seems very unlikely to be helpful in Momentum's case.
-        PakfileLump pakfileLump = bspFile.GetLump<PakfileLump>();
+        PakfileLump? pakfileLump = bspFile.GetLump<PakfileLump>();
+        if (pakfileLump == null)
+        {
+            Logger.Warn("BSP does not contain a pakfile lump, skipping asset check.");
+            return true;
+        }
 
         int numMatches = 0;
 
@@ -237,7 +242,10 @@ internal sealed class Program
             throw new InvalidDataException($"Could not load rules file {rulesPath}", ex);
         }
 
-        EntityLump entLump = bspFile.GetLump<EntityLump>();
+        EntityLump? entLump = bspFile.GetLump<EntityLump>();
+
+        if (entLump == null)
+            return false;
 
         int noClassname = 0;
         Dictionary<EntityRule.AllowLevel, HashSet<string>> counts = new()

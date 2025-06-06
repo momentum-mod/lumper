@@ -174,8 +174,7 @@ public sealed partial class BspFile : IDisposable
                     );
                 }
 
-                PakfileLump pakfile = GetLump<PakfileLump>();
-                pakfile.ProcessMapRename(Name, newFileName);
+                GetLump<PakfileLump>()?.ProcessMapRename(Name, newFileName);
             }
         }
 
@@ -412,10 +411,10 @@ public sealed partial class BspFile : IDisposable
         }
     }
 
-    public T GetLump<T>()
+    public T? GetLump<T>()
         where T : Lump<BspLumpType>
     {
-        return Lumps.Values.OfType<T>().First();
+        return Lumps.Values.OfType<T>().FirstOrDefault();
     }
 
     public Lump<BspLumpType> GetLump(BspLumpType lumpType)

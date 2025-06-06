@@ -19,7 +19,7 @@ public class StripperConfigTests
     public void Setup()
     {
         _bspFile = TestUtils.CreateMockBspFile();
-        _entityLump = _bspFile.GetLump<EntityLump>();
+        _entityLump = _bspFile.GetLump<EntityLump>()!;
 
         // Clear any entities that might be in the lump
         _entityLump.Data.Clear();
