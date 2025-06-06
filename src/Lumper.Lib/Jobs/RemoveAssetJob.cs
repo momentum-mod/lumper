@@ -48,7 +48,13 @@ public class RemoveAssetJob : Job, IJob
             return false;
         }
 
-        PakfileLump pakfileLump = bsp.GetLump<PakfileLump>();
+        PakfileLump? pakfileLump = bsp.GetLump<PakfileLump>();
+
+        if (pakfileLump == null)
+        {
+            Logger.Warn("BSP does not contain a pakfile lump, ignoring job.");
+            return false;
+        }
 
         Logger.Info("Removing game assets... this may take a while!");
         int totalMatches = 0;

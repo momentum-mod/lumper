@@ -131,7 +131,7 @@ public partial class PakfileLump
     {
         bool updated = false;
 
-        foreach (Entity entity in Parent.GetLump<EntityLump>().Data)
+        foreach (Entity entity in Parent.GetLump<EntityLump>()?.Data ?? [])
         {
             foreach (Entity.EntityProperty prop in entity.Properties)
             {
@@ -415,7 +415,7 @@ public partial class PakfileLump
         if (!Path.GetExtension(oldPath).Equals(".mdl", Comparison) || !opPrefix.Equals("models", Comparison))
             return false;
 
-        List<string>? pathList = Parent.GetLump<GameLump>().GetLump<Sprp>()?.StaticPropsDict?.Data;
+        List<string>? pathList = Parent.GetLump<GameLump>()?.GetLump<Sprp>()?.StaticPropsDict?.Data;
 
         if (pathList is null)
             return false;

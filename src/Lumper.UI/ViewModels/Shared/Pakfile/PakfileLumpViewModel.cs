@@ -25,7 +25,9 @@ public sealed class PakfileLumpViewModel : LumpViewModel
     {
         BspService.Instance.ThrowIfNoLoadedBsp();
 
-        _pakfile = bsp.GetLump<PakfileLump>();
+        _pakfile =
+            bsp.GetLump<PakfileLump>()
+            ?? throw new InvalidOperationException("BSP does not contain a pakfile lump somehow!");
 
         PullChangesFromModel(); // Initializes everything
     }
