@@ -123,7 +123,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
     {
         Lump? gameLump = null;
         LumpHeaderInfo? gameLumpHeader = null;
-        foreach ((Lump? lump, LumpHeaderInfo? header) in Lumps.OrderBy(x => x.Item2.Offset))
+        foreach ((Lump lump, LumpHeaderInfo header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
             if (lump is GameLump)
             {
@@ -149,9 +149,9 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
     private void SortLumps()
     {
         Dictionary<BspLumpType, Lump<BspLumpType>> newLumps = [];
-        foreach ((Lump? lump, _) in Lumps.OrderBy(x => x.Item2.Offset))
+        foreach ((Lump lump, _) in Lumps.OrderBy(x => x.Item2.Offset))
         {
-            (BspLumpType key, Lump<BspLumpType>? value) = _bsp.Lumps.First(x => x.Value == lump);
+            (BspLumpType key, Lump<BspLumpType> value) = _bsp.Lumps.First(x => x.Value == lump);
             newLumps.Add(key, value);
             _bsp.Lumps.Remove(key);
         }
@@ -170,7 +170,7 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
         LumpHeaderInfo? prevHeader = null;
 
         bool first = true;
-        foreach ((Lump? tmpLump, LumpHeaderInfo? header) in Lumps.OrderBy(x => x.Item2.Offset))
+        foreach ((Lump tmpLump, LumpHeaderInfo header) in Lumps.OrderBy(x => x.Item2.Offset))
         {
             var lump = (Lump<BspLumpType>)tmpLump;
             if (first)
