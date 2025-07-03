@@ -86,6 +86,7 @@ jobs:
           Lumper.UI.exe \
           NLog.config \
           RegisterLumperURLProtocol.ps1 \
+          RegisterLumperFileAssociation.ps1 \
           resources \
         && cd ..
 
