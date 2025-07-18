@@ -295,6 +295,7 @@ public sealed partial class BspFile : IDisposable
             FilePath = outPath;
             FileStream = File.OpenRead(outPath);
             FileSize = new FileInfo(outPath).Length;
+            ComputeHash(FileStream);
 
             Logger.Info($"Saved {outPath}");
 

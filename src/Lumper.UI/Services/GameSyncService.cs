@@ -164,7 +164,7 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
             if (_lastWarnedHash != message.MapHash)
             {
                 _logger.Warn(
-                    "Received game message with mismatching map hash! You are probably editing the wrong map."
+                    "Received game message with mismatching map hash! You are editing the wrong map or haven't reloaded in-game after saving."
                 );
                 _logger.Warn($"Lumper map hash: {BspService.Instance.FileHash}, game map hash: {message.MapHash}");
                 _lastWarnedHash = message.MapHash;
