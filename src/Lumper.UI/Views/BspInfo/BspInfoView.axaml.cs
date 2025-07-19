@@ -2,6 +2,7 @@ namespace Lumper.UI.Views.BspInfo;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -9,16 +10,20 @@ using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.ReactiveUI;
-using Lib.RequiredGames;
+using Lumper.Lib.AssetManifest;
 using Lumper.Lib.EntityRules;
+using Lumper.Lib.RequiredGames;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.BspInfo;
 using Lumper.UI.ViewModels.Shared.Pakfile;
+using NLog;
 using ReactiveUI;
 using EntityRules = System.Collections.Generic.Dictionary<string, Lib.EntityRules.EntityRule>;
 
 public partial class BspInfoView : ReactiveWindow<BspInfoViewModel>
 {
+    private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
     public BspInfoView()
     {
         InitializeComponent();
@@ -130,7 +135,28 @@ public partial class BspInfoView : ReactiveWindow<BspInfoViewModel>
 
                             entry.PrefetchData();
 
-                            obs.OnNext(entry.MatchingGameAssets.Count > 0 ? 1 : 0);
+                            List<AssetManifest.Asset> matches = entry.MatchingGameAssets;
+                            if (matches.Count == 0)
+                            {
+                                obs.OnNext(0);
+                                continue;
+                            }
+
+                            if (Path.GetExtension(entry.Key).Equals(".vmt", StringComparison.OrdinalIgnoreCase))
+                            {
+                                Logger.Debug(
+                                    $"Pakfile entry {entry.Key} matches but is a VMT so ignoring (matches {string.Join(", ", matches.Select(asset => $"{asset.Origin} asset {asset.Path})"))}"
+                                );
+
+                                obs.OnNext(0);
+                                continue;
+                            }
+
+                            Logger.Debug(
+                                $"Pakfile entry {entry.Key} matches {string.Join(", ", matches.Select(asset => $"{asset.Origin} asset {asset.Path}"))}"
+                            );
+
+                            obs.OnNext(1);
                         }
 
                         obs.OnCompleted();
