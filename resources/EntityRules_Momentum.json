@@ -592,7 +592,7 @@
     },
     "info_player_counterterrorist": {
         "Level": 3,
-        "Comment": "info_player_spawn is preferred but not required"
+        "Comment": "info_player_start is preferred but not required"
     },
     "info_player_deathmatch": {
         "Level": 3
@@ -602,11 +602,11 @@
     },
     "info_player_teamspawn": {
         "Level": 3,
-        "Comment": "info_player_spawn is preferred but not required"
+        "Comment": "info_player_start is preferred but not required"
     },
     "info_player_terrorist": {
         "Level": 3,
-        "Comment": "info_player_spawn is preferred but not required"
+        "Comment": "info_player_start is preferred but not required"
     },
     "info_projecteddecal": {
         "Level": 3
