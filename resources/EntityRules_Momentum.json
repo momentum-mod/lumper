@@ -293,6 +293,10 @@
         "Level": 2,
         "Comment": "This filter only applies to entities being held with +use"
     },
+    "filter_tf_class": {
+        "Level": 2,
+        "Comment": "Soldier (3) passes for RJ, Demo (4) passes for SJ, but always fails in other gamemodes that may be playable, e.g. Conc."
+    },
     "filter_velocity": {
         "Level": 3
     },
@@ -318,7 +322,8 @@
         "Level": 3
     },
     "func_button": {
-        "Level": 3
+        "Level": 2,
+        "Comment": "Can cause issues in TF2 maps when using OnDamage outputs - see \"func_button\" section on Map Porting docs"
     },
     "func_clip_vphysics": {
         "Level": 3
@@ -422,6 +427,10 @@
         "Level": 2,
         "Comment": "Use with care, this entity is buggy"
     },
+    "func_regenerate": {
+        "Level": 2,
+        "Comment": "Does nothing in Momentum. If only one is present, it's usually safe to ignore. If multiple are present, check in TF2 if limited ammo sections are intended, if so, see \"Limited Ammo Triggers\" on Map Porting docs for alterative."
+    },
     "func_rot_button": {
         "Level": 3
     },
@@ -488,7 +497,8 @@
         "Level": 3
     },
     "func_viscluster": {
-        "Level": 3
+        "Level": 3,
+        "Comment": "allow"
     },
     "func_wall": {
         "Level": 3
@@ -1086,6 +1096,14 @@
     "target_changegravity": {
         "Level": 3
     },
+    "team_control_point": {
+        "Level": 3,
+        "Comment": "TF2 objective entity, does nothing in Momentum"
+    },
+    "team_control_point_master": {
+        "Level": 3,
+        "Comment": "TF2 objective entity, does nothing in Momentum"
+    },
     "test_sidelist": {
         "Level": 0,
         "Comment": "Debugging entity only used for testing"
@@ -1094,12 +1112,20 @@
         "Level": 0,
         "Comment": "Debugging entity only used for testing"
     },
+    "tf_gamerules": {
+        "Level": 3,
+        "Comment": "TF2 entity, does nothing in Momentum"
+    },
     "trigger_bounce_stickybombs": {
         "Level": 3
     },
     "trigger_brush": {
         "Level": 0,
         "Comment": "Use func_button instead"
+    },
+    "trigger_capture_area": {
+        "Level": 3,
+        "Comment": "TF2 objective entity, does nothing in Momentum"
     },
     "trigger_catapult": {
         "Level": 2,
@@ -1117,7 +1143,8 @@
         "Level": 3
     },
     "trigger_hurt": {
-        "Level": 3
+        "Level": 3,
+        "Comment": "Does nothing in Momentum, but fine to ignore"
     },
     "trigger_impact": {
         "Level": 2,
