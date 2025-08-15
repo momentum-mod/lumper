@@ -131,7 +131,7 @@ public class RemoveAssetJob : Job, IJob
 
     private static void RemoveStaticProp(BspFile bsp, string path)
     {
-        Sprp? sprp = bsp.GetLump<GameLump>().GetLump<Sprp>();
+        Sprp? sprp = bsp.GetLump<GameLump>()?.GetLump<Sprp>();
         if (sprp is null)
             return;
 
