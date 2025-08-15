@@ -221,7 +221,7 @@
                 <TextBlock LineHeight="24">
                   Allows two-way communication between Lumper and Momentum Mod.
                   <LineBreak />
-                  To enable, set <Run FontFamily="{StaticResource Monospace}">mom_lumper_sync_enable 1</Run>
+                  To enable, set <Run FontFamily="{StaticResource Monospace}">mom_lumper_sync 1</Run>
                   via ingame console, then press this button.
                 </TextBlock>
               </StackPanel>
