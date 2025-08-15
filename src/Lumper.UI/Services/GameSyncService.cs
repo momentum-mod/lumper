@@ -81,7 +81,7 @@ public sealed class GameSyncService : ReactiveObject, IDisposable
         catch
         {
             await Disconnect();
-            _logger.Error("Game Sync connection failed. Do you have a sync server running? (mom_lumper_sync_enable 1)");
+            _logger.Error("Game Sync connection failed. Do you have a sync server running? (mom_lumper_sync 1)");
             return;
         }
 
