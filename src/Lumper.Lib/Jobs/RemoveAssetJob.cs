@@ -99,7 +99,13 @@ public class RemoveAssetJob : Job, IJob
 
             bestAsset ??= assets[0];
 
-            if (entry.Key != bestAsset.Path)
+            if (
+                entry.Key != bestAsset.Path
+                // Occasionally maps pack an "env_cubemap" material that matches random official assets,
+                // don't refactor paths as we could replace values of the $envmap property...
+                // (https://github.com/momentum-mod/lumper/issues/187)
+                && !Path.GetFileName(entry.Key).Equals("env_cubemap.vtf", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 pakfileLump.UpdatePathReferences(entry.Key, bestAsset.Path);
                 Logger.Info($"Removed {entry.Key} which matched {matches}, updating references to {bestAsset.Path}");
