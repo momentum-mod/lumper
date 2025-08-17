@@ -20,7 +20,7 @@
       </Button>
     </Grid>
     <DataGrid Grid.Row="1" ItemsSource="{Binding Results}" IsReadOnly="True" BorderBrush="#333"
-              BorderThickness="0 1 0 0" VerticalScrollBarVisibility="Visible">
+              BorderThickness="0 1 0 0" VerticalScrollBarVisibility="Visible" CanUserSortColumns="False">
       <DataGrid.Styles>
         <Style Selector="ScrollBar">
           <Setter Property="AllowAutoHide" Value="False" />
@@ -32,7 +32,7 @@
                             FontFamily="{StaticResource Monospace}" FontSize="14" />
         <DataGridTextColumn Width="Auto" Header="Count" Binding="{Binding Count}"
                             FontFamily="{StaticResource Monospace}" FontSize="14" />
-        <DataGridTemplateColumn Width="Auto" Header="Validity" SortMemberPath="Level">
+        <DataGridTemplateColumn Width="Auto" Header="Validity">
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
               <Panel VerticalAlignment="Stretch">
