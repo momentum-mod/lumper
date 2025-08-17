@@ -68,6 +68,9 @@
                   <materialIcons:MaterialIcon Width="20" Height="20" Kind="AlertCircleOutline" Foreground="Red"
                                               Margin="4 3 6 4" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </StackPanel>
+                <TextBlock Text="Animated" IsVisible="{Binding IsAnimated}" ZIndex="10" HorizontalAlignment="Left"
+                           VerticalAlignment="Top" Foreground="OrangeRed" FontWeight="ExtraBold" Margin="8" FontSize="14"
+                           FontFamily="{StaticResource Monospace}" />
                 <Panel
                   Height="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
                   Width="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
