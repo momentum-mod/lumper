@@ -54,6 +54,9 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
     [ObservableAsProperty]
     public uint MipmapMax { get; }
 
+    [ObservableAsProperty]
+    public bool IsAnimated { get; }
+
     [Reactive]
     public uint SelectedResizeHeight { get; set; } = 512;
 
@@ -93,6 +96,9 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
             .Skip(1)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Subscribe(x => _ = FetchImage());
+
+        this.WhenAnyValue(x => x.VtfFile, x => x.VtfFile!.FrameCount, (file, count) => file is not null && count > 1)
+            .ToPropertyEx(this, x => x.IsAnimated);
 
         this.WhenAnyValue(x => x.VtfFile, x => x.VtfFile!.ImageFormat).Subscribe(x => SelectedImageFormat = x.Item2);
     }
