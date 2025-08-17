@@ -3,6 +3,7 @@ namespace Lumper.UI.ViewModels.Pages.EntityReview;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -43,12 +44,12 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
                         .AutoRefresh() // This could be a perf hit but seems okay on very entity-heavy maps...
                         .GroupWithImmutableState(y => y.Classname)
                         .Transform(y => new EntityReviewResult(rules, y.Key, y.Count))
-                        .SortBy(y => y.Classname)
                     ?? Observable.Return<IChangeSet<EntityReviewResult, string>>(
                         ChangeSet<EntityReviewResult, string>.Empty
                     );
             })
             .Switch()
+            .SortBy(y => y)
             .Bind(out _results)
             .Subscribe();
     }
@@ -86,7 +87,8 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
         };
     }
 
-    public class EntityReviewResult
+    [SuppressMessage("Design", "CA1036:Override methods on comparable types")]
+    public class EntityReviewResult : IComparable
     {
         public string Classname { get; }
         public int Count { get; }
@@ -142,6 +144,17 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
                     Validity = "Unknown";
                     break;
             }
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is not EntityReviewResult other)
+                return 1;
+
+            if (Level != other.Level)
+                return Level - other.Level;
+
+            return string.Compare(Classname, other.Classname, StringComparison.Ordinal);
         }
     }
 }
