@@ -6,9 +6,14 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:views="clr-namespace:Lumper.UI.Views.Pages.VtfBrowser"
              xmlns:vm="clr-namespace:Lumper.UI.ViewModels.Pages.VtfBrowser"
+             xmlns:converters="clr-namespace:Lumper.UI.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="vm:VtfBrowserViewModel"
              x:Class="Lumper.UI.Views.Pages.VtfBrowser.VtfBrowserView">
+
+  <UserControl.Resources>
+    <converters:FileSizeConverter x:Key="FileSize" />
+  </UserControl.Resources>
 
   <Grid RowDefinitions="*, Auto">
     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
@@ -31,7 +36,8 @@
               </Button.ContextMenu>
               <Panel>
                 <StackPanel ZIndex="10" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8"
-                            Orientation="Horizontal" IsVisible="{Binding !!MatchingGameAssets.Count}" Background="#88000000">
+                            Orientation="Horizontal" IsVisible="{Binding !!MatchingGameAssets.Count}"
+                            Background="#88000000">
                   <ToolTip.Tip>
                     <StackPanel Spacing="4">
                       <TextBlock Text="This texture is present in a Valve game or other asset pack!" />
@@ -62,26 +68,44 @@
                   <materialIcons:MaterialIcon Width="20" Height="20" Kind="AlertCircleOutline" Foreground="Red"
                                               Margin="4 3 6 4" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </StackPanel>
-                <StackPanel
-                    Height="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
-                    Width="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
+                <Panel
+                  Height="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
+                  Width="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
                   <Image
                     Height="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
                     Width="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}"
                     Source="{Binding Image}" IsVisible="{Binding Loaded}">
                   </Image>
-                  <TextBlock
-                    TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                    Text="{Binding Name}" Padding="4"
-                    MaxWidth="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
-                    <ToolTip.Tip>
-                      <StackPanel Width="600">
-                        <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="{Binding Key}" />
-                      </StackPanel>
-                    </ToolTip.Tip>
-                  </TextBlock>
-                </StackPanel>
+
+                  <Border HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Margin="4" Padding="2"
+                          Background="#88000000" CornerRadius="2">
+                    <StackPanel Spacing="4" Orientation="Vertical" HorizontalAlignment="Center">
+                      <TextBlock
+                        TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                        Text="{Binding Name}" FontFamily="{StaticResource Monospace}"
+                        MaxWidth="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
+                        <TextBlock.Effect>
+                          <DropShadowEffect Color="Black" BlurRadius="0" OffsetX="1" OffsetY="1" />
+                        </TextBlock.Effect>
+                        <ToolTip.Tip>
+                          <StackPanel Width="600">
+                            <TextBlock Text="{Binding Name}" />
+                            <TextBlock Text="{Binding Key}" />
+                          </StackPanel>
+                        </ToolTip.Tip>
+                      </TextBlock>
+                      <TextBlock
+                        TextTrimming="CharacterEllipsis" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                        Text="{Binding UncompressedSize, Converter={StaticResource FileSize}}"
+                        Foreground="{Binding WarningColor}" FontFamily="{StaticResource Monospace}"
+                        MaxWidth="{Binding ViewModel.StateService.VtfBrowserDimensions, RelativeSource={RelativeSource AncestorType=views:VtfBrowserView}, FallbackValue=192}">
+                        <TextBlock.Effect>
+                          <DropShadowEffect Color="Black" BlurRadius="0" OffsetX="1" OffsetY="1" />
+                        </TextBlock.Effect>
+                      </TextBlock>
+                    </StackPanel>
+                  </Border>
+                </Panel>
               </Panel>
             </Button>
           </DataTemplate>
@@ -92,7 +116,7 @@
     <Border Grid.Row="1" BorderBrush="#10FFFFFF" Background="#20000000" Padding="4" BorderThickness="0 1 0 0">
       <Grid ColumnDefinitions="Auto, Auto, Auto, Auto, *, Auto, Auto">
         <ctrls:ClearableTextBox Grid.Column="0" Height="32" Width="256" Margin="8" Text="{Binding TextureSearch}"
-                 Watermark="Search" />
+                                Watermark="Search" />
         <CheckBox Grid.Column="1" Margin="4" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                   IsChecked="{Binding StateService.VtfBrowserShowCubemaps, Mode=TwoWay}">
           Show Cubemaps

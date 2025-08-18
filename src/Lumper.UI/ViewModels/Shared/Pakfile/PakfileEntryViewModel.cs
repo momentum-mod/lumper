@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Avalonia.Media;
 using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp.Struct;
 using ReactiveUI.Fody.Helpers;
@@ -34,9 +35,14 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     [Reactive]
     public string Extension { get; set; } = "";
 
-    public long? CompressedSize => BaseEntry.CompressedSize;
+    [Reactive]
+    public long? CompressedSize { get; private set; }
 
-    public long? UncompressedSize => BaseEntry.UncompressedSize;
+    [Reactive]
+    public long? UncompressedSize { get; private set; }
+
+    [Reactive]
+    public IImmutableSolidColorBrush WarningColor { get; set; } = Brushes.Transparent;
 
     [Reactive]
     public string? Hash { get; set; }
@@ -49,6 +55,7 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     {
         BaseEntry = baseEntry;
         Key = BaseEntry.Key;
+        UpdateSizes();
     }
 
     public virtual void Load(CancellationTokenSource? cts = null) { }
@@ -137,6 +144,7 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
         // of running for multiple pakfileentryvms in parallel!
         Hash = BaseEntry.Hash;
         MatchingGameAssets = Hash is not null ? AssetManifest.Manifest.GetValueOrDefault(Hash) ?? [] : [];
+        UpdateSizes();
     }
 
     /// <summary>
@@ -147,4 +155,17 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
     /// information), this can be a noop.
     /// </summary>
     public override void PushChangesToModel() { }
+
+    private void UpdateSizes()
+    {
+        CompressedSize = BaseEntry.CompressedSize;
+        UncompressedSize = BaseEntry.UncompressedSize;
+        WarningColor = UncompressedSize switch
+        {
+            > 5_000_000 => Brushes.Tomato,
+            > 3_000_000 => Brushes.Orange,
+            > 1_000_000 => Brushes.Yellow,
+            _ => Brushes.White,
+        };
+    }
 }
