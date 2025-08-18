@@ -224,22 +224,7 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         {
             Prepare();
 
-            float r = 0;
-            float g = 0;
-            float b = 0;
-            VTFFile.ImageGetReflectivity(ref r, ref g, ref b);
-            var createOptions = new SVTFCreateOptions();
-            VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
-            createOptions.versionMajor = VTFFile.ImageGetMajorVersion();
-            createOptions.versionMinor = VTFFile.ImageGetMinorVersion();
-            createOptions.imageFormat = VTFFile.ImageGetFormat();
-            createOptions.flags = VTFFile.ImageGetFlags();
-            createOptions.startFrame = VTFFile.ImageGetStartFrame();
-            createOptions.bumpScale = VTFFile.ImageGetBumpmapScale();
-            createOptions.reflectivityR = r;
-            createOptions.reflectivityG = g;
-            createOptions.reflectivityB = b;
-            createOptions.mipmaps = VTFFile.ImageGetMipmapCount() > 1;
+            SVTFCreateOptions createOptions = GetCreateOptionsWithExistingValues();
 
             if (!VTFFile.ImageCreateSingle(newWidth, newHeight, resizedData, ref createOptions))
             {
@@ -256,6 +241,61 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
 
             Logger.Info(
                 $"Resizing {pakfileEntry.Key}: Updated VTF file in pakfile lump. Resizing complete! ({stopwatch.ElapsedMilliseconds}ms)"
+            );
+        });
+    }
+
+    public async Task Reencode(VTFImageFormat newFormat, uint frame, uint face, uint slice, uint mipmapLevel)
+    {
+        if (newFormat == ImageFormat)
+        {
+            Logger.Warn($"Re-encoding {pakfileEntry.Key} to the same format, skipping.");
+            return;
+        }
+
+        Logger.Info(
+            $"Reencoding {pakfileEntry.Key} to {GetImageFormatString(newFormat)}... NOTE this operation won't start if the texture browser is currently loading textures!!"
+        );
+
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        Image<Rgba32>? image = await GetImage(cts: null, frame, face, slice, mipmapLevel);
+        if (image is null)
+        {
+            Logger.Error($"Reencoding {pakfileEntry.Key}: Failed to get image for resizing");
+            return;
+        }
+
+        byte[] oldData = GetRgba8888FromImage(image, out bool _);
+
+        await VtfLibQueue.Run(() =>
+        {
+            Prepare();
+
+            // Note: VTFLib has a ImageConvert function specifically for this, but I can't get it to work.
+            // If I copy the existing data from the VTF file and call ImageConvert, it returns true,
+            // but nothing is updated. Instead just reading image data to RGBA8888 and creating a new VTF
+            // from scratch.
+
+            SVTFCreateOptions createOptions = GetCreateOptionsWithExistingValues();
+            createOptions.imageFormat = newFormat;
+
+            if (!VTFFile.ImageCreateSingle(ImageWidth, ImageHeight, oldData, ref createOptions))
+            {
+                string err = VTFAPI.GetLastError();
+                Logger.Error($"Reencoding {pakfileEntry.Key}: Error creating new VTF during VTF creation: ${err}");
+                return;
+            }
+
+            Logger.Info(
+                $"Reencoding {pakfileEntry.Key}: Created resized VTF file in memory ({stopwatch.ElapsedMilliseconds}ms)"
+            );
+
+            SaveVtf();
+
+            Logger.Info(
+                $"Reencoding {pakfileEntry.Key}: Updated VTF file in pakfile lump. Resizing complete! ({stopwatch.ElapsedMilliseconds}ms)"
             );
         });
     }
@@ -309,7 +349,7 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         ImageWidth = VTFFile.ImageGetWidth();
         ImageHeight = VTFFile.ImageGetHeight();
         ImageFormat = VTFFile.ImageGetFormat();
-        ImageFormatString = ImageFormat.ToString().Replace("IMAGE_FORMAT_", "");
+        ImageFormatString = GetImageFormatString(ImageFormat);
         Depth = VTFFile.ImageGetDepth();
 
         float x = 0,
@@ -317,6 +357,11 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
             z = 0;
         VTFFile.ImageGetReflectivity(ref x, ref y, ref z);
         Reflectivity = [Math.Round(x, 2), Math.Round(y, 2), Math.Round(z, 2)];
+    }
+
+    public static string GetImageFormatString(VTFImageFormat format)
+    {
+        return format.ToString().Replace("IMAGE_FORMAT_", "");
     }
 
     private static byte[] GetRgba8888FromImage(Image<Rgba32> image, out bool hasAlpha)
@@ -341,6 +386,28 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         }
 
         return buffer;
+    }
+
+    private static SVTFCreateOptions GetCreateOptionsWithExistingValues()
+    {
+        float r = 0;
+        float g = 0;
+        float b = 0;
+        VTFFile.ImageGetReflectivity(ref r, ref g, ref b);
+        var createOptions = new SVTFCreateOptions();
+        VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
+        createOptions.versionMajor = VTFFile.ImageGetMajorVersion();
+        createOptions.versionMinor = VTFFile.ImageGetMinorVersion();
+        createOptions.imageFormat = VTFFile.ImageGetFormat();
+        createOptions.flags = VTFFile.ImageGetFlags();
+        createOptions.startFrame = VTFFile.ImageGetStartFrame();
+        createOptions.bumpScale = VTFFile.ImageGetBumpmapScale();
+        createOptions.reflectivityR = r;
+        createOptions.reflectivityG = g;
+        createOptions.reflectivityB = b;
+        createOptions.mipmaps = VTFFile.ImageGetMipmapCount() > 1;
+
+        return createOptions;
     }
 
     /// <summary>

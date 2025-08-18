@@ -20,6 +20,7 @@ using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.PixelFormats;
+using VTFLib;
 
 public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 {
@@ -61,6 +62,11 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
     public uint[] ResizeOptions { get; } = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
+    [Reactive]
+    public VTFImageFormat SelectedImageFormat { get; set; }
+
+    public VTFImageFormat[] ImageFormats { get; } = Enum.GetValues<VTFImageFormat>();
+
     public bool HasSeparateWindow { get; set; }
 
     public PakfileEntryVtfViewModel(PakfileEntry entry, BspNode parent)
@@ -87,6 +93,8 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
             .Skip(1)
             .ObserveOn(RxApp.TaskpoolScheduler)
             .Subscribe(x => _ = FetchImage());
+
+        this.WhenAnyValue(x => x.VtfFile, x => x.VtfFile!.ImageFormat).Subscribe(x => SelectedImageFormat = x.Item2);
     }
 
     private bool _inited;
@@ -189,6 +197,15 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
                 }
             }
         }
+    }
+
+    public async Task Reencode()
+    {
+        if (VtfFile is null)
+            return;
+
+        await VtfFile.Reencode(SelectedImageFormat, Frame, Face, Slice, MipmapLevel);
+        await FetchImage();
     }
 
     public void OpenVtfImageWindow()
