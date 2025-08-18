@@ -146,10 +146,7 @@
                            Minimum="0" Maximum="{Binding MipmapMax}" />
           </Grid>
 
-          <Button Command="{Binding Resize}" Margin="0 8 0 0">
-            <TextBlock Text="Resize (Width x Height)" />
-          </Button>
-          <StackPanel Orientation="Horizontal" Spacing="4" Margin="0 0 0 8">
+          <StackPanel Orientation="Horizontal" Spacing="4" Margin="0 8 0 0">
             <ComboBox ItemsSource="{Binding ResizeOptions}" SelectedItem="{Binding SelectedResizeWidth}"
                       Padding="12,0,0,0">
               <ComboBox.ItemTemplate>
@@ -167,6 +164,23 @@
               </ComboBox.ItemTemplate>
             </ComboBox>
           </StackPanel>
+          <Button Command="{Binding Resize}" Margin="0 0 0 4">
+            <TextBlock Text="Resize (Width x Height)" />
+          </Button>
+
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <ComboBox ItemsSource="{Binding ImageFormats}" SelectedItem="{Binding SelectedImageFormat}"
+                      Padding="12,0,0,0">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Classes="Value" Text="{Binding}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+          <Button Command="{Binding Reencode}" Margin="0 0 0 8">
+            <TextBlock Text="Re-encode" />
+          </Button>
 
           <Button Command="{Binding SetImage}" CommandParameter="true">Replace Image</Button>
           <Button Command="{Binding SetImage}" CommandParameter="false"
