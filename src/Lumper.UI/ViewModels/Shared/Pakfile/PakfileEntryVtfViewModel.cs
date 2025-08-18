@@ -4,11 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Lumper.Lib.Bsp.Lumps.BspLumps;
 using Lumper.Lib.Bsp.Struct;
+using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Vtf;
 using Lumper.UI.Views.Shared;
 using Lumper.UI.Views.Shared.Pakfile;
@@ -49,6 +52,14 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 
     [ObservableAsProperty]
     public uint MipmapMax { get; }
+
+    [Reactive]
+    public uint SelectedResizeHeight { get; set; } = 512;
+
+    [Reactive]
+    public uint SelectedResizeWidth { get; set; } = 512;
+
+    public uint[] ResizeOptions { get; } = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
     public bool HasSeparateWindow { get; set; }
 
@@ -134,6 +145,50 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         MarkAsModified();
 
         await FetchImage();
+    }
+
+    public async Task Resize()
+    {
+        if (VtfFile is null)
+            return;
+
+        TexDataLump? texDataLump = BspService.Instance.BspFile?.GetLump<TexDataLump>();
+        TexInfoLump? texInfoLump = BspService.Instance.BspFile?.GetLump<TexInfoLump>();
+        if (texDataLump is null || texInfoLump is null)
+            return;
+
+        string name = Regex.Replace(Key, @"^materials/|\.vtf$", "", RegexOptions.IgnoreCase);
+
+        float widthScaleFactor = SelectedResizeHeight / (float)VtfFile.ImageHeight;
+        float heightScaleFactor = SelectedResizeWidth / (float)VtfFile.ImageWidth;
+
+        await VtfFile.ResizeImage(SelectedResizeWidth, SelectedResizeHeight, Frame, Face, Slice, MipmapLevel);
+        await FetchImage();
+
+        foreach (TexData texData in texDataLump.Data)
+        {
+            if (!texData.TexName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            texData.Width = (int)SelectedResizeWidth;
+            texData.Height = (int)SelectedResizeHeight;
+            // Honestly not sure what this does, and judging by engine code, *nor does Valve*.
+            // VBSP sets it to the same as Width/Height, so we'll do the same.
+            texData.ViewWidth = (int)SelectedResizeWidth;
+            texData.ViewHeight = (int)SelectedResizeHeight;
+
+            foreach (TexInfo texInfo in texInfoLump.Data)
+            {
+                if (texInfo.TexDataPointer != texData.StringTablePointer)
+                    continue;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    texInfo.TextureVectors[0, i] *= widthScaleFactor;
+                    texInfo.TextureVectors[1, i] *= heightScaleFactor;
+                }
+            }
+        }
     }
 
     public void OpenVtfImageWindow()

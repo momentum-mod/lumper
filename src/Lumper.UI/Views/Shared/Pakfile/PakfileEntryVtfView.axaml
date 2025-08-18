@@ -146,6 +146,28 @@
                            Minimum="0" Maximum="{Binding MipmapMax}" />
           </Grid>
 
+          <Button Command="{Binding Resize}" Margin="0 8 0 0">
+            <TextBlock Text="Resize (Width x Height)" />
+          </Button>
+          <StackPanel Orientation="Horizontal" Spacing="4" Margin="0 0 0 8">
+            <ComboBox ItemsSource="{Binding ResizeOptions}" SelectedItem="{Binding SelectedResizeWidth}"
+                      Padding="12,0,0,0">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Classes="Value" Text="{Binding}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox ItemsSource="{Binding ResizeOptions}" SelectedItem="{Binding SelectedResizeHeight}"
+                      Padding="12,0,0,0">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Classes="Value" Text="{Binding}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+
           <Button Command="{Binding SetImage}" CommandParameter="true">Replace Image</Button>
           <Button Command="{Binding SetImage}" CommandParameter="false"
                   ToolTip.Tip="Replace only the current Frame, Face, Slice and Mipmap">
