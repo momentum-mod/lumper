@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -18,6 +19,8 @@ using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using VTFLib;
 
 /// <summary>
@@ -124,9 +127,7 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         var rgba = new Rgba32[ImageWidth * ImageHeight];
         int j = 0;
         for (int i = 0; i < dest.Length; i += 4)
-        {
             rgba[j++] = new Rgba32(dest[i], dest[i + 1], dest[i + 2], dest[i + 3]);
-        }
 
         // We could make the UI significantly faster if we did a resize here. But code is complicated and leads
         // to doing *more* work doing the heaviest part of the loading process, so not doing for now.
@@ -170,6 +171,7 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
 
             // TODO: Allow picking this. For Strata-based games, use BC7!
             createOptions.imageFormat = hasAlpha ? VTFImageFormat.IMAGE_FORMAT_DXT5 : VTFImageFormat.IMAGE_FORMAT_DXT1;
+
             if (!VTFFile.ImageCreateSingle((uint)image.Width, (uint)image.Height, buffer, ref createOptions))
             {
                 try
@@ -184,6 +186,77 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
             }
 
             SaveVtf();
+        });
+    }
+
+    public async Task ResizeImage(uint newWidth, uint newHeight, uint frame, uint face, uint slice, uint mipmapLevel)
+    {
+        if (newWidth <= 0 || (newWidth & (newWidth - 1)) != 0 || newHeight <= 0 || (newHeight & (newHeight - 1)) != 0)
+            throw new ArgumentException("Sizes must be powers of 2");
+
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        // This is really stupid but don't want to spend the time transforming VTFLib queueing stuff to use a priority
+        // queue -- .NET doesn't have one built-in, and my attempt to hack something together was too buggy
+        // and gross to justify. We'll remove all that crap when we move to vtfpp anyway!
+        Logger.Info(
+            $"Resizing {pakfileEntry.Key} from {ImageWidth}x{ImageHeight} to {newWidth}x{newHeight}... NOTE this operation won't start if the texture browser is currently loading textures!!"
+        );
+
+        Image<Rgba32>? image = await GetImage(cts: null, frame, face, slice, mipmapLevel);
+        if (image is null)
+        {
+            Logger.Error($"Resizing {pakfileEntry.Key}: Failed to get image for resizing");
+            return;
+        }
+
+        Logger.Info($"Resizing {pakfileEntry.Key}: Fetched VTF image data ({stopwatch.ElapsedMilliseconds}ms)");
+
+        image.Mutate(x => x.Resize((int)newWidth, (int)newHeight, new BicubicResampler()));
+        byte[] resizedData = GetRgba8888FromImage(image, out bool _);
+
+        Logger.Info(
+            $"Resizing {pakfileEntry.Key}: Resized raw image data in memory ({stopwatch.ElapsedMilliseconds}ms)"
+        );
+
+        await VtfLibQueue.Run(() =>
+        {
+            Prepare();
+
+            float r = 0;
+            float g = 0;
+            float b = 0;
+            VTFFile.ImageGetReflectivity(ref r, ref g, ref b);
+            var createOptions = new SVTFCreateOptions();
+            VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
+            createOptions.versionMajor = VTFFile.ImageGetMajorVersion();
+            createOptions.versionMinor = VTFFile.ImageGetMinorVersion();
+            createOptions.imageFormat = VTFFile.ImageGetFormat();
+            createOptions.flags = VTFFile.ImageGetFlags();
+            createOptions.startFrame = VTFFile.ImageGetStartFrame();
+            createOptions.bumpScale = VTFFile.ImageGetBumpmapScale();
+            createOptions.reflectivityR = r;
+            createOptions.reflectivityG = g;
+            createOptions.reflectivityB = b;
+            createOptions.mipmaps = VTFFile.ImageGetMipmapCount() > 1;
+
+            if (!VTFFile.ImageCreateSingle(newWidth, newHeight, resizedData, ref createOptions))
+            {
+                string err = VTFAPI.GetLastError();
+                Logger.Error($"Resizing {pakfileEntry.Key}: Error creating new VTF during VTF creation: ${err}");
+                return;
+            }
+
+            Logger.Info(
+                $"Resizing {pakfileEntry.Key}: Created resized VTF file in memory ({stopwatch.ElapsedMilliseconds}ms)"
+            );
+
+            SaveVtf();
+
+            Logger.Info(
+                $"Resizing {pakfileEntry.Key}: Updated VTF file in pakfile lump. Resizing complete! ({stopwatch.ElapsedMilliseconds}ms)"
+            );
         });
     }
 
