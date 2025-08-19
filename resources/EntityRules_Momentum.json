@@ -230,8 +230,8 @@
         "Comment": "Use with care, don't punch the player's view if it affects gameplay"
     },
     "env_wind": {
-        "Level": 0,
-        "Comment": "Used with physics entities, wind carries over between maps"
+        "Level": 2,
+        "Comment": "Ensure it doesn't affect physics props"
     },
     "env_zoom": {
         "Level": 3
