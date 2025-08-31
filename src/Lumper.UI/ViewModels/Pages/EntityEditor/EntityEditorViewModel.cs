@@ -199,28 +199,25 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
                 output = output.Where(vm =>
                     vm.Properties.Any(prop =>
                         (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key, true)))
-                        && !exKeys!.Any(key => prop.MatchKey(key, true))
                         && (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val, true)))
-                        && !exVals!.Any(val => prop.MatchValue(val, true))
+                    )
+                    && vm.Properties.Any(prop =>
+                        !exKeys!.Any(key => prop.MatchKey(key, true)) && !exVals!.Any(val => prop.MatchValue(val, true))
                     )
                 );
             }
             else if (hasKeys)
             {
                 output = output.Where(vm =>
-                    vm.Properties.Any(prop =>
-                        (inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key, true)))
-                        && !exKeys!.Any(key => prop.MatchKey(key, true))
-                    )
+                    vm.Properties.Any(prop => inKeys!.Count == 0 || inKeys.Any(key => prop.MatchKey(key, true)))
+                    && vm.Properties.All(prop => !exKeys!.Any(key => prop.MatchKey(key, true)))
                 );
             }
             else
             {
                 output = output.Where(vm =>
-                    vm.Properties.Any(prop =>
-                        (inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val, true)))
-                        && !exVals!.Any(val => prop.MatchValue(val, true))
-                    )
+                    vm.Properties.Any(prop => inVals!.Count == 0 || inVals.Any(val => prop.MatchValue(val, true)))
+                    && vm.Properties.All(prop => !exVals!.Any(val => prop.MatchValue(val, true)))
                 );
             }
         }
