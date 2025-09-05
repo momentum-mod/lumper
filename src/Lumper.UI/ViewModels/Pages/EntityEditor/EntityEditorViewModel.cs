@@ -3,6 +3,7 @@ namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Reactive;
@@ -117,7 +118,13 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             .Select(pos =>
                 // Remove decimal points, clogs up filter textbox and will never need such high precision.
                 pos is not null
-                    ? string.Join(" ", pos.Split(' ').Select(str => float.TryParse(str, out float val) ? (int)val : 0))
+                    ? string.Join(
+                        " ",
+                        pos.Split(' ')
+                            .Select(str =>
+                                float.TryParse(str, CultureInfo.InvariantCulture, out float val) ? (int)val : 0
+                            )
+                    )
                     : null
             )
             .ObserveOn(RxApp.MainThreadScheduler)
