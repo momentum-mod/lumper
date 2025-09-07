@@ -175,6 +175,10 @@ public sealed class EntityLumpViewModel : LumpViewModel
                 entVm.MarkAsModified();
             }
 
+            // Below code relies on order of items in entVm.Properties so don't want to mutate; collect all changes
+            // and do them after iterating.
+            List<Action> deferredActions = [];
+
             // Iterating over model properties not viewmodel and searching by key, for all we know a Job could have
             // removed and recreated a property, can't rely on EntityPropertyViewModel.Property referring to the
             // right instance.
@@ -195,48 +199,54 @@ public sealed class EntityLumpViewModel : LumpViewModel
                         propVm = props[idx];
                 }
 
-                if (propVm is not null)
+                deferredActions.Add(() =>
                 {
-                    if (propVm is EntityPropertyStringViewModel strVm)
+                    if (propVm is not null)
                     {
-                        if (propM is Entity.EntityProperty<string> strM)
+                        if (propVm is EntityPropertyStringViewModel strVm)
                         {
-                            // Setters here call RaisePropertyChanged, MarkAsModified
-                            strVm.Value = strM.Value;
+                            if (propM is Entity.EntityProperty<string> strM)
+                            {
+                                // Setters here call RaisePropertyChanged, MarkAsModified
+                                strVm.Value = strM.Value;
+                            }
+                            else
+                            {
+                                // Weird case, we became EntityIO - create new viewmodel from scratch.
+                                // Careful not to use EntityViewModel.CreateProperty here, which also creates new models.
+                                entVm.Properties.Remove(propVm);
+                                entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                                entVm.MarkAsModified();
+                            }
                         }
-                        else
+                        else if (propVm is EntityPropertyIoViewModel ioVm)
                         {
-                            // Weird case, we became EntityIO - create new viewmodel from scratch.
-                            // Careful not to use EntityViewModel.CreateProperty here, which also creates new models.
-                            entVm.Properties.Remove(propVm);
-                            entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
-                            entVm.MarkAsModified();
+                            if (propM is Entity.EntityProperty<EntityIo> ioM)
+                            {
+                                ioVm.TargetEntityName = ioM.Value.TargetEntityName;
+                                ioVm.Input = ioM.Value.Input;
+                                ioVm.Parameter = ioM.Value.Parameter;
+                                ioVm.Delay = ioM.Value.Delay;
+                                ioVm.TimesToFire = ioM.Value.TimesToFire;
+                            }
+                            else
+                            {
+                                entVm.Properties.Remove(propVm);
+                                entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                                entVm.MarkAsModified();
+                            }
                         }
                     }
-                    else if (propVm is EntityPropertyIoViewModel ioVm)
+                    else
                     {
-                        if (propM is Entity.EntityProperty<EntityIo> ioM)
-                        {
-                            ioVm.TargetEntityName = ioM.Value.TargetEntityName;
-                            ioVm.Input = ioM.Value.Input;
-                            ioVm.Parameter = ioM.Value.Parameter;
-                            ioVm.Delay = ioM.Value.Delay;
-                            ioVm.TimesToFire = ioM.Value.TimesToFire;
-                        }
-                        else
-                        {
-                            entVm.Properties.Remove(propVm);
-                            entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
-                            entVm.MarkAsModified();
-                        }
+                        // Add new properties
+                        entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
                     }
-                }
-                else
-                {
-                    // Add new properties
-                    entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
-                }
+                });
             }
+
+            foreach (Action action in deferredActions)
+                action();
         }
 
         // Not in EL, in ELVM -> remove from ELVM
