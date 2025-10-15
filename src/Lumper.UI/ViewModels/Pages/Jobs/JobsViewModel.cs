@@ -27,6 +27,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
             new JobMenuItem<StripperFileJob>(this, () => new StripperFileJob()),
             new JobMenuItem<StripperTextJob>(this, () => new StripperTextJob()),
             new JobMenuItem<RunExternalToolJob>(this, () => new RunExternalToolJob()),
+            new JobMenuItem<AddSkyOcclusionFlagJob>(this, () => new AddSkyOcclusionFlagJob()),
         ];
 
         this.WhenAnyValue(x => x.SelectedJob).Where(x => x is not null).BindTo(this, x => x.ActiveJobPage);
@@ -74,6 +75,7 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
             RunExternalToolJob runExternal => new RunExternalToolJobViewModel(runExternal),
             ReplaceTextureJob changeTexture => new ReplaceTextureJobViewModel(changeTexture),
             RemoveAssetJob removeAsset => new RemoveAssetJobViewModel(removeAsset),
+            AddSkyOcclusionFlagJob addSkyOcclusion => new AddSkyOcclusionFlagJobViewModel(addSkyOcclusion),
             _ => throw new ArgumentException("Invalid job"),
         };
     }
