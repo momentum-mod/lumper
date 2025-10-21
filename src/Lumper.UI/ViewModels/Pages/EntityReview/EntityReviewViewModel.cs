@@ -39,14 +39,17 @@ public sealed class EntityReviewViewModel : ViewModelWithView<EntityReviewViewMo
             .Select(tuple =>
             {
                 (EntityRules rules, EntityLumpViewModel? entLump) = tuple;
+
+                if (entLump is null)
+                    return Observable.Return(ChangeSet<EntityReviewResult, string>.Empty);
+
+                // Track both entities being added/removed from the collection,
+                // plus this classname property changing.
                 return entLump
-                        ?.Entities.Connect()
-                        .AutoRefresh() // This could be a perf hit but seems okay on very entity-heavy maps...
-                        .GroupWithImmutableState(y => y.Classname)
-                        .Transform(y => new EntityReviewResult(rules, y.Key, y.Count))
-                    ?? Observable.Return<IChangeSet<EntityReviewResult, string>>(
-                        ChangeSet<EntityReviewResult, string>.Empty
-                    );
+                    .Entities.Connect()
+                    .MergeChangeSets(entLump.Entities.Connect().AutoRefresh())
+                    .GroupWithImmutableState(y => y.Classname)
+                    .Transform(y => new EntityReviewResult(rules, y.Key, y.Count));
             })
             .Switch()
             .SortBy(y => y)
