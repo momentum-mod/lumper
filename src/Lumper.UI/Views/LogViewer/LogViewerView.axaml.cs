@@ -164,4 +164,9 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
     {
         ScrollViewer.ScrollToEnd();
     }
+
+    private void ClearOutput(object? sender, RoutedEventArgs e)
+    {
+        _lines.Clear();
+    }
 }
