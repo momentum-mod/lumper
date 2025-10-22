@@ -185,4 +185,9 @@ public partial class BspInfoView : ReactiveWindow<BspInfoViewModel>
         if (clipboard != null)
             await clipboard.SetTextAsync(Text?.Inlines?.Text);
     }
+
+    private void CloseWindow(object? sender, RoutedEventArgs e)
+    {
+        Close();
+    }
 }
