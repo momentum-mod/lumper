@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -8,8 +8,8 @@
              x:Class="Lumper.UI.Views.LogViewer.LogViewerView"
              x:DataType="vm:LogViewerViewModel">
 
-  <Grid RowDefinitions="Auto, Auto, Auto, *" ColumnDefinitions="*, Auto">
-    <ScrollViewer Grid.Column="0" Grid.Row="0" Grid.RowSpan="4" Name="ScrollViewer" VerticalAlignment="Stretch"
+  <Grid RowDefinitions="Auto, Auto, Auto, Auto, *" ColumnDefinitions="*, Auto">
+    <ScrollViewer Grid.Column="0" Grid.Row="0" Grid.RowSpan="5" Name="ScrollViewer" VerticalAlignment="Stretch"
                   VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" Background="#55000000"
                   MaxHeight="Infinity">
       <ItemsControl Name="LogLines">
@@ -39,5 +39,9 @@
                   Grid.Row="2" ToolTip.Tip="Show Debug Logs">
       <materialIcons:MaterialIcon Kind="Bug" Width="24" Height="24" />
     </ToggleButton>
+    <Button Click="ClearOutput" Margin="4" Grid.Column="1" Grid.Row="3" Padding="0"
+            ToolTip.Tip="Clear Output">
+      <materialIcons:MaterialIcon Kind="DeleteSweep" Width="24" Height="24" />
+    </Button>
   </Grid>
 </UserControl>
