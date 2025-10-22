@@ -1,4 +1,4 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -72,7 +72,11 @@
         <Run Classes="R" Name="PakfileProcessing" Foreground="Gray" />
 
       </SelectableTextBlock>
-      <Button HorizontalAlignment="Right" Click="CopyText">Copy</Button>
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Click="CloseWindow" Margin="0 0 8 0">OK</Button>
+        <Button Click="CopyText">Copy</Button>
+      </StackPanel>
     </StackPanel>
   </Border>
 </Window>
