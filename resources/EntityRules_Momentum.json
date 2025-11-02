@@ -1128,8 +1128,7 @@
         "Comment": "TF2 objective entity, does nothing in Momentum"
     },
     "trigger_catapult": {
-        "Level": 2,
-        "Comment": "Catapults on ported maps that have no target and are pointing directly upwards need to have launch speed multiplied by 1.5 to match original behaviour. (Ignore this warning if map is not a port)."
+        "Level": 3
     },
     "trigger_changelevel": {
         "Level": 0,
