@@ -95,7 +95,7 @@
       </ListBox>
       <Border Grid.Row="2" HorizontalAlignment="Stretch" Background="#20000000" Padding="4">
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-          <Button Command="{Binding Run}" IsEnabled="{Binding !IsRunning}">Run</Button>
+          <Button Command="{Binding Run}" IsEnabled="{Binding CanRun}">Run</Button>
         </StackPanel>
       </Border>
     </Grid>

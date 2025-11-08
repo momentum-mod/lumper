@@ -41,6 +41,11 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 
         BspService
             .Instance.WhenAnyValue(x => x.BspFile)
+            .CombineLatest(this.WhenAnyValue(x => x.IsRunning))
+            .Subscribe(_ => this.RaisePropertyChanged(nameof(CanRun)));
+
+        BspService
+            .Instance.WhenAnyValue(x => x.BspFile)
             .Subscribe(_ =>
             {
                 foreach (JobViewModel job in Jobs)
@@ -50,6 +55,8 @@ public class JobsViewModel : ViewModelWithView<JobsViewModel, JobsView>
 
     [Reactive]
     public bool IsRunning { get; set; }
+
+    public bool CanRun => BspService.Instance.BspFile is not null && !IsRunning;
 
     [Reactive]
     public JobViewModel? SelectedJob { get; set; }
