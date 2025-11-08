@@ -16,12 +16,12 @@
 
   <Grid>
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="340" MinWidth="300" />
+      <ColumnDefinition Width="380" MinWidth="360" />
       <ColumnDefinition Width="2" />
       <ColumnDefinition Width="*" />
     </Grid.ColumnDefinitions>
 
-    <Grid RowDefinitions="Auto, *, Auto" Grid.Row="0" Grid.Column="0" Classes="PageTopBar">
+    <Grid RowDefinitions="Auto, *" Grid.Row="0" Grid.Column="0" Classes="PageTopBar">
       <Border Grid.Row="0">
         <Grid>
           <Grid.ColumnDefinitions>
@@ -54,6 +54,12 @@
               <StackPanel>
                 <materialIcons:MaterialIcon Kind="FileExport" />
                 <TextBlock>Save</TextBlock>
+              </StackPanel>
+            </Button>
+            <Button Command="{Binding Run}" IsEnabled="{Binding CanRun}">
+              <StackPanel>
+                <materialIcons:MaterialIcon Kind="Play" />
+                <TextBlock>Run</TextBlock>
               </StackPanel>
             </Button>
           </StackPanel>
@@ -93,11 +99,6 @@
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
-      <Border Grid.Row="2" HorizontalAlignment="Stretch" Background="#20000000" Padding="4">
-        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-          <Button Command="{Binding Run}" IsEnabled="{Binding CanRun}">Run</Button>
-        </StackPanel>
-      </Border>
     </Grid>
     <GridSplitter Grid.Column="1" Width="2" MinWidth="1" ResizeDirection="Columns" />
     <ContentControl Grid.Column="2" Content="{Binding ActiveJobPage}" />
