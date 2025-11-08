@@ -1,4 +1,4 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
+<UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,25 +15,27 @@
     </local:JobView.JobDescription>
 
     <local:JobView.MainContent>
-      <StackPanel Spacing="4" Margin="16 12">
-        <ItemsControl ItemsSource="{Binding Selection}">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate>
-              <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock FontWeight="Medium" VerticalAlignment="Center" Width="80"
-                           FontFamily="{StaticResource Monospace}" Text="{Binding Origin}" />
-                <CheckBox IsChecked="{Binding Selected}" />
-              </StackPanel>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <TextBlock FontWeight="Medium" VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
-                     Text="Remove Static Props" />
-          <CheckBox IsChecked="{Binding Job.RemoveStaticProps}" />
+      <ScrollViewer VerticalAlignment="Stretch">
+        <StackPanel Spacing="4" Margin="16 12">
+          <ItemsControl ItemsSource="{Binding Selection}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock FontWeight="Medium" VerticalAlignment="Center" Width="80"
+                             FontFamily="{StaticResource Monospace}" Text="{Binding Origin}" />
+                  <CheckBox IsChecked="{Binding Selected}" />
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock FontWeight="Medium" VerticalAlignment="Center" FontFamily="{StaticResource Monospace}"
+                       Text="Remove Static Props" />
+            <CheckBox IsChecked="{Binding Job.RemoveStaticProps}" />
+          </StackPanel>
+          <TextBlock FontSize="12" Foreground="LightGray">Warning: Do NOT use if map contains props with collision that affects gameplay!</TextBlock>
         </StackPanel>
-        <TextBlock FontSize="12" Foreground="LightGray">Warning: Do NOT use if map contains props with collision that affects gameplay!</TextBlock>
-      </StackPanel>
+      </ScrollViewer>
     </local:JobView.MainContent>
   </local:JobView>
 </UserControl>
