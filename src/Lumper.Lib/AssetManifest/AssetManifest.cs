@@ -54,7 +54,16 @@ public static class AssetManifest
     /// List of games that are mounted by default. The order determines game priority in asset removal and required games.
     /// This is biased towards Momentum!
     /// </summary>
-    public static readonly List<string> MomentumMountedOrigins = ["hl2", "tf2", "css", "csgo"];
+    public static readonly List<string> MomentumMountedOrigins =
+    [
+        "hl2",
+        "hl2e2",
+        "hl2e1",
+        "tf2",
+        "css",
+        "csgo",
+        "portal2",
+    ];
 
     /// <summary>
     /// Preload the asset manifest. UI wants this, CLI doesn't. Don't call from the UI thread!
