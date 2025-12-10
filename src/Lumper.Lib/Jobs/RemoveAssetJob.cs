@@ -94,7 +94,7 @@ public partial class RemoveAssetJob : Job, IJob
             AssetManifest.Asset? bestAsset = null;
             if (assets.Count > 1)
             {
-                foreach (string origin in AssetManifest.RenamedOriginPriority)
+                foreach (string origin in AssetManifest.MomentumMountedOrigins)
                 {
                     bestAsset = assets.FirstOrDefault(asset => asset.Origin == origin);
                     if (bestAsset != null)
