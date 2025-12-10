@@ -51,13 +51,10 @@ public static class AssetManifest
     public static HashSet<string> Origins { get; } = [];
 
     /// <summary>
-    /// Origins we prioritise when renaming assets that match a hash but not the original filename,
-    /// or there's multiple officials with the same hash, where one path matches but a more
-    /// accessible game has the same asset with a different path.
-    /// In both case, we update references to the most accessible path everywhere to avoid missing
-    /// textures as best we can. This is biased towards Momentum!
+    /// List of games that are mounted by default. The order determines game priority in asset removal and required games.
+    /// This is biased towards Momentum!
     /// </summary>
-    public static readonly List<string> RenamedOriginPriority = ["hl2", "tf2", "css", "csgo"];
+    public static readonly List<string> MomentumMountedOrigins = ["hl2", "tf2", "css", "csgo"];
 
     /// <summary>
     /// Preload the asset manifest. UI wants this, CLI doesn't. Don't call from the UI thread!

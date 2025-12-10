@@ -20,7 +20,13 @@ public sealed class RemoveAssetJobViewModel : JobViewModel
     }
 
     public List<GameSelection> Selection { get; } =
-        AssetManifest.Origins.Select(origin => new GameSelection { Origin = origin, Selected = true }).ToList();
+        AssetManifest
+            .Origins.Select(origin => new GameSelection
+            {
+                Origin = origin,
+                Selected = AssetManifest.MomentumMountedOrigins.Contains(origin),
+            })
+            .ToList();
 
     public override RemoveAssetJob Job { get; }
 
