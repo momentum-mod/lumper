@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
@@ -11,7 +12,7 @@ using Lumper.Lib.Bsp.Lumps.GameLumps;
 using Lumper.Lib.Bsp.Struct;
 using NLog;
 
-public class RemoveAssetJob : Job, IJob
+public partial class RemoveAssetJob : Job, IJob
 {
     public static string JobName => "Remove Game Assets";
     public override string JobNameInternal => JobName;
@@ -66,6 +67,10 @@ public class RemoveAssetJob : Job, IJob
             Progress.Count++;
 
             if (SkipVmts && Path.GetExtension(entry.Key).Equals(".vmt", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            //Cubemaps should never be removed, if they match an official asset it is likely incorrect.
+            if (CubemapRegex().IsMatch(entry.Key))
                 continue;
 
             string hash = entry.Hash;
@@ -146,4 +151,7 @@ public class RemoveAssetJob : Job, IJob
         if (removed > 0)
             Logger.Info($"Removed {removed} static props for {path}. This may affect lighting!");
     }
+
+    [GeneratedRegex(@"^materials/maps/.*/((c-?\d+_-?\d+_-?\d+)|cubemapdefault)(\.hdr){0,}\.vtf$")]
+    private static partial Regex CubemapRegex();
 }
