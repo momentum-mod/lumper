@@ -13,7 +13,8 @@
   <local:JobView>
     <local:JobView.JobDescription>
       <StackPanel>
-        <TextBlock>Replaces every matching occurence of a texture with the given string.</TextBlock>
+        <TextBlock>Replaces every matching occurence of a texture with the given string. Match is case insensitive.</TextBlock>
+        <TextBlock>Note that this replaces the entire material. If you want to only replace the texture it references, edit the vmt.</TextBlock>
         <TextBlock>This job only operates on the TexData lumps, and doesn't modify the Pakfile lump in any way.</TextBlock>
 
         <TextBlock FontStyle="Italic" FontWeight="Medium" Margin="0 8 0 0">Example 1</TextBlock>
