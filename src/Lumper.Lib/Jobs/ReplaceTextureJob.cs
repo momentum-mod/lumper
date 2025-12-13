@@ -68,7 +68,7 @@ public class ReplaceTextureJob : Job, IJob
             // Fine if this throws, job will just fail.
             _regexMatcher = new Regex(
                 Matcher,
-                RegexOptions.Compiled | RegexOptions.ExplicitCapture,
+                RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.IgnoreCase,
                 TimeSpan.FromSeconds(1)
             );
         }
@@ -81,7 +81,7 @@ public class ReplaceTextureJob : Job, IJob
                     return false;
 
                 string newName = _regexMatcher.Replace(texture.TexName, ReplaceWith);
-                if (texture.TexName == newName)
+                if (texture.TexName.Equals(newName, StringComparison.OrdinalIgnoreCase))
                     return false;
 
                 texture.TexName = newName;
@@ -89,7 +89,7 @@ public class ReplaceTextureJob : Job, IJob
             }
             else
             {
-                if (texture.TexName != Matcher)
+                if (!texture.TexName.Equals(Matcher, StringComparison.OrdinalIgnoreCase))
                     return false;
 
                 texture.TexName = ReplaceWith;
