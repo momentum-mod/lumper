@@ -493,6 +493,16 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         }
     }
 
+    public void CopyKeyToClipboard()
+    {
+        if (!GetSelection(out IReadOnlyList<Node> items, single: true))
+            return;
+
+        Node item = items[0];
+
+        _ = Program.MainWindow.Clipboard?.SetTextAsync(item.PathString);
+    }
+
     // This has a big fuckoff empty label at the top of the dialog, dunno how to get rid of it.
     private static IMsBox<string> CreateMessageBox(
         string title,

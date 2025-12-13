@@ -73,6 +73,11 @@ public partial class PakfileExplorerView : ReactiveUserControl<PakfileExplorerVi
                                 Header = "Export",
                                 Command = ReactiveCommand.CreateFromTask(() => ViewModel!.ExportFiles()),
                             },
+                            new MenuItem
+                            {
+                                Header = "Copy Path to Clipboard",
+                                Command = ReactiveCommand.Create(() => ViewModel!.CopyKeyToClipboard()),
+                            },
                             new Separator(),
                             new MenuItem
                             {
