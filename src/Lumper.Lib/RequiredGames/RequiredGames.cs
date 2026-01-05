@@ -23,7 +23,7 @@ public static class RequiredGames
             get => _games;
             init
             {
-                List<string> priorityGames = AssetManifest.RenamedOriginPriority;
+                List<string> priorityGames = AssetManifest.MomentumMountedOrigins;
                 _games = value
                     .OrderBy(game =>
                     {
