@@ -304,6 +304,11 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         await ShowMessageBox(msBox);
 
         string name = msBox.InputValue;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Logger.Error("Directory name cannot be empty.");
+            return;
+        }
 
         List<string> pathList = [.. branchPath, name];
         Tree!.Root.AddDirectory(pathList);
@@ -323,6 +328,12 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         await ShowMessageBox(msBox);
 
         string name = msBox.InputValue;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            Logger.Error("File name cannot be empty.");
+            return;
+        }
+
         if (name.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase))
         {
             Logger.Error("Creating empty VTFs is not supported, please import one.");
