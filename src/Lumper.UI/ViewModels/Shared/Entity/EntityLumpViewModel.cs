@@ -140,7 +140,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
     {
         // Entity property viewmodel setters set values on underlying models
         if (IsEditingStream && RawEntitiesViewModel is not null)
-            RawEntitiesViewModel.SaveOrDiscardEntityLump();
+            RawEntitiesViewModel.SaveEntityLump();
     }
 
     public override void PullChangesFromModel()
