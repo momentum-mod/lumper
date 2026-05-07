@@ -57,7 +57,7 @@ public partial class RawEntitiesView : ReactiveUserControl<RawEntitiesViewModel>
                 .DisposeWith(disposables);
 
             Disposable
-                .Create(() => Observable.Start(ViewModel!.SaveOrDiscardEntityLump, RxApp.MainThreadScheduler))
+                .Create(() => Observable.Start(ViewModel!.CloseEntityLump, RxApp.MainThreadScheduler))
                 .DisposeWith(disposables);
         });
     }

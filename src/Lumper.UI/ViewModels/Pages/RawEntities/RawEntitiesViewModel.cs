@@ -39,23 +39,16 @@ public sealed class RawEntitiesViewModel : ViewModelWithView<RawEntitiesViewMode
     }
 
     /// <summary>
-    /// Called whenever we navigate away from the raw entities page or save
-    /// the BSP whilst said page is visible.
+    /// Flushes any pending edits in the text editor to the entity lump.
+    /// Called when the BSP is being saved whilst this page is visible.
     /// </summary>
-    public void SaveOrDiscardEntityLump()
+    public void SaveEntityLump()
     {
         if (BspService.Instance.EntityLumpViewModel is not { } entLump)
-        {
-            _editor = null;
             return;
-        }
 
         if (_editor is not { IsModified: true })
-        {
-            entLump.IsEditingStream = false;
-            _editor = null;
             return;
-        }
 
         BspService.Instance.IsLoading = true;
         BspService.Instance.MarkAsModified();
@@ -70,8 +63,23 @@ public sealed class RawEntitiesViewModel : ViewModelWithView<RawEntitiesViewMode
 
         Logger.Info("Updated entity lump with raw entity data");
 
-        entLump.IsEditingStream = false;
         BspService.Instance.IsLoading = false;
-        BspService.Instance.EntityLumpViewModel.RawEntitiesViewModel = null;
+    }
+
+    /// <summary>
+    /// Saves any pending edits and tears down editor state. Called when navigating
+    /// away from the raw entities page.
+    /// </summary>
+    public void CloseEntityLump()
+    {
+        SaveEntityLump();
+
+        if (BspService.Instance.EntityLumpViewModel is { } entLump)
+        {
+            entLump.IsEditingStream = false;
+            entLump.RawEntitiesViewModel = null;
+        }
+
+        _editor = null;
     }
 }
