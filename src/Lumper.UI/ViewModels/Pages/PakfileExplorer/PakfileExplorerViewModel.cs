@@ -301,7 +301,9 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
         List<string> branchPath = items[0].Path;
         IMsBox<string> msBox = CreateMessageBox("Create Directory", "Directory Name", "Create");
-        await ShowMessageBox(msBox);
+        string result = await ShowMessageBox(msBox);
+        if (result == "Cancel")
+            return;
 
         string name = msBox.InputValue;
 
@@ -320,7 +322,9 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
 
         List<string> branchPath = items[0].Path;
         IMsBox<string> msBox = CreateMessageBox("Create File", "File Name", "Create");
-        await ShowMessageBox(msBox);
+        string result = await ShowMessageBox(msBox);
+        if (result == "Cancel")
+            return;
 
         string name = msBox.InputValue;
         if (name.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase))
