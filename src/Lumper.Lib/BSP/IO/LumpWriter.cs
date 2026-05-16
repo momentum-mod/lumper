@@ -115,7 +115,7 @@ public abstract class LumpWriter(Stream output) : BinaryWriter(output, BspFile.E
         const int headerSize = 4 + 4 + 4 + 5; // id + actualSize + lzmaSize + properties
         mem.Seek(headerSize, SeekOrigin.Begin);
 
-        var lzmaStream = new LzmaStream(new LzmaEncoderProperties(), false, mem);
+        var lzmaStream = LzmaStream.Create(new LzmaEncoderProperties(), false, mem);
         uncompressedStream.CopyTo(lzmaStream);
         lzmaStream.Dispose();
 

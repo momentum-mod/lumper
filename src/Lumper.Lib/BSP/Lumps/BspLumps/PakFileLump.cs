@@ -43,7 +43,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
     [JsonIgnore]
     public ZipArchive Zip { get; private set; } = null!;
 
-    private static readonly ArchiveEncoding ArchiveEncoding = new(BspFile.Encoding, BspFile.Encoding);
+    private static readonly ArchiveEncoding ArchiveEncoding = new() { Forced = BspFile.Encoding };
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
@@ -73,7 +73,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
         }
 
         dataStream.Seek(0, SeekOrigin.Begin);
-        Zip = ZipArchive.Open(dataStream, new ReaderOptions { ArchiveEncoding = ArchiveEncoding });
+        Zip = (ZipArchive)ZipArchive.OpenArchive(dataStream, new ReaderOptions { ArchiveEncoding = ArchiveEncoding });
         Entries = Zip.Entries.Select(entry => new PakfileEntry(this, entry)).ToList();
 
         // Mark the zip as compressed if we have any LZMA-compressed entries. We won't update an existing
@@ -129,7 +129,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
 
             handler?.UpdateProgress(0.75f * prog, "Writing pakfile contents");
             using var dataStream = new MemoryStream();
-            Zip.SaveTo(dataStream, new WriterOptions(CompressionType.None) { ArchiveEncoding = ArchiveEncoding });
+            Zip.SaveTo(dataStream, new ZipWriterOptions(CompressionType.None) { ArchiveEncoding = ArchiveEncoding });
             dataStream.Seek(0, SeekOrigin.Begin);
             dataStream.CopyTo(stream);
 
@@ -141,7 +141,7 @@ public partial class PakfileLump(BspFile parent) : ManagedLump<BspLumpType>(pare
             // fought with SharpCompress for hours I can't figure it out.
             using var outStream = new MemoryStream();
             var zipWriter = (ZipWriter)
-                WriterFactory.Open(
+                WriterFactory.OpenWriter(
                     outStream,
                     ArchiveType.Zip,
                     new ZipWriterOptions(CompressionType.None) { ArchiveEncoding = ArchiveEncoding }

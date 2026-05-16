@@ -172,7 +172,7 @@ public sealed partial class UpdaterService : ReactiveObject
 
             DeleteBackupExecutable(); // Delete backup executable in case it still exists
 
-            using var archive = ZipArchive.Open(zipStream);
+            using var archive = (ZipArchive)ZipArchive.OpenArchive(zipStream);
             foreach (ZipArchiveEntry entry in archive.Entries)
             {
                 if (!entry.IsDirectory)
