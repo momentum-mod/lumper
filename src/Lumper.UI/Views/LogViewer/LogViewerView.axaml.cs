@@ -63,7 +63,7 @@ public partial class LogViewerView : ReactiveUserControl<LogViewerViewModel>
                 }
                 else
                 {
-                    newLine.Inlines!.Add(
+                    newLine.Inlines.Add(
                         new Run(" (2)") { FontStyle = FontStyle.Italic, FontWeight = FontWeight.Medium }
                     );
                     _isBatching = true;

@@ -72,6 +72,6 @@ public sealed class RawEntitiesViewModel : ViewModelWithView<RawEntitiesViewMode
 
         entLump.IsEditingStream = false;
         BspService.Instance.IsLoading = false;
-        BspService.Instance.EntityLumpViewModel!.RawEntitiesViewModel = null;
+        BspService.Instance.EntityLumpViewModel.RawEntitiesViewModel = null;
     }
 }
