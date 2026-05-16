@@ -110,7 +110,7 @@ public abstract class LumpReader(Stream input) : BinaryReader(input, encoding: B
 
         _ = Read(properties, 0, 5);
 
-        var lzmaStream = new LzmaStream(properties, BaseStream, lzmaSize, actualSize);
+        var lzmaStream = LzmaStream.Create(properties, BaseStream, lzmaSize, actualSize);
         lzmaStream.CopyTo(decompressedStream);
         decompressedStream.Flush();
         decompressedStream.Seek(0, SeekOrigin.Begin);
