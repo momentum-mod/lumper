@@ -125,7 +125,7 @@ public class RunExternalToolJob : Job, IJob
             {
                 args = args.Replace("%INPUT%", $"\"{inputPath}\"");
                 args = args.Replace("%DIR%", $"\"{WorkingDir}\"");
-                if (!WritesToStdOut && !WritesToStdOut)
+                if (!WritesToStdOut && !WritesToInputFile)
                     args = args.Replace("%OUTPUT%", $"\"{outputPath}\"");
             }
 
