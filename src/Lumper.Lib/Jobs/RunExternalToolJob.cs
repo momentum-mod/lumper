@@ -98,8 +98,11 @@ public class RunExternalToolJob : Job, IJob
         Progress.Max = 100;
         Progress.Count = 0;
 
-        string inputPath = System.IO.Path.GetTempFileName() + ".bsp";
-        string? outputPath = WritesToStdOut || WritesToInputFile ? null : System.IO.Path.GetTempFileName() + ".bsp";
+        static string NewTempBspPath() =>
+            System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.IO.Path.GetRandomFileName() + ".bsp");
+
+        string inputPath = NewTempBspPath();
+        string? outputPath = WritesToStdOut || WritesToInputFile ? null : NewTempBspPath();
 
         // TODO: It'd be nice to do full task cancellation, in which case we'd be passing a CT into this method.
         var handler = new IoHandler(new CancellationTokenSource());
