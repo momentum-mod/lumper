@@ -173,7 +173,6 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
             // If this is a directory it doesn't live in the SourceCache,
             // so manually remove from tree.
             node.RemoveSelf();
-            node.Parent?.RecalculateSize();
         }
         else
         {
