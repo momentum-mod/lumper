@@ -55,6 +55,9 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
     public uint MipmapMax { get; }
 
     [ObservableAsProperty]
+    public uint SliceMax { get; }
+
+    [ObservableAsProperty]
     public bool IsAnimated { get; }
 
     [Reactive]
@@ -91,6 +94,13 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
                 (file, count) => file is not null ? count - 1 : 0
             )
             .ToPropertyEx(this, x => x.MipmapMax);
+
+        this.WhenAnyValue(
+                x => x.VtfFile,
+                x => x.VtfFile!.Depth,
+                (file, depth) => file is not null && depth > 0 ? depth - 1 : 0
+            )
+            .ToPropertyEx(this, x => x.SliceMax);
 
         this.WhenAnyValue(x => x.MipmapLevel, x => x.Frame, x => x.Face, x => x.Slice)
             .Skip(1)
