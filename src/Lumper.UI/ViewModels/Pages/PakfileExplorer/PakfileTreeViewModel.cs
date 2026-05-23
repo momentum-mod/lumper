@@ -43,8 +43,6 @@ public class PakfileTreeViewModel
                             break;
                     }
                 }
-
-                Root.RecalculateSize();
             });
     }
 
@@ -80,17 +78,17 @@ public class PakfileTreeViewModel
 
 public class PakfileTreeNodeViewModel : ViewModel
 {
-    public PakfileEntryViewModel? Leaf { get; init; }
+    public PakfileEntryViewModel? Leaf { get; }
 
     public required Node? Parent { get; set; }
 
-    public ObservableCollectionExtended<Node>? Children { get; private set; }
+    public ObservableCollectionExtended<Node>? Children { get; }
 
     [Reactive]
     public required string Name { get; set; }
 
-    [Reactive]
-    public long? Size { get; set; }
+    [ObservableAsProperty]
+    public long? Size { get; }
 
     [Reactive]
     public bool IsExpanded { get; set; } = false;
@@ -101,7 +99,21 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public PakfileTreeNodeViewModel()
     {
-        Size = Leaf?.UncompressedSize ?? 0;
+        Children = [];
+
+        Children
+            .ToObservableChangeSet()
+            .AutoRefresh(c => c.Size)
+            .ToCollection()
+            .Select(coll => (long?)coll.Sum(c => c.Size ?? 0))
+            .ToPropertyEx(this, x => x.Size);
+    }
+
+    public PakfileTreeNodeViewModel(PakfileEntryViewModel leaf)
+    {
+        Leaf = leaf;
+
+        leaf.WhenAnyValue(x => x.UncompressedSize).ToPropertyEx(this, x => x.Size);
     }
 
     // Note that this is the entire path, INCLUDING name.extension
@@ -136,29 +148,21 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     private void AddInternal(PakfileEntryViewModel? value, PathList path)
     {
-        long size = value?.UncompressedSize ?? 0;
-
         // Processing directory paths of the path, recursing down the tree and creating new nodes where needed
         if (path.Count > 1)
         {
-            Node? existing = Children?.ToList().Find(x => x.Name == path[0]);
+            Node? existing = Children!.ToList().Find(x => x.Name == path[0]);
             if (existing is not null)
             {
                 existing.AddInternal(value, path[1..]);
-                existing.Size += size;
                 return;
             }
 
-            var newChild = new Node
-            {
-                Parent = this,
-                Name = path[0],
-                Size = size,
-            };
+            var newChild = new Node { Parent = this, Name = path[0] };
 
             newChild.AddInternal(value, path[1..]);
 
-            (Children ??= []).Add(newChild);
+            Children!.Add(newChild);
 
             return;
         }
@@ -166,18 +170,11 @@ public class PakfileTreeNodeViewModel : ViewModel
         // Okay, actually the filename, create the node
         // `value` being null here is fine, just means we're creating a directory. Those don't actually get saved out
         // (zips can't have empty directories), but UI uses them.
-        var newNode = new Node
-        {
-            Parent = this,
-            Name = path[0],
-            Leaf = value,
-            Size = size,
-        };
+        Node newNode = value is not null
+            ? new Node(value) { Parent = this, Name = path[0] }
+            : new Node { Parent = this, Name = path[0] };
 
-        if (value is null)
-            newNode.Children = [];
-
-        (Children ??= []).Add(newNode);
+        Children!.Add(newNode);
     }
 
     public void RemoveSelf()
@@ -196,7 +193,6 @@ public class PakfileTreeNodeViewModel : ViewModel
         {
             node.RemoveRecursive(path[1..]);
 
-            node.RecalculateSize();
             // Delete directory is no children is empty.
             // Even though zips don't have actual directories we *do* let you add
             // empty directories (so you can add stuff to them), so maybe this isn't quite the
@@ -256,11 +252,6 @@ public class PakfileTreeNodeViewModel : ViewModel
         }
 
         return previous!;
-    }
-
-    public void RecalculateSize()
-    {
-        Size = Children?.Sum(child => child.Size) ?? 0;
     }
 
     public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector)
