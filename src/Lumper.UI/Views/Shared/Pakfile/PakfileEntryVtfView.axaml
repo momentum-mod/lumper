@@ -137,7 +137,7 @@
             <TextBlock Classes="Name" Grid.Row="16" Grid.Column="0" Text="Slice" />
             <NumericUpDown Classes="Value" Grid.Row="16" Grid.Column="2" Value="{Binding Slice}"
                            Increment="1"
-                           Minimum="0" />
+                           Minimum="0" Maximum="{Binding SliceMax}" />
 
             <TextBlock Classes="Name" Grid.Row="17" Grid.Column="0" Text="MipmapLevel" />
             <NumericUpDown Classes="Value" Grid.Row="17" Grid.Column="2"
