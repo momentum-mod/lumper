@@ -44,7 +44,7 @@ public class PakfileTreeViewModel
                     }
                 }
 
-                Root.RecalculateSize();
+                Root.RecalculateSizes();
             });
     }
 
@@ -145,7 +145,6 @@ public class PakfileTreeNodeViewModel : ViewModel
             if (existing is not null)
             {
                 existing.AddInternal(value, path[1..]);
-                existing.Size += size;
                 return;
             }
 
@@ -196,7 +195,6 @@ public class PakfileTreeNodeViewModel : ViewModel
         {
             node.RemoveRecursive(path[1..]);
 
-            node.RecalculateSize();
             // Delete directory is no children is empty.
             // Even though zips don't have actual directories we *do* let you add
             // empty directories (so you can add stuff to them), so maybe this isn't quite the
@@ -258,9 +256,22 @@ public class PakfileTreeNodeViewModel : ViewModel
         return previous!;
     }
 
-    public void RecalculateSize()
+    public void RecalculateSizes()
     {
-        Size = Children?.Sum(child => child.Size) ?? 0;
+        if (Children is null)
+        {
+            Size = Leaf?.UncompressedSize ?? 0;
+            return;
+        }
+
+        long size = 0;
+        foreach (Node child in Children)
+        {
+            child.RecalculateSizes();
+            size += child.Size ?? 0;
+        }
+
+        Size = size;
     }
 
     public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector)

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Avalonia.Media;
+using DynamicData;
 using Lumper.Lib.AssetManifest;
 using Lumper.Lib.Bsp.Struct;
 using ReactiveUI.Fody.Helpers;
@@ -144,7 +145,12 @@ public abstract class PakfileEntryViewModel : HierarchicalBspNode
         // of running for multiple pakfileentryvms in parallel!
         Hash = BaseEntry.Hash;
         MatchingGameAssets = Hash is not null ? AssetManifest.Manifest.GetValueOrDefault(Hash) ?? [] : [];
+
+        long? oldSize = UncompressedSize;
         UpdateSizes();
+
+        if (UncompressedSize != oldSize)
+            ((PakfileLumpViewModel)Parent).Entries.Refresh(this);
     }
 
     /// <summary>
