@@ -155,6 +155,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     public void ToggleSizeDisplay()
     {
         ShowCompressedSize = !ShowCompressedSize;
+        DataGridSource = CreateHierarchicalTreeDataGridSource();
         Tree?.Root.NotifyDisplaySizeChanged();
     }
 
