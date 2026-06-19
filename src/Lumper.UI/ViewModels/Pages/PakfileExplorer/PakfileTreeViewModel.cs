@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
+using Lumper.UI.Converters;
 using Lumper.UI.Services;
 using Lumper.UI.ViewModels.Shared.Pakfile;
 using ReactiveUI;
@@ -17,13 +18,17 @@ public class PakfileTreeViewModel
 {
     public Node Root { get; }
 
-    public PakfileTreeViewModel(SourceCache<PakfileEntryViewModel, string> source)
+    public PakfileExplorerViewModel ParentViewModel { get; }
+
+    public PakfileTreeViewModel(SourceCache<PakfileEntryViewModel, string> source, PakfileExplorerViewModel parentViewModel)
     {
+        ParentViewModel = parentViewModel;
         Root = new Node
         {
             Parent = null,
             Name = BspService.Instance.FileName ?? "<no map loaded>",
             IsExpanded = true,
+            Tree = this,
         };
 
         source
@@ -84,6 +89,8 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public required Node? Parent { get; set; }
 
+    public PakfileTreeViewModel? Tree { get; set; }
+
     public ObservableCollectionExtended<Node>? Children { get; private set; }
 
     [Reactive]
@@ -93,15 +100,35 @@ public class PakfileTreeNodeViewModel : ViewModel
     public long? Size { get; set; }
 
     [Reactive]
+    public long? CompressedSize { get; set; }
+
+    [Reactive]
     public bool IsExpanded { get; set; } = false;
 
     public bool IsDirectory => Children is not null;
 
     public string? Extension => Leaf?.Extension;
 
+    public string DisplaySize
+    {
+        get
+        {
+            bool showCompressed = Tree?.ParentViewModel?.ShowCompressedSize ?? false;
+
+            if (showCompressed && CompressedSize.HasValue && CompressedSize.Value > 0)
+            {
+                // Show compressed size when toggle is on
+                return FileSizeConverter.FormattedFileSize(CompressedSize.Value);
+            }
+            // Show uncompressed size (default)
+            return FileSizeConverter.FormattedFileSize(Size ?? 0);
+        }
+    }
+
     public PakfileTreeNodeViewModel()
     {
         Size = Leaf?.UncompressedSize ?? 0;
+        CompressedSize = Leaf?.CompressedSize;
     }
 
     // Note that this is the entire path, INCLUDING name.extension
@@ -137,6 +164,7 @@ public class PakfileTreeNodeViewModel : ViewModel
     private void AddInternal(PakfileEntryViewModel? value, PathList path)
     {
         long size = value?.UncompressedSize ?? 0;
+        long compressedSize = value?.CompressedSize ?? 0;
 
         // Processing directory paths of the path, recursing down the tree and creating new nodes where needed
         if (path.Count > 1)
@@ -146,6 +174,7 @@ public class PakfileTreeNodeViewModel : ViewModel
             {
                 existing.AddInternal(value, path[1..]);
                 existing.Size += size;
+                existing.CompressedSize = (existing.CompressedSize ?? 0) + compressedSize;
                 return;
             }
 
@@ -154,6 +183,7 @@ public class PakfileTreeNodeViewModel : ViewModel
                 Parent = this,
                 Name = path[0],
                 Size = size,
+                Tree = Tree,
             };
 
             newChild.AddInternal(value, path[1..]);
@@ -172,6 +202,7 @@ public class PakfileTreeNodeViewModel : ViewModel
             Name = path[0],
             Leaf = value,
             Size = size,
+            Tree = Tree,
         };
 
         if (value is null)
@@ -289,5 +320,17 @@ public class PakfileTreeNodeViewModel : ViewModel
                 return -1;
             return Comparer<T>.Default.Compare(selector(y), selector(x));
         };
+    }
+
+    public void NotifyDisplaySizeChanged()
+    {
+        this.RaisePropertyChanged(nameof(DisplaySize));
+        if (Children != null)
+        {
+            foreach (PakfileTreeNodeViewModel? child in Children)
+            {
+                child?.NotifyDisplaySizeChanged();
+            }
+        }
     }
 }
