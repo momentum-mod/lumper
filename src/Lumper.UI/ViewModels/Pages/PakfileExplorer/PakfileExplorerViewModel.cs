@@ -156,10 +156,6 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     {
         ShowCompressedSize = !ShowCompressedSize;
         Tree?.Root.NotifyDisplaySizeChanged();
-        if (Tree is not null)
-        {
-            DataGridSource = CreateHierarchicalTreeDataGridSource();
-        }
     }
 
     public void ExpandAll()

@@ -115,10 +115,15 @@ public class PakfileTreeNodeViewModel : ViewModel
         {
             bool showCompressed = Tree?.ParentViewModel?.ShowCompressedSize ?? false;
 
-            if (showCompressed && CompressedSize.HasValue && CompressedSize.Value > 0)
+            if (showCompressed)
             {
-                // Show compressed size when toggle is on
-                return FileSizeConverter.FormattedFileSize(CompressedSize.Value);
+                // When showing compressed mode, show compressed size if available
+                if (CompressedSize.HasValue && CompressedSize.Value > 0)
+                {
+                    return FileSizeConverter.FormattedFileSize(CompressedSize.Value);
+                }
+                // If no compressed size available (uncompressed entry), still show uncompressed
+                return FileSizeConverter.FormattedFileSize(Size ?? 0);
             }
             // Show uncompressed size (default)
             return FileSizeConverter.FormattedFileSize(Size ?? 0);
@@ -183,6 +188,7 @@ public class PakfileTreeNodeViewModel : ViewModel
                 Parent = this,
                 Name = path[0],
                 Size = size,
+                CompressedSize = compressedSize,
                 Tree = Tree,
             };
 
@@ -202,6 +208,7 @@ public class PakfileTreeNodeViewModel : ViewModel
             Name = path[0],
             Leaf = value,
             Size = size,
+            CompressedSize = compressedSize,
             Tree = Tree,
         };
 
@@ -292,6 +299,7 @@ public class PakfileTreeNodeViewModel : ViewModel
     public void RecalculateSize()
     {
         Size = Children?.Sum(child => child.Size) ?? 0;
+        CompressedSize = Children?.Sum(child => child.CompressedSize ?? 0) ?? 0;
     }
 
     public static Comparison<Node?> SortAscending<T>(Func<Node, T> selector)
@@ -324,7 +332,9 @@ public class PakfileTreeNodeViewModel : ViewModel
 
     public void NotifyDisplaySizeChanged()
     {
+        // Force the UI to update by raising property changed on UI thread
         this.RaisePropertyChanged(nameof(DisplaySize));
+
         if (Children != null)
         {
             foreach (PakfileTreeNodeViewModel? child in Children)
