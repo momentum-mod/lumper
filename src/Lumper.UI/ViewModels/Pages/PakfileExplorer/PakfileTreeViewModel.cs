@@ -20,7 +20,10 @@ public class PakfileTreeViewModel
 
     public PakfileExplorerViewModel ParentViewModel { get; }
 
-    public PakfileTreeViewModel(SourceCache<PakfileEntryViewModel, string> source, PakfileExplorerViewModel parentViewModel)
+    public PakfileTreeViewModel(
+        SourceCache<PakfileEntryViewModel, string> source,
+        PakfileExplorerViewModel parentViewModel
+    )
     {
         ParentViewModel = parentViewModel;
         Root = new Node

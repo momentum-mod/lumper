@@ -78,7 +78,7 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
         {
             throw new InvalidOperationException("Tree root cannot be null when creating data grid source");
         }
-            
+
         return new HierarchicalTreeDataGridSource<Node>(Tree.Root)
         {
             Columns =
