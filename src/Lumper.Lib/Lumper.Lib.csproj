@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <EmitCompilerGeneratedFiles>false</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,6 +13,20 @@
     <PackageReference Include="NLog" Version="5.4.0" />
     <PackageReference Include="SharpCompress" Version="0.48.1" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CompilerGeneratedFilesOutputPath)' != ''">
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+  </ItemGroup>  
+
+  <ItemGroup>
+    <ProjectReference Include="../Lumper.Generators\FGDGenerator\FGDGenerator.csproj"
+                       OutputItemType="Analyzer"
+                       ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../../resources/momentum.fgd" />
   </ItemGroup>
 
 </Project>
