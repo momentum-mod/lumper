@@ -16,6 +16,7 @@
 
   <Application.Styles>
     <StyleInclude Source="Styles/Styles.axaml" />
+    <StyleInclude Source="avares://Lumper.UI/Controls/ExtendedAutoCompleteBox.axaml"/>
         <materialIcons:MaterialIconStyles />
   </Application.Styles>
 </Application>

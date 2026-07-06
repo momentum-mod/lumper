@@ -1,5 +1,6 @@
 namespace Lumper.UI.ViewModels.Shared.Entity;
 
+
 using System.Linq;
 using DynamicData.Binding;
 using Lumper.Lib.Bsp.Lumps.BspLumps;
@@ -46,12 +47,22 @@ public class EntityViewModel : HierarchicalBspNode
         ResetClassname();
     }
 
+    public void RaiseTargetnameChanged()
+    {
+        this.RaisePropertyChanged(nameof(Targetname));
+        this.RaisePropertyChanged(nameof(ClassAndTargetname));
+    }
+
     public EntityPropertyViewModel AddProperty(Entity.EntityProperty prop)
     {
         var vm = EntityPropertyViewModel.Create(prop, this);
         Entity.Properties.Add(prop);
         Properties.Add(vm);
         MarkAsModified();
+
+        if (prop.Key == "targetname")
+            RaiseTargetnameChanged();
+
         return vm;
     }
 
@@ -60,6 +71,9 @@ public class EntityViewModel : HierarchicalBspNode
         Entity.Properties.Remove(propVm.Property);
         Properties.Remove(propVm);
         MarkAsModified();
+
+        if (propVm.Key == "targetname")
+            RaiseTargetnameChanged();
     }
 
     public void AddString()
@@ -92,6 +106,7 @@ public class EntityViewModel : HierarchicalBspNode
     {
         return Properties.OfType<EntityPropertyStringViewModel>().FirstOrDefault(x => x.Key == key)?.Value;
     }
+    
 
     public void ResetClassname()
     {
@@ -118,4 +133,6 @@ public class EntityViewModel : HierarchicalBspNode
         if (Origin is { } origin)
             GameSyncService.Instance.TeleportToOrigin(origin);
     }
+
+
 }

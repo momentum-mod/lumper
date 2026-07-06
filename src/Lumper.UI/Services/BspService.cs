@@ -123,6 +123,9 @@ public sealed class BspService : ReactiveObject, IDisposable
 
     private List<BspNode?> Lumps => [_entityLumpViewModel, _pakfileLumpViewModel];
 
+    private TargetnameIndexViewModel? _targetnameIndex;
+    public TargetnameIndexViewModel TargetnameIndex => _targetnameIndex ??= new TargetnameIndexViewModel();
+
     private BspService()
     {
         this.WhenAnyValue(x => x.BspFile).Subscribe(_ => OnBspChanged());

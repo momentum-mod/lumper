@@ -202,8 +202,13 @@
                 <ItemsControl.DataTemplates>
                   <DataTemplate DataType="entity:EntityPropertyStringViewModel">
                     <Grid ColumnDefinitions="*, 4, 3*, 4, 32" Height="32" Margin="0 0 0 4">
-                      <TextBox Text="{Binding Key}" />
-                      <TextBox Text="{Binding Value}" Grid.Column="2" />
+                      <ctrls:ExtendedAutoCompleteBox Text="{Binding Key, Mode=TwoWay}"
+                                                     Suggestions="{Binding KeySuggestions}"
+                                                     IsBitfieldMode="False" />
+                      <ctrls:ExtendedAutoCompleteBox Text="{Binding Value, Mode=TwoWay}"
+                                                     Suggestions="{Binding ValueSuggestions}"
+                                                     IsBitfieldMode="{Binding IsBitfield}"
+                                                     Grid.Column="2" />
                       <Button Command="{Binding Delete}" Grid.Column="4" Height="32">
                         <materialIcons:MaterialIcon Kind="Delete" />
                       </Button>
@@ -219,18 +224,31 @@
                                   Value="{StaticResource Monospace}" />
                         </Style>
                       </Grid.Styles>
-                      <TextBox Text="{Binding Key}" Grid.Row="0" Grid.Column="0" />
+                      <ctrls:ExtendedAutoCompleteBox Text="{Binding IOKey, Mode=TwoWay}"
+                                                     Suggestions="{Binding IOKeySuggestions}"
+                                                     IsBitfieldMode="False"
+                                                     Grid.Row="0"
+                                                     Grid.Column="0" />
                       <TextBox Text="{Binding DisplayValue}" Grid.Row="0" Grid.Column="2" IsReadOnly="True"
                                Foreground="Gray" />
                       <Button Command="{Binding Delete}" Grid.Row="0" Grid.Column="4" Height="32">
                         <materialIcons:MaterialIcon Kind="Delete" />
                       </Button>
+                      
                       <TextBlock Text="Target Entity Name" Grid.Row="2" Grid.Column="0" Padding="8 0 0 0" />
-                      <TextBox Text="{Binding TargetEntityName}" Grid.Row="2" Grid.Column="2"
-                               Grid.ColumnSpan="3" />
+                      <ctrls:ExtendedAutoCompleteBox Text="{Binding TargetEntityName, Mode=TwoWay}"
+                                                     Suggestions="{Binding TargetEntityNameSuggestions}"
+                                                     IsBitfieldMode="False"
+                                                     Grid.Row="2"
+                                                     Grid.Column="2"
+                                                     Grid.ColumnSpan="3" />
                       <TextBlock Text="Input" Grid.Row="4" Grid.Column="0" Padding="8 0 0 0" />
-                      <TextBox Text="{Binding Input}" Grid.Row="4" Grid.Column="2"
-                               Grid.ColumnSpan="3" />
+                      <ctrls:ExtendedAutoCompleteBox Text="{Binding Input, Mode=TwoWay}"
+                                                     Suggestions="{Binding InputSuggestions}"
+                                                     IsBitfieldMode="False"
+                                                     Grid.Row="4"
+                                                     Grid.Column="2"
+                                                     Grid.ColumnSpan="3" />
                       <TextBlock Text="Parameter" Grid.Row="6" Grid.Column="0" Padding="8 0 0 0" />
                       <TextBox Text="{Binding Parameter}" Grid.Row="6" Grid.Column="2"
                                Grid.ColumnSpan="3" />
