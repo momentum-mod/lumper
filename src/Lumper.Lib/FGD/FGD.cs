@@ -8,11 +8,11 @@ public record FGDInput(string Name, string ParameterType, string Description);
 public record FGDOutput(string Name, string ParameterType, string Description);
 
 public record FGDProperty(
-    string Name, 
-    string ValueType, 
-    string DisplayName, 
-    string DefaultValue, 
-    string Description, 
+    string Name,
+    string ValueType,
+    string DisplayName,
+    string DefaultValue,
+    string Description,
     IReadOnlyDictionary<string, string> Choices
 );
 
@@ -37,7 +37,9 @@ public record FGDEntityRaw(
 
 public static class FGD
 {
-    public static IReadOnlyDictionary<string, FGDEntity> ResolveInheritance(IReadOnlyDictionary<string, FGDEntityRaw> rawEntities)
+    public static IReadOnlyDictionary<string, FGDEntity> ResolveInheritance(
+        IReadOnlyDictionary<string, FGDEntityRaw> rawEntities
+    )
     {
         var cache = new Dictionary<string, FGDEntity>(StringComparer.OrdinalIgnoreCase);
         var result = new Dictionary<string, FGDEntity>();
@@ -49,7 +51,12 @@ public static class FGD
                 continue;
             }
 
-            result[ent.ClassName] = ResolveOne(ent, rawEntities, cache, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            result[ent.ClassName] = ResolveOne(
+                ent,
+                rawEntities,
+                cache,
+                new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            );
         }
 
         return result;
@@ -59,7 +66,8 @@ public static class FGD
         FGDEntityRaw ent,
         IReadOnlyDictionary<string, FGDEntityRaw> rawEntities,
         Dictionary<string, FGDEntity> cache,
-        HashSet<string> visiting)
+        HashSet<string> visiting
+    )
     {
         if (cache.TryGetValue(ent.ClassName, out FGDEntity? cached))
         {
@@ -75,7 +83,8 @@ public static class FGD
                 ent.Description,
                 new Dictionary<string, FGDProperty>(),
                 new Dictionary<string, FGDInput>(),
-                new Dictionary<string, FGDOutput>());
+                new Dictionary<string, FGDOutput>()
+            );
         }
 
         var properties = new Dictionary<string, FGDProperty>();
@@ -91,14 +100,20 @@ public static class FGD
             }
 
             FGDEntity baseDef = ResolveOne(baseDecl, rawEntities, cache, visiting);
-            foreach (KeyValuePair<string, FGDProperty> kv in baseDef.Properties) properties[kv.Key] = kv.Value;
-            foreach (KeyValuePair<string, FGDInput> kv in baseDef.Inputs) inputs[kv.Key] = kv.Value;
-            foreach (KeyValuePair<string, FGDOutput> kv in baseDef.Outputs) outputs[kv.Key] = kv.Value;
+            foreach (KeyValuePair<string, FGDProperty> kv in baseDef.Properties)
+                properties[kv.Key] = kv.Value;
+            foreach (KeyValuePair<string, FGDInput> kv in baseDef.Inputs)
+                inputs[kv.Key] = kv.Value;
+            foreach (KeyValuePair<string, FGDOutput> kv in baseDef.Outputs)
+                outputs[kv.Key] = kv.Value;
         }
 
-        foreach (KeyValuePair<string, FGDProperty> kv in ent.Properties) properties[kv.Key] = kv.Value;
-        foreach (KeyValuePair<string, FGDInput> kv in ent.Inputs) inputs[kv.Key] = kv.Value;
-        foreach (KeyValuePair<string, FGDOutput> kv in ent.Outputs) outputs[kv.Key] = kv.Value;
+        foreach (KeyValuePair<string, FGDProperty> kv in ent.Properties)
+            properties[kv.Key] = kv.Value;
+        foreach (KeyValuePair<string, FGDInput> kv in ent.Inputs)
+            inputs[kv.Key] = kv.Value;
+        foreach (KeyValuePair<string, FGDOutput> kv in ent.Outputs)
+            outputs[kv.Key] = kv.Value;
 
         var result = new FGDEntity(ent.ClassName, ent.ClassType, ent.Description, properties, inputs, outputs);
         cache[ent.ClassName] = result;

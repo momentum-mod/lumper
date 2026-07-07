@@ -6,8 +6,8 @@ using System.Linq;
 using System.Reactive.Linq;
 using DynamicData;
 using DynamicData.Binding;
-using Lumper.UI.Services;
 using Lumper.UI.Controls;
+using Lumper.UI.Services;
 using ReactiveUI;
 
 public sealed record TargetnameMapping(string Targetname, string Classname);
@@ -36,9 +36,11 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
             )
             .Switch()
             .Publish(shared =>
-                    Observable.Merge(
-                        shared.Take(1),
-                        shared.Skip(1).Throttle(TimeSpan.FromMilliseconds(200), RxApp.TaskpoolScheduler)))
+                Observable.Merge(
+                    shared.Take(1),
+                    shared.Skip(1).Throttle(TimeSpan.FromMilliseconds(200), RxApp.TaskpoolScheduler)
+                )
+            )
             .Select(entities =>
                 entities
                     .Where(e => !string.IsNullOrEmpty(e.Targetname))
@@ -53,11 +55,13 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
                 Entries.AddRange(list);
 
                 Suggestions.Clear();
-                Suggestions.AddRange(list.Select(entry => new ExtendedAutoCompleteItem
-                {
-                    Value = entry.Targetname,
-                    Display = $"{entry.Targetname} ({entry.Classname})"
-                }));
+                Suggestions.AddRange(
+                    list.Select(entry => new ExtendedAutoCompleteItem
+                    {
+                        Value = entry.Targetname,
+                        Display = $"{entry.Targetname} ({entry.Classname})",
+                    })
+                );
             });
     }
 

@@ -36,15 +36,17 @@ public class TokenStream(List<Token> tokens)
     {
         return _pos < _tokens.Count ? _tokens[_pos] : new Token(TokenType.EOF, "");
     }
+
     public Token Consume()
     {
         return _pos < _tokens.Count ? _tokens[_pos++] : new Token(TokenType.EOF, "");
     }
+
     public bool Match(string val)
     {
-        if(Peek().Value == val)
+        if (Peek().Value == val)
         {
-            _ = Consume(); 
+            _ = Consume();
             return true;
         }
         return false;
@@ -58,23 +60,27 @@ public static class FGDParser
         var stream = new TokenStream(FGDLexer.Tokenize(fgdContent));
         var entities = new List<RawEntity>();
 
-        while(stream.Peek().Type != TokenType.EOF)
+        while (stream.Peek().Type != TokenType.EOF)
         {
-            if(stream.Match("@")){
+            if (stream.Match("@"))
+            {
                 Token classTypeToken = stream.Consume();
-                
-                if(classTypeToken.Type == TokenType.Word && classTypeToken.Value.EndsWith("Class", StringComparison.OrdinalIgnoreCase))
+
+                if (
+                    classTypeToken.Type == TokenType.Word
+                    && classTypeToken.Value.EndsWith("Class", StringComparison.OrdinalIgnoreCase)
+                )
                 {
                     entities.Add(ParseEntity(stream, classTypeToken.Value));
                 }
                 else
                 {
-                    while(stream.Peek().Type != TokenType.EOF && stream.Peek().Value != "@")
+                    while (stream.Peek().Type != TokenType.EOF && stream.Peek().Value != "@")
                     {
                         _ = stream.Consume();
                     }
                 }
-            }  
+            }
         }
         return entities;
     }
@@ -87,13 +93,13 @@ public static class FGDParser
         while (stream.Peek().Value != "=" && stream.Peek().Value != "[" && stream.Peek().Type != TokenType.EOF)
         {
             Token token = stream.Consume();
-            if(token.Value == "base")
+            if (token.Value == "base")
             {
                 _ = stream.Match("(");
-                while(!stream.Match(")") && stream.Peek().Type != TokenType.EOF)
+                while (!stream.Match(")") && stream.Peek().Type != TokenType.EOF)
                 {
                     Token baseToken = stream.Consume();
-                    if(baseToken.Type == TokenType.Word)
+                    if (baseToken.Type == TokenType.Word)
                     {
                         entity.InheritedBases.Add(baseToken.Value);
                         _ = stream.Match(",");
@@ -102,13 +108,13 @@ public static class FGDParser
             }
         }
 
-        // Parse name: entity_name : "Description" 
+        // Parse name: entity_name : "Description"
         if (stream.Match("="))
         {
             entity.Name = stream.Consume().Value;
-            if(stream.Match(":"))
+            if (stream.Match(":"))
             {
-                if(stream.Peek().Type == TokenType._String)
+                if (stream.Peek().Type == TokenType._String)
                 {
                     entity.Description = stream.Consume().Value;
                 }
@@ -118,19 +124,19 @@ public static class FGDParser
         // Parse properties
         if (stream.Match("["))
         {
-            while(!stream.Match("]") && stream.Peek().Type != TokenType.EOF)
+            while (!stream.Match("]") && stream.Peek().Type != TokenType.EOF)
             {
-                if(string.Equals(stream.Peek().Value, "input", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(stream.Peek().Value, "input", StringComparison.OrdinalIgnoreCase))
                 {
                     _ = stream.Consume();
                     entity.Inputs.Add(ParseIO(stream));
                 }
-                else if(string.Equals(stream.Peek().Value, "output", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(stream.Peek().Value, "output", StringComparison.OrdinalIgnoreCase))
                 {
                     _ = stream.Consume();
                     entity.Outputs.Add(ParseIO(stream));
                 }
-                else if(stream.Peek().Value.StartsWith("linedivider", StringComparison.OrdinalIgnoreCase))
+                else if (stream.Peek().Value.StartsWith("linedivider", StringComparison.OrdinalIgnoreCase))
                 {
                     _ = ParseProperty(stream);
                 }
@@ -175,11 +181,10 @@ public static class FGDParser
         }
 
         // Ignore optional modifiers ( readonly )
-        while(!":=[]".Contains(stream.Peek().Value) && stream.Peek().Type != TokenType.EOF)
+        while (!":=[]".Contains(stream.Peek().Value) && stream.Peek().Type != TokenType.EOF)
         {
             _ = stream.Consume();
         }
-
 
         //Match: : "Display Name" : "Default Value" : "Description"
         int colonCount = 0;
@@ -187,9 +192,12 @@ public static class FGDParser
         {
             string? val = stream.Peek().Type is TokenType._String or TokenType.Word ? stream.Consume().Value : null;
 
-            if (colonCount == 0) prop.DisplayName = val;
-            else if(colonCount == 1) prop.DefaultValue = val;
-            else if(colonCount == 2) prop.Description = val;
+            if (colonCount == 0)
+                prop.DisplayName = val;
+            else if (colonCount == 1)
+                prop.DefaultValue = val;
+            else if (colonCount == 2)
+                prop.Description = val;
 
             colonCount++;
         }
@@ -201,7 +209,7 @@ public static class FGDParser
             {
                 var choices = new List<KeyValuePair<string, string>>();
 
-                while(!stream.Match("]") && stream.Peek().Type != TokenType.EOF)
+                while (!stream.Match("]") && stream.Peek().Type != TokenType.EOF)
                 {
                     string choiceKey = stream.Consume().Value;
                     _ = stream.Match(":");
@@ -209,9 +217,9 @@ public static class FGDParser
 
                     choices.Add(new KeyValuePair<string, string>(choiceKey, choiceDisplay));
 
-                    if(stream.Match(":"))
+                    if (stream.Match(":"))
                     {
-                        if(stream.Peek().Type is TokenType._String or TokenType.Word)
+                        if (stream.Peek().Type is TokenType._String or TokenType.Word)
                         {
                             _ = stream.Consume();
                         }
@@ -220,13 +228,13 @@ public static class FGDParser
 
                 bool allKeysAreIntegers = choices.All(choice => int.TryParse(choice.Key, out _));
 
-                prop.Choices = (allKeysAreIntegers
+                prop.Choices = (
+                    allKeysAreIntegers
                         ? choices.OrderBy(choice => int.Parse(choice.Key, CultureInfo.InvariantCulture))
-                        : choices.OrderBy(choice => choice.Key, StringComparer.OrdinalIgnoreCase))
-                    .ToDictionary(choice => choice.Key, choice => choice.Value, StringComparer.OrdinalIgnoreCase);
+                        : choices.OrderBy(choice => choice.Key, StringComparer.OrdinalIgnoreCase)
+                ).ToDictionary(choice => choice.Key, choice => choice.Value, StringComparer.OrdinalIgnoreCase);
             }
         }
         return prop;
     }
-
 }

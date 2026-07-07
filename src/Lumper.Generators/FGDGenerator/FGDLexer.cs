@@ -2,7 +2,14 @@ namespace Lumper.Generators.FGDGenerator;
 
 using System.Collections.Generic;
 
-public enum TokenType { Word, _String, Symbol, EOF }
+public enum TokenType
+{
+    Word,
+    _String,
+    Symbol,
+    EOF,
+}
+
 public record Token(TokenType Type, string Value);
 
 public static class FGDLexer
@@ -23,7 +30,8 @@ public static class FGDLexer
 
             if (c == '/' && i + 1 < input.Length && input[i + 1] == '/')
             {
-                while (i < input.Length && input[i] != '\n') i++;
+                while (i < input.Length && input[i] != '\n')
+                    i++;
                 continue;
             }
 
@@ -31,7 +39,8 @@ public static class FGDLexer
             {
                 i++;
                 int start = i;
-                while (i < input.Length && input[i] != '"') i++;
+                while (i < input.Length && input[i] != '"')
+                    i++;
                 tokens.Add(new Token(TokenType._String, input[start..i]));
                 i++; // Consume end quote
                 continue;

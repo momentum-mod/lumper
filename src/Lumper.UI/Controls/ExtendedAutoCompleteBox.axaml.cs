@@ -1,10 +1,5 @@
 namespace Lumper.UI.Controls;
 
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
-using Avalonia.Input;
-using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,22 +7,33 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Threading;
 
 public class ExtendedAutoCompleteBox : TemplatedControl
 {
-
-    public static readonly StyledProperty<string> TextProperty =
-        AvaloniaProperty.Register<ExtendedAutoCompleteBox, string>(nameof(Text));
+    public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<
+        ExtendedAutoCompleteBox,
+        string
+    >(nameof(Text));
 
     public static readonly StyledProperty<IReadOnlyCollection<ExtendedAutoCompleteItem>> SuggestionsProperty =
-        AvaloniaProperty.Register<ExtendedAutoCompleteBox, IReadOnlyCollection<ExtendedAutoCompleteItem>>(nameof(Suggestions));
+        AvaloniaProperty.Register<ExtendedAutoCompleteBox, IReadOnlyCollection<ExtendedAutoCompleteItem>>(
+            nameof(Suggestions)
+        );
 
-    public static readonly StyledProperty<bool> IsBitfieldModeProperty =
-        AvaloniaProperty.Register<ExtendedAutoCompleteBox, bool>(nameof(IsBitfieldMode));
+    public static readonly StyledProperty<bool> IsBitfieldModeProperty = AvaloniaProperty.Register<
+        ExtendedAutoCompleteBox,
+        bool
+    >(nameof(IsBitfieldMode));
 
-    public static readonly StyledProperty<bool> IsDropdownOpenProperty =
-        AvaloniaProperty.Register<ExtendedAutoCompleteBox, bool>(nameof(IsDropdownOpen));
-
+    public static readonly StyledProperty<bool> IsDropdownOpenProperty = AvaloniaProperty.Register<
+        ExtendedAutoCompleteBox,
+        bool
+    >(nameof(IsDropdownOpen));
 
     private TextBox? _textBox;
     private Button? _dropdownButton;
@@ -89,7 +95,8 @@ public class ExtendedAutoCompleteBox : TemplatedControl
             _textBox.KeyDown += OnTextBoxKeyDown;
             _textBox.GotFocus += (s, args) =>
             {
-                if (!IsBitfieldMode) UpdateFilteredSuggestions();
+                if (!IsBitfieldMode)
+                    UpdateFilteredSuggestions();
             };
         }
 
@@ -109,6 +116,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         SetDropdownButtonState();
         UpdateFilteredSuggestions();
     }
+
     private void OnListBoxPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         e.Handled = true;
@@ -116,7 +124,8 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
     private void SetDropdownButtonState()
     {
-        if (_dropdownButton == null) return;
+        if (_dropdownButton == null)
+            return;
         _dropdownButton.IsVisible = Suggestions is { Count: > 0 };
     }
 
@@ -153,7 +162,8 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         }
         if (e.OldValue is IEnumerable<ExtendedAutoCompleteItem> oldItems)
         {
-            foreach (ExtendedAutoCompleteItem item in oldItems) item.PropertyChanged -= OnItemPropertyChanged;
+            foreach (ExtendedAutoCompleteItem item in oldItems)
+                item.PropertyChanged -= OnItemPropertyChanged;
         }
 
         if (e.NewValue is INotifyCollectionChanged newCollection)
@@ -162,7 +172,8 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         }
         if (e.NewValue is IEnumerable<ExtendedAutoCompleteItem> newItems)
         {
-            foreach (ExtendedAutoCompleteItem item in newItems) item.PropertyChanged += OnItemPropertyChanged;
+            foreach (ExtendedAutoCompleteItem item in newItems)
+                item.PropertyChanged += OnItemPropertyChanged;
         }
 
         UpdateFilteredSuggestions();
@@ -183,12 +194,14 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         }
 
         UpdateFilteredSuggestions();
-        if (IsBitfieldMode) CalculateBitfieldSum();
+        if (IsBitfieldMode)
+            CalculateBitfieldSum();
     }
 
     private void OnTextChanged()
     {
-        if (_isUpdatingText) return;
+        if (_isUpdatingText)
+            return;
 
         if (!IsBitfieldMode)
         {
@@ -211,9 +224,10 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         FilteredSuggestions.Clear();
         string query = Text ?? string.Empty;
 
-        IEnumerable<ExtendedAutoCompleteItem> toAdd = (showAll || IsBitfieldMode || string.IsNullOrEmpty(query))
-            ? Suggestions
-            : Suggestions.Where(x => x.DisplayText.Contains(query, StringComparison.OrdinalIgnoreCase));
+        IEnumerable<ExtendedAutoCompleteItem> toAdd =
+            (showAll || IsBitfieldMode || string.IsNullOrEmpty(query))
+                ? Suggestions
+                : Suggestions.Where(x => x.DisplayText.Contains(query, StringComparison.OrdinalIgnoreCase));
 
         foreach (ExtendedAutoCompleteItem item in toAdd)
         {
@@ -227,7 +241,9 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         {
             CalculateBitfieldSum();
         }
-        else if (e.PropertyName is (nameof(ExtendedAutoCompleteItem.Display)) or (nameof(ExtendedAutoCompleteItem.Value)))
+        else if (
+            e.PropertyName is (nameof(ExtendedAutoCompleteItem.Display)) or (nameof(ExtendedAutoCompleteItem.Value))
+        )
         {
             UpdateFilteredSuggestions(showAll: IsBitfieldMode || IsDropdownOpen);
         }
@@ -237,7 +253,8 @@ public class ExtendedAutoCompleteBox : TemplatedControl
     {
         _isInitializing = true;
 
-        if (Suggestions == null || string.IsNullOrEmpty(Text)) return;
+        if (Suggestions == null || string.IsNullOrEmpty(Text))
+            return;
 
         if (long.TryParse(Text, out long currentBitfieldValue))
         {
@@ -262,8 +279,9 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
     private void CalculateBitfieldSum()
     {
-        if(_isInitializing) return;
-        
+        if (_isInitializing)
+            return;
+
         long sum = 0;
         if (Suggestions != null)
         {
@@ -304,19 +322,20 @@ public class ExtendedAutoCompleteBox : TemplatedControl
                     _textBox?.Focus();
                 });
             }
-
         }
     }
 
     private void OnTextBoxKeyDown(object? sender, KeyEventArgs e)
     {
         ListBox? activeList = IsBitfieldMode ? _bitfieldList : _standardList;
-        if (activeList == null || !FilteredSuggestions.Any()) return;
+        if (activeList == null || !FilteredSuggestions.Any())
+            return;
 
         if (e.Key == Key.Down)
         {
             _isNavigating = true;
-            if (!IsDropdownOpen) IsDropdownOpen = true;
+            if (!IsDropdownOpen)
+                IsDropdownOpen = true;
             activeList.SelectedIndex = Math.Min(activeList.SelectedIndex + 1, FilteredSuggestions.Count - 1);
             e.Handled = true;
             _isNavigating = false;

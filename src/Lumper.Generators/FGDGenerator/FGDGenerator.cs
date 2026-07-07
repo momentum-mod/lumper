@@ -16,32 +16,35 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValuesProvider<string?> fgdContents = context.AdditionalTextsProvider
-            .Where(static file => Path.GetExtension(file.Path).Equals(".fgd", StringComparison.OrdinalIgnoreCase))
+        IncrementalValuesProvider<string?> fgdContents = context
+            .AdditionalTextsProvider.Where(static file =>
+                Path.GetExtension(file.Path).Equals(".fgd", StringComparison.OrdinalIgnoreCase)
+            )
             .Select(static (file, ct) => file.GetText(ct)?.ToString());
 
-        context.RegisterSourceOutput(fgdContents, static (spc, content) =>
-        {
-            if (string.IsNullOrEmpty(content))
+        context.RegisterSourceOutput(
+            fgdContents,
+            static (spc, content) =>
             {
-                return;
+                if (string.IsNullOrEmpty(content))
+                {
+                    return;
+                }
+
+                List<RawEntity> rawEntities = FGDParser.Parse(content!);
+
+                var lookup = new Dictionary<string, RawEntity>(StringComparer.OrdinalIgnoreCase);
+                foreach (RawEntity raw in rawEntities)
+                {
+                    lookup[raw.Name] = raw;
+                }
+
+                var entities = lookup.Values.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
+
+                string code = GenerateSource(entities);
+                spc.AddSource($"{GeneratedClassName}.g.cs", SourceText.From(code, Encoding.UTF8));
             }
-
-            List<RawEntity> rawEntities = FGDParser.Parse(content!);
-
-            var lookup = new Dictionary<string, RawEntity>(StringComparer.OrdinalIgnoreCase);
-            foreach (RawEntity raw in rawEntities)
-            {
-                lookup[raw.Name] = raw;
-            }
-
-            var entities = lookup.Values
-                .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            string code = GenerateSource(entities);
-            spc.AddSource($"{GeneratedClassName}.g.cs", SourceText.From(code, Encoding.UTF8));
-        });
+        );
     }
 
     private static string GenerateSource(List<RawEntity> entities)
@@ -57,7 +60,9 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
         sb.AppendLine();
         sb.AppendLine($"public static class {GeneratedClassName}");
         sb.AppendLine("{");
-        sb.AppendLine("    private static readonly IReadOnlyDictionary<string, FGDEntityRaw> RawEntities = new Dictionary<string, FGDEntityRaw>");
+        sb.AppendLine(
+            "    private static readonly IReadOnlyDictionary<string, FGDEntityRaw> RawEntities = new Dictionary<string, FGDEntityRaw>"
+        );
         sb.AppendLine("    {");
 
         foreach (RawEntity entity in entities)
@@ -67,7 +72,9 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
 
         sb.AppendLine("    };");
         sb.AppendLine();
-        sb.AppendLine("    public static readonly IReadOnlyDictionary<string, FGDEntity> Entities = FGD.ResolveInheritance(RawEntities);");
+        sb.AppendLine(
+            "    public static readonly IReadOnlyDictionary<string, FGDEntity> Entities = FGD.ResolveInheritance(RawEntities);"
+        );
         sb.AppendLine("}");
         return sb.ToString();
     }
@@ -94,7 +101,9 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
         sb.AppendLine("            {");
         foreach (RawProperty input in entity.Inputs)
         {
-            sb.AppendLine($"                [{Lit(input.Key)}] = new FGDInput({Lit(input.Key)}, {Lit(input.Type)}, {Lit(input.Description ?? "")}),");
+            sb.AppendLine(
+                $"                [{Lit(input.Key)}] = new FGDInput({Lit(input.Key)}, {Lit(input.Type)}, {Lit(input.Description ?? "")}),"
+            );
         }
         sb.AppendLine("            },");
 
@@ -102,7 +111,9 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
         sb.AppendLine("            {");
         foreach (RawProperty output in entity.Outputs)
         {
-            sb.AppendLine($"                [{Lit(output.Key)}] = new FGDOutput({Lit(output.Key)}, {Lit(output.Type)}, {Lit(output.Description ?? "")}),");
+            sb.AppendLine(
+                $"                [{Lit(output.Key)}] = new FGDOutput({Lit(output.Key)}, {Lit(output.Type)}, {Lit(output.Description ?? "")}),"
+            );
         }
         sb.AppendLine("            }");
 
@@ -114,14 +125,16 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
         if (prop.Choices.Count == 0)
         {
             sb.AppendLine(
-                $"                [{Lit(prop.Key)}] = new FGDProperty({Lit(prop.Key)}, {Lit(prop.Type)}, " +
-                $"{Lit(prop.DisplayName ?? "")}, {Lit(prop.DefaultValue ?? "")}, {Lit(prop.Description ?? "")}, new Dictionary<string, string>()),");
+                $"                [{Lit(prop.Key)}] = new FGDProperty({Lit(prop.Key)}, {Lit(prop.Type)}, "
+                    + $"{Lit(prop.DisplayName ?? "")}, {Lit(prop.DefaultValue ?? "")}, {Lit(prop.Description ?? "")}, new Dictionary<string, string>()),"
+            );
             return;
         }
 
         sb.AppendLine(
-            $"                [{Lit(prop.Key)}] = new FGDProperty({Lit(prop.Key)}, {Lit(prop.Type)}, " +
-            $"{Lit(prop.DisplayName ?? "")}, {Lit(prop.DefaultValue ?? "")}, {Lit(prop.Description ?? "")}, new Dictionary<string, string>");
+            $"                [{Lit(prop.Key)}] = new FGDProperty({Lit(prop.Key)}, {Lit(prop.Type)}, "
+                + $"{Lit(prop.DisplayName ?? "")}, {Lit(prop.DefaultValue ?? "")}, {Lit(prop.Description ?? "")}, new Dictionary<string, string>"
+        );
         sb.AppendLine("                {");
         foreach (KeyValuePair<string, string> choice in prop.Choices)
         {
@@ -138,12 +151,24 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
         {
             switch (c)
             {
-                case '"': sb.Append("\\\""); break;
-                case '\\': sb.Append("\\\\"); break;
-                case '\n': sb.Append("\\n"); break;
-                case '\r': sb.Append("\\r"); break;
-                case '\t': sb.Append("\\t"); break;
-                default: sb.Append(c); break;
+                case '"':
+                    sb.Append("\\\"");
+                    break;
+                case '\\':
+                    sb.Append("\\\\");
+                    break;
+                case '\n':
+                    sb.Append("\\n");
+                    break;
+                case '\r':
+                    sb.Append("\\r");
+                    break;
+                case '\t':
+                    sb.Append("\\t");
+                    break;
+                default:
+                    sb.Append(c);
+                    break;
             }
         }
         sb.Append('"');

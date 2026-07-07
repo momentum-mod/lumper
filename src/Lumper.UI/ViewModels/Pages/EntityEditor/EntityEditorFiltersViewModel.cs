@@ -1,4 +1,4 @@
-﻿namespace Lumper.UI.ViewModels.Pages.EntityEditor;
+namespace Lumper.UI.ViewModels.Pages.EntityEditor;
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
