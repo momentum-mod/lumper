@@ -224,8 +224,8 @@
                                   Value="{StaticResource Monospace}" />
                         </Style>
                       </Grid.Styles>
-                      <ctrls:ExtendedAutoCompleteBox Text="{Binding IOKey, Mode=TwoWay}"
-                                                     Suggestions="{Binding IOKeySuggestions}"
+                      <ctrls:ExtendedAutoCompleteBox Text="{Binding Key, Mode=TwoWay}"
+                                                     Suggestions="{Binding KeySuggestions}"
                                                      IsBitfieldMode="False"
                                                      Grid.Row="0"
                                                      Grid.Column="0" />

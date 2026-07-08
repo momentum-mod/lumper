@@ -228,7 +228,6 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
 public class EntityPropertyIoViewModel : EntityPropertyViewModel
 {
     private readonly Entity.EntityProperty<EntityIo> _property;
-    private string _ioKey;
     private string _targetEntityName;
     private string _input;
     private IReadOnlyCollection<ExtendedAutoCompleteItem>? _inputSuggestions;
@@ -240,14 +239,14 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
         : base(property, bspNode)
     {
         _property = property;
-        _ioKey = property.Key;
+        Key = property.Key;
         _targetEntityName = property.Value.TargetEntityName;
         _input = property.Value.Input;
         _parameter = property.Value.Parameter;
         _delay = property.Value.Delay;
         _timesToFire = property.Value.TimesToFire;
 
-        this.WhenAnyValue(x => x.ParentEntity.Classname).Subscribe(_ => IOKeySuggestions = FetchIoKeySuggestions());
+        this.WhenAnyValue(x => x.ParentEntity.Classname).Subscribe(_ => KeySuggestions = FetchIoKeySuggestions());
 
         this.WhenAnyValue(x => x.TargetEntityName)
             .Subscribe(_ =>
@@ -256,19 +255,6 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
                 this.RaisePropertyChanged(nameof(InputSuggestions));
             });
     }
-
-    public string IOKey
-    {
-        get => _ioKey;
-        set
-        {
-            _ioKey = value;
-            OnValueChanged();
-        }
-    }
-
-    [Reactive]
-    public IReadOnlyCollection<ExtendedAutoCompleteItem> IOKeySuggestions { get; set; } = [];
 
     public string TargetEntityName
     {
