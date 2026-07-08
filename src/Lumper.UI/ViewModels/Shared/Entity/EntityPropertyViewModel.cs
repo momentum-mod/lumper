@@ -125,12 +125,23 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
         _property = property;
         _value = property.Value;
 
-        this.WhenAnyValue(x => x.Key, x => x.ParentEntity.Classname)
+        this.WhenAnyValue(x => x.Key)
             .Subscribe(_ =>
             {
                 IsBitfield = IsKeyBitfield();
                 _valueSuggestions = null;
                 this.RaisePropertyChanged(nameof(ValueSuggestions));
+            });
+
+        this.WhenAnyValue(x => x.ParentEntity.Classname)
+            .Subscribe(_ =>
+            {
+                if (Key != "classname")
+                {
+                    IsBitfield = IsKeyBitfield();
+                    _valueSuggestions = null;
+                    this.RaisePropertyChanged(nameof(ValueSuggestions));
+                }
             });
     }
 

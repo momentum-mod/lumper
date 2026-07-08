@@ -261,6 +261,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         }
 
         UpdateFilteredSuggestions();
+        SetDropdownButtonState();
 
         if (IsBitfieldMode)
             InitializeBitfieldCheckboxes();
@@ -402,15 +403,21 @@ public class ExtendedAutoCompleteBox : TemplatedControl
             Text = item.Value?.ToString() ?? item.DisplayText;
             _isUpdatingText = false;
 
-            if (!_isNavigating)
+            bool shouldCloseDropdown = !_isNavigating;
+
+            Dispatcher.UIThread.Post(() =>
             {
-                Dispatcher.UIThread.Post(() =>
+                if (_textBox != null)
+                {
+                    _textBox.CaretIndex = Text?.Length ?? 0;
+                }
+                if (shouldCloseDropdown)
                 {
                     IsDropdownOpen = false;
                     _standardList.SelectedItem = null;
                     _textBox?.Focus();
-                });
-            }
+                }
+            });
         }
     }
 
