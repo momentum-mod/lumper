@@ -117,6 +117,7 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
 {
     private readonly Entity.EntityProperty<string> _property;
     private string _value;
+    private IReadOnlyCollection<ExtendedAutoCompleteItem>? _valueSuggestions;
 
     public EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
         : base(property, bspNode)
@@ -128,6 +129,7 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
             .Subscribe(_ =>
             {
                 IsBitfield = IsKeyBitfield();
+                _valueSuggestions = null;
                 this.RaisePropertyChanged(nameof(ValueSuggestions));
             });
     }
@@ -146,13 +148,14 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
             this.RaisePropertyChanged();
 
             if (Key == "classname")
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => ((EntityViewModel)Parent).Classname = value);
+                ((EntityViewModel)Parent).Classname = value;
             else if (Key == "targetname")
                 ((EntityViewModel)Parent).RaiseTargetnameChanged();
         }
     }
 
-    public IReadOnlyCollection<ExtendedAutoCompleteItem> ValueSuggestions => FetchValueSuggestionsForKey();
+    public IReadOnlyCollection<ExtendedAutoCompleteItem> ValueSuggestions =>
+    _valueSuggestions ??= FetchValueSuggestionsForKey();
 
     [Reactive]
     public bool IsBitfield { get; set; } = false;
