@@ -41,6 +41,7 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
                     shared.Skip(1).Throttle(TimeSpan.FromMilliseconds(200), RxApp.TaskpoolScheduler)
                 )
             )
+            .ObserveOn(RxApp.MainThreadScheduler)
             .Select(entities =>
                 entities
                     .Where(e => !string.IsNullOrEmpty(e.Targetname))
@@ -48,12 +49,11 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
                     .Select(g => new TargetnameMapping(g.Key, g.First().Classname))
                     .ToList()
             )
-            .ObserveOn(RxApp.MainThreadScheduler)
             .Subscribe(list =>
             {
                 Entries.Clear();
                 Entries.AddRange(list);
-
+ 
                 Suggestions.Clear();
                 Suggestions.AddRange(
                     list.Select(entry => new ExtendedAutoCompleteItem
