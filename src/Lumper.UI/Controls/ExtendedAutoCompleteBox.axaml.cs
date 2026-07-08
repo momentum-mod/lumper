@@ -42,6 +42,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
     private bool _isUpdatingText;
     private bool _isNavigating;
     private bool _isInitializing;
+    private long _preservedBits;
 
     public ObservableCollection<ExtendedAutoCompleteItem> FilteredSuggestions { get; } = [];
 
@@ -178,6 +179,9 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
         UpdateFilteredSuggestions();
         SetDropdownButtonState();
+
+        if (IsBitfieldMode)
+            InitializeBitfieldCheckboxes();
     }
 
     private void OnSuggestionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -194,8 +198,9 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         }
 
         UpdateFilteredSuggestions();
+
         if (IsBitfieldMode)
-            CalculateBitfieldSum();
+            InitializeBitfieldCheckboxes();
     }
 
     private void OnTextChanged()
@@ -203,7 +208,11 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         if (_isUpdatingText)
             return;
 
-        if (!IsBitfieldMode)
+        if (IsBitfieldMode)
+        {
+            InitializeBitfieldCheckboxes();
+        }
+        else
         {
             UpdateFilteredSuggestions();
             if (!string.IsNullOrEmpty(Text) && _textBox != null && _textBox.IsFocused)
@@ -252,29 +261,46 @@ public class ExtendedAutoCompleteBox : TemplatedControl
     private void InitializeBitfieldCheckboxes()
     {
         _isInitializing = true;
-
-        if (Suggestions == null || string.IsNullOrEmpty(Text))
-            return;
-
-        if (long.TryParse(Text, out long currentBitfieldValue))
+        try
         {
+            _preservedBits = 0;
+
+            if (Suggestions == null || string.IsNullOrEmpty(Text))
+                return;
+
+            if (!long.TryParse(Text, out long currentBitfieldValue))
+                return;
+
+            long knownMask = 0;
+            foreach (ExtendedAutoCompleteItem item in Suggestions)
+            {
+                if (
+                    item.Value != null
+                    && long.TryParse(item.Value.ToString(), out long flagValue)
+                    && flagValue != 0
+                )
+                {
+                    knownMask |= flagValue;
+                }
+            }
+
+            _preservedBits = currentBitfieldValue & ~knownMask;
+
             foreach (ExtendedAutoCompleteItem item in Suggestions)
             {
                 if (item.Value != null && long.TryParse(item.Value.ToString(), out long flagValue))
                 {
-                    if (flagValue != 0)
-                    {
-                        item.IsChecked = (currentBitfieldValue & flagValue) == flagValue;
-                    }
-                    else
-                    {
-                        item.IsChecked = currentBitfieldValue == 0;
-                    }
+                    item.IsChecked =
+                        flagValue != 0
+                            ? (currentBitfieldValue & flagValue) == flagValue
+                            : currentBitfieldValue == 0;
                 }
             }
         }
-
-        _isInitializing = false;
+        finally
+        {
+            _isInitializing = false;
+        }
     }
 
     private void CalculateBitfieldSum()
@@ -282,7 +308,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         if (_isInitializing)
             return;
 
-        long sum = 0;
+        long sum = _preservedBits;
         if (Suggestions != null)
         {
             foreach (ExtendedAutoCompleteItem item in Suggestions)
@@ -291,7 +317,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
                 {
                     if (long.TryParse(item.Value.ToString(), out long val))
                     {
-                        sum += val;
+                        sum |= val;
                     }
                 }
             }
