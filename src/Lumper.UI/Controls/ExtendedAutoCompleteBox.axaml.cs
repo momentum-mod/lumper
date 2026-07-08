@@ -43,6 +43,8 @@ public class ExtendedAutoCompleteBox : TemplatedControl
     private bool _isNavigating;
     private bool _isInitializing;
     private long _preservedBits;
+    private INotifyCollectionChanged? _subscribedCollection;
+    private readonly HashSet<ExtendedAutoCompleteItem> _subscribedItems = [];
 
     public ObservableCollection<ExtendedAutoCompleteItem> FilteredSuggestions { get; } = [];
 
@@ -118,6 +120,20 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         UpdateFilteredSuggestions();
     }
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        SubscribeCollection(Suggestions);
+        SubscribeAllItems(Suggestions);
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        UnsubscribeCollection();
+        UnsubscribeAllItems();
+        base.OnDetachedFromVisualTree(e);
+    }
+
     private void OnListBoxPointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
         e.Handled = true;
@@ -155,27 +171,66 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         }
     }
 
+    private void SubscribeCollection(IReadOnlyCollection<ExtendedAutoCompleteItem>? suggestions)
+    {
+        if (suggestions is INotifyCollectionChanged incc)
+        {
+            if (ReferenceEquals(incc, _subscribedCollection))
+                return;
+
+            UnsubscribeCollection();
+            incc.CollectionChanged += OnSuggestionsCollectionChanged;
+            _subscribedCollection = incc;
+        }
+        else
+        {
+            UnsubscribeCollection();
+        }
+    }
+
+    private void UnsubscribeCollection()
+    {
+        if (_subscribedCollection != null)
+        {
+            _subscribedCollection.CollectionChanged -= OnSuggestionsCollectionChanged;
+            _subscribedCollection = null;
+        }
+    }
+
+    private void SubscribeItem(ExtendedAutoCompleteItem item)
+    {
+        if (_subscribedItems.Add(item))
+            item.PropertyChanged += OnItemPropertyChanged;
+    }
+
+    private void UnsubscribeItem(ExtendedAutoCompleteItem item)
+    {
+        if (_subscribedItems.Remove(item))
+            item.PropertyChanged -= OnItemPropertyChanged;
+    }
+
+    private void SubscribeAllItems(IEnumerable<ExtendedAutoCompleteItem>? items)
+    {
+        if (items == null)
+            return;
+
+        foreach (ExtendedAutoCompleteItem item in items)
+            SubscribeItem(item);
+    }
+
+    private void UnsubscribeAllItems()
+    {
+        foreach (ExtendedAutoCompleteItem item in _subscribedItems)
+            item.PropertyChanged -= OnItemPropertyChanged;
+        _subscribedItems.Clear();
+    }
+
     private void OnSuggestionsChanged(AvaloniaPropertyChangedEventArgs e)
     {
-        if (e.OldValue is INotifyCollectionChanged oldCollection)
-        {
-            oldCollection.CollectionChanged -= OnSuggestionsCollectionChanged;
-        }
-        if (e.OldValue is IEnumerable<ExtendedAutoCompleteItem> oldItems)
-        {
-            foreach (ExtendedAutoCompleteItem item in oldItems)
-                item.PropertyChanged -= OnItemPropertyChanged;
-        }
+        SubscribeCollection(e.NewValue as IReadOnlyCollection<ExtendedAutoCompleteItem>);
 
-        if (e.NewValue is INotifyCollectionChanged newCollection)
-        {
-            newCollection.CollectionChanged += OnSuggestionsCollectionChanged;
-        }
-        if (e.NewValue is IEnumerable<ExtendedAutoCompleteItem> newItems)
-        {
-            foreach (ExtendedAutoCompleteItem item in newItems)
-                item.PropertyChanged += OnItemPropertyChanged;
-        }
+        UnsubscribeAllItems();
+        SubscribeAllItems(e.NewValue as IEnumerable<ExtendedAutoCompleteItem>);
 
         UpdateFilteredSuggestions();
         SetDropdownButtonState();
@@ -186,15 +241,23 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
     private void OnSuggestionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.OldItems != null)
+        if (e.Action == NotifyCollectionChangedAction.Reset || (e.OldItems == null && e.NewItems == null))
         {
-            foreach (ExtendedAutoCompleteItem item in e.OldItems)
-                item.PropertyChanged -= OnItemPropertyChanged;
+            UnsubscribeAllItems();
+            SubscribeAllItems(Suggestions);
         }
-        if (e.NewItems != null)
+        else
         {
-            foreach (ExtendedAutoCompleteItem item in e.NewItems)
-                item.PropertyChanged += OnItemPropertyChanged;
+            if (e.OldItems != null)
+            {
+                foreach (ExtendedAutoCompleteItem item in e.OldItems)
+                    UnsubscribeItem(item);
+            }
+            if (e.NewItems != null)
+            {
+                foreach (ExtendedAutoCompleteItem item in e.NewItems)
+                    SubscribeItem(item);
+            }
         }
 
         UpdateFilteredSuggestions();
