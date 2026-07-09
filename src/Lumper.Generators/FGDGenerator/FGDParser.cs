@@ -81,6 +81,10 @@ public static class FGDParser
                     }
                 }
             }
+            else
+            {
+                _ = stream.Consume();
+            }
         }
         return entities;
     }
@@ -212,8 +216,15 @@ public static class FGDParser
                 while (!stream.Match("]") && stream.Peek().Type != TokenType.EOF)
                 {
                     string choiceKey = stream.Consume().Value;
-                    _ = stream.Match(":");
-                    string choiceDisplay = stream.Consume().Value;
+                    string choiceDisplay = choiceKey;
+
+                    if (stream.Match(":"))
+                    {
+                        if (stream.Peek().Type is TokenType._String or TokenType.Word)
+                        {
+                            choiceDisplay = stream.Consume().Value;
+                        }
+                    }
 
                     choices.Add(new KeyValuePair<string, string>(choiceKey, choiceDisplay));
 
@@ -228,11 +239,17 @@ public static class FGDParser
 
                 bool allKeysAreIntegers = choices.All(choice => int.TryParse(choice.Key, out _));
 
-                prop.Choices = (
-                    allKeysAreIntegers
-                        ? choices.OrderBy(choice => int.Parse(choice.Key, CultureInfo.InvariantCulture))
-                        : choices.OrderBy(choice => choice.Key, StringComparer.OrdinalIgnoreCase)
-                ).ToDictionary(choice => choice.Key, choice => choice.Value, StringComparer.OrdinalIgnoreCase);
+                IOrderedEnumerable<KeyValuePair<string, string>> orderedChoices = allKeysAreIntegers
+                    ? choices.OrderBy(choice => int.Parse(choice.Key, CultureInfo.InvariantCulture))
+                    : choices.OrderBy(choice => choice.Key, StringComparer.OrdinalIgnoreCase);
+
+                var choiceDict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, string> choice in orderedChoices)
+                {
+                    choiceDict[choice.Key] = choice.Value;
+                }
+
+                prop.Choices = choiceDict;
             }
         }
         return prop;
