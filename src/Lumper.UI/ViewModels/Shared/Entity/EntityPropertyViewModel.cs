@@ -373,11 +373,9 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
     {
         List<ExtendedAutoCompleteItem> suggestions = [];
 
-        string? classname = BspService
-            .Instance.TargetnameIndex.Entries.FirstOrDefault(e => e.Targetname == TargetEntityName)
-            ?.Classname;
-
-        if (classname != null && MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity))
+        if (BspService.Instance.TargetnameIndex.ClassnamesByTargetname.TryGetValue(TargetEntityName, out string? classname) 
+            && classname != null 
+            && MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity))
         {
             foreach (FGDInput input in fgdEntity.Inputs.Values)
             {
@@ -385,6 +383,7 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
                 suggestions.Add(item);
             }
         }
+        
         return suggestions;
     }
 

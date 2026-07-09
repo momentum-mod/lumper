@@ -16,6 +16,8 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
 {
     public ObservableCollectionExtended<TargetnameMapping> Entries { get; } = [];
     public ObservableCollectionExtended<ExtendedAutoCompleteItem> Suggestions { get; } = [];
+    public IReadOnlyDictionary<string, string> ClassnamesByTargetname { get; private set; } 
+    = new Dictionary<string, string>();
 
     private readonly IDisposable _subscription;
 
@@ -61,6 +63,11 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
                         Value = entry.Targetname,
                         Display = $"{entry.Targetname} ({entry.Classname})",
                     })
+                );
+
+                ClassnamesByTargetname = list.ToDictionary(
+                    entry => entry.Targetname,
+                    entry => entry.Classname
                 );
             });
     }
