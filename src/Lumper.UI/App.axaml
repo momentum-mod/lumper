@@ -8,15 +8,14 @@
         <local:ViewLocator />
     </Application.DataTemplates>
 
-  <Application.Resources>
+    <Application.Resources>
         <!-- To change these across the application, just whack static-weight TTFs in Assets/Fonts/ and update below. -->
         <FontFamily x:Key="Sans">avares://Lumper.UI/Assets/Fonts/Roboto/#Roboto</FontFamily>
         <FontFamily x:Key="Monospace">avares://Lumper.UI/Assets/Fonts/JetBrains_Mono/#JetBrains Mono</FontFamily>
     </Application.Resources>
 
-  <Application.Styles>
-    <StyleInclude Source="Styles/Styles.axaml" />
-    <StyleInclude Source="avares://Lumper.UI/Controls/ExtendedAutoCompleteBox.axaml"/>
+    <Application.Styles>
+        <StyleInclude Source="Styles/Styles.axaml" />
         <materialIcons:MaterialIconStyles />
-  </Application.Styles>
+    </Application.Styles>
 </Application>

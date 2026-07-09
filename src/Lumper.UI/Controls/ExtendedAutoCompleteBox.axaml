@@ -1,89 +1,89 @@
-<Styles xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:local="using:Lumper.UI.Controls">
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:Lumper.UI.Controls"
+             x:Class="Lumper.UI.Controls.ExtendedAutoCompleteBox"
+             x:Name="Root">
 
-    <Style Selector="local|ExtendedAutoCompleteBox">
-        <Setter Property="Template">
-            <ControlTemplate>
+    <Grid>
+        <TextBox x:Name="InputTextBox"
+                 Text="{Binding $parent[controls:ExtendedAutoCompleteBox].Text, Mode=TwoWay}">
+            <TextBox.InnerLeftContent>
+                <Button x:Name="DropdownButton"
+                        Width="20"
+                        Height="20"
+                        CornerRadius="4"
+                        VerticalAlignment="Center"
+                        Margin="4 0 0 0"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Focusable="False"
+                        Cursor="Hand">
+                    <Path Fill="{DynamicResource TextControlForeground}"
+                          Data="M 0 0 L 4 4 L 8 0 Z"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center" />
+                </Button>
+            </TextBox.InnerLeftContent>
+        </TextBox>
+
+        <Popup x:Name="SuggestionsPopup"
+               PlacementTarget="{Binding ElementName=InputTextBox}"
+               IsOpen="{Binding $parent[controls:ExtendedAutoCompleteBox].IsDropdownOpen, Mode=TwoWay}"
+               IsLightDismissEnabled="True"
+               Placement="BottomEdgeAlignedLeft"
+               MaxHeight="250"
+               MinWidth="{Binding Bounds.Width, ElementName=InputTextBox}">
+
+            <Border Background="{DynamicResource FlyoutPresenterBackground}"
+                    BorderBrush="{DynamicResource FlyoutPresenterBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="4">
                 <Grid>
-                    <TextBox Name="PART_TextBox" Text="{Binding Text, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
-                        <TextBox.InnerLeftContent>
-                            <Button Name="PART_DropdownButton"
-                                Width="20" 
-                                Height="20" 
-                                CornerRadius="4"
-                                VerticalAlignment="Center"
-                                Margin="4 0 0 0"
-                                Padding="0"
-                                Background="Transparent" 
-                                BorderThickness="0" 
-                                Focusable="False" 
-                                Cursor="Hand">
-                                <Path Fill="{DynamicResource TextControlForeground}" Data="M 0 0 L 4 4 L 8 0 Z" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            </Button>
-                        </TextBox.InnerLeftContent>
-                    </TextBox>
+                    <ListBox x:Name="StandardList"
+                             IsVisible="{Binding !$parent[controls:ExtendedAutoCompleteBox].IsBitfieldMode}"
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="8,4" />
+                                <Setter Property="MinHeight" Value="24" />
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="controls:ExtendedAutoCompleteItem">
+                                <TextBlock Text="{Binding DisplayText}" FontSize="14" VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
 
-                    <Popup Name="PART_Popup" 
-                           PlacementTarget="{Binding ElementName=PART_TextBox}" 
-                           IsOpen="{Binding IsDropdownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}" 
-                           IsLightDismissEnabled="True" 
-                           Placement="BottomEdgeAlignedLeft" 
-                           MaxHeight="250" 
-                           MinWidth="{Binding Bounds.Width, ElementName=PART_TextBox}">
-                        
-                        <Border Background="{DynamicResource FlyoutPresenterBackground}" 
-                                BorderBrush="{DynamicResource FlyoutPresenterBorderBrush}" 
-                                BorderThickness="1" 
-                                CornerRadius="4"
-                                Padding="4">
-                            <Grid>
-                                <ListBox Name="PART_StandardList" 
-                                        IsVisible="{Binding !IsBitfieldMode, RelativeSource={RelativeSource TemplatedParent}}" 
-                                        Background="Transparent" 
-                                        BorderThickness="0">
-                                    <ListBox.Styles>
-                                        <Style Selector="ListBoxItem">
-                                            <Setter Property="Padding" Value="8,4"/>
-                                            <Setter Property="MinHeight" Value="24"/>
-                                        </Style>
-                                    </ListBox.Styles>
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate x:DataType="local:ExtendedAutoCompleteItem">
-                                            <TextBlock Text="{Binding DisplayText}" FontSize="14" VerticalAlignment="Center"/>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-
-                                <ListBox Name="PART_BitfieldList" 
-                                    IsVisible="{Binding IsBitfieldMode, RelativeSource={RelativeSource TemplatedParent}}" 
-                                    Background="Transparent" 
-                                    BorderThickness="0">
-                                    <ListBox.Styles>
-                                        <Style Selector="ListBoxItem">
-                                            <Setter Property="Padding" Value="6,2"/>
-                                            <Setter Property="MinHeight" Value="24"/>
-                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                        </Style>
-                                    </ListBox.Styles>
-                                    <ListBox.ItemTemplate>
-                                        <DataTemplate x:DataType="local:ExtendedAutoCompleteItem">
-                                            <CheckBox Content="{Binding DisplayText}" 
-                                                    IsChecked="{Binding IsChecked, Mode=TwoWay}" 
-                                                    HorizontalAlignment="Stretch"
-                                                    Background="Transparent"
-                                                    FontSize="14" 
-                                                    MinHeight="20"
-                                                    Padding="6,0,0,0"
-                                                    VerticalAlignment="Center"/>
-                                        </DataTemplate>
-                                    </ListBox.ItemTemplate>
-                                </ListBox>
-                            </Grid>
-                        </Border>
-                    </Popup>
+                    <ListBox x:Name="BitfieldList"
+                             IsVisible="{Binding $parent[controls:ExtendedAutoCompleteBox].IsBitfieldMode}"
+                             Background="Transparent"
+                             BorderThickness="0">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="6,2" />
+                                <Setter Property="MinHeight" Value="24" />
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="controls:ExtendedAutoCompleteItem">
+                                <CheckBox Content="{Binding DisplayText}"
+                                          IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                          HorizontalAlignment="Stretch"
+                                          Background="Transparent"
+                                          FontSize="14"
+                                          MinHeight="20"
+                                          Padding="6,0,0,0"
+                                          VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </Grid>
-            </ControlTemplate>
-        </Setter>
-    </Style>
-</Styles>
+            </Border>
+        </Popup>
+    </Grid>
+</UserControl>

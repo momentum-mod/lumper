@@ -9,11 +9,10 @@ using System.Globalization;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Threading;
 
-public class ExtendedAutoCompleteBox : TemplatedControl
+public partial class ExtendedAutoCompleteBox : UserControl
 {
     public static readonly StyledProperty<string> TextProperty = AvaloniaProperty.Register<
         ExtendedAutoCompleteBox,
@@ -35,10 +34,6 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         bool
     >(nameof(IsDropdownOpen));
 
-    private TextBox? _textBox;
-    private Button? _dropdownButton;
-    private ListBox? _standardList;
-    private ListBox? _bitfieldList;
     private bool _isUpdatingText;
     private bool _isNavigating;
     private bool _isInitializing;
@@ -79,42 +74,29 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         IsBitfieldModeProperty.Changed.AddClassHandler<ExtendedAutoCompleteBox>((x, e) => x.OnIsBitfieldModeChanged());
     }
 
-    protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
+    public ExtendedAutoCompleteBox()
     {
-        base.OnApplyTemplate(e);
+        InitializeComponent();
 
-        _textBox = e.NameScope.Find<TextBox>("PART_TextBox");
-        _dropdownButton = e.NameScope.Find<Button>("PART_DropdownButton");
-        _standardList = e.NameScope.Find<ListBox>("PART_StandardList");
-        _bitfieldList = e.NameScope.Find<ListBox>("PART_BitfieldList");
+        // The visual tree is fixed for the lifetime of this control (unlike a
+        // TemplatedControl, there's no re-templating to guard against), so these
+        // elements are wired once here instead of in OnApplyTemplate, and referenced
+        // directly rather than through nullable backing fields.
+        DropdownButton.Click += (_, _) => ToggleDropdown();
 
-        if (_dropdownButton != null)
+        InputTextBox.KeyDown += OnTextBoxKeyDown;
+        InputTextBox.GotFocus += (_, _) =>
         {
-            _dropdownButton.Click += (s, args) => ToggleDropdown();
-        }
+            if (!IsBitfieldMode)
+                UpdateFilteredSuggestions();
+        };
 
-        if (_textBox != null)
-        {
-            _textBox.KeyDown += OnTextBoxKeyDown;
-            _textBox.GotFocus += (s, args) =>
-            {
-                if (!IsBitfieldMode)
-                    UpdateFilteredSuggestions();
-            };
-        }
+        StandardList.SelectionChanged += OnStandardListSelectionChanged;
+        StandardList.ItemsSource = FilteredSuggestions;
+        StandardList.PointerWheelChanged += OnListBoxPointerWheelChanged;
 
-        if (_standardList != null)
-        {
-            _standardList.SelectionChanged += OnStandardListSelectionChanged;
-            _standardList.ItemsSource = FilteredSuggestions;
-            _standardList.PointerWheelChanged += OnListBoxPointerWheelChanged;
-        }
-
-        if (_bitfieldList != null)
-        {
-            _bitfieldList.ItemsSource = FilteredSuggestions;
-            _bitfieldList.PointerWheelChanged += OnListBoxPointerWheelChanged;
-        }
+        BitfieldList.ItemsSource = FilteredSuggestions;
+        BitfieldList.PointerWheelChanged += OnListBoxPointerWheelChanged;
 
         SetDropdownButtonState();
         UpdateFilteredSuggestions();
@@ -141,9 +123,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
     private void SetDropdownButtonState()
     {
-        if (_dropdownButton == null)
-            return;
-        _dropdownButton.IsVisible = Suggestions is { Count: > 0 };
+        DropdownButton.IsVisible = Suggestions is { Count: > 0 };
     }
 
     private void ToggleDropdown()
@@ -152,7 +132,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         if (IsDropdownOpen)
         {
             UpdateFilteredSuggestions(showAll: true);
-            _textBox?.Focus();
+            InputTextBox.Focus();
         }
     }
 
@@ -279,7 +259,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
         else
         {
             UpdateFilteredSuggestions();
-            if (!string.IsNullOrEmpty(Text) && _textBox != null && _textBox.IsFocused)
+            if (!string.IsNullOrEmpty(Text) && InputTextBox.IsFocused)
             {
                 IsDropdownOpen = FilteredSuggestions.Any();
             }
@@ -391,7 +371,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
     private void OnStandardListSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (_standardList?.SelectedItem is ExtendedAutoCompleteItem item)
+        if (StandardList.SelectedItem is ExtendedAutoCompleteItem item)
         {
             _isUpdatingText = true;
             Text = item.Value?.ToString() ?? item.DisplayText;
@@ -401,15 +381,12 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
             Dispatcher.UIThread.Post(() =>
             {
-                if (_textBox != null)
-                {
-                    _textBox.CaretIndex = Text?.Length ?? 0;
-                }
+                InputTextBox.CaretIndex = Text?.Length ?? 0;
                 if (shouldCloseDropdown)
                 {
                     IsDropdownOpen = false;
-                    _standardList.SelectedItem = null;
-                    _textBox?.Focus();
+                    StandardList.SelectedItem = null;
+                    InputTextBox.Focus();
                 }
             });
         }
@@ -417,8 +394,8 @@ public class ExtendedAutoCompleteBox : TemplatedControl
 
     private void OnTextBoxKeyDown(object? sender, KeyEventArgs e)
     {
-        ListBox? activeList = IsBitfieldMode ? _bitfieldList : _standardList;
-        if (activeList == null || !FilteredSuggestions.Any())
+        ListBox activeList = IsBitfieldMode ? BitfieldList : StandardList;
+        if (!FilteredSuggestions.Any())
             return;
 
         if (e.Key == Key.Down)
