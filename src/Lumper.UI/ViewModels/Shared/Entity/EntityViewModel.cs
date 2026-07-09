@@ -32,6 +32,8 @@ public class EntityViewModel : HierarchicalBspNode
             // Gross doing this but really don't want the perf hit of registering
             // a ToPropertyEx observable chain for every entity
             this.RaisePropertyChanged(nameof(ClassAndTargetname));
+
+            RefreshPropertiesForClassname();
         }
     }
 
@@ -44,6 +46,15 @@ public class EntityViewModel : HierarchicalBspNode
             Properties.Add(EntityPropertyViewModel.Create(property, this));
 
         ResetClassname();
+        RefreshPropertiesForClassname();
+    }
+
+    private void RefreshPropertiesForClassname()
+    {
+        // Avoid the getter checks
+        string classname = Classname;
+        foreach (EntityPropertyViewModel propVm in Properties)
+            propVm.RefreshForClassname(classname);
     }
 
     public void RaiseTargetnameChanged()
@@ -57,6 +68,7 @@ public class EntityViewModel : HierarchicalBspNode
         var vm = EntityPropertyViewModel.Create(prop, this);
         Entity.Properties.Add(prop);
         Properties.Add(vm);
+        vm.RefreshForClassname(Classname);
         MarkAsModified();
 
         if (prop.Key == "targetname")
@@ -78,6 +90,7 @@ public class EntityViewModel : HierarchicalBspNode
     public void AddPropertyViewModelOnly(EntityPropertyViewModel propVm)
     {
         Properties.Add(propVm);
+        propVm.RefreshForClassname(Classname);
 
         if (propVm.Key == "targetname")
             RaiseTargetnameChanged();

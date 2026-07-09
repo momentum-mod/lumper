@@ -12,17 +12,18 @@ using Lumper.UI.Services;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
-public abstract class EntityPropertyViewModel : HierarchicalBspNode
+public abstract class EntityPropertyViewModel(Entity.EntityProperty property, BspNode bspNode)
+    : HierarchicalBspNode(bspNode)
 {
-    public Entity.EntityProperty Property { get; }
-    public EntityViewModel ParentEntity { get; }
+    public Entity.EntityProperty Property { get; } = property;
+    public EntityViewModel ParentEntity { get; } = (EntityViewModel)bspNode;
 
     // Note that EntityPropertyViewModels all store copies of their corresponding model values;
     // without we'd be unable to tell if a viewmodel has been modified when a job or other
     // Lumper.Lib code is ran that updates the model. When this happens, calling PullChangesFromModel
     // can simply try setting the viewmodel value to model value, and only RaisePropertyChanged
     // if it changed.
-    private string _key;
+    private string _key = property.Key;
     public string Key
     {
         get => _key;
@@ -37,6 +38,7 @@ public abstract class EntityPropertyViewModel : HierarchicalBspNode
             _key = value;
             Property.Key = value;
             this.RaisePropertyChanged();
+            OnKeyChanged();
 
             if (this is not EntityPropertyStringViewModel vm)
                 return;
@@ -51,16 +53,7 @@ public abstract class EntityPropertyViewModel : HierarchicalBspNode
         }
     }
 
-    protected EntityPropertyViewModel(Entity.EntityProperty property, BspNode bspNode)
-        : base(bspNode)
-    {
-        Property = property;
-        ParentEntity = (EntityViewModel)bspNode;
-        _key = property.Key;
-
-        this.WhenAnyValue(x => x.ParentEntity.Classname)
-            .Subscribe(classname => KeySuggestions = FetchKeySuggestionsForClassname(classname));
-    }
+    protected virtual void OnKeyChanged() { }
 
     [Reactive]
     public IReadOnlyCollection<ExtendedAutoCompleteItem> KeySuggestions { get; set; } = [];
@@ -68,23 +61,36 @@ public abstract class EntityPropertyViewModel : HierarchicalBspNode
     public IReadOnlyCollection<ExtendedAutoCompleteItem> TargetEntityNameSuggestions =>
         BspService.Instance.TargetnameIndex.Suggestions;
 
-    public List<ExtendedAutoCompleteItem> FetchKeySuggestionsForClassname(string classname)
+    private static readonly Dictionary<string, IReadOnlyCollection<ExtendedAutoCompleteItem>> KeySuggestionsCache = [];
+
+    public virtual IReadOnlyCollection<ExtendedAutoCompleteItem> FetchKeySuggestionsForClassname(string classname)
     {
+        if (string.IsNullOrWhiteSpace(classname))
+            return [];
+
+        if (KeySuggestionsCache.TryGetValue(classname, out IReadOnlyCollection<ExtendedAutoCompleteItem>? cached))
+            return cached;
+
         List<ExtendedAutoCompleteItem> suggestions = [];
-        if (
-            !string.IsNullOrWhiteSpace(classname)
-            && MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity)
-        )
+        if (MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity))
         {
             foreach (FGDProperty prop in fgdEntity.Properties.Values)
             {
-                var item = new ExtendedAutoCompleteItem { Value = prop.Name };
-
-                suggestions.Add(item);
+                suggestions.Add(new ExtendedAutoCompleteItem { Value = prop.Name });
             }
         }
+
+        KeySuggestionsCache[classname] = suggestions;
         return suggestions;
     }
+
+    public void RefreshForClassname(string classname)
+    {
+        KeySuggestions = FetchKeySuggestionsForClassname(classname);
+        OnClassnameChanged();
+    }
+
+    protected virtual void OnClassnameChanged() { }
 
     public static EntityPropertyViewModel Create(Entity.EntityProperty entityProperty, EntityViewModel parent)
     {
@@ -111,39 +117,31 @@ public abstract class EntityPropertyViewModel : HierarchicalBspNode
     }
 }
 
-public class EntityPropertyStringViewModel : EntityPropertyViewModel
+public class EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
+    : EntityPropertyViewModel(property, bspNode)
 {
-    private readonly Entity.EntityProperty<string> _property;
-    private string _value;
+    private readonly Entity.EntityProperty<string> _property = property;
+    private string _value = property.Value;
     private IReadOnlyCollection<ExtendedAutoCompleteItem>? _valueSuggestions;
     private static readonly IReadOnlyCollection<ExtendedAutoCompleteItem> ClassnameSuggestions = MomentumFGD
         .Entities.Keys.Select(fgdKey => new ExtendedAutoCompleteItem { Value = fgdKey })
         .ToList();
 
-    public EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
-        : base(property, bspNode)
+    protected override void OnKeyChanged()
     {
-        _property = property;
-        _value = property.Value;
+        IsBitfield = IsKeyBitfield();
+        _valueSuggestions = null;
+        this.RaisePropertyChanged(nameof(ValueSuggestions));
+    }
 
-        this.WhenAnyValue(x => x.Key)
-            .Subscribe(_ =>
-            {
-                IsBitfield = IsKeyBitfield();
-                _valueSuggestions = null;
-                this.RaisePropertyChanged(nameof(ValueSuggestions));
-            });
+    protected override void OnClassnameChanged()
+    {
+        if (Key == "classname")
+            return;
 
-        this.WhenAnyValue(x => x.ParentEntity.Classname)
-            .Subscribe(_ =>
-            {
-                if (Key != "classname")
-                {
-                    IsBitfield = IsKeyBitfield();
-                    _valueSuggestions = null;
-                    this.RaisePropertyChanged(nameof(ValueSuggestions));
-                }
-            });
+        IsBitfield = IsKeyBitfield();
+        _valueSuggestions = null;
+        this.RaisePropertyChanged(nameof(ValueSuggestions));
     }
 
     public string Value
@@ -257,15 +255,6 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
         _parameter = property.Value.Parameter;
         _delay = property.Value.Delay;
         _timesToFire = property.Value.TimesToFire;
-
-        this.WhenAnyValue(x => x.ParentEntity.Classname).Subscribe(_ => KeySuggestions = FetchIoKeySuggestions());
-
-        this.WhenAnyValue(x => x.TargetEntityName)
-            .Subscribe(_ =>
-            {
-                _inputSuggestions = null;
-                this.RaisePropertyChanged(nameof(InputSuggestions));
-            });
     }
 
     public string TargetEntityName
@@ -279,6 +268,10 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
             _targetEntityName = value;
             _property.Value.TargetEntityName = value;
             this.RaisePropertyChanged();
+
+            _inputSuggestions = null;
+            this.RaisePropertyChanged(nameof(InputSuggestions));
+
             OnValueChanged();
         }
     }
@@ -354,18 +347,27 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
         this.RaisePropertyChanged(nameof(DisplayValue));
     }
 
-    private List<ExtendedAutoCompleteItem> FetchIoKeySuggestions()
-    {
-        List<ExtendedAutoCompleteItem> suggestions = [];
+    private static readonly Dictionary<string, IReadOnlyCollection<ExtendedAutoCompleteItem>> IoKeySuggestionsCache =
+    [];
 
-        if (MomentumFGD.Entities.TryGetValue(ParentEntity.Classname, out FGDEntity? fgdEntity))
+    public override IReadOnlyCollection<ExtendedAutoCompleteItem> FetchKeySuggestionsForClassname(string classname)
+    {
+        if (string.IsNullOrWhiteSpace(classname))
+            return [];
+
+        if (IoKeySuggestionsCache.TryGetValue(classname, out IReadOnlyCollection<ExtendedAutoCompleteItem>? cached))
+            return cached;
+
+        List<ExtendedAutoCompleteItem> suggestions = [];
+        if (MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity))
         {
             foreach (KeyValuePair<string, FGDOutput> output in fgdEntity.Outputs)
             {
-                var item = new ExtendedAutoCompleteItem { Value = output.Value.Name };
-                suggestions.Add(item);
+                suggestions.Add(new ExtendedAutoCompleteItem { Value = output.Value.Name });
             }
         }
+
+        IoKeySuggestionsCache[classname] = suggestions;
         return suggestions;
     }
 
