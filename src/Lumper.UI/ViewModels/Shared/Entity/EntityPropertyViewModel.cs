@@ -42,12 +42,12 @@ public abstract class EntityPropertyViewModel : HierarchicalBspNode
                 return;
 
             if (wasClassname)
-                ((EntityViewModel)Parent).ResetClassname();
+                ParentEntity.ResetClassname();
             else if (value == "classname")
-                ((EntityViewModel)Parent).Classname = vm.Value;
+                ParentEntity.Classname = vm.Value;
 
             if (wasTargetname || value == "targetname")
-                ((EntityViewModel)Parent).RaiseTargetnameChanged();
+                ParentEntity.RaiseTargetnameChanged();
         }
     }
 
@@ -107,7 +107,7 @@ public abstract class EntityPropertyViewModel : HierarchicalBspNode
 
     public void Delete()
     {
-        ((EntityViewModel)Parent).DeleteProperty(this);
+        ParentEntity.DeleteProperty(this);
     }
 }
 
@@ -157,9 +157,9 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
             this.RaisePropertyChanged();
 
             if (Key == "classname")
-                ((EntityViewModel)Parent).Classname = value;
+                ParentEntity.Classname = value;
             else if (Key == "targetname")
-                ((EntityViewModel)Parent).RaiseTargetnameChanged();
+                ParentEntity.RaiseTargetnameChanged();
         }
     }
 
@@ -358,10 +358,7 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
     {
         List<ExtendedAutoCompleteItem> suggestions = [];
 
-        if (
-            Parent is EntityViewModel entityVm
-            && MomentumFGD.Entities.TryGetValue(entityVm.Classname, out FGDEntity? fgdEntity)
-        )
+        if (MomentumFGD.Entities.TryGetValue(ParentEntity.Classname, out FGDEntity? fgdEntity))
         {
             foreach (KeyValuePair<string, FGDOutput> output in fgdEntity.Outputs)
             {
