@@ -24,7 +24,7 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
     public TargetnameIndexViewModel()
     {
         _subscription = BspService
-            .WhenAnyValue(x => x.EntityLumpViewModel)
+            .WhenAnyValue(x => x.EntityLumpViewModelLazy)
             .Select(entLump =>
                 entLump is not null
                     ? entLump

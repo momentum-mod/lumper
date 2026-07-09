@@ -99,7 +99,11 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// Get the entity lump viewmodel. If this is the first time it's being accessed, it will be initialized.
     /// </summary>
     public EntityLumpViewModel? EntityLumpViewModel =>
-        LazyLoadLump(ref _entityLumpViewModel, () => new EntityLumpViewModel(BspFile!));
+        LazyLoadLump(
+            ref _entityLumpViewModel,
+            () => new EntityLumpViewModel(BspFile!),
+            nameof(EntityLumpViewModelLazy)
+        );
 
     /// <summary>
     /// Get the entity lump viewmodel if it's been initialized, otherwise returns null.
@@ -112,7 +116,11 @@ public sealed class BspService : ReactiveObject, IDisposable
     /// Get the pakfile lump viewmodel. If this is the first time it's being accessed, it will be initialized.
     /// </summary>
     public PakfileLumpViewModel? PakfileLumpViewModel =>
-        LazyLoadLump(ref _pakfileLumpViewModel, () => new PakfileLumpViewModel(BspFile!));
+        LazyLoadLump(
+            ref _pakfileLumpViewModel,
+            () => new PakfileLumpViewModel(BspFile!),
+            nameof(PakfileLumpViewModelLazy)
+        );
 
     /// <summary>
     /// Get the pakfile lump viewmodel if it's been initialized, otherwise return null.
@@ -476,12 +484,14 @@ public sealed class BspService : ReactiveObject, IDisposable
             _entityLumpViewModel?.Dispose();
             _entityLumpViewModel = null;
             this.RaisePropertyChanged(nameof(EntityLumpViewModel));
+            this.RaisePropertyChanged(nameof(EntityLumpViewModelLazy));
         }
         else if (type == typeof(PakfileLumpViewModel))
         {
             _pakfileLumpViewModel?.Dispose();
             _pakfileLumpViewModel = null;
             this.RaisePropertyChanged(nameof(PakfileLumpViewModel));
+            this.RaisePropertyChanged(nameof(PakfileLumpViewModelLazy));
         }
     }
 
@@ -505,7 +515,9 @@ public sealed class BspService : ReactiveObject, IDisposable
         throw new InvalidOperationException(message);
     }
 
-    private T? LazyLoadLump<T>(ref T? backingField, Func<T> newFn)
+    // notifyLazyPropertyName lets callers announce construction on the *Lazy property.
+    // Passive observers can react to a lump being loaded without triggering the load
+    private T? LazyLoadLump<T>(ref T? backingField, Func<T> newFn, string? notifyLazyPropertyName = null)
         where T : class?, new()
     {
         if (BspFile is null)
@@ -514,13 +526,18 @@ public sealed class BspService : ReactiveObject, IDisposable
         if (backingField is not null)
             return backingField;
 
-        return backingField ??= newFn();
+        backingField = newFn();
+        if (notifyLazyPropertyName is not null)
+            this.RaisePropertyChanged(notifyLazyPropertyName);
+
+        return backingField;
     }
 
     public void Dispose()
     {
         _entityLumpViewModel?.Dispose();
         _pakfileLumpViewModel?.Dispose();
+        _targetnameIndex?.Dispose();
         _bspSubject.Dispose();
         BspFile?.Dispose();
     }
