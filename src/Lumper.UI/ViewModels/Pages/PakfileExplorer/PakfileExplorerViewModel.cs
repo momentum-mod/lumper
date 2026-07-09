@@ -35,6 +35,9 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     [Reactive]
     public PakfileEntryViewModel? ActiveFile { get; set; }
 
+    [Reactive]
+    public bool ShowCompressedSize { get; set; } = false;
+
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
     public PakfileExplorerViewModel()
@@ -53,67 +56,79 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
                 }
 
                 _pakfileLumpViewModel = pakfile;
-                Tree = new PakfileTreeViewModel(pakfile.Entries);
+                Tree = new PakfileTreeViewModel(pakfile.Entries, this);
 
-                DataGridSource = new HierarchicalTreeDataGridSource<Node>(Tree.Root)
+                if (Tree is not null)
                 {
-                    Columns =
-                    {
-                        new HierarchicalExpanderColumn<Node>(
-                            new TemplateColumn<Node>(
-                                "Name",
-                                "EntryNameCell",
-                                null, // No edit cell, doesn't work well, we use dialog window instead
-                                new GridLength(4, GridUnitType.Star),
-                                new TemplateColumnOptions<Node>
-                                {
-                                    CompareAscending = Node.SortAscending(x => x.Name),
-                                    CompareDescending = Node.SortDescending(x => x.Name),
-                                    IsTextSearchEnabled = true,
-                                    TextSearchValueSelector = x => x.Name,
-                                    BeginEditGestures = BeginEditGestures.None,
-                                }
-                            ),
-                            x => x.Children,
-                            x => x.IsDirectory,
-                            x => x.IsExpanded
-                        ),
-                        new TextColumn<Node, string?>(
-                            "Extension",
-                            x => x.Extension,
-                            new GridLength(1, GridUnitType.Star),
-                            options: new TextColumnOptions<Node>
-                            {
-                                CompareAscending = Node.SortAscending(x => x.Extension),
-                                CompareDescending = Node.SortDescending(x => x.Extension),
-                            }
-                        ),
-                        new TemplateColumn<Node>(
-                            "Size (uncompressed)",
-                            "EntrySizeCell",
-                            null,
-                            new GridLength(1, GridUnitType.Star),
-                            new TemplateColumnOptions<Node>
-                            {
-                                CompareAscending = Node.SortAscending(x => x.Size),
-                                CompareDescending = Node.SortDescending(x => x.Size),
-                                IsTextSearchEnabled = true,
-                                TextSearchValueSelector = x => x.Name,
-                            }
-                        ),
-                        // TODO: We could do an extra column for percentage of overall size,
-                        // bit of work to recalculate everything as stuff moves so cba rn
-                    },
-                };
-
-                DataGridSource.RowSelection!.SingleSelect = false;
-                DataGridSource.RowSelection!.SelectionChanged += (_, _) =>
-                    SetActiveFile(
-                        DataGridSource?.RowSelection.SelectedItems.Count > 0
-                            ? DataGridSource?.RowSelection.SelectedItems[0]
-                            : null
-                    );
+                    DataGridSource = CreateHierarchicalTreeDataGridSource();
+                    DataGridSource.RowSelection!.SingleSelect = false;
+                    DataGridSource.RowSelection!.SelectionChanged += (_, _) =>
+                        SetActiveFile(
+                            DataGridSource?.RowSelection.SelectedItems.Count > 0
+                                ? DataGridSource?.RowSelection.SelectedItems[0]
+                                : null
+                        );
+                }
             });
+    }
+
+    private HierarchicalTreeDataGridSource<Node> CreateHierarchicalTreeDataGridSource()
+    {
+        if (Tree?.Root is null)
+        {
+            throw new InvalidOperationException("Tree root cannot be null when creating data grid source");
+        }
+
+        return new HierarchicalTreeDataGridSource<Node>(Tree.Root)
+        {
+            Columns =
+            {
+                new HierarchicalExpanderColumn<Node>(
+                    new TemplateColumn<Node>(
+                        "Name",
+                        "EntryNameCell",
+                        null, // No edit cell, doesn't work well, we use dialog window instead
+                        new GridLength(4, GridUnitType.Star),
+                        new TemplateColumnOptions<Node>
+                        {
+                            CompareAscending = Node.SortAscending(x => x.Name),
+                            CompareDescending = Node.SortDescending(x => x.Name),
+                            IsTextSearchEnabled = true,
+                            TextSearchValueSelector = x => x.Name,
+                            BeginEditGestures = BeginEditGestures.None,
+                        }
+                    ),
+                    x => x.Children,
+                    x => x.IsDirectory,
+                    x => x.IsExpanded
+                ),
+                new TextColumn<Node, string?>(
+                    "Extension",
+                    x => x.Extension,
+                    new GridLength(1, GridUnitType.Star),
+                    options: new TextColumnOptions<Node>
+                    {
+                        CompareAscending = Node.SortAscending(x => x.Extension),
+                        CompareDescending = Node.SortDescending(x => x.Extension),
+                    }
+                ),
+                new TemplateColumn<Node>(
+                    $"Size ({(ShowCompressedSize ? "compressed" : "uncompressed")})",
+                    "EntrySizeCell",
+                    null,
+                    new GridLength(1, GridUnitType.Star),
+                    new TemplateColumnOptions<Node>
+                    {
+                        CompareAscending = Node.SortAscending(x => x.Size),
+                        CompareDescending = Node.SortDescending(x => x.Size),
+                        IsTextSearchEnabled = true,
+                        TextSearchValueSelector = x => x.Name,
+                    }
+                ),
+                // TODO: We could do an extra column for percentage of overall size,
+                // bit of work to recalculate everything as stuff moves so cba rn
+            },
+        };
     }
 
     // Null here is fine, just closes RHS pane.
@@ -135,6 +150,13 @@ public sealed class PakfileExplorerViewModel : ViewModelWithView<PakfileExplorer
     public void Unsort()
     {
         DataGridSource?.Sort(null);
+    }
+
+    public void ToggleSizeDisplay()
+    {
+        ShowCompressedSize = !ShowCompressedSize;
+        DataGridSource = CreateHierarchicalTreeDataGridSource();
+        Tree?.Root.NotifyDisplaySizeChanged();
     }
 
     public void ExpandAll()
