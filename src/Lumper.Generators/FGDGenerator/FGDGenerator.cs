@@ -2,10 +2,12 @@ namespace Lumper.Generators.FGDGenerator;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 [Generator(LanguageNames.CSharp)]
@@ -16,16 +18,24 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValuesProvider<string?> fgdContents = context
-            .AdditionalTextsProvider.Where(static file =>
-                Path.GetExtension(file.Path).Equals(".fgd", StringComparison.OrdinalIgnoreCase)
-            )
-            .Select(static (file, ct) => file.GetText(ct)?.ToString());
+        IncrementalValuesProvider<FgdFileState> fgdFiles = context.AdditionalTextsProvider
+            .Where(static file => Path.GetExtension(file.Path).Equals(".fgd", StringComparison.OrdinalIgnoreCase))
+            .Select(static (file, ct) =>
+            {
+                SourceText? text = file.GetText(ct);
+                if (text == null) return default;
+                
+                return new FgdFileState(file, text.GetChecksum());
+            })
+            .Where(static state => state.File != null);
 
         context.RegisterSourceOutput(
-            fgdContents,
-            static (spc, content) =>
+            fgdFiles,
+            static (spc, state) =>
             {
+                SourceText? sourceText = state.File!.GetText(spc.CancellationToken);
+                string? content = sourceText?.ToString();
+
                 if (string.IsNullOrEmpty(content))
                 {
                     return;
@@ -45,6 +55,39 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
                 spc.AddSource($"{GeneratedClassName}.g.cs", SourceText.From(code, Encoding.UTF8));
             }
         );
+    }
+
+    private readonly struct FgdFileState(AdditionalText file, ImmutableArray<byte> checksum) : IEquatable<FgdFileState>
+    {
+        public AdditionalText? File { get; } = file;
+        public ImmutableArray<byte> Checksum { get; } = checksum;
+
+        public bool Equals(FgdFileState other)
+        {
+            if (File?.Path != other.File?.Path) return false;
+            if (Checksum.IsDefault && other.Checksum.IsDefault) return true;
+            if (Checksum.IsDefault || other.Checksum.IsDefault) return false;
+            
+            return Checksum.SequenceEqual(other.Checksum);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is FgdFileState other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = File?.Path?.GetHashCode() ?? 0;
+            if (!Checksum.IsDefault)
+            {
+                for (int i = 0; i < Math.Min(Checksum.Length, 4); i++)
+                {
+                    hash = (hash * 31) + Checksum[i];
+                }
+            }
+            return hash;
+        }
     }
 
     private static string GenerateSource(List<RawEntity> entities)
@@ -145,33 +188,6 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
 
     private static string Lit(string value)
     {
-        var sb = new StringBuilder(value.Length + 2);
-        sb.Append('"');
-        foreach (char c in value)
-        {
-            switch (c)
-            {
-                case '"':
-                    sb.Append("\\\"");
-                    break;
-                case '\\':
-                    sb.Append("\\\\");
-                    break;
-                case '\n':
-                    sb.Append("\\n");
-                    break;
-                case '\r':
-                    sb.Append("\\r");
-                    break;
-                case '\t':
-                    sb.Append("\\t");
-                    break;
-                default:
-                    sb.Append(c);
-                    break;
-            }
-        }
-        sb.Append('"');
-        return sb.ToString();
+        return SymbolDisplay.FormatLiteral(value, quote: true);
     }
 }
