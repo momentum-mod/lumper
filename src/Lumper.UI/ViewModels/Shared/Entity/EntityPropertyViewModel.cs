@@ -86,8 +86,6 @@ public abstract class EntityPropertyViewModel : HierarchicalBspNode
         return suggestions;
     }
 
-    public virtual void OnClassnameChanged() { }
-
     public static EntityPropertyViewModel Create(Entity.EntityProperty entityProperty, EntityViewModel parent)
     {
         return entityProperty switch
