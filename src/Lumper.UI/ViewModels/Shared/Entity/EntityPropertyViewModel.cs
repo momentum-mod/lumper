@@ -116,6 +116,10 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
     private readonly Entity.EntityProperty<string> _property;
     private string _value;
     private IReadOnlyCollection<ExtendedAutoCompleteItem>? _valueSuggestions;
+    private static readonly IReadOnlyCollection<ExtendedAutoCompleteItem> ClassnameSuggestions = 
+        MomentumFGD.Entities.Keys
+            .Select(fgdKey => new ExtendedAutoCompleteItem { Value = fgdKey })
+            .ToList();
 
     public EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
         : base(property, bspNode)
@@ -187,11 +191,7 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
 
         if (Key == "classname")
         {
-            foreach (string? fgdKey in MomentumFGD.Entities.Keys)
-            {
-                var item = new ExtendedAutoCompleteItem { Value = fgdKey };
-                suggestions.Add(item);
-            }
+            return ClassnameSuggestions;
         }
         else if (
             MomentumFGD.Entities.TryGetValue(ParentEntity.Classname, out FGDEntity? fgdEntity)
