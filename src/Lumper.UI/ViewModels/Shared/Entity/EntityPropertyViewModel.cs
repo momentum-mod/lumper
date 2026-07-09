@@ -176,7 +176,7 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
             && fgdEntity.Properties.TryGetValue(Key, out FGDProperty? fgdProp)
         )
         {
-            return fgdProp.ValueType == "flags";
+            return fgdProp.ValueType == FGDValueType.Flags;
         }
         return false;
     }
@@ -193,19 +193,19 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
                 suggestions.Add(item);
             }
         }
-        else if (Key == "target")
-        {
-            return BspService.Instance.TargetnameIndex?.Suggestions ?? [];
-        }
         else if (
             MomentumFGD.Entities.TryGetValue(ParentEntity.Classname, out FGDEntity? fgdEntity)
             && fgdEntity.Properties.TryGetValue(Key, out FGDProperty? fgdProp)
         )
         {
-            if (fgdProp.ValueType == "boolean")
+            if (fgdProp.ValueType == FGDValueType.Boolean)
             {
                 suggestions.Add(new ExtendedAutoCompleteItem { Value = 0, Display = "[0] False" });
                 suggestions.Add(new ExtendedAutoCompleteItem { Value = 1, Display = "[1] True" });
+            }
+            else if(fgdProp.ValueType == FGDValueType.TargetDestination)
+            {
+                return BspService.Instance.TargetnameIndex.Suggestions;
             }
             else
             {
@@ -216,7 +216,7 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
                     var item = new ExtendedAutoCompleteItem
                     {
                         Value = choice.Key,
-                        Display = fgdProp.ValueType == "flags" ? choice.Value : $"[{choice.Key}] {choice.Value}",
+                        Display = fgdProp.ValueType == FGDValueType.Flags ? choice.Value : $"[{choice.Key}] {choice.Value}",
                     };
                     suggestions.Add(item);
                 }

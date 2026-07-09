@@ -9,7 +9,8 @@ public record FGDOutput(string Name, string ParameterType, string Description);
 
 public record FGDProperty(
     string Name,
-    string ValueType,
+    // Type derived from FGD input file by FGDGenerator
+    FGDValueType ValueType,
     string DisplayName,
     string DefaultValue,
     string Description,
