@@ -75,6 +75,22 @@ public class EntityViewModel : HierarchicalBspNode
             RaiseTargetnameChanged();
     }
 
+    public void AddPropertyViewModelOnly(EntityPropertyViewModel propVm)
+    {
+        Properties.Add(propVm);
+
+        if (propVm.Key == "targetname")
+            RaiseTargetnameChanged();
+    }
+
+    public void RemovePropertyViewModelOnly(EntityPropertyViewModel propVm)
+    {
+        Properties.Remove(propVm);
+
+        if (propVm.Key == "targetname")
+            RaiseTargetnameChanged();
+    }
+
     public void AddString()
     {
         AddProperty(new Entity.EntityProperty<string>("newproperty", "newvalue"));

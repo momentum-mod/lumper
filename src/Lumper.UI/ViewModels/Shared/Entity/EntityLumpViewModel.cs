@@ -171,7 +171,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
                     .Where(propVm => entM.Properties.All(x => x.Key != propVm.Key))
             )
             {
-                entVm.Properties.Remove(propVm);
+                entVm.RemovePropertyViewModelOnly(propVm);
                 entVm.MarkAsModified();
             }
 
@@ -214,8 +214,8 @@ public sealed class EntityLumpViewModel : LumpViewModel
                             {
                                 // Weird case, we became EntityIO - create new viewmodel from scratch.
                                 // Careful not to use EntityViewModel.CreateProperty here, which also creates new models.
-                                entVm.Properties.Remove(propVm);
-                                entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                                entVm.RemovePropertyViewModelOnly(propVm);
+                                entVm.AddPropertyViewModelOnly(EntityPropertyViewModel.Create(propM, entVm));
                                 entVm.MarkAsModified();
                             }
                         }
@@ -231,8 +231,8 @@ public sealed class EntityLumpViewModel : LumpViewModel
                             }
                             else
                             {
-                                entVm.Properties.Remove(propVm);
-                                entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                                entVm.RemovePropertyViewModelOnly(propVm);
+                                entVm.AddPropertyViewModelOnly(EntityPropertyViewModel.Create(propM, entVm));
                                 entVm.MarkAsModified();
                             }
                         }
@@ -240,7 +240,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
                     else
                     {
                         // Add new properties
-                        entVm.Properties.Add(EntityPropertyViewModel.Create(propM, entVm));
+                        entVm.AddPropertyViewModelOnly(EntityPropertyViewModel.Create(propM, entVm));
                     }
                 });
             }
