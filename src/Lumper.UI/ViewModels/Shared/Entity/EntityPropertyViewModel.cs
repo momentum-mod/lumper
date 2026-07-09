@@ -116,10 +116,9 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
     private readonly Entity.EntityProperty<string> _property;
     private string _value;
     private IReadOnlyCollection<ExtendedAutoCompleteItem>? _valueSuggestions;
-    private static readonly IReadOnlyCollection<ExtendedAutoCompleteItem> ClassnameSuggestions = 
-        MomentumFGD.Entities.Keys
-            .Select(fgdKey => new ExtendedAutoCompleteItem { Value = fgdKey })
-            .ToList();
+    private static readonly IReadOnlyCollection<ExtendedAutoCompleteItem> ClassnameSuggestions = MomentumFGD
+        .Entities.Keys.Select(fgdKey => new ExtendedAutoCompleteItem { Value = fgdKey })
+        .ToList();
 
     public EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
         : base(property, bspNode)
@@ -168,7 +167,7 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
     }
 
     public IReadOnlyCollection<ExtendedAutoCompleteItem> ValueSuggestions =>
-    _valueSuggestions ??= FetchValueSuggestionsForKey();
+        _valueSuggestions ??= FetchValueSuggestionsForKey();
 
     [Reactive]
     public bool IsBitfield { get; set; } = false;
@@ -203,7 +202,7 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
                 suggestions.Add(new ExtendedAutoCompleteItem { Value = 0, Display = "[0] False" });
                 suggestions.Add(new ExtendedAutoCompleteItem { Value = 1, Display = "[1] True" });
             }
-            else if(fgdProp.ValueType == FGDValueType.TargetDestination)
+            else if (fgdProp.ValueType == FGDValueType.TargetDestination)
             {
                 return BspService.Instance.TargetnameIndex.Suggestions;
             }
@@ -216,7 +215,8 @@ public class EntityPropertyStringViewModel : EntityPropertyViewModel
                     var item = new ExtendedAutoCompleteItem
                     {
                         Value = choice.Key,
-                        Display = fgdProp.ValueType == FGDValueType.Flags ? choice.Value : $"[{choice.Key}] {choice.Value}",
+                        Display =
+                            fgdProp.ValueType == FGDValueType.Flags ? choice.Value : $"[{choice.Key}] {choice.Value}",
                     };
                     suggestions.Add(item);
                 }
@@ -373,9 +373,14 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
     {
         List<ExtendedAutoCompleteItem> suggestions = [];
 
-        if (BspService.Instance.TargetnameIndex.ClassnamesByTargetname.TryGetValue(TargetEntityName, out string? classname) 
-            && classname != null 
-            && MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity))
+        if (
+            BspService.Instance.TargetnameIndex.ClassnamesByTargetname.TryGetValue(
+                TargetEntityName,
+                out string? classname
+            )
+            && classname != null
+            && MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity)
+        )
         {
             foreach (FGDInput input in fgdEntity.Inputs.Values)
             {
@@ -383,7 +388,7 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
                 suggestions.Add(item);
             }
         }
-        
+
         return suggestions;
     }
 

@@ -18,15 +18,20 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        IncrementalValuesProvider<FgdFileState> fgdFiles = context.AdditionalTextsProvider
-            .Where(static file => Path.GetExtension(file.Path).Equals(".fgd", StringComparison.OrdinalIgnoreCase))
-            .Select(static (file, ct) =>
-            {
-                SourceText? text = file.GetText(ct);
-                if (text == null) return default;
-                
-                return new FgdFileState(file, text.GetChecksum());
-            })
+        IncrementalValuesProvider<FgdFileState> fgdFiles = context
+            .AdditionalTextsProvider.Where(static file =>
+                Path.GetExtension(file.Path).Equals(".fgd", StringComparison.OrdinalIgnoreCase)
+            )
+            .Select(
+                static (file, ct) =>
+                {
+                    SourceText? text = file.GetText(ct);
+                    if (text == null)
+                        return default;
+
+                    return new FgdFileState(file, text.GetChecksum());
+                }
+            )
             .Where(static state => state.File != null);
 
         context.RegisterSourceOutput(
@@ -72,10 +77,13 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
 
         public bool Equals(FgdFileState other)
         {
-            if (File?.Path != other.File?.Path) return false;
-            if (Checksum.IsDefault && other.Checksum.IsDefault) return true;
-            if (Checksum.IsDefault || other.Checksum.IsDefault) return false;
-            
+            if (File?.Path != other.File?.Path)
+                return false;
+            if (Checksum.IsDefault && other.Checksum.IsDefault)
+                return true;
+            if (Checksum.IsDefault || other.Checksum.IsDefault)
+                return false;
+
             return Checksum.SequenceEqual(other.Checksum);
         }
 
@@ -207,16 +215,17 @@ public sealed class FGDSourceGenerator : IIncrementalGenerator
 
     private static string ToSafeIdentifier(string rawType)
     {
-        if (string.IsNullOrWhiteSpace(rawType)) return "Unknown";
-        
+        if (string.IsNullOrWhiteSpace(rawType))
+            return "Unknown";
+
         string[] parts = rawType.Split(['_', ' ', '-'], StringSplitOptions.RemoveEmptyEntries);
         string pascal = string.Concat(parts.Select(p => char.ToUpperInvariant(p[0]) + p[1..]));
-        
+
         if (char.IsDigit(pascal[0]))
         {
             pascal = "_" + pascal;
         }
-        
+
         return pascal;
     }
 

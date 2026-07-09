@@ -338,11 +338,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
             long knownMask = 0;
             foreach (ExtendedAutoCompleteItem item in Suggestions)
             {
-                if (
-                    item.Value != null
-                    && long.TryParse(item.Value.ToString(), out long flagValue)
-                    && flagValue != 0
-                )
+                if (item.Value != null && long.TryParse(item.Value.ToString(), out long flagValue) && flagValue != 0)
                 {
                     knownMask |= flagValue;
                 }
@@ -355,9 +351,7 @@ public class ExtendedAutoCompleteBox : TemplatedControl
                 if (item.Value != null && long.TryParse(item.Value.ToString(), out long flagValue))
                 {
                     item.IsChecked =
-                        flagValue != 0
-                            ? (currentBitfieldValue & flagValue) == flagValue
-                            : currentBitfieldValue == 0;
+                        flagValue != 0 ? (currentBitfieldValue & flagValue) == flagValue : currentBitfieldValue == 0;
                 }
             }
         }

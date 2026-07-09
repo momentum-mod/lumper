@@ -16,8 +16,8 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
 {
     public ObservableCollectionExtended<TargetnameMapping> Entries { get; } = [];
     public ObservableCollectionExtended<ExtendedAutoCompleteItem> Suggestions { get; } = [];
-    public IReadOnlyDictionary<string, string> ClassnamesByTargetname { get; private set; } 
-    = new Dictionary<string, string>();
+    public IReadOnlyDictionary<string, string> ClassnamesByTargetname { get; private set; } =
+        new Dictionary<string, string>();
 
     private readonly IDisposable _subscription;
 
@@ -55,7 +55,7 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
             {
                 Entries.Clear();
                 Entries.AddRange(list);
- 
+
                 Suggestions.Clear();
                 Suggestions.AddRange(
                     list.Select(entry => new ExtendedAutoCompleteItem
@@ -65,10 +65,7 @@ public sealed class TargetnameIndexViewModel : ViewModel, IDisposable
                     })
                 );
 
-                ClassnamesByTargetname = list.ToDictionary(
-                    entry => entry.Targetname,
-                    entry => entry.Classname
-                );
+                ClassnamesByTargetname = list.ToDictionary(entry => entry.Targetname, entry => entry.Classname);
             });
     }
 
