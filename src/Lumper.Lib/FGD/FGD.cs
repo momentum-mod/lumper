@@ -1,21 +1,20 @@
-namespace Lumper.Lib.FGD;
+namespace Lumper.Lib.Fgd;
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 
-public record FGDInput(string Name, string ParameterType, string Description);
+public record FgdInput(string Name, string ParameterType, string Description);
 
-public record FGDOutput(string Name, string ParameterType, string Description);
+public record FgdOutput(string Name, string ParameterType, string Description);
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage(
     "Naming",
     "CA1720:Identifier contains type name",
     Justification = "These enum members intentionally mirror common FGD schema types."
 )]
-public enum FGDValueType
+public enum FgdValueType
 {
     Unknown,
     Angle,
@@ -39,40 +38,46 @@ public enum FGDValueType
     Void,
 }
 
-public record FGDProperty(
+public record FgdProperty(
     string Name,
-    // Runtime classification of the raw FGD property type.
-    FGDValueType ValueType,
+    // Runtime classification of the raw Fgd property type.
+    FgdValueType ValueType,
     string DisplayName,
     string DefaultValue,
     string Description,
     IReadOnlyDictionary<string, string> Choices
 );
 
-public record FGDEntity(
+public record FgdEntity(
     string ClassName,
     string ClassType,
     string Description,
-    IReadOnlyDictionary<string, FGDProperty> Properties,
-    IReadOnlyDictionary<string, FGDInput> Inputs,
-    IReadOnlyDictionary<string, FGDOutput> Outputs
+    IReadOnlyDictionary<string, FgdProperty> Properties,
+    IReadOnlyDictionary<string, FgdInput> Inputs,
+    IReadOnlyDictionary<string, FgdOutput> Outputs
 );
 
-public record FGDEntityRaw(
+public record FgdEntityRaw(
     string ClassName,
     string ClassType,
     string Description,
     IReadOnlyList<string> Bases,
-    IReadOnlyDictionary<string, FGDProperty> Properties,
-    IReadOnlyDictionary<string, FGDInput> Inputs,
-    IReadOnlyDictionary<string, FGDOutput> Outputs
+    IReadOnlyDictionary<string, FgdProperty> Properties,
+    IReadOnlyDictionary<string, FgdInput> Inputs,
+    IReadOnlyDictionary<string, FgdOutput> Outputs
 );
 
-public static class FGD
+public static class Fgd
 {
-    public static IReadOnlyDictionary<string, FGDEntityRaw> Parse(string input)
+    public static IReadOnlyDictionary<string, FgdEntity> Parse(string input)
     {
-        ArgumentNullException.ThrowIfNull(input);
+        return ResolveInheritance(ParseRaw(input));
+    }
+
+    public static IReadOnlyDictionary<string, FgdEntityRaw> ParseRaw(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return new Dictionary<string, FgdEntityRaw>(StringComparer.OrdinalIgnoreCase);
 
         var stream = new TokenStream(Tokenize(input));
         var parsedEntities = new List<ParsedEntity>();
@@ -108,12 +113,12 @@ public static class FGD
             parsedByName[entity.Name] = entity;
         }
 
-        var dedupedEntities = new Dictionary<string, FGDEntityRaw>(StringComparer.OrdinalIgnoreCase);
+        var dedupedEntities = new Dictionary<string, FgdEntityRaw>(StringComparer.OrdinalIgnoreCase);
         foreach (
             ParsedEntity entity in parsedByName.Values.OrderBy(entity => entity.Name, StringComparer.OrdinalIgnoreCase)
         )
         {
-            dedupedEntities[entity.Name] = new FGDEntityRaw(
+            dedupedEntities[entity.Name] = new FgdEntityRaw(
                 ClassName: entity.Name,
                 ClassType: entity.ClassType,
                 Description: entity.Description ?? string.Empty,
@@ -127,14 +132,14 @@ public static class FGD
         return dedupedEntities;
     }
 
-    public static IReadOnlyDictionary<string, FGDEntity> ResolveInheritance(
-        IReadOnlyDictionary<string, FGDEntityRaw> rawEntities
+    public static IReadOnlyDictionary<string, FgdEntity> ResolveInheritance(
+        IReadOnlyDictionary<string, FgdEntityRaw> rawEntities
     )
     {
-        var cache = new Dictionary<string, FGDEntity>(StringComparer.OrdinalIgnoreCase);
-        var result = new Dictionary<string, FGDEntity>(StringComparer.OrdinalIgnoreCase);
+        var cache = new Dictionary<string, FgdEntity>(StringComparer.OrdinalIgnoreCase);
+        var result = new Dictionary<string, FgdEntity>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (FGDEntityRaw ent in rawEntities.Values)
+        foreach (FgdEntityRaw ent in rawEntities.Values)
         {
             if (string.Equals(ent.ClassType, "BaseClass", StringComparison.OrdinalIgnoreCase))
             {
@@ -152,60 +157,58 @@ public static class FGD
         return result;
     }
 
-    private static FGDEntity ResolveOne(
-        FGDEntityRaw ent,
-        IReadOnlyDictionary<string, FGDEntityRaw> rawEntities,
-        Dictionary<string, FGDEntity> cache,
+    private static FgdEntity ResolveOne(
+        FgdEntityRaw ent,
+        IReadOnlyDictionary<string, FgdEntityRaw> rawEntities,
+        Dictionary<string, FgdEntity> cache,
         HashSet<string> visiting
     )
     {
-        if (cache.TryGetValue(ent.ClassName, out FGDEntity? cached))
-        {
+        if (cache.TryGetValue(ent.ClassName, out FgdEntity? cached))
             return cached;
-        }
 
         if (!visiting.Add(ent.ClassName))
         {
             // Handle circular base reference
-            return new FGDEntity(
+            return new FgdEntity(
                 ent.ClassName,
                 ent.ClassType,
                 ent.Description,
-                new Dictionary<string, FGDProperty>(StringComparer.OrdinalIgnoreCase),
-                new Dictionary<string, FGDInput>(StringComparer.OrdinalIgnoreCase),
-                new Dictionary<string, FGDOutput>(StringComparer.OrdinalIgnoreCase)
+                new Dictionary<string, FgdProperty>(StringComparer.OrdinalIgnoreCase),
+                new Dictionary<string, FgdInput>(StringComparer.OrdinalIgnoreCase),
+                new Dictionary<string, FgdOutput>(StringComparer.OrdinalIgnoreCase)
             );
         }
 
-        var properties = new Dictionary<string, FGDProperty>(StringComparer.OrdinalIgnoreCase);
-        var inputs = new Dictionary<string, FGDInput>(StringComparer.OrdinalIgnoreCase);
-        var outputs = new Dictionary<string, FGDOutput>(StringComparer.OrdinalIgnoreCase);
+        var properties = new Dictionary<string, FgdProperty>(StringComparer.OrdinalIgnoreCase);
+        var inputs = new Dictionary<string, FgdInput>(StringComparer.OrdinalIgnoreCase);
+        var outputs = new Dictionary<string, FgdOutput>(StringComparer.OrdinalIgnoreCase);
 
         foreach (string baseName in ent.Bases)
         {
-            // Skip bases not in the FGD
-            if (!rawEntities.TryGetValue(baseName, out FGDEntityRaw? baseDecl))
+            // Skip bases not in the Fgd
+            if (!rawEntities.TryGetValue(baseName, out FgdEntityRaw? baseDecl))
             {
                 continue;
             }
 
-            FGDEntity baseDef = ResolveOne(baseDecl, rawEntities, cache, visiting);
-            foreach (KeyValuePair<string, FGDProperty> kv in baseDef.Properties)
+            FgdEntity baseDef = ResolveOne(baseDecl, rawEntities, cache, visiting);
+            foreach (KeyValuePair<string, FgdProperty> kv in baseDef.Properties)
                 properties[kv.Key] = kv.Value;
-            foreach (KeyValuePair<string, FGDInput> kv in baseDef.Inputs)
+            foreach (KeyValuePair<string, FgdInput> kv in baseDef.Inputs)
                 inputs[kv.Key] = kv.Value;
-            foreach (KeyValuePair<string, FGDOutput> kv in baseDef.Outputs)
+            foreach (KeyValuePair<string, FgdOutput> kv in baseDef.Outputs)
                 outputs[kv.Key] = kv.Value;
         }
 
-        foreach (KeyValuePair<string, FGDProperty> kv in ent.Properties)
+        foreach (KeyValuePair<string, FgdProperty> kv in ent.Properties)
             properties[kv.Key] = kv.Value;
-        foreach (KeyValuePair<string, FGDInput> kv in ent.Inputs)
+        foreach (KeyValuePair<string, FgdInput> kv in ent.Inputs)
             inputs[kv.Key] = kv.Value;
-        foreach (KeyValuePair<string, FGDOutput> kv in ent.Outputs)
+        foreach (KeyValuePair<string, FgdOutput> kv in ent.Outputs)
             outputs[kv.Key] = kv.Value;
 
-        var result = new FGDEntity(ent.ClassName, ent.ClassType, ent.Description, properties, inputs, outputs);
+        var result = new FgdEntity(ent.ClassName, ent.ClassType, ent.Description, properties, inputs, outputs);
         cache[ent.ClassName] = result;
         visiting.Remove(ent.ClassName);
         return result;
@@ -256,20 +259,20 @@ public static class FGD
             {
                 _ = stream.Consume();
                 ParsedIo input = ParseIo(stream);
-                entity.Inputs[input.Key] = new FGDInput(input.Key, input.Type, input.Description ?? string.Empty);
+                entity.Inputs[input.Key] = new FgdInput(input.Key, input.Type, input.Description ?? string.Empty);
             }
             else if (string.Equals(stream.Peek().Value, "output", StringComparison.OrdinalIgnoreCase))
             {
                 _ = stream.Consume();
                 ParsedIo output = ParseIo(stream);
-                entity.Outputs[output.Key] = new FGDOutput(output.Key, output.Type, output.Description ?? string.Empty);
+                entity.Outputs[output.Key] = new FgdOutput(output.Key, output.Type, output.Description ?? string.Empty);
             }
             else
             {
                 ParsedProperty property = ParseProperty(stream);
                 if (!property.IsLineDivider)
                 {
-                    entity.Properties[property.Key] = new FGDProperty(
+                    entity.Properties[property.Key] = new FgdProperty(
                         property.Key,
                         GetValueType(property.Type),
                         property.DisplayName ?? string.Empty,
@@ -439,30 +442,30 @@ public static class FGD
         return tokens;
     }
 
-    private static FGDValueType GetValueType(string rawType)
+    private static FgdValueType GetValueType(string rawType)
     {
         return rawType.ToLowerInvariant() switch
         {
-            "angle" or "angle_negative_pitch" => FGDValueType.Angle,
-            "axis" => FGDValueType.Axis,
-            "bool" or "boolean" => FGDValueType.Boolean,
-            "choices" => FGDValueType.Choices,
-            "color255" => FGDValueType.Color255,
-            "flags" => FGDValueType.Flags,
-            "float" => FGDValueType.Float,
-            "integer" => FGDValueType.Integer,
-            "material" => FGDValueType.Material,
-            "origin" => FGDValueType.Origin,
-            "point" => FGDValueType.Point,
-            "sound" or "soundscape" => FGDValueType.Sound,
-            "sprite" => FGDValueType.Sprite,
-            "string" or "instance_file" or "instance_parm" or "instance_variable" => FGDValueType.String,
-            "studio" => FGDValueType.Studio,
-            "target_destination" => FGDValueType.TargetDestination,
-            "target_source" => FGDValueType.TargetSource,
-            "vector" or "vecline" => FGDValueType.Vector,
-            "void" => FGDValueType.Void,
-            _ => FGDValueType.Unknown,
+            "angle" or "angle_negative_pitch" => FgdValueType.Angle,
+            "axis" => FgdValueType.Axis,
+            "bool" or "boolean" => FgdValueType.Boolean,
+            "choices" => FgdValueType.Choices,
+            "color255" => FgdValueType.Color255,
+            "flags" => FgdValueType.Flags,
+            "float" => FgdValueType.Float,
+            "integer" => FgdValueType.Integer,
+            "material" => FgdValueType.Material,
+            "origin" => FgdValueType.Origin,
+            "point" => FgdValueType.Point,
+            "sound" or "soundscape" => FgdValueType.Sound,
+            "sprite" => FgdValueType.Sprite,
+            "string" or "instance_file" or "instance_parm" or "instance_variable" => FgdValueType.String,
+            "studio" => FgdValueType.Studio,
+            "target_destination" => FgdValueType.TargetDestination,
+            "target_source" => FgdValueType.TargetSource,
+            "vector" or "vecline" => FgdValueType.Vector,
+            "void" => FgdValueType.Void,
+            _ => FgdValueType.Unknown,
         };
     }
 
@@ -478,17 +481,16 @@ public static class FGD
 
     private sealed class TokenStream(List<Token> tokens)
     {
-        private readonly List<Token> _tokens = tokens;
         private int _position;
 
         public Token Peek()
         {
-            return _position < _tokens.Count ? _tokens[_position] : new Token(TokenType.Eof, string.Empty);
+            return _position < tokens.Count ? tokens[_position] : new Token(TokenType.Eof, string.Empty);
         }
 
         public Token Consume()
         {
-            return _position < _tokens.Count ? _tokens[_position++] : new Token(TokenType.Eof, string.Empty);
+            return _position < tokens.Count ? tokens[_position++] : new Token(TokenType.Eof, string.Empty);
         }
 
         public bool Match(string value)
@@ -509,9 +511,9 @@ public static class FGD
         public required string Name { get; set; }
         public string? Description { get; set; }
         public List<string> InheritedBases { get; } = [];
-        public Dictionary<string, FGDProperty> Properties { get; } = new(StringComparer.OrdinalIgnoreCase);
-        public Dictionary<string, FGDInput> Inputs { get; } = new(StringComparer.OrdinalIgnoreCase);
-        public Dictionary<string, FGDOutput> Outputs { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, FgdProperty> Properties { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, FgdInput> Inputs { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, FgdOutput> Outputs { get; } = new(StringComparer.OrdinalIgnoreCase);
     }
 
     private sealed class ParsedIo
