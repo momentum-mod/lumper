@@ -51,6 +51,9 @@ public class StateService : ReactiveObject
     // Using a power of 2 doesn't have a significant improvement visually and 128/256 sizes feel too small/large
     public double VtfBrowserDimensions { get; set; } = 192;
 
+    [Reactive]
+    public string? FgdPath { get; set; } = null;
+
     public ObservableCollectionExtended<string> RecentFiles { get; set; } = [];
 
     public void UpdateRecentFiles(string bspPath)

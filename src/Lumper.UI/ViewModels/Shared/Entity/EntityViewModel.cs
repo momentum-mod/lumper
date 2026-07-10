@@ -49,7 +49,13 @@ public class EntityViewModel : HierarchicalBspNode
         RefreshPropertiesForClassname();
     }
 
-    private void RefreshPropertiesForClassname()
+    public void ResetFgdProperties()
+    {
+        foreach (EntityPropertyViewModel propVm in Properties)
+            propVm.ResetFgdProperties(Classname);
+    }
+
+    public void RefreshPropertiesForClassname()
     {
         // Avoid the getter checks
         string classname = Classname;

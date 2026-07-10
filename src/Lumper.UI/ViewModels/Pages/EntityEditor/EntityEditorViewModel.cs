@@ -40,6 +40,8 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
     public static GameSyncService GameSyncService => GameSyncService.Instance;
 
+    public static FgdService FgdService => FgdService.Instance;
+
     public EntityEditorViewModel()
     {
         BspService.WhenAnyValue(x => x.EntityLumpViewModel).ToPropertyEx(this, x => x.EntityLumpViewModel);

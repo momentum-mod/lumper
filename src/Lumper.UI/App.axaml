@@ -4,18 +4,18 @@
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="Lumper.UI.App">
 
-    <Application.DataTemplates>
-        <local:ViewLocator />
-    </Application.DataTemplates>
+  <Application.DataTemplates>
+    <local:ViewLocator />
+  </Application.DataTemplates>
 
-    <Application.Resources>
-        <!-- To change these across the application, just whack static-weight TTFs in Assets/Fonts/ and update below. -->
-        <FontFamily x:Key="Sans">avares://Lumper.UI/Assets/Fonts/Roboto/#Roboto</FontFamily>
-        <FontFamily x:Key="Monospace">avares://Lumper.UI/Assets/Fonts/JetBrains_Mono/#JetBrains Mono</FontFamily>
-    </Application.Resources>
+  <Application.Resources>
+    <!-- To change these across the application, just whack static-weight TTFs in Assets/Fonts/ and update below. -->
+    <FontFamily x:Key="Sans">avares://Lumper.UI/Assets/Fonts/Roboto/#Roboto</FontFamily>
+    <FontFamily x:Key="Monospace">avares://Lumper.UI/Assets/Fonts/JetBrains_Mono/#JetBrains Mono</FontFamily>
+  </Application.Resources>
 
-    <Application.Styles>
-        <StyleInclude Source="Styles/Styles.axaml" />
-        <materialIcons:MaterialIconStyles />
-    </Application.Styles>
+  <Application.Styles>
+    <StyleInclude Source="Styles/Styles.axaml" />
+    <materialIcons:MaterialIconStyles />
+  </Application.Styles>
 </Application>

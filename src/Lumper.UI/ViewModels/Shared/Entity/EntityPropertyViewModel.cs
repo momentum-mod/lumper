@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using Lumper.Lib.Bsp.Struct;
 using Lumper.Lib.ExtensionMethods;
-using Lumper.Lib.FGD;
+using Lumper.Lib.Fgd;
 using Lumper.UI.Controls;
 using Lumper.UI.Services;
 using ReactiveUI;
@@ -72,7 +72,7 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty property, Bs
             return cached;
 
         List<ExtendedAutoCompleteItem> suggestions = [];
-        if (MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity))
+        if (FgdService.Instance.Entities.TryGetValue(classname, out FgdEntity? fgdEntity))
         {
             foreach (FgdProperty prop in fgdEntity.Properties.Values)
             {
@@ -82,6 +82,12 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty property, Bs
 
         KeySuggestionsCache[classname] = suggestions;
         return suggestions;
+    }
+
+    public virtual void ResetFgdProperties(string classname)
+    {
+        KeySuggestionsCache.Clear();
+        RefreshForClassname(classname);
     }
 
     public void RefreshForClassname(string classname)
@@ -120,12 +126,16 @@ public abstract class EntityPropertyViewModel(Entity.EntityProperty property, Bs
 public class EntityPropertyStringViewModel(Entity.EntityProperty<string> property, BspNode bspNode)
     : EntityPropertyViewModel(property, bspNode)
 {
-    private readonly Entity.EntityProperty<string> _property = property;
     private string _value = property.Value;
     private IReadOnlyCollection<ExtendedAutoCompleteItem>? _valueSuggestions;
-    private static readonly IReadOnlyCollection<ExtendedAutoCompleteItem> ClassnameSuggestions = MomentumFGD
-        .Entities.Keys.Select(fgdKey => new ExtendedAutoCompleteItem { Value = fgdKey })
-        .ToList();
+    public IReadOnlyCollection<ExtendedAutoCompleteItem> ValueSuggestions =>
+        _valueSuggestions ??= FetchValueSuggestionsForKey();
+
+    private static IReadOnlyCollection<ExtendedAutoCompleteItem>? _classnameSuggestions;
+    private static IReadOnlyCollection<ExtendedAutoCompleteItem> ClassnameSuggestions =>
+        _classnameSuggestions ??= FgdService
+            .Instance.Entities.Keys.Select(fgdKey => new ExtendedAutoCompleteItem { Value = fgdKey })
+            .ToList();
 
     protected override void OnKeyChanged()
     {
@@ -153,7 +163,7 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> propert
                 return;
 
             _value = value;
-            _property.Value = value;
+            property.Value = value;
             MarkAsModified();
             this.RaisePropertyChanged();
 
@@ -164,35 +174,32 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> propert
         }
     }
 
-    public IReadOnlyCollection<ExtendedAutoCompleteItem> ValueSuggestions =>
-        _valueSuggestions ??= FetchValueSuggestionsForKey();
-
     [Reactive]
     public bool IsBitfield { get; set; } = false;
 
     private bool IsKeyBitfield()
     {
         if (
-            MomentumFGD.Entities.TryGetValue(ParentEntity.Classname, out FGDEntity? fgdEntity)
-            && fgdEntity.Properties.TryGetValue(Key, out FGDProperty? fgdProp)
+            FgdService.Instance.Entities.TryGetValue(ParentEntity.Classname, out FgdEntity? fgdEntity)
+            && fgdEntity.Properties.TryGetValue(Key, out FgdProperty? fgdProp)
         )
         {
             return fgdProp.ValueType == FgdValueType.Flags;
         }
+
         return false;
     }
 
-    private IReadOnlyCollection<ExtendedAutoCompleteItem> FetchValueSuggestionsForKey()
+    public IReadOnlyCollection<ExtendedAutoCompleteItem> FetchValueSuggestionsForKey()
     {
         List<ExtendedAutoCompleteItem> suggestions = [];
 
         if (Key == "classname")
-        {
             return ClassnameSuggestions;
-        }
-        else if (
-            MomentumFGD.Entities.TryGetValue(ParentEntity.Classname, out FGDEntity? fgdEntity)
-            && fgdEntity.Properties.TryGetValue(Key, out FGDProperty? fgdProp)
+
+        if (
+            FgdService.Instance.Entities.TryGetValue(ParentEntity.Classname, out FgdEntity? fgdEntity)
+            && fgdEntity.Properties.TryGetValue(Key, out FgdProperty? fgdProp)
         )
         {
             if (fgdProp.ValueType == FgdValueType.Boolean)
@@ -220,7 +227,17 @@ public class EntityPropertyStringViewModel(Entity.EntityProperty<string> propert
                 }
             }
         }
+
         return suggestions;
+    }
+
+    public override void ResetFgdProperties(string classname)
+    {
+        _classnameSuggestions = null;
+        _valueSuggestions = null;
+        base.ResetFgdProperties(classname);
+        this.RaisePropertyChanged(nameof(ClassnameSuggestions));
+        this.RaisePropertyChanged(nameof(ValueSuggestions));
     }
 
     public override bool MemberwiseEquals(EntityPropertyViewModel other)
@@ -240,10 +257,13 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
     private readonly Entity.EntityProperty<EntityIo> _property;
     private string _targetEntityName;
     private string _input;
-    private IReadOnlyCollection<ExtendedAutoCompleteItem>? _inputSuggestions;
     private string _parameter;
     private float _delay;
     private int _timesToFire;
+
+    private IReadOnlyCollection<ExtendedAutoCompleteItem>? _inputSuggestions;
+    public IReadOnlyCollection<ExtendedAutoCompleteItem> InputSuggestions =>
+        _inputSuggestions ??= FetchInputSuggestions();
 
     public EntityPropertyIoViewModel(Entity.EntityProperty<EntityIo> property, BspNode bspNode)
         : base(property, bspNode)
@@ -290,9 +310,6 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
             OnValueChanged();
         }
     }
-
-    public IReadOnlyCollection<ExtendedAutoCompleteItem> InputSuggestions =>
-        _inputSuggestions ??= FetchInputSuggestions();
 
     public string Parameter
     {
@@ -359,7 +376,7 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
             return cached;
 
         List<ExtendedAutoCompleteItem> suggestions = [];
-        if (MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity))
+        if (FgdService.Instance.Entities.TryGetValue(classname, out FgdEntity? fgdEntity))
         {
             foreach (KeyValuePair<string, FgdOutput> output in fgdEntity.Outputs)
             {
@@ -379,9 +396,7 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
             BspService.Instance.TargetnameIndex.ClassnamesByTargetname.TryGetValue(
                 TargetEntityName,
                 out string? classname
-            )
-            && classname != null
-            && MomentumFGD.Entities.TryGetValue(classname, out FGDEntity? fgdEntity)
+            ) && FgdService.Instance.Entities.TryGetValue(classname, out FgdEntity? fgdEntity)
         )
         {
             foreach (FgdInput input in fgdEntity.Inputs.Values)
@@ -392,6 +407,14 @@ public class EntityPropertyIoViewModel : EntityPropertyViewModel
         }
 
         return suggestions;
+    }
+
+    public override void ResetFgdProperties(string classname)
+    {
+        _inputSuggestions = null;
+        IoKeySuggestionsCache.Clear();
+        base.ResetFgdProperties(classname);
+        this.RaisePropertyChanged(nameof(InputSuggestions));
     }
 
     public override bool MemberwiseEquals(EntityPropertyViewModel other)
