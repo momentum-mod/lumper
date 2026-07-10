@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lumper.CLI", "src\Lumper.CL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lumper.Test", "src\Lumper.Test\Lumper.Test.csproj", "{D4A0E5B7-9AB1-4958-87CD-E1657C5549D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FGDGenerator", "src\Lumper.Generators\FGDGenerator\FGDGenerator.csproj", "{BD3BB241-2DEE-4A68-A078-E831EFE7639D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +33,6 @@ Global
 		{D4A0E5B7-9AB1-4958-87CD-E1657C5549D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4A0E5B7-9AB1-4958-87CD-E1657C5549D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4A0E5B7-9AB1-4958-87CD-E1657C5549D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BD3BB241-2DEE-4A68-A078-E831EFE7639D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BD3BB241-2DEE-4A68-A078-E831EFE7639D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD3BB241-2DEE-4A68-A078-E831EFE7639D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD3BB241-2DEE-4A68-A078-E831EFE7639D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
