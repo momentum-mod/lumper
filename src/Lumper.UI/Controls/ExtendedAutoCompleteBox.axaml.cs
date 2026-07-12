@@ -142,8 +142,9 @@ public partial class ExtendedAutoCompleteBox : UserControl
 
         if (IsBitfieldMode)
         {
-            InitializeBitfieldCheckboxes();
-            CalculateBitfieldSum();
+            bool isValidBitfield = InitializeBitfieldCheckboxes();
+            if (isValidBitfield)
+                CalculateBitfieldSum();
         }
         else
         {
@@ -302,7 +303,7 @@ public partial class ExtendedAutoCompleteBox : UserControl
         }
     }
 
-    private void InitializeBitfieldCheckboxes()
+    private bool InitializeBitfieldCheckboxes()
     {
         _isInitializing = true;
         try
@@ -310,10 +311,10 @@ public partial class ExtendedAutoCompleteBox : UserControl
             _preservedBits = 0;
 
             if (Suggestions == null || string.IsNullOrEmpty(Text))
-                return;
+                return false;
 
             if (!long.TryParse(Text, out long currentBitfieldValue))
-                return;
+                return false;
 
             long knownMask = 0;
             foreach (ExtendedAutoCompleteItem item in Suggestions)
@@ -334,6 +335,8 @@ public partial class ExtendedAutoCompleteBox : UserControl
                         flagValue != 0 ? (currentBitfieldValue & flagValue) == flagValue : currentBitfieldValue == 0;
                 }
             }
+
+            return true;
         }
         finally
         {
