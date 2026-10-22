@@ -138,7 +138,14 @@ public partial class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : V
             ushort width = vtf.Width(mip);
             ushort height = vtf.Height(mip);
 
-            byte[] rgba = vtf.GetImageDataAsRGBA8888(mip, (ushort)frame, (byte)face, (ushort)slice);
+            // vtfpp's conversion of HDR data to 8 bits comes out too dark, so we do it ourselves
+            byte[] rgba =
+                vtf.Format == ImageFormat.RGBA16161616F
+                    ? HdrImageConversion.Rgba16161616FToRgba8888(
+                        vtf.GetImageDataRaw(mip, (ushort)frame, (byte)face, (ushort)slice),
+                        width * height
+                    )
+                    : vtf.GetImageDataAsRGBA8888(mip, (ushort)frame, (byte)face, (ushort)slice);
             if (width == 0 || height == 0 || rgba.Length < width * height * 4)
             {
                 Logger.Error($"Failed to get image data for {pakfileEntry.Key}");
