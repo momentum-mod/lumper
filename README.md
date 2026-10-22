@@ -100,13 +100,13 @@ Lumper lets us:
 Lumper is written in C#, targeting .NET. It's divided into three subprojects:
 
 - __Lumper.Lib__ - Library for BSP manipulation, with minimal dependencies. Also
-  includes jobs. Rather than do VTF handling oureslves we
-  use [VTFLib.NET](https://github.com/momentum-mod/VTFLib.NET), which provides
-  .NET bindings for [VTFLib](https://github.com/NeilJed/VTFLib).
+  includes jobs.
 - __Lumper.UI__ - GUI frontend using [Avalonia](https://docs.avaloniaui.net/).
   It uses an MVVM architecture with XAML for layouting
   and [ReactiveUI](https://www.reactiveui.net/) for reactivity and view ↔
-  viewmodel binding.
+  viewmodel binding. Rather than do VTF handling ourselves we
+  use [sourcepp](https://github.com/craftablescience/sourcepp)'s vtfpp, via its
+  C# bindings.
 - __Lumper.CLI__ - Simple CLI application for repetitive tasks, especially jobs.
   It's WIP and as of writing, barely
   functional.

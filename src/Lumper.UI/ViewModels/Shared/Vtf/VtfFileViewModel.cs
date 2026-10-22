@@ -1,32 +1,29 @@
 namespace Lumper.UI.ViewModels.Shared.Vtf;
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Lumper.UI.ViewModels;
 using NLog;
 using Pakfile;
-using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Transforms;
-using VTFLib;
+using sourcepp.vtfpp;
 
 /// <summary>
-/// This is a simple reactive wrapper around VTFLib.NET (which is itself a wrapper around VTFLib).
+/// This is a simple reactive wrapper around vtfpp (via the sourcepp C# bindings).
+///
+/// Unlike VTFLib, vtfpp has no global "bound image" state, so we don't hold onto any native handles: each operation
+/// parses the VTF from the pakfile entry into its own <see cref="VTF"/>, does its work, and disposes it.
 /// </summary>
-public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
+public partial class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
 {
     [Reactive]
     public bool Loaded { get; private set; }
@@ -47,13 +44,13 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
     public uint ImageHeight { get; private set; }
 
     [Reactive]
-    public VTFImageFormat ImageFormat { get; private set; }
+    public ImageFormat ImageFormat { get; private set; }
 
     [Reactive]
     public string ImageFormatString { get; private set; } = "";
 
     [Reactive]
-    public VTFImageFlag Flags { get; private set; }
+    public VTF.Flags Flags { get; private set; }
 
     [Reactive]
     public List<string> FlagList { get; private set; } = [];
@@ -73,19 +70,54 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
     [Reactive]
     public double[] Reflectivity { get; private set; } = null!;
 
-    private uint _imageIndex;
+    /// <summary>
+    /// Formats offered when re-encoding. This is the set of formats that are actually useful in a map; vtfpp supports
+    /// plenty more (console formats, virtual HDR formats, etc.) that Source's map compile/loading doesn't care about.
+    /// </summary>
+    public static readonly ImageFormat[] SelectableImageFormats =
+    [
+        ImageFormat.RGBA8888,
+        ImageFormat.ABGR8888,
+        ImageFormat.RGB888,
+        ImageFormat.BGR888,
+        ImageFormat.RGB565,
+        ImageFormat.I8,
+        ImageFormat.IA88,
+        ImageFormat.A8,
+        ImageFormat.ARGB8888,
+        ImageFormat.BGRA8888,
+        ImageFormat.DXT1,
+        ImageFormat.DXT3,
+        ImageFormat.DXT5,
+        ImageFormat.BGRX8888,
+        ImageFormat.BGR565,
+        ImageFormat.BGRX5551,
+        ImageFormat.BGRA4444,
+        ImageFormat.DXT1_ONE_BIT_ALPHA,
+        ImageFormat.BGRA5551,
+        ImageFormat.UV88,
+        ImageFormat.UVWQ8888,
+        ImageFormat.RGBA16161616F,
+        ImageFormat.RGBA16161616,
+        ImageFormat.ATI2N,
+        ImageFormat.ATI1N,
+        ImageFormat.STRATA_BC7,
+        ImageFormat.STRATA_BC6H_SF,
+        ImageFormat.STRATA_BC6H_UF,
+        ImageFormat.STRATA_BC5,
+        ImageFormat.STRATA_BC4,
+    ];
 
     private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-    static VtfFileViewModel()
-    {
-        if (VTFAPI.Initialize())
-            Logger.Debug("Initialized VTFAPI");
-        else
-            Logger.Error("Failed to initialize VTFAPI!");
-    }
+    // Catmull-Rom is what ImageSharp calls "bicubic", which is what we used to resize with.
+    private const ImageConversion.ResizeFilter DefaultResizeFilter = ImageConversion.ResizeFilter.CATMULL_ROM;
 
-    public async Task<Image<Rgba32>?> GetImage(
+    // Reads don't need this, since they always work on their own copy of the VTF, but we don't want two edits to the
+    // same entry racing and one clobbering the other. Edits are user-triggered, so one lock for everything is fine.
+    private static readonly SemaphoreSlim EditLock = new(1, 1);
+
+    public Task<Bitmap?> GetImage(
         CancellationTokenSource? cts,
         uint frame,
         uint face,
@@ -93,159 +125,158 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
         uint mipmapLevel
     )
     {
-        byte[]? data = await VtfLibQueue.Run<byte[]>(
-            () =>
-            {
-                Prepare();
-
-                if (VTFFile.ImageGetHasImage() == 0)
-                    return null!;
-
-                nint imageData = VTFFile.ImageGetData(frame, face, slice, mipmapLevel);
-                int imageSize = (int)VTFFile.ImageComputeImageSize(ImageWidth, ImageHeight, 1, 1, ImageFormat);
-
-                byte[] data = new byte[imageSize];
-                Marshal.Copy(imageData, data, 0, imageSize);
-
-                if (imageSize <= 0)
-                {
-                    Logger.Error("Image data array size is 0");
-                    return null!;
-                }
-
-                return data;
-            },
-            cts
-        );
-
-        if (data is null)
-            return null;
-
-        byte[] dest = new byte[ImageWidth * ImageHeight * 4];
-        VTFFile.ImageConvertToRGBA8888(data, dest, ImageWidth, ImageHeight, ImageFormat);
-
-        var rgba = new Rgba32[ImageWidth * ImageHeight];
-        int j = 0;
-        for (int i = 0; i < dest.Length; i += 4)
-            rgba[j++] = new Rgba32(dest[i], dest[i + 1], dest[i + 2], dest[i + 3]);
-
-        // We could make the UI significantly faster if we did a resize here. But code is complicated and leads
-        // to doing *more* work doing the heaviest part of the loading process, so not doing for now.
-        // Worth considering if we work on VTF Browser perf in the future.
-        return Image.LoadPixelData<Rgba32>(rgba.AsSpan(), (int)ImageWidth, (int)ImageHeight);
-    }
-
-    public async Task SetImageData(Image<Rgba32> image, uint frame, uint face, uint slice, uint mipmapLevel)
-    {
-        await VtfLibQueue.Run(() =>
+        return Task.Run<Bitmap?>(() =>
         {
-            Prepare();
+            if (cts?.IsCancellationRequested ?? false)
+                return null;
 
-            byte[] imageRgbaData = GetRgba8888FromImage(image, out _);
+            using VTF? vtf = Open();
+            if (vtf is null || !vtf.HasImageData)
+                return null;
 
-            int size = (int)VTFFile.ImageComputeImageSize((uint)image.Width, (uint)image.Height, 1, 1, ImageFormat);
-            byte[] vtfImageData = new byte[size];
+            var mip = (byte)mipmapLevel;
+            ushort width = vtf.Width(mip);
+            ushort height = vtf.Height(mip);
 
-            VTFFile.ImageConvertFromRGBA8888(
-                imageRgbaData,
-                vtfImageData,
-                (uint)image.Width,
-                (uint)image.Height,
-                ImageFormat
-            );
-
-            VTFFile.ImageSetData(frame, face, slice, mipmapLevel, vtfImageData);
-            SaveVtf();
-        });
-    }
-
-    public async Task SetNewImage(Image<Rgba32> image)
-    {
-        await VtfLibQueue.Run(() =>
-        {
-            Prepare();
-
-            byte[] buffer = GetRgba8888FromImage(image, out bool hasAlpha);
-            var createOptions = new SVTFCreateOptions();
-            VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
-
-            // TODO: Allow picking this. For Strata-based games, use BC7!
-            createOptions.imageFormat = hasAlpha ? VTFImageFormat.IMAGE_FORMAT_DXT5 : VTFImageFormat.IMAGE_FORMAT_DXT1;
-
-            if (!VTFFile.ImageCreateSingle((uint)image.Width, (uint)image.Height, buffer, ref createOptions))
+            byte[] rgba = vtf.GetImageDataAsRGBA8888(mip, (ushort)frame, (byte)face, (ushort)slice);
+            if (width == 0 || height == 0 || rgba.Length < width * height * 4)
             {
-                try
-                {
-                    string err = VTFAPI.GetLastError();
-                    Logger.Warn($"Error updating VTF ${pakfileEntry.Key}: ${err}");
-                }
-                catch (Win32Exception ex)
-                {
-                    Logger.Error(ex, "fucking vtflib!!");
-                }
+                Logger.Error($"Failed to get image data for {pakfileEntry.Key}");
+                return null;
             }
 
-            SaveVtf();
+            // We could make the UI significantly faster if we did a resize here. But code is complicated and leads
+            // to doing *more* work doing the heaviest part of the loading process, so not doing for now.
+            // Worth considering if we work on VTF Browser perf in the future.
+            return RgbaToBitmap(rgba, width, height);
         });
     }
 
-    public async Task ResizeImage(uint newWidth, uint newHeight, uint frame, uint face, uint slice, uint mipmapLevel)
+    /// <summary>
+    /// Replace the entire VTF with the given image file, which can be any format vtfpp can decode, or another VTF.
+    /// </summary>
+    public Task<bool> SetNewImage(byte[] file, bool isVtf)
+    {
+        return Edit(() =>
+        {
+            if (isVtf)
+            {
+                // Drop in the VTF as-is rather than re-baking it, we don't want to change anything about it.
+                using var newVtf = new VTF(file);
+                if (!newVtf)
+                {
+                    Logger.Error($"Updating {pakfileEntry.Key}: file is not a valid VTF");
+                    return false;
+                }
+
+                pakfileEntry.UpdateData(file);
+                Refresh(newVtf, file.Length);
+                return true;
+            }
+
+            if (!TryDecodeImage(file, out byte[] rgba, out ushort width, out ushort height))
+                return false;
+
+            using VTF? current = Open();
+            if (current is null)
+                return false;
+
+            // TODO: Allow picking the format. For Strata-based games, use BC7!
+            var options = new VTF.CreationOptions
+            {
+                Version = current.Version,
+                OutputFormat = HasAlpha(rgba) ? ImageFormat.DXT5 : ImageFormat.DXT1,
+            };
+
+            using VTF? vtf = VTF.Create(rgba, ImageFormat.RGBA8888, width, height, options);
+            if (vtf is null || !vtf)
+            {
+                Logger.Error($"Updating {pakfileEntry.Key}: failed to create VTF from image");
+                return false;
+            }
+
+            return Save(vtf);
+        });
+    }
+
+    /// <summary>
+    /// Replace a single frame/face/slice/mipmap of the VTF with the given image file, which can be any format vtfpp
+    /// can decode, or another VTF (in which case its first image is used).
+    /// </summary>
+    public Task<bool> SetImageData(byte[] file, bool isVtf, uint frame, uint face, uint slice, uint mipmapLevel)
+    {
+        return Edit(() =>
+        {
+            byte[] rgba;
+            ushort width;
+            ushort height;
+            if (isVtf)
+            {
+                using var source = new VTF(file);
+                if (!source || !source.HasImageData)
+                {
+                    Logger.Error($"Updating {pakfileEntry.Key}: file is not a valid VTF");
+                    return false;
+                }
+
+                width = source.Width();
+                height = source.Height();
+                rgba = source.GetImageDataAsRGBA8888();
+            }
+            else if (!TryDecodeImage(file, out rgba, out width, out height))
+            {
+                return false;
+            }
+
+            using VTF? vtf = Open();
+            if (vtf is null)
+                return false;
+
+            var mip = (byte)mipmapLevel;
+            // vtfpp resizes and converts the image to match the VTF
+            if (!vtf.SetImage(rgba, ImageFormat.RGBA8888, width, height, DefaultResizeFilter, mip, (ushort)frame, (byte)face, (ushort)slice))
+            {
+                Logger.Error($"Updating {pakfileEntry.Key}: failed to set image data");
+                return false;
+            }
+
+            // Smaller mips are now stale, and nobody is going to want to edit those by hand.
+            if (mip == 0 && vtf.MipCount > 1)
+                vtf.ComputeMips(DefaultResizeFilter);
+
+            return Save(vtf);
+        });
+    }
+
+    public async Task ResizeImage(uint newWidth, uint newHeight)
     {
         if (newWidth <= 0 || (newWidth & (newWidth - 1)) != 0 || newHeight <= 0 || (newHeight & (newHeight - 1)) != 0)
             throw new ArgumentException("Sizes must be powers of 2");
 
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
-
-        // This is really stupid but don't want to spend the time transforming VTFLib queueing stuff to use a priority
-        // queue -- .NET doesn't have one built-in, and my attempt to hack something together was too buggy
-        // and gross to justify. We'll remove all that crap when we move to vtfpp anyway!
-        Logger.Info(
-            $"Resizing {pakfileEntry.Key} from {ImageWidth}x{ImageHeight} to {newWidth}x{newHeight}... NOTE this operation won't start if the texture browser is currently loading textures!!"
-        );
-
-        Image<Rgba32>? image = await GetImage(cts: null, frame, face, slice, mipmapLevel);
-        if (image is null)
+        bool success = await Edit(() =>
         {
-            Logger.Error($"Resizing {pakfileEntry.Key}: Failed to get image for resizing");
-            return;
-        }
+            var stopwatch = Stopwatch.StartNew();
+            Logger.Info($"Resizing {pakfileEntry.Key} to {newWidth}x{newHeight}...");
 
-        Logger.Info($"Resizing {pakfileEntry.Key}: Fetched VTF image data ({stopwatch.ElapsedMilliseconds}ms)");
+            using VTF? vtf = Open();
+            if (vtf is null)
+                return false;
 
-        image.Mutate(x => x.Resize((int)newWidth, (int)newHeight, new BicubicResampler()));
-        byte[] resizedData = GetRgba8888FromImage(image, out bool _);
+            // Resizes every mip, frame and face
+            vtf.SetSize((ushort)newWidth, (ushort)newHeight, DefaultResizeFilter);
 
-        Logger.Info(
-            $"Resizing {pakfileEntry.Key}: Resized raw image data in memory ({stopwatch.ElapsedMilliseconds}ms)"
-        );
+            if (!Save(vtf))
+                return false;
 
-        await VtfLibQueue.Run(() =>
-        {
-            Prepare();
-
-            SVTFCreateOptions createOptions = GetCreateOptionsWithExistingValues();
-
-            if (!VTFFile.ImageCreateSingle(newWidth, newHeight, resizedData, ref createOptions))
-            {
-                string err = VTFAPI.GetLastError();
-                Logger.Error($"Resizing {pakfileEntry.Key}: Error creating new VTF during VTF creation: ${err}");
-                return;
-            }
-
-            Logger.Info(
-                $"Resizing {pakfileEntry.Key}: Created resized VTF file in memory ({stopwatch.ElapsedMilliseconds}ms)"
-            );
-
-            SaveVtf();
-
-            Logger.Info(
-                $"Resizing {pakfileEntry.Key}: Updated VTF file in pakfile lump. Resizing complete! ({stopwatch.ElapsedMilliseconds}ms)"
-            );
+            Logger.Info($"Resizing {pakfileEntry.Key}: complete! ({stopwatch.ElapsedMilliseconds}ms)");
+            return true;
         });
+
+        if (!success)
+            Logger.Error($"Resizing {pakfileEntry.Key} failed");
     }
 
-    public async Task Reencode(VTFImageFormat newFormat, uint frame, uint face, uint slice, uint mipmapLevel)
+    public async Task Reencode(ImageFormat newFormat)
     {
         if (newFormat == ImageFormat)
         {
@@ -253,233 +284,248 @@ public class VtfFileViewModel(PakfileEntryVtfViewModel pakfileEntry) : ViewModel
             return;
         }
 
-        Logger.Info(
-            $"Reencoding {pakfileEntry.Key} to {GetImageFormatString(newFormat)}... NOTE this operation won't start if the texture browser is currently loading textures!!"
-        );
-
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
-
-        Image<Rgba32>? image = await GetImage(cts: null, frame, face, slice, mipmapLevel);
-        if (image is null)
+        bool success = await Edit(() =>
         {
-            Logger.Error($"Reencoding {pakfileEntry.Key}: Failed to get image for resizing");
-            return;
-        }
+            var stopwatch = Stopwatch.StartNew();
+            Logger.Info($"Re-encoding {pakfileEntry.Key} to {newFormat}...");
 
-        byte[] oldData = GetRgba8888FromImage(image, out bool _);
+            using VTF? vtf = Open();
+            if (vtf is null)
+                return false;
 
-        await VtfLibQueue.Run(() =>
-        {
-            Prepare();
-
-            // Note: VTFLib has a ImageConvert function specifically for this, but I can't get it to work.
-            // If I copy the existing data from the VTF file and call ImageConvert, it returns true,
-            // but nothing is updated. Instead just reading image data to RGBA8888 and creating a new VTF
-            // from scratch.
-
-            SVTFCreateOptions createOptions = GetCreateOptionsWithExistingValues();
-            createOptions.imageFormat = newFormat;
-
-            if (!VTFFile.ImageCreateSingle(ImageWidth, ImageHeight, oldData, ref createOptions))
+            // Strata's formats are only understood by VTF version 7.6 and up
+            if (newFormat is >= ImageFormat.STRATA_R8 and <= ImageFormat.STRATA_BC4 && vtf.Version < 6)
             {
-                string err = VTFAPI.GetLastError();
-                Logger.Error($"Reencoding {pakfileEntry.Key}: Error creating new VTF during VTF creation: ${err}");
-                return;
+                Logger.Info($"Re-encoding {pakfileEntry.Key}: upgrading VTF version to 7.6 for {newFormat}");
+                vtf.Version = 6;
             }
 
-            Logger.Info(
-                $"Reencoding {pakfileEntry.Key}: Created resized VTF file in memory ({stopwatch.ElapsedMilliseconds}ms)"
-            );
+            vtf.SetFormat(newFormat);
+            if (vtf.Format != newFormat)
+            {
+                Logger.Error($"Re-encoding {pakfileEntry.Key}: vtfpp was unable to convert to {newFormat}");
+                return false;
+            }
 
-            SaveVtf();
+            if (!Save(vtf))
+                return false;
 
-            Logger.Info(
-                $"Reencoding {pakfileEntry.Key}: Updated VTF file in pakfile lump. Resizing complete! ({stopwatch.ElapsedMilliseconds}ms)"
-            );
+            Logger.Info($"Re-encoding {pakfileEntry.Key}: complete! ({stopwatch.ElapsedMilliseconds}ms)");
+            return true;
         });
+
+        if (!success)
+            Logger.Error($"Re-encoding {pakfileEntry.Key} failed");
     }
 
-    private void Prepare()
+    private async Task<bool> Edit(Func<bool> edit)
     {
-        if (Loaded)
+        await EditLock.WaitAsync();
+        try
         {
-            VTFFile.BindImage(_imageIndex);
-            return;
+            return await Task.Run(edit);
         }
-
-        // Copy (ToArray) is required since VTFLib needs a byte[] which is inherently mutable.
-        byte[] vtfBuffer = pakfileEntry.GetData().ToArray();
-
-        VTFFile.CreateImage(ref _imageIndex);
-        VTFFile.BindImage(_imageIndex);
-        VTFFile.ImageLoadLump(vtfBuffer, (uint)vtfBuffer.Length, false);
-
-        Update();
-        Loaded = true;
-    }
-
-    private void SaveVtf()
-    {
-        VTFFile.BindImage(_imageIndex);
-        uint size = VTFFile.ImageGetSize();
-
-        byte[] vtfBuffer = new byte[size];
-        uint uiSize = 0;
-        if (!VTFFile.ImageSaveLump(vtfBuffer, (uint)vtfBuffer.Length, ref uiSize))
+        finally
         {
-            string err = VTFAPI.GetLastError();
-            Logger.Error($"Error saving VTF ${pakfileEntry.Key}: ${err}");
+            EditLock.Release();
         }
-
-        pakfileEntry.UpdateData(vtfBuffer);
-        Update();
-    }
-
-    private void Update()
-    {
-        FrameCount = VTFFile.ImageGetFrameCount();
-        FaceCount = VTFFile.ImageGetFaceCount();
-        MipmapCount = VTFFile.ImageGetMipmapCount();
-        Flags = (VTFImageFlag)VTFFile.ImageGetFlags();
-        FlagList = Utils.ExpandBitfield(Flags).Select(x => x.ToString().Replace("TEXTUREFLAGS_", "")).ToList();
-        MajorVersion = VTFFile.ImageGetMajorVersion();
-        MinorVersion = VTFFile.ImageGetMinorVersion();
-        ImageSize = VTFFile.ImageGetSize();
-        ImageWidth = VTFFile.ImageGetWidth();
-        ImageHeight = VTFFile.ImageGetHeight();
-        ImageFormat = VTFFile.ImageGetFormat();
-        ImageFormatString = GetImageFormatString(ImageFormat);
-        Depth = VTFFile.ImageGetDepth();
-
-        float x = 0,
-            y = 0,
-            z = 0;
-        VTFFile.ImageGetReflectivity(ref x, ref y, ref z);
-        Reflectivity = [Math.Round(x, 2), Math.Round(y, 2), Math.Round(z, 2)];
-    }
-
-    public static string GetImageFormatString(VTFImageFormat format)
-    {
-        return format.ToString().Replace("IMAGE_FORMAT_", "");
-    }
-
-    private static byte[] GetRgba8888FromImage(Image<Rgba32> image, out bool hasAlpha)
-    {
-        int size = image.Width * image.Height * 4;
-        using var mem = new MemoryStream();
-        byte[] buffer = new byte[size];
-        int i = 0;
-        hasAlpha = false;
-        for (int y = 0; y < image.Height; y++)
-        {
-            for (int x = 0; x < image.Width; x++)
-            {
-                Rgba32 pixel = image[x, y];
-                buffer[i++] = pixel.R;
-                buffer[i++] = pixel.G;
-                buffer[i++] = pixel.B;
-                buffer[i++] = pixel.A;
-                if (!hasAlpha && pixel.A != 255)
-                    hasAlpha = true;
-            }
-        }
-
-        return buffer;
-    }
-
-    private static SVTFCreateOptions GetCreateOptionsWithExistingValues()
-    {
-        float r = 0;
-        float g = 0;
-        float b = 0;
-        VTFFile.ImageGetReflectivity(ref r, ref g, ref b);
-        var createOptions = new SVTFCreateOptions();
-        VTFFile.ImageCreateDefaultCreateStructure(ref createOptions);
-        createOptions.versionMajor = VTFFile.ImageGetMajorVersion();
-        createOptions.versionMinor = VTFFile.ImageGetMinorVersion();
-        createOptions.imageFormat = VTFFile.ImageGetFormat();
-        createOptions.flags = VTFFile.ImageGetFlags();
-        createOptions.startFrame = VTFFile.ImageGetStartFrame();
-        createOptions.bumpScale = VTFFile.ImageGetBumpmapScale();
-        createOptions.reflectivityR = r;
-        createOptions.reflectivityG = g;
-        createOptions.reflectivityB = b;
-        createOptions.mipmaps = VTFFile.ImageGetMipmapCount() > 1;
-
-        return createOptions;
     }
 
     /// <summary>
-    /// VTFLib operates on a single VTF file at a time.
-    /// The class wraps VTFLib-based operations in a thread-safe queue that processes all
-    /// the VTFLib stuff in a single thread.
+    /// Parses the VTF held by the pakfile entry. The caller owns the returned VTF and must dispose it.
     /// </summary>
-    private static class VtfLibQueue
+    private VTF? Open()
     {
-        private static readonly ConcurrentQueue<(Func<object>, CancellationTokenSource?)> Queue = new();
-        private static readonly Subject<(Func<object>, object?)> Output = new();
-        private static readonly Lock Lock = new();
-        private static bool _isRunning;
-
-        public static Task Run(Action fn)
+        ReadOnlySpan<byte> data = pakfileEntry.GetData();
+        var vtf = new VTF(data);
+        if (!vtf)
         {
-            return Run(fn, null);
+            Logger.Error($"Failed to parse VTF {pakfileEntry.Key}");
+            vtf.Dispose();
+            return null;
         }
 
-        public static async Task Run(Action fn, CancellationTokenSource? cts)
+        if (!Loaded)
+            Refresh(vtf, data.Length);
+
+        return vtf;
+    }
+
+    private bool Save(VTF vtf)
+    {
+        byte[] data = vtf.Bake();
+        if (data.Length == 0)
         {
-            await Run<object>(
-                () =>
-                {
-                    fn();
-                    return true; // Return literally anything so this is a valid Func<object>
-                },
-                cts
-            );
+            Logger.Error($"Error saving VTF {pakfileEntry.Key}");
+            return false;
         }
 
-        public static Task<T> Run<T>(Func<object> fn)
+        pakfileEntry.UpdateData(data);
+        Refresh(vtf, data.Length);
+        return true;
+    }
+
+    private void Refresh(VTF vtf, int fileSize)
+    {
+        FrameCount = vtf.FrameCount;
+        FaceCount = vtf.FaceCount;
+        MipmapCount = vtf.MipCount;
+        Flags = vtf.VtfFlags;
+        FlagList = GetFlagNames(vtf.VtfFlags, vtf.Version);
+        // vtfpp's version is just the minor version, there's only ever been one major version
+        MajorVersion = 7;
+        MinorVersion = vtf.Version;
+        ImageSize = (uint)fileSize;
+        ImageWidth = vtf.Width();
+        ImageHeight = vtf.Height();
+        ImageFormat = vtf.Format;
+        ImageFormatString = ImageFormat.ToString();
+        Depth = vtf.Depth();
+
+        (float x, float y, float z) = vtf.Reflectivity;
+        Reflectivity = [Math.Round(x, 2), Math.Round(y, 2), Math.Round(z, 2)];
+
+        Loaded = true;
+    }
+
+    /// <summary>
+    /// Decode any image file supported by vtfpp (PNG, JPEG, TGA, BMP, WebP, HDR, EXR, ...) to RGBA8888.
+    /// </summary>
+    private bool TryDecodeImage(byte[] file, out byte[] rgba, out ushort width, out ushort height)
+    {
+        rgba = [];
+        width = 0;
+        height = 0;
+
+        var format = ImageFormat.EMPTY;
+        int w = 0,
+            h = 0,
+            frames = 0;
+        byte[] data = ImageConversion.ConvertFileToImageData(file, ref format, ref w, ref h, ref frames);
+        if (data.Length == 0 || format == ImageFormat.EMPTY || w <= 0 || h <= 0 || frames <= 0)
         {
-            return Run<T>(fn, null)!;
+            Logger.Error($"Updating {pakfileEntry.Key}: unable to read image file");
+            return false;
         }
 
-        public static async Task<T?> Run<T>(Func<object> fn, CancellationTokenSource? cts)
+        if (w > ushort.MaxValue || h > ushort.MaxValue)
         {
-            Queue.Enqueue((fn, cts));
+            Logger.Error($"Updating {pakfileEntry.Key}: image is too large ({w}x{h}), VTFs are limited to 65535px");
+            return false;
+        }
 
-            lock (Lock)
+        // Animated images come back as every frame in one buffer, we only want the first.
+        if (frames > 1)
+            data = data[..(data.Length / frames)];
+
+        width = (ushort)w;
+        height = (ushort)h;
+        rgba =
+            format == ImageFormat.RGBA8888
+                ? data
+                : ImageConversion.ConvertImageDataToFormat(data, format, ImageFormat.RGBA8888, width, height);
+        return true;
+    }
+
+    private static bool HasAlpha(byte[] rgba)
+    {
+        for (int i = 3; i < rgba.Length; i += 4)
+        {
+            if (rgba[i] != 255)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static WriteableBitmap RgbaToBitmap(byte[] rgba, int width, int height)
+    {
+        var bitmap = new WriteableBitmap(
+            new PixelSize(width, height),
+            new Vector(96, 96),
+            PixelFormat.Rgba8888,
+            AlphaFormat.Unpremul
+        );
+
+        using ILockedFramebuffer framebuffer = bitmap.Lock();
+        int rowBytes = width * 4;
+        if (framebuffer.RowBytes == rowBytes)
+        {
+            Marshal.Copy(rgba, 0, framebuffer.Address, rowBytes * height);
+        }
+        else
+        {
+            for (int y = 0; y < height; y++)
+                Marshal.Copy(rgba, y * rowBytes, framebuffer.Address + (y * framebuffer.RowBytes), rowBytes);
+        }
+
+        return bitmap;
+    }
+
+    private static readonly (string Name, uint Value)[] AllFlags = Enum.GetNames<VTF.Flags>()
+        .Where(x => !x.StartsWith("MASK_", StringComparison.Ordinal))
+        .Select(x => (x, (uint)Enum.Parse<VTF.Flags>(x)))
+        .ToArray();
+
+    [GeneratedRegex(@"^V\d_")]
+    private static partial Regex FlagVersionPrefix();
+
+    /// <summary>
+    /// vtfpp's flags enum covers every VTF version, and the same bit means different things in different versions, so
+    /// we can't just expand the bitfield. Work out which names apply to this version, preferring newer names.
+    /// </summary>
+    private static List<string> GetFlagNames(VTF.Flags flags, uint version)
+    {
+        var names = new List<(uint Value, string Name)>();
+        uint claimed = 0;
+
+        foreach (string prefix in GetFlagPrefixes(version))
+        {
+            uint groupBits = 0;
+            foreach ((string name, uint value) in AllFlags.Where(x => x.Name.StartsWith(prefix, StringComparison.Ordinal)))
             {
-                if (!_isRunning)
-                {
-                    _isRunning = true;
-                    Observable.Start(ProcessQueue, RxApp.TaskpoolScheduler);
-                }
-            }
-
-            return await Output.FirstAsync(x => x.Item1 == fn).Select(x => (T?)x.Item2);
-        }
-
-        private static void ProcessQueue()
-        {
-            while (!Queue.IsEmpty)
-            {
-                (Func<object>, CancellationTokenSource?) next;
-                while (!Queue.TryDequeue(out next)) { }
-
-                (Func<object> fn, CancellationTokenSource? cts) = next;
-
-                if (cts?.IsCancellationRequested ?? false)
-                {
-                    Output.OnNext((fn, null));
+                if ((claimed & value) != 0)
                     continue;
-                }
 
-                object result = fn();
-                Output.OnNext((fn, result));
+                groupBits |= value;
+
+                // The VTEX flags are only meaningful to Valve's vtex tool, and never end up in a compiled VTF.
+                if (((uint)flags & value) != 0 && !name.Contains("VTEX", StringComparison.Ordinal))
+                    names.Add((value, FlagVersionPrefix().Replace(name, "")));
             }
 
-            _isRunning = false;
+            claimed |= groupBits;
         }
+
+        return names.OrderBy(x => x.Value).Select(x => x.Name).ToList();
+    }
+
+    // Newest first
+    private static IEnumerable<string> GetFlagPrefixes(uint version)
+    {
+        if (version >= 6)
+            yield return "V6_";
+
+        if (version >= 5)
+        {
+            yield return "V5_CSGO_";
+            yield return "V5_";
+        }
+        else if (version >= 4)
+        {
+            yield return "V4_TF2_";
+            yield return "V4_";
+        }
+
+        if (version >= 3)
+            yield return "V3_";
+
+        if (version >= 2)
+            yield return "V2_";
+
+        if (version >= 1)
+            yield return "V1_";
+
+        yield return "V0_";
     }
 }

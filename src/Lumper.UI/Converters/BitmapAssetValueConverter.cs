@@ -2,15 +2,11 @@ namespace Lumper.UI.Converters;
 
 using System;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Bmp;
-using SixLabors.ImageSharp.PixelFormats;
 
 /// <summary>
 /// Converts a string path to a bitmap asset.
@@ -50,19 +46,6 @@ public class BitmapAssetValueConverter : IValueConverter
                 }
 
                 return new Bitmap(AssetLoader.Open(uri));
-            }
-            case Image<Rgba32> img when targetType.IsAssignableFrom(typeof(Bitmap)):
-            {
-                using var mem = new MemoryStream();
-                var encoder = new BmpEncoder
-                {
-                    SupportTransparency = true,
-                    BitsPerPixel = BmpBitsPerPixel.Pixel32,
-                    SkipMetadata = false,
-                };
-                img.SaveAsBmp(mem, encoder);
-                mem.Seek(0, SeekOrigin.Begin);
-                return new Bitmap(mem);
             }
             default:
                 // Return null so FallbackValue can handle? Not sure this is right, could do a dedicated image.
