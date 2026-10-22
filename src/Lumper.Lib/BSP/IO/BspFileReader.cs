@@ -129,9 +129,11 @@ public sealed class BspFileReader(BspFile file, Stream input, IoHandler? handler
             {
                 gameLump = lump;
                 gameLumpHeader = header;
-                if (gameLumpHeader is { Length: 0, Offset: 0 })
+                // An empty gamelump can share its offset with the next lump (older Lumper versions wrote
+                // them like this), stretching it over that lump would read its data as gamelump headers.
+                if (gameLumpHeader is { Length: 0 })
                 {
-                    Logger.Warn("GameLump length and offset 0 .. won't set new length");
+                    Logger.Debug("GameLump length 0 .. won't set new length");
                     break;
                 }
             }
