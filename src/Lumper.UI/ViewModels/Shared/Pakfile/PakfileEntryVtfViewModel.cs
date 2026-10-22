@@ -17,10 +17,7 @@ using Lumper.UI.Views.Shared;
 using Lumper.UI.Views.Shared.Pakfile;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Bmp;
-using SixLabors.ImageSharp.PixelFormats;
-using VTFLib;
+using sourcepp.vtfpp;
 
 public class PakfileEntryVtfViewModel : PakfileEntryViewModel
 {
@@ -69,9 +66,9 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
     public uint[] ResizeOptions { get; } = [16, 32, 64, 128, 256, 512, 1024, 2048, 4096];
 
     [Reactive]
-    public VTFImageFormat SelectedImageFormat { get; set; }
+    public ImageFormat SelectedImageFormat { get; set; }
 
-    public VTFImageFormat[] ImageFormats { get; } = Enum.GetValues<VTFImageFormat>();
+    public ImageFormat[] ImageFormats { get; } = VtfFileViewModel.SelectableImageFormats;
 
     public bool HasSeparateWindow { get; set; }
 
@@ -134,12 +131,12 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         if (VtfFile is null || (cts?.IsCancellationRequested ?? false))
             return;
 
-        Image<Rgba32>? image = await VtfFile.GetImage(cts, Frame, Face, Slice, MipmapLevel);
+        Bitmap? image = await VtfFile.GetImage(cts, Frame, Face, Slice, MipmapLevel);
         if (image is null || (cts?.IsCancellationRequested ?? false))
             return;
 
         Loaded = true;
-        Image = ImageToBitmap(image);
+        Image = image;
     }
 
     public async Task SetImage(bool createNew)
@@ -158,13 +155,21 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         if (result is not { Count: 1 })
             return;
 
-        var image = SixLabors.ImageSharp.Image.Load<Rgba32>(await result[0].OpenReadAsync());
+        byte[] file;
+        await using (Stream stream = await result[0].OpenReadAsync())
+        {
+            using var mem = new MemoryStream();
+            await stream.CopyToAsync(mem);
+            file = mem.ToArray();
+        }
 
-        IsModified = true;
-        if (createNew)
-            await VtfFile.SetNewImage(image);
-        else
-            await VtfFile.SetImageData(image, Frame, Face, Slice, MipmapLevel);
+        bool isVtf = result[0].Name.EndsWith(".vtf", StringComparison.OrdinalIgnoreCase);
+
+        bool success = createNew
+            ? await VtfFile.SetNewImage(file, isVtf)
+            : await VtfFile.SetImageData(file, isVtf, Frame, Face, Slice, MipmapLevel);
+        if (!success)
+            return;
 
         MarkAsModified();
 
@@ -186,7 +191,7 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         float widthScaleFactor = SelectedResizeHeight / (float)VtfFile.ImageHeight;
         float heightScaleFactor = SelectedResizeWidth / (float)VtfFile.ImageWidth;
 
-        await VtfFile.ResizeImage(SelectedResizeWidth, SelectedResizeHeight, Frame, Face, Slice, MipmapLevel);
+        await VtfFile.ResizeImage(SelectedResizeWidth, SelectedResizeHeight);
         await FetchImage();
 
         foreach (TexData texData in texDataLump.Data)
@@ -220,7 +225,7 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         if (VtfFile is null)
             return;
 
-        await VtfFile.Reencode(SelectedImageFormat, Frame, Face, Slice, MipmapLevel);
+        await VtfFile.Reencode(SelectedImageFormat);
         await FetchImage();
     }
 
@@ -240,26 +245,14 @@ public class PakfileEntryVtfViewModel : PakfileEntryViewModel
         HasSeparateWindow = true;
     }
 
-    private static Bitmap ImageToBitmap(Image<Rgba32> image)
-    {
-        using var mem = new MemoryStream();
-        image.SaveAsBmp(mem, Encoder);
-        mem.Seek(0, SeekOrigin.Begin);
-        return new Bitmap(mem);
-    }
-
-    private static readonly BmpEncoder Encoder = new()
-    {
-        SupportTransparency = true,
-        BitsPerPixel = BmpBitsPerPixel.Pixel32,
-        SkipMetadata = false,
-    };
-
     private static FilePickerFileType[] GenerateImageFileFilter()
     {
         return
         [
-            new FilePickerFileType("Image files") { Patterns = ["*.bmp", "*.jpeg", "*.jpg", "*.png"] },
+            new FilePickerFileType("Image files")
+            {
+                Patterns = ["*.vtf", "*.bmp", "*.jpeg", "*.jpg", "*.png", "*.tga", "*.webp", "*.hdr", "*.exr"],
+            },
             new FilePickerFileType("All files") { Patterns = ["*"] },
         ];
     }
