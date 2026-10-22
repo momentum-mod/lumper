@@ -45,5 +45,7 @@ public class GameLump(BspFile parent) : ManagedLump<BspLumpType>(parent)
         LastWriter.Save();
     }
 
-    public override bool Empty => Lumps.Count == 0;
+    // Always written, even with no lumps in it: Source tools like bspzip read the gamelump header
+    // without checking the lump's length.
+    public override bool Empty => false;
 }

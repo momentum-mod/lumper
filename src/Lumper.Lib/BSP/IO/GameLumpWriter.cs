@@ -34,6 +34,12 @@ public sealed class GameLumpWriter(GameLump gameLump, Stream output, IoHandler? 
 
     public void Save()
     {
+        if (_gameLump.Lumps.All(x => x.Key == 0 || x.Value is null))
+        {
+            Write(0); // Gamelump count
+            return;
+        }
+
         // The last gamelump header should be 0 so we add a empty lump at the end
         _gameLump.Lumps.TryAdd(0, null);
 
