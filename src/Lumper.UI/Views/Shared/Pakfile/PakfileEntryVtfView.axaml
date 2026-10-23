@@ -193,11 +193,11 @@
             </StackPanel>
           </Button>
           <TextBlock Margin="0 8 0 0" Foreground="#EEE" TextWrapping="Wrap" LineHeight="16">
-            <Run FontWeight="Bold" Text="Warning!" />
-            Importing an image that VTFLib doesn't like will crash the entire program.
+            Images can be any common format (PNG, JPEG, TGA, WebP...), or another VTF. Replacing with a VTF
+            using "Replace Current" uses its first image.
           </TextBlock>
           <TextBlock Foreground="#EEE" TextWrapping="Wrap" LineHeight="16">
-            Make sure the image you use is sized in nice powers of 2!
+            Make sure the image you use is sized in nice powers of 2! Anything else will be scaled up to the next one.
           </TextBlock>
         </StackPanel>
       </Border>
