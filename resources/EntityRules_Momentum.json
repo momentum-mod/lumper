@@ -698,8 +698,7 @@
         "Level": 3
     },
     "logic_datadesc_accessor": {
-        "Level": 0,
-        "Comment": "Not relevant to Momentum Mod"
+        "Level": 3
     },
     "logic_entity_position": {
         "Level": 3
@@ -780,6 +779,9 @@
         "Level": 3
     },
     "math_counter_advanced": {
+        "Level": 3
+    },
+    "math_expression": {
         "Level": 3
     },
     "math_generate": {
@@ -1239,8 +1241,8 @@
         "Comment": "Do not transition to other levels from your map"
     },
     "trigger_userinput": {
-        "Level": 0,
-        "Comment": "Not relevant to Momentum Mod"
+        "Level": 2,
+        "Comment": "Use with care, don't simulate an existing functionality like a restart key"
     },
     "trigger_vphysics_motion": {
         "Level": 2,
