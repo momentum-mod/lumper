@@ -260,12 +260,15 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
             EntityLumpViewModel?.RemoveMultiple(multiple.RealEntities);
     }
 
-    public void OpenTab(List<EntityViewModel>? entities)
+    public void OpenTab(List<EntityViewModel>? entities, bool keepCurrentTab = false)
     {
         if (entities is null or { Count: 0 })
             return;
 
-        if (SelectedTab is EntityEditorTabSingleEntityViewModel { IsPinned: false, Entity.IsModified: false })
+        if (
+            !keepCurrentTab
+            && SelectedTab is EntityEditorTabSingleEntityViewModel { IsPinned: false, Entity.IsModified: false }
+        )
         {
             Tabs.Remove(SelectedTab);
             SelectedTab = null;
@@ -273,7 +276,7 @@ public sealed class EntityEditorViewModel : ViewModelWithView<EntityEditorViewMo
 
         // Never preserve tabs for multiple entity selections, too weird, confusing UX, don't like multiple tabs
         // with textentries bound to same entity.
-        if (SelectedTab is EntityEditorTabMultipleEntityViewModel multiTab)
+        if (!keepCurrentTab && SelectedTab is EntityEditorTabMultipleEntityViewModel multiTab)
         {
             Tabs.Remove(SelectedTab);
             SelectedTab = null;
