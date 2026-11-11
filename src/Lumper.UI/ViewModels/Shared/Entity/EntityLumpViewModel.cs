@@ -65,7 +65,7 @@ public sealed class EntityLumpViewModel : LumpViewModel
     // Note: don't use this for doing large inserts, you'll make the SourceCache fire a billion
     // update notifications. Use .Edit to batch all changes together:
     // (https://github.com/reactivemarbles/DynamicData?tab=readme-ov-file#the-observable-cache)
-    public void AddEmptyEntity()
+    public EntityViewModel AddEmptyEntity()
     {
         var entity = new Entity();
         // Adding this to the model now just because it's easier than adding any
@@ -73,7 +73,11 @@ public sealed class EntityLumpViewModel : LumpViewModel
         // new items separately, or do a slow search for existing entity models
         // for *every* entity, just to figure add what the new things are.
         _entityLump.Data.Add(entity);
-        Entities.AddOrUpdate(new EntityViewModel(entity, this));
+
+        var vm = new EntityViewModel(entity, this);
+        Entities.AddOrUpdate(vm);
+
+        return vm;
     }
 
     // Same as above!

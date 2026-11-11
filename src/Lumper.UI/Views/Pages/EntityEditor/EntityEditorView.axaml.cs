@@ -36,4 +36,14 @@ public partial class EntityEditorView : ReactiveUserControl<EntityEditorViewMode
         if (selected is not null)
             ViewModel?.OpenTab(selected);
     }
+
+    private void AddAndOpenEmptyEntity(object? sender, RoutedEventArgs e)
+    {
+        if (ViewModel?.EntityLumpViewModel is not { } entityLump)
+            return;
+
+        EntityViewModel emptyEntity = entityLump.AddEmptyEntity();
+        EntityList.UnselectAll();
+        ViewModel.OpenTab([emptyEntity], keepCurrentTab: true);
+    }
 }
