@@ -262,7 +262,7 @@ public partial class ExtendedAutoCompleteBox : UserControl
             UpdateFilteredSuggestions();
             if (!string.IsNullOrEmpty(Text) && InputTextBox.IsFocused)
             {
-                IsDropdownOpen = FilteredSuggestions.Any();
+                IsDropdownOpen = FilteredSuggestions.Count > 0;
             }
         }
     }
@@ -398,7 +398,7 @@ public partial class ExtendedAutoCompleteBox : UserControl
     private void OnTextBoxKeyDown(object? sender, KeyEventArgs e)
     {
         ListBox activeList = IsBitfieldMode ? BitfieldList : StandardList;
-        if (!FilteredSuggestions.Any())
+        if (FilteredSuggestions.Count == 0)
             return;
 
         if (e.Key == Key.Down)
